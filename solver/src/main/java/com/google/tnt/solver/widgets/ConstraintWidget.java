@@ -207,6 +207,23 @@ public class ConstraintWidget implements Solvable {
     }
 
     /**
+     * Returns the top-level container, regardless if it's a ConstraintWidgetContainer
+     * or a simple WidgetContainer.
+     *
+     * @return top-level WidgetContainer
+     */
+    public WidgetContainer getRootWidgetContainer() {
+        ConstraintWidget root = this;
+        while (root.getParent() != null) {
+            root = root.getParent();
+        }
+        if (root instanceof WidgetContainer) {
+            return (WidgetContainer)root;
+        }
+        return null;
+    }
+
+    /**
      * Returns the parent of this widget if there is one
      *
      * @return parent
@@ -999,9 +1016,10 @@ public class ConstraintWidget implements Solvable {
      * Reset all connections
      */
     public void resetAnchors() {
-        if (getParent() != null) {
-            ConstraintWidgetContainer parent = (ConstraintWidgetContainer) getParent();
-            if (parent.handlesInternalConstraints()) {
+        ConstraintWidget parent = getParent();
+        if (parent != null && parent instanceof ConstraintWidgetContainer) {
+            ConstraintWidgetContainer parentContainer = (ConstraintWidgetContainer) getParent();
+            if (parentContainer.handlesInternalConstraints()) {
                 return;
             }
         }

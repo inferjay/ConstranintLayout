@@ -24,11 +24,9 @@ import java.util.ArrayList;
 /**
  * A container of ConstraintWidget that can layout its children
  */
-public class ConstraintWidgetContainer extends ConstraintWidget {
+public class ConstraintWidgetContainer extends WidgetContainer {
 
     protected LinearSystem mSystem = new LinearSystem();
-
-    protected ArrayList<ConstraintWidget> mChildren = new ArrayList<ConstraintWidget>();
 
     private Snapshot mSnapshot = new Snapshot(this);
 
@@ -74,96 +72,6 @@ public class ConstraintWidgetContainer extends ConstraintWidget {
     }
 
     /**
-     * Add a child widget
-     *
-     * @param widget to add
-     */
-    public void add(ConstraintWidget widget) {
-        mChildren.add(widget);
-        if (widget.getParent() != null) {
-            ConstraintWidgetContainer container = (ConstraintWidgetContainer) widget.getParent();
-            container.remove(widget);
-        }
-        widget.setParent(this);
-    }
-
-    /**
-     * Remove a child widget
-     *
-     * @param widget to remove
-     */
-    public void remove(ConstraintWidget widget) {
-        mChildren.remove(widget);
-        widget.setParent(null);
-    }
-
-    /**
-     * Access the children
-     *
-     * @return the array of children
-     */
-    public ArrayList<ConstraintWidget> getChildren() {
-        return mChildren;
-    }
-
-    /**
-     * Find a widget at the coordinate (x, y)
-     *
-     * @param x x position
-     * @param y y position
-     * @return a widget if found, null otherwise
-     */
-    public ConstraintWidget findWidget(int x, int y) {
-        ConstraintWidget found = null;
-        int l = getDrawX();
-        int t = getDrawY();
-        int r = l + getWidth();
-        int b = t + getHeight();
-        if (x >= l && x <= r && y >= t && y <= b) {
-            found = this;
-        }
-        for (ConstraintWidget widget : mChildren) {
-            if (widget instanceof ConstraintWidgetContainer) {
-                ConstraintWidget f = ((ConstraintWidgetContainer) widget).findWidget(x, y);
-                if (f != null) {
-                    found = f;
-                }
-            } else {
-                l = widget.getDrawX();
-                t = widget.getDrawY();
-                r = l + widget.getWidth();
-                b = t + widget.getHeight();
-                if (x >= l && x <= r && y >= t && y <= b) {
-                    found = widget;
-                }
-            }
-        }
-        return found;
-    }
-
-    /**
-     * Gather all the widgets contained in the area specified and return them as an array
-     *
-     * @param x x position of the selection area
-     * @param y y position of the selection area
-     * @param width width of the selection area
-     * @param height height of the selection area
-     * @return an array containing the widgets inside the selection area
-     */
-    public ArrayList<ConstraintWidget> findWidgets(int x, int y, int width, int height) {
-        ArrayList<ConstraintWidget> found = new ArrayList<ConstraintWidget>();
-        Rectangle area = new Rectangle(x, y, width, height);
-        for (ConstraintWidget widget : mChildren) {
-            Rectangle bounds = new Rectangle(widget.getDrawX(), widget.getDrawY(),
-                    widget.getWidth(), widget.getHeight());
-            if (area.intersects(bounds)) {
-                found.add(widget);
-            }
-        }
-        return found;
-    }
-
-    /**
      * Set a new ConstraintWidgetContainer containing the list of supplied
      * children. The dimensions of the container will be the bounding box
      * containing all the children.
@@ -201,39 +109,6 @@ public class ConstraintWidgetContainer extends ConstraintWidget {
             widget.setY(widget.getY() - bounds.y);
         }
         return container;
-    }
-
-    /**
-     * Return the bounds of the selected group of widgets
-     *
-     * @param widgets
-     * @return
-     */
-    public static Rectangle getBounds(ArrayList<ConstraintWidget> widgets) {
-        Rectangle bounds = new Rectangle();
-        if (widgets.size() == 0) {
-            return bounds;
-        }
-        int minX = Integer.MAX_VALUE;
-        int maxX = 0;
-        int minY = Integer.MAX_VALUE;
-        int maxY = 0;
-        for (ConstraintWidget widget : widgets) {
-            if (widget.getX() < minX) {
-                minX = widget.getX();
-            }
-            if (widget.getY() < minY) {
-                minY = widget.getY();
-            }
-            if (widget.getRight() > maxX) {
-                maxX = widget.getRight();
-            }
-            if (widget.getBottom() > maxY) {
-                maxY = widget.getBottom();
-            }
-        }
-        bounds.setBounds(minX, minY, maxX - minX, maxY - minY);
-        return bounds;
     }
 
     /*-----------------------------------------------------------------------*/
@@ -291,25 +166,9 @@ public class ConstraintWidgetContainer extends ConstraintWidget {
     }
 
     /**
-     * Set the offset of this widget relative to the root widget.
-     * We then set the offset of our children as well.
-     *
-     * @param x horizontal offset
-     * @param y vertical offset
-     */
-    @Override
-    public void setOffset(int x, int y) {
-        super.setOffset(x, y);
-        final int count = mChildren.size();
-        for (int i = 0; i < count; i++) {
-            ConstraintWidget widget = mChildren.get(i);
-            widget.setOffset(getRootX(), getRootY());
-        }
-    }
-
-    /**
      * Layout the tree of widgets
      */
+    @Override
     public void layout() {
         mSnapshot.updateFrom(this);
         // We clear ourselves of external anchors as
@@ -325,8 +184,8 @@ public class ConstraintWidgetContainer extends ConstraintWidget {
         final int count = mChildren.size();
         for (int i = 0; i < count; i++) {
             ConstraintWidget widget = mChildren.get(i);
-            if (widget instanceof ConstraintWidgetContainer) {
-                ((ConstraintWidgetContainer) widget).layout();
+            if (widget instanceof WidgetContainer) {
+                ((WidgetContainer) widget).layout();
             }
         }
 
@@ -346,26 +205,8 @@ public class ConstraintWidgetContainer extends ConstraintWidget {
         mSnapshot.applyTo(this);
         setWidth(width);
         setHeight(height);
-        if (isRoot()) {
+        if (this == getRootConstraintContainer()) {
             updateDrawPosition();
-        }
-    }
-
-    /**
-     * Update the draw position
-     * Recursive call to the children
-     */
-    @Override
-    public void updateDrawPosition() {
-        super.updateDrawPosition();
-        if (mChildren == null) {
-            return;
-        }
-        final int count = mChildren.size();
-        for (int i = 0; i < count; i++) {
-            ConstraintWidget widget = mChildren.get(i);
-            widget.setOffset(getDrawX(), getDrawY());
-            widget.updateDrawPosition();
         }
     }
 
