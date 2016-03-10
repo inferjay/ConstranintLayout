@@ -44,6 +44,10 @@ buildDir = new File(ext.androidHostOut, "build/root")
 ext.localRepo = project.hasProperty('localRepo') ? localRepo : "$ext.androidHostOut/repo"
 
 subprojects { Project project ->
+    repositories {
+        maven { url "$rootProject.projectDir/../../prebuilts/tools/common/m2/repository" }
+    }
+
     // Change buildDir first so that all plugins pick up the new value.
     project.buildDir = project.file("$project.parent.buildDir/../$project.name/build")
 }

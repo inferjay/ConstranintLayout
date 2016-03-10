@@ -4,3 +4,7 @@ compileJava {
     targetCompatibility = 1.6
     sourceCompatibility = 1.6
 }
+
+dependencies {
+    testCompile 'org.testng:testng:6.9.10'
+}
