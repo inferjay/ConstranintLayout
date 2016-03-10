@@ -56,11 +56,11 @@ public class ConstraintLayout extends ViewGroup {
     private static final boolean DEBUG = false;
     private static final String TAG = "ConstraintLayout";
 
-    protected HashMap<View, ConstraintWidget> mConstrainedViews = new HashMap<>();
-    protected ArrayList<ConstraintWidget> mConstrainedWidgets = new ArrayList<>();
-    protected HashMap<View, ConstraintWidget> mConstrainedViewTargets = new HashMap<>();
-    protected ArrayList<ConstraintWidget> mConstrainedTargets = new ArrayList<>();
-    private ArrayList<ConstraintWidget> mSizeDependentsWidgets = new ArrayList<>();
+    protected HashMap<View, ConstraintWidget> mConstrainedViews = new HashMap<View, ConstraintWidget>();
+    protected ArrayList<ConstraintWidget> mConstrainedWidgets = new ArrayList<ConstraintWidget>();
+    protected HashMap<View, ConstraintWidget> mConstrainedViewTargets = new HashMap<View, ConstraintWidget>();
+    protected ArrayList<ConstraintWidget> mConstrainedTargets = new ArrayList<ConstraintWidget>();
+    private ArrayList<ConstraintWidget> mSizeDependentsWidgets = new ArrayList<ConstraintWidget>();
 
     protected ConstraintWidgetContainer mLayoutWidget = null;
     protected LinearSystem mEquationSystem = new LinearSystem();

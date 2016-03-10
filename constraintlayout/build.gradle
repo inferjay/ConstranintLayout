@@ -1,0 +1,15 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "23.0.1"
+
+    defaultConfig {
+        minSdkVersion 17
+        targetSdkVersion 23
+    }
+}
+
+dependencies {
+    compile project(':solver')
+}
