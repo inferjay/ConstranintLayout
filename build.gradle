@@ -34,7 +34,7 @@ if (System.env.DIST_DIR != null && System.env.OUT_DIR != null) {
     ext.androidHostDist = file(System.env.DIST_DIR)
 } else {
     // ext.androidHostOut is shared by all tools/{base,build,swt} gradle projects/
-    ext.androidHostOut = file("$rootDir/../out")
+    ext.androidHostOut = file("$rootDir/../../out")
     ext.androidHostDist = new File(ext.androidHostOut, "dist")
 }
 
