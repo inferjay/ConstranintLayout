@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ConstraintLayout_LayoutParams">
+
+        <attr name="orientation">
+            <enum name="horizontal" value="0"/>
+            <enum name="vertical" value="1"/>
+        </attr>
+
+        <attr name="relativeBegin" format="dimension" />
+        <attr name="relativeEnd" format="dimension" />
+        <attr name="relativePercent" format="integer" />
+        <attr name="containerItemSkip" format="integer" />
+
+        <attr name="layout_constraintLeft_toLeftOf" format="reference"/>
+        <attr name="layout_constraintLeft_toRightOf" format="reference"/>
+        <attr name="layout_constraintRight_toLeftOf" format="reference"/>
+        <attr name="layout_constraintRight_toRightOf" format="reference"/>
+        <attr name="layout_constraintTop_toTopOf" format="reference"/>
+        <attr name="layout_constraintTop_toBottomOf" format="reference"/>
+        <attr name="layout_constraintBottom_toTopOf" format="reference"/>
+        <attr name="layout_constraintBottom_toBottomOf" format="reference"/>
+        <attr name="layout_constraintBaseline_toBaselineOf" format="reference"/>
+        <attr name="layout_constraintCenterX_toCenterX" format="reference"/>
+        <attr name="layout_constraintCenterY_toCenterY" format="reference"/>
+
+        <attr name="layout_constraintLeft_margin" format="dimension"/>
+        <attr name="layout_constraintTop_margin" format="dimension"/>
+        <attr name="layout_constraintRight_margin" format="dimension"/>
+        <attr name="layout_constraintBottom_margin" format="dimension"/>
+
+        <attr name="layout_constraintStart_margin" format="dimension"/>
+        <attr name="layout_constraintEnd_margin" format="dimension"/>
+        <attr name="layout_constraintStart_toEndOf" format="reference"/>
+        <attr name="layout_constraintStart_toStartOf" format="reference"/>
+        <attr name="layout_constraintEnd_toStartOf" format="reference"/>
+        <attr name="layout_constraintEnd_toEndOf" format="reference"/>
+
+        <attr name="layout_constraintLeft_strength">
+            <enum name="strong" value="0"/>
+            <enum name="weak" value="1"/>
+        </attr>
+
+        <attr name="layout_constraintTop_strength">
+            <enum name="strong" value="0"/>
+            <enum name="weak" value="1"/>
+        </attr>
+
+        <attr name="layout_constraintRight_strength">
+            <enum name="strong" value="0"/>
+            <enum name="weak" value="1"/>
+        </attr>
+
+        <attr name="layout_constraintBottom_strength">
+            <enum name="strong" value="0"/>
+            <enum name="weak" value="1"/>
+        </attr>
+
+        <attr name="layout_editor_absoluteX" format="dimension"/>
+        <attr name="layout_editor_absoluteY" format="dimension"/>
+
+        <!-- Used by TableConstraintLayout -->
+        <attr name="table_numRows" format="integer"/>
+        <attr name="table_numColumns" format="integer"/>
+        <attr name="table_columnsAlignment" format="string"/>
+        <attr name="table_padding" format="dimension"/>
+
+    </declare-styleable>
+</resources>
