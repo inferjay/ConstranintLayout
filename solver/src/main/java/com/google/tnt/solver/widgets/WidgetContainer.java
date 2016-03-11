@@ -107,7 +107,7 @@ public class WidgetContainer extends ConstraintWidget {
             item = parent;
             parent = item.getParent();
             if (item instanceof ConstraintWidgetContainer) {
-                container = (ConstraintWidgetContainer)parent;
+                container = (ConstraintWidgetContainer)item;
             }
         }
         return container;
