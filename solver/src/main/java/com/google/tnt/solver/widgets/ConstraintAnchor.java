@@ -39,12 +39,19 @@ public class ConstraintAnchor {
      */
     public enum ConnectionType { RELAXED, STRICT }
 
+    /**
+     * Type of creator
+     */
+    public static final int USER_CREATOR = 0;
+    public static final int SCOUT_CREATOR = 1;
+
     private final ConstraintWidget mOwner;
     private final Type mType;
     private ConstraintAnchor mTarget;
     private int mMargin;
     private Strength mStrength = Strength.NONE;
     private ConnectionType mConnectionType = ConnectionType.RELAXED;
+    private int mConnectionCreator = 0;
 
     /**
      * Constructor
@@ -98,6 +105,17 @@ public class ConstraintAnchor {
     public void setConnectionType(ConnectionType type ) {
         mConnectionType = type;
     }
+
+    /**
+     * Return the creator of this connection
+     */
+    public int getConnectionCreator() { return mConnectionCreator; }
+
+    /**
+     * Set the creator for this connection
+     * @param creator For now, values can be USER_CREATOR or SCOUT_CREATOR
+     */
+    public void setConnectionCreator(int creator) { mConnectionCreator = creator; }
 
     /**
      * Resets the anchor's connection.
