@@ -43,10 +43,6 @@ public class TableConstraintLayout extends ConstraintLayout {
         super(context, attrs, defStyleAttr);
     }
 
-    public TableConstraintLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
-
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();

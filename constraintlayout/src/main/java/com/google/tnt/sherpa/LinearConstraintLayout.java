@@ -50,11 +50,6 @@ public class LinearConstraintLayout extends ConstraintLayout {
         setAttributes(context, attrs);
     }
 
-    public LinearConstraintLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        setAttributes(context, attrs);
-    }
-
     @Override
     protected void setChildrenConstraints() {
         final int count = getChildCount();

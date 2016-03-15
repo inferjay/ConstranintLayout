@@ -78,10 +78,6 @@ public class ConstraintLayout extends ViewGroup {
         super(context, attrs, defStyleAttr);
     }
 
-    public ConstraintLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
-
     protected ConstraintWidgetContainer getLayoutWidget() {
         if (mLayoutWidget == null) {
             mLayoutWidget = new ConstraintWidgetContainer();
