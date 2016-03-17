@@ -11,6 +11,18 @@ dependencies {
     testCompile 'org.testng:testng:6.9.10'
 }
 
+test {
+    useTestNG()
+
+    testLogging.showStandardStreams = true
+    beforeTest { descriptor ->
+        logger.lifecycle("Running test: " + descriptor)
+    }
+    onOutput { descriptor, event ->
+        logger.lifecycle("Test: " + descriptor + " output: " + event.message )
+    }
+}
+
 // TBD
 group = 'com.android.support.sherpa'
 archivesBaseName = 'solver'
