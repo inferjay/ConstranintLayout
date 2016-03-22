@@ -920,17 +920,25 @@ public class ConstraintWidget implements Solvable {
         } else if (constraintFrom == ConstraintAnchor.Type.CENTER_X
                 && constraintTo == ConstraintAnchor.Type.CENTER_X) {
             // Center X connection will connect left & right
-            connect(ConstraintAnchor.Type.LEFT, target,
-                    ConstraintAnchor.Type.LEFT, 0, strength);
-            connect(ConstraintAnchor.Type.RIGHT, target,
-                    ConstraintAnchor.Type.RIGHT, 0, strength);
+            ConstraintAnchor left = getAnchor(ConstraintAnchor.Type.LEFT);
+            ConstraintAnchor leftTarget = target.getAnchor(ConstraintAnchor.Type.LEFT);
+            left.connect(leftTarget, 0);
+            ConstraintAnchor right = getAnchor(ConstraintAnchor.Type.RIGHT);
+            ConstraintAnchor rightTarget = target.getAnchor(ConstraintAnchor.Type.RIGHT);
+            right.connect(rightTarget, 0);
+            ConstraintAnchor centerX = getAnchor(ConstraintAnchor.Type.CENTER_X);
+            centerX.connect(target.getAnchor(constraintTo), 0);
         } else if (constraintFrom == ConstraintAnchor.Type.CENTER_Y
                 && constraintTo == ConstraintAnchor.Type.CENTER_Y) {
             // Center Y connection will connect top & bottom.
-            connect(ConstraintAnchor.Type.TOP, target,
-                    ConstraintAnchor.Type.TOP, 0, strength);
-            connect(ConstraintAnchor.Type.BOTTOM, target,
-                    ConstraintAnchor.Type.BOTTOM, 0, strength);
+            ConstraintAnchor top = getAnchor(ConstraintAnchor.Type.TOP);
+            ConstraintAnchor topTarget = target.getAnchor(ConstraintAnchor.Type.TOP);
+            top.connect(topTarget, 0);
+            ConstraintAnchor bottom = getAnchor(ConstraintAnchor.Type.BOTTOM);
+            ConstraintAnchor bottomTarget = target.getAnchor(ConstraintAnchor.Type.BOTTOM);
+            bottom.connect(bottomTarget, 0);
+            ConstraintAnchor centerY = getAnchor(ConstraintAnchor.Type.CENTER_Y);
+            centerY.connect(target.getAnchor(constraintTo), 0);
         } else {
             ConstraintAnchor fromAnchor = getAnchor(constraintFrom);
             ConstraintAnchor toAnchor = target.getAnchor(constraintTo);
@@ -957,12 +965,41 @@ public class ConstraintWidget implements Solvable {
                     if (center.getTarget() != toAnchor) {
                         center.reset();
                     }
+                    ConstraintAnchor opposite = getAnchor(constraintFrom).getOpposite();
+                    ConstraintAnchor centerY = getAnchor(ConstraintAnchor.Type.CENTER_Y);
+                    if (centerY.isConnected()) {
+                        opposite.reset();
+                        centerY.reset();
+                    } else {
+                        // let's see if we need to mark center_y as connected
+                        if (opposite.isConnected() && opposite.getTarget().getOwner()
+                                == toAnchor.getOwner()) {
+                            ConstraintAnchor targetCenterY = toAnchor.getOwner().getAnchor(
+                                    ConstraintAnchor.Type.CENTER_Y);
+                            centerY.connect(targetCenterY, 0);
+                        }
+                    }
                 } else if ((constraintFrom == ConstraintAnchor.Type.LEFT)
                         || (constraintFrom == ConstraintAnchor.Type.RIGHT)) {
                     ConstraintAnchor center = getAnchor(ConstraintAnchor.Type.CENTER);
                     if (center.getTarget() != toAnchor) {
                         center.reset();
                     }
+                    ConstraintAnchor opposite = getAnchor(constraintFrom).getOpposite();
+                    ConstraintAnchor centerX = getAnchor(ConstraintAnchor.Type.CENTER_X);
+                    if (centerX.isConnected()) {
+                        opposite.reset();
+                        centerX.reset();
+                    } else {
+                        // let's see if we need to mark center_x as connected
+                        if (opposite.isConnected() && opposite.getTarget().getOwner()
+                                == toAnchor.getOwner()) {
+                            ConstraintAnchor targetCenterX = toAnchor.getOwner().getAnchor(
+                                    ConstraintAnchor.Type.CENTER_X);
+                            centerX.connect(targetCenterX, 0);
+                        }
+                    }
+
                 }
                 fromAnchor.connect(toAnchor, margin, strength);
                 toAnchor.getOwner().connectedTo(fromAnchor.getOwner());
@@ -1025,6 +1062,29 @@ public class ConstraintWidget implements Solvable {
         }
         for (ConstraintAnchor anchor : mAnchors) {
             anchor.reset();
+        }
+    }
+
+    /**
+     * Reset all connections that have this connectCreator
+     */
+    public void resetAnchors(int connectionCreator) {
+        ConstraintWidget parent = getParent();
+        if (parent != null && parent instanceof ConstraintWidgetContainer) {
+            ConstraintWidgetContainer parentContainer = (ConstraintWidgetContainer) getParent();
+            if (parentContainer.handlesInternalConstraints()) {
+                return;
+            }
+        }
+        for (ConstraintAnchor anchor : mAnchors) {
+            if (connectionCreator == anchor.getConnectionCreator()) {
+                if (anchor.isVerticalAnchor()) {
+                    setVerticalBiasPercent(ConstraintWidget.DEFAULT_BIAS);
+                } else {
+                    setHorizontalBiasPercent(ConstraintWidget.DEFAULT_BIAS);
+                }
+                anchor.reset();
+            }
         }
     }
 
