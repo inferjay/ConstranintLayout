@@ -18,5 +18,5 @@ package com.google.tnt.solver.widgets;
 public class ConnectionCandidate {
     public ConstraintAnchor anchorOrigin;
     public ConstraintAnchor anchorTarget;
-    public int distance;
+    public float distance;
 }

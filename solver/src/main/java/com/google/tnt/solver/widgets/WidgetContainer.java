@@ -124,7 +124,7 @@ public class WidgetContainer extends ConstraintWidget {
      * @param y y position
      * @return a widget if found, null otherwise
      */
-    public ConstraintWidget findWidget(int x, int y) {
+    public ConstraintWidget findWidget(float x, float y) {
         ConstraintWidget found = null;
         int l = getDrawX();
         int t = getDrawY();
