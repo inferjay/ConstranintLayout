@@ -144,9 +144,6 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     protected void addConstrainedChild(View child, ConstraintWidget widget) {
-        if (child.getVisibility() == GONE) {
-            return;
-        }
         mConstrainedViews.put(child, widget);
         mConstrainedWidgets.add(widget);
         widget.setParent(mLayoutWidget);
@@ -162,13 +159,11 @@ public class ConstraintLayout extends ViewGroup {
         // Now, let's set the constraints from the xml
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            if (child.getVisibility() == GONE) {
-                continue;
-            }
             ConstraintWidget widget = mConstrainedViews.get(child);
             if (widget == null) {
                 continue;
             }
+            widget.setVisibility(child.getVisibility());
             widget.setParent(mLayoutWidget);
             final LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
             if ((layoutParams.left_to_left != LayoutParams.UNSET)
