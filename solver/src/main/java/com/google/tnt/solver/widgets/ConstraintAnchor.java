@@ -79,7 +79,12 @@ public class ConstraintAnchor {
      * Return the connection's margin from this anchor to its target.
      * @return the margin value. 0 if not connected.
      */
-    public int getMargin() { return mMargin; }
+    public int getMargin() {
+        if (mOwner.getVisibility() == ConstraintWidget.GONE) {
+            return 0;
+        }
+        return mMargin;
+    }
 
     /**
      * Return the connection's strength (NONE if not connected)

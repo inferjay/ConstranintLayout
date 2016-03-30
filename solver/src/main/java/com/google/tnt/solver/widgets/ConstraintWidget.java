@@ -45,6 +45,10 @@ public class ConstraintWidget implements Solvable {
     private String mDebugName = null;
     private String mType = null;
 
+    public final static int VISIBLE = 0;
+    public final static int INVISIBLE = 4;
+    public final static int GONE = 8;
+
     /**
      * Define how the content of a widget should align, if the widget has children
      */
@@ -117,6 +121,9 @@ public class ConstraintWidget implements Solvable {
     // a container like ConstraintTableLayout can use this to implement empty cells
     // (the item positioned after the empty cell will have a skip value of 1)
     private int mContainerItemSkip = 0;
+
+    // Contains the visibility status of the widget (VISIBLE, INVISIBLE, or GONE)
+    private int mVisibility = VISIBLE;
 
     /*-----------------------------------------------------------------------*/
     // Creation
@@ -260,6 +267,18 @@ public class ConstraintWidget implements Solvable {
     }
 
     /**
+     * Set the visibility for this widget
+     * @param visibility either VISIBLE, INVISIBLE, or GONE
+     */
+    public void setVisibility(int visibility) { mVisibility = visibility; }
+
+    /**
+     * Returns the current visibility value for this widget
+     * @return the visibility (VISIBLE, INVISIBLE, or GONE)
+     */
+    public int getVisibility() { return mVisibility; }
+
+    /**
      * Returns the name of this widget (used for debug purposes)
      *
      * @return the debug name
@@ -383,6 +402,9 @@ public class ConstraintWidget implements Solvable {
      * @return width width
      */
     public int getWidth() {
+        if (mVisibility == ConstraintWidget.GONE) {
+            return 0;
+        }
         return mWidth;
     }
 
@@ -392,6 +414,9 @@ public class ConstraintWidget implements Solvable {
      * @return height height
      */
     public int getHeight() {
+        if (mVisibility == ConstraintWidget.GONE) {
+            return 0;
+        }
         return mHeight;
     }
 
@@ -1333,6 +1358,9 @@ public class ConstraintWidget implements Solvable {
         SolverVariable beginTarget = system.createObjectVariable(beginAnchor.getTarget());
         SolverVariable endTarget = system.createObjectVariable(endAnchor.getTarget());
 
+        if (mVisibility == ConstraintWidget.GONE) {
+            dimension = 0;
+        }
         if (beginTarget == null && endTarget == null) {
             system.addConstraint(EquationCreation.createRowEquals(system, begin, beginPosition));
             if (wrapContent) {
