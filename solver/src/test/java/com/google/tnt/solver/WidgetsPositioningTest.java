@@ -41,7 +41,9 @@ public class WidgetsPositioningTest {
 
     @Test
     public void testWidgetCenterPositioning() {
-        final ConstraintWidget rootWidget = new ConstraintWidget(600, 400);
+        final int x = 20;
+        final int y = 30;
+        final ConstraintWidget rootWidget = new ConstraintWidget(x, y, 600, 400);
         final ConstraintWidget centeredWidget = new ConstraintWidget(100, 20);
         ArrayList<ConstraintWidget> widgets = new ArrayList<ConstraintWidget>();
         widgets.add(rootWidget);
@@ -57,10 +59,10 @@ public class WidgetsPositioningTest {
                 int top = centeredWidget.getTop();
                 int right = centeredWidget.getRight();
                 int bottom = centeredWidget.getBottom();
-                assertEquals(left, 250);
-                assertEquals(right, 350);
-                assertEquals(top, 190);
-                assertEquals(bottom, 210);
+                assertEquals(left, x + 250);
+                assertEquals(right, x + 350);
+                assertEquals(top, y + 190);
+                assertEquals(bottom, y + 210);
             }
         });
     }

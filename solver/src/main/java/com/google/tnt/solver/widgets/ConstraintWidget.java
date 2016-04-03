@@ -688,6 +688,24 @@ public class ConstraintWidget implements Solvable {
     }
 
     /**
+     * Set the draw width of the widget
+     *
+     * @param drawWidth
+     */
+    public void setDrawWidth(int drawWidth) {
+        mDrawWidth = drawWidth;
+    }
+
+    /**
+     * Set the draw height of the widget
+     *
+     * @param drawHeight
+     */
+    public void setDrawHeight(int drawHeight) {
+        mDrawHeight = drawHeight;
+    }
+
+    /**
      * Set the width of the widget
      *
      * @param w width
