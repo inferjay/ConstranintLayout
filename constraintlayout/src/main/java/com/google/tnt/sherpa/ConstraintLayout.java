@@ -27,6 +27,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.tnt.solver.LinearSystem;
+import com.google.tnt.solver.widgets.Animator;
 import com.google.tnt.solver.widgets.ConstraintAnchor;
 import com.google.tnt.solver.widgets.ConstraintWidget;
 import com.google.tnt.solver.widgets.ConstraintWidgetContainer;
@@ -37,7 +38,7 @@ import java.util.HashMap;
 /**
  * A Layout where the positions of the children is described as constraints in relation to each
  * other or to the parent.
- *
+ * <p>
  * <p>
  * Note that you cannot have a circular dependency in constraints
  * </p>
@@ -146,11 +147,12 @@ public class ConstraintLayout extends ViewGroup {
     protected void addConstrainedChild(View child, ConstraintWidget widget) {
         mConstrainedViews.put(child, widget);
         mConstrainedWidgets.add(widget);
-        widget.setParent(mLayoutWidget);
         widget.setCompanionWidget(child);
         if (mLayoutWidget instanceof ConstraintWidgetContainer) {
             ConstraintWidgetContainer container = (ConstraintWidgetContainer) mLayoutWidget;
             container.add(widget);
+        } else {
+            widget.setParent(mLayoutWidget);
         }
     }
 
@@ -561,65 +563,31 @@ public class ConstraintLayout extends ViewGroup {
      */
     private void solveLinearSystem() {
         mEquationSystem.reset();
-        addAllWidgetsToSolver();
-        try {
-            mEquationSystem.minimize();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        updateAllWidgetsFromSolver();
-    }
-
-    protected void addAllWidgetsToSolver() {
-        mLayoutWidget.addToSolver(mEquationSystem);
-        int num = mConstrainedWidgets.size();
-        for (int i = 0; i < num; i++) {
-            ConstraintWidget widget = mConstrainedWidgets.get(i);
-            widget.addToSolver(mEquationSystem);
-        }
-        num = mConstrainedTargets.size();
-        for (int i = 0; i < num; i++) {
-            ConstraintWidget target = mConstrainedTargets.get(i);
-            target.addToSolver(mEquationSystem);
-        }
-    }
-
-    protected void updateAllWidgetsFromSolver() {
-        mLayoutWidget.updateFromSolver(mEquationSystem);
-        int num = mConstrainedWidgets.size();
-        for (int i = 0; i < num; i++) {
-            ConstraintWidget widget = mConstrainedWidgets.get(i);
-            widget.updateFromSolver(mEquationSystem);
-        }
-        num = mConstrainedTargets.size();
-        for (int i = 0; i < num; i++) {
-            ConstraintWidget target = mConstrainedTargets.get(i);
-            target.updateFromSolver(mEquationSystem);
-        }
+        Animator.setAnimationEnabled(false);
+        mLayoutWidget.layout();
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         final int widgetsCount = mConstrainedWidgets.size();
-
         for (int i = 0; i < widgetsCount; i++) {
             ConstraintWidget widget = mConstrainedWidgets.get(i);
             final View child = (View) widget.getCompanionWidget();
             if (child == null) {
                 continue;
             }
-            int l = widget.getLeft();
-            int t = widget.getTop();
-            int r = widget.getRight();
-            int b = widget.getBottom();
+            int l = widget.getDrawX();
+            int t = widget.getDrawY();
+            int r = l + widget.getWidth();
+            int b = t + widget.getHeight();
             if (ALLOWS_EMBEDDED) {
                 if (getParent() instanceof ConstraintLayout) {
                     int dx = 0;
                     int dy = 0;
                     ConstraintWidget item = getLayoutWidget(); // start with ourselves
                     while (item != null) {
-                        dx += item.getLeft();
-                        dy += item.getTop();
+                        dx += item.getDrawX();
+                        dy += item.getDrawY();
                         item = item.getParent();
                     }
                     l -= dx;
@@ -637,18 +605,18 @@ public class ConstraintLayout extends ViewGroup {
             if (child == null) {
                 continue;
             }
-            int l = target.getX();
-            int t = target.getY();
-            int r = l + target.getWidth();;
+            int l = target.getDrawX();
+            int t = target.getDrawY();
+            int r = l + target.getWidth();
             int b = t + target.getHeight();
             if (target instanceof com.google.tnt.solver.widgets.Guideline) {
                 com.google.tnt.solver.widgets.Guideline guideline = (com.google.tnt.solver.widgets.Guideline) target;
                 if (guideline.getOrientation() == com.google.tnt.solver.widgets.Guideline.HORIZONTAL) {
-                    t = ((com.google.tnt.solver.widgets.Guideline) target).getParent().getTop();
+                    t = ((com.google.tnt.solver.widgets.Guideline) target).getParent().getDrawY();
                     b = ((com.google.tnt.solver.widgets.Guideline) target).getParent().getBottom();
                     r = l;
                 } else {
-                    l = ((com.google.tnt.solver.widgets.Guideline) target).getParent().getLeft();
+                    l = ((com.google.tnt.solver.widgets.Guideline) target).getParent().getDrawX();
                     r = ((com.google.tnt.solver.widgets.Guideline) target).getParent().getRight();
                     b = t;
                 }
@@ -748,7 +716,7 @@ public class ConstraintLayout extends ViewGroup {
             final int N = a.getIndexCount();
             for (int i = 0; i < N; i++) {
                 int attr = a.getIndex(i);
-                if (attr ==  R.styleable.ConstraintLayout_LayoutParams_layout_constraintLeft_toLeftOf) {
+                if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintLeft_toLeftOf) {
                     left_to_left = a.getResourceId(attr, left_to_left);
                 } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintLeft_toRightOf) {
                     left_to_right = a.getResourceId(attr, left_to_right);
@@ -821,7 +789,7 @@ public class ConstraintLayout extends ViewGroup {
                 } else if (attr == R.styleable.ConstraintLayout_LayoutParams_containerItemSkip) {
                     container_skip = a.getInteger(attr, container_skip);
                 } else {
-                    Log.w(TAG," UNSUPPORTED attr ! = "+attr);
+                    Log.w(TAG, " UNSUPPORTED attr ! = " + attr);
                 }
             }
 
@@ -854,6 +822,7 @@ public class ConstraintLayout extends ViewGroup {
 
     /**
      * Support rtl
+     *
      * @param layoutDirection
      */
     @Override
@@ -867,6 +836,7 @@ public class ConstraintLayout extends ViewGroup {
 
     /**
      * swap start and end to left and right as needed by RTL
+     *
      * @param layoutParams
      */
     private void resolveRtlProperties(LayoutParams layoutParams) {
