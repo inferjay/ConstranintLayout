@@ -41,6 +41,7 @@ import java.util.ArrayList;
  */
 public class ConstraintWidget implements Solvable {
 
+    private static final boolean AUTOTAG_CENTER = false;
     private Animator mAnimator = new Animator(this);
     private String mDebugName = null;
     private String mType = null;
@@ -1014,12 +1015,14 @@ public class ConstraintWidget implements Solvable {
                         opposite.reset();
                         centerY.reset();
                     } else {
-                        // let's see if we need to mark center_y as connected
-                        if (opposite.isConnected() && opposite.getTarget().getOwner()
-                                == toAnchor.getOwner()) {
-                            ConstraintAnchor targetCenterY = toAnchor.getOwner().getAnchor(
-                                    ConstraintAnchor.Type.CENTER_Y);
-                            centerY.connect(targetCenterY, 0);
+                        if (AUTOTAG_CENTER) {
+                            // let's see if we need to mark center_y as connected
+                            if (opposite.isConnected() && opposite.getTarget().getOwner()
+                                    == toAnchor.getOwner()) {
+                                ConstraintAnchor targetCenterY = toAnchor.getOwner().getAnchor(
+                                        ConstraintAnchor.Type.CENTER_Y);
+                                centerY.connect(targetCenterY, 0);
+                            }
                         }
                     }
                 } else if ((constraintFrom == ConstraintAnchor.Type.LEFT)
@@ -1034,12 +1037,14 @@ public class ConstraintWidget implements Solvable {
                         opposite.reset();
                         centerX.reset();
                     } else {
-                        // let's see if we need to mark center_x as connected
-                        if (opposite.isConnected() && opposite.getTarget().getOwner()
-                                == toAnchor.getOwner()) {
-                            ConstraintAnchor targetCenterX = toAnchor.getOwner().getAnchor(
-                                    ConstraintAnchor.Type.CENTER_X);
-                            centerX.connect(targetCenterX, 0);
+                        if (AUTOTAG_CENTER) {
+                            // let's see if we need to mark center_x as connected
+                            if (opposite.isConnected() && opposite.getTarget().getOwner()
+                                    == toAnchor.getOwner()) {
+                                ConstraintAnchor targetCenterX = toAnchor.getOwner().getAnchor(
+                                        ConstraintAnchor.Type.CENTER_X);
+                                centerX.connect(targetCenterX, 0);
+                            }
                         }
                     }
 
