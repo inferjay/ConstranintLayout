@@ -187,10 +187,6 @@ public class ConstraintAnchor {
         }
         Type target = anchor.getType();
         if (target == mType) {
-            if (mType == Type.CENTER) {
-                // only allow center if it's on our parent
-                return anchor.getOwner() == getOwner().getParent();
-            }
             if (mType == Type.BASELINE
                     && (!anchor.getOwner().hasBaseline() || !getOwner().hasBaseline())) {
                 return false;

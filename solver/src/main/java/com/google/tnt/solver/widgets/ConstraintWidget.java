@@ -933,17 +933,42 @@ public class ConstraintWidget implements Solvable {
             // If we have center, we connect instead to the corresponding
             // left/right or top/bottom pairs
             if (constraintTo == ConstraintAnchor.Type.CENTER) {
-                // if we connect to another center, connect all...
-                connect(ConstraintAnchor.Type.LEFT, target,
-                        ConstraintAnchor.Type.LEFT, 0, strength);
-                connect(ConstraintAnchor.Type.RIGHT, target,
-                        ConstraintAnchor.Type.RIGHT, 0, strength);
-                connect(ConstraintAnchor.Type.TOP, target,
-                        ConstraintAnchor.Type.TOP, 0, strength);
-                connect(ConstraintAnchor.Type.BOTTOM, target,
-                        ConstraintAnchor.Type.BOTTOM, 0, strength);
-                ConstraintAnchor center = getAnchor(ConstraintAnchor.Type.CENTER);
-                center.connect(target.getAnchor(ConstraintAnchor.Type.CENTER), 0);
+                ConstraintAnchor left = getAnchor(ConstraintAnchor.Type.LEFT);
+                ConstraintAnchor right = getAnchor(ConstraintAnchor.Type.RIGHT);
+                ConstraintAnchor top = getAnchor(ConstraintAnchor.Type.TOP);
+                ConstraintAnchor bottom = getAnchor(ConstraintAnchor.Type.BOTTOM);
+                boolean centerX = false;
+                boolean centerY = false;
+                if ((left != null && left.isConnected())
+                        || (right != null && right.isConnected())) {
+                    // don't apply center here
+                } else {
+                    connect(ConstraintAnchor.Type.LEFT, target,
+                            ConstraintAnchor.Type.LEFT, 0, strength);
+                    connect(ConstraintAnchor.Type.RIGHT, target,
+                            ConstraintAnchor.Type.RIGHT, 0, strength);
+                    centerX = true;
+                }
+                if ((top != null && top.isConnected())
+                        || (bottom != null && bottom.isConnected())) {
+                    // don't apply center here
+                } else {
+                    connect(ConstraintAnchor.Type.TOP, target,
+                            ConstraintAnchor.Type.TOP, 0, strength);
+                    connect(ConstraintAnchor.Type.BOTTOM, target,
+                            ConstraintAnchor.Type.BOTTOM, 0, strength);
+                    centerY = true;
+                }
+                if (centerX && centerY) {
+                    ConstraintAnchor center = getAnchor(ConstraintAnchor.Type.CENTER);
+                    center.connect(target.getAnchor(ConstraintAnchor.Type.CENTER), 0);
+                } else if (centerX) {
+                    ConstraintAnchor center = getAnchor(ConstraintAnchor.Type.CENTER_X);
+                    center.connect(target.getAnchor(ConstraintAnchor.Type.CENTER_X), 0);
+                } else if (centerY) {
+                    ConstraintAnchor center = getAnchor(ConstraintAnchor.Type.CENTER_Y);
+                    center.connect(target.getAnchor(ConstraintAnchor.Type.CENTER_Y), 0);
+                }
             } else if ((constraintTo == ConstraintAnchor.Type.LEFT)
                     || (constraintTo == ConstraintAnchor.Type.RIGHT)) {
                 connect(ConstraintAnchor.Type.LEFT, target,
