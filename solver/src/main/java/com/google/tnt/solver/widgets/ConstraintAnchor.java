@@ -24,6 +24,8 @@ import java.util.ArrayList;
  */
 public class ConstraintAnchor {
 
+    public static final boolean USE_CENTER_ANCHOR = false;
+
     /**
      * Define the type of anchor
      */
@@ -187,6 +189,11 @@ public class ConstraintAnchor {
         }
         Type target = anchor.getType();
         if (target == mType) {
+            if (!USE_CENTER_ANCHOR) {
+                if (mType == Type.CENTER) {
+                    return false;
+                }
+            }
             if (mType == Type.BASELINE
                     && (!anchor.getOwner().hasBaseline() || !getOwner().hasBaseline())) {
                 return false;

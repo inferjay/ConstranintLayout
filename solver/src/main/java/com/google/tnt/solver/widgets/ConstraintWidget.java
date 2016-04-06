@@ -177,7 +177,9 @@ public class ConstraintWidget implements Solvable {
         mAnchors.add(mBottom);
         mAnchors.add(mCenterX);
         mAnchors.add(mCenterY);
-        mAnchors.add(mCenter);
+        if (ConstraintAnchor.USE_CENTER_ANCHOR) {
+            mAnchors.add(mCenter);
+        }
         mAnchors.add(mBaseline);
     }
 
