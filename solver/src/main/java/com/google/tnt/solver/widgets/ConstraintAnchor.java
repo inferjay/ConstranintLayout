@@ -46,6 +46,7 @@ public class ConstraintAnchor {
      */
     public static final int USER_CREATOR = 0;
     public static final int SCOUT_CREATOR = 1;
+    public static final int AUTO_CONSTRAINT_CREATOR = 2;
 
     private final ConstraintWidget mOwner;
     private final Type mType;
@@ -131,6 +132,7 @@ public class ConstraintAnchor {
         mTarget = null;
         mMargin = 0;
         mStrength = Strength.NONE;
+        mConnectionCreator = AUTO_CONSTRAINT_CREATOR;
     }
 
     /**
@@ -138,13 +140,15 @@ public class ConstraintAnchor {
      * @param toAnchor
      * @param margin
      * @param strength
+     * @param creator
      * @return true if the connection succeeds.
      */
-    public boolean connect(ConstraintAnchor toAnchor, int margin, Strength strength) {
+    public boolean connect(ConstraintAnchor toAnchor, int margin, Strength strength, int creator) {
         if (toAnchor == null) {
             mTarget = toAnchor;
             mMargin = 0;
             mStrength = Strength.NONE;
+            mConnectionCreator = AUTO_CONSTRAINT_CREATOR;
             return true;
         }
         if (!isValidConnection(toAnchor)) {
@@ -157,7 +161,19 @@ public class ConstraintAnchor {
             mMargin = 0;
         }
         mStrength = strength;
+        mConnectionCreator = creator;
         return true;
+    }
+
+    /**
+     * Connects this anchor to another one.
+     * @param toAnchor
+     * @param margin
+     * @param creator
+     * @return true if the connection succeeds.
+     */
+    public boolean connect(ConstraintAnchor toAnchor, int margin, int creator) {
+        return connect(toAnchor, margin, Strength.STRONG, creator);
     }
 
     /**
@@ -167,7 +183,7 @@ public class ConstraintAnchor {
      * @return true if the connection succeeds.
      */
     public boolean connect(ConstraintAnchor toAnchor, int margin) {
-        return connect(toAnchor, margin, Strength.STRONG);
+        return connect(toAnchor, margin, Strength.STRONG, USER_CREATOR);
     }
 
     /**

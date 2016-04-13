@@ -228,7 +228,7 @@ public class ConstraintWidget implements Solvable {
             root = root.getParent();
         }
         if (root instanceof WidgetContainer) {
-            return (WidgetContainer)root;
+            return (WidgetContainer) root;
         }
         return null;
     }
@@ -271,15 +271,21 @@ public class ConstraintWidget implements Solvable {
 
     /**
      * Set the visibility for this widget
+     *
      * @param visibility either VISIBLE, INVISIBLE, or GONE
      */
-    public void setVisibility(int visibility) { mVisibility = visibility; }
+    public void setVisibility(int visibility) {
+        mVisibility = visibility;
+    }
 
     /**
      * Returns the current visibility value for this widget
+     *
      * @return the visibility (VISIBLE, INVISIBLE, or GONE)
      */
-    public int getVisibility() { return mVisibility; }
+    public int getVisibility() {
+        return mVisibility;
+    }
 
     /**
      * Returns the name of this widget (used for debug purposes)
@@ -547,7 +553,9 @@ public class ConstraintWidget implements Solvable {
      *
      * @return horizontal percentage bias
      */
-    public float getHorizontalBiasPercent() { return mHorizontalBiasPercent; }
+    public float getHorizontalBiasPercent() {
+        return mHorizontalBiasPercent;
+    }
 
     /**
      * Return the vertical percentage bias that is used when two opposite connections
@@ -555,7 +563,9 @@ public class ConstraintWidget implements Solvable {
      *
      * @return vertical percentage bias
      */
-    public float getVerticalBiasPercent() { return mVerticalBiasPercent; }
+    public float getVerticalBiasPercent() {
+        return mVerticalBiasPercent;
+    }
 
     /**
      * Return true if this widget has a baseline
@@ -735,6 +745,7 @@ public class ConstraintWidget implements Solvable {
     /**
      * Set the horizontal bias percent to apply when we have two opposite constraints of
      * equal strength
+     *
      * @param horizontalBiasPercent the percentage used
      */
     public void setHorizontalBiasPercent(float horizontalBiasPercent) {
@@ -744,6 +755,7 @@ public class ConstraintWidget implements Solvable {
     /**
      * Set the vertical bias percent to apply when we have two opposite constraints of
      * equal strength
+     *
      * @param verticalBiasPercent the percentage used
      */
     public void setVerticalBiasPercent(float verticalBiasPercent) {
@@ -875,16 +887,19 @@ public class ConstraintWidget implements Solvable {
      * @param from   the anchor we are connecting from (of this widget)
      * @param to     the anchor we are connecting to
      * @param margin how much margin we want to have
-     * @return the undo operation
+     * @param creator who created the connection
      */
-    public void connect(ConstraintAnchor from, ConstraintAnchor to, int margin) {
-        connect(from, to, margin, ConstraintAnchor.Strength.STRONG);
+    public void connect(ConstraintAnchor from, ConstraintAnchor to, int margin, int creator) {
+        connect(from, to, margin, ConstraintAnchor.Strength.STRONG, creator);
     }
 
+    public void connect(ConstraintAnchor from, ConstraintAnchor to, int margin) {
+        connect(from, to, margin, ConstraintAnchor.Strength.STRONG, ConstraintAnchor.USER_CREATOR);
+    }
     public void connect(ConstraintAnchor from, ConstraintAnchor to, int margin,
-            ConstraintAnchor.Strength strength) {
+            ConstraintAnchor.Strength strength, int creator) {
         if (from.getOwner() == this) {
-            connect(from.getType(), to.getOwner(), to.getType(), margin, strength);
+            connect(from.getType(), to.getOwner(), to.getType(), margin, strength, creator);
         }
     }
 
@@ -917,6 +932,7 @@ public class ConstraintWidget implements Solvable {
         connect(constraintFrom, target, constraintTo, 0, ConstraintAnchor.Strength.STRONG);
     }
 
+
     /**
      * Connect a given anchor of this widget to another anchor of a target widget
      *
@@ -925,12 +941,29 @@ public class ConstraintWidget implements Solvable {
      * @param constraintTo   the target anchor on the target widget
      * @param margin         how much margin we want to keep as a minimum distance between the two anchors
      * @param strength       the constraint strength (Weak/Strong)
-     * @return the undo operation
      */
     public void connect(ConstraintAnchor.Type constraintFrom,
             ConstraintWidget target,
             ConstraintAnchor.Type constraintTo, int margin,
             ConstraintAnchor.Strength strength) {
+        connect(constraintFrom, target, constraintTo, margin, strength,
+                ConstraintAnchor.USER_CREATOR);
+    }
+
+    /**
+     * Connect a given anchor of this widget to another anchor of a target widget
+     *
+     * @param constraintFrom which anchor of this widget to connect from
+     * @param target         the target widget
+     * @param constraintTo   the target anchor on the target widget
+     * @param margin         how much margin we want to keep as a minimum distance between the two anchors
+     * @param strength       the constraint strength (Weak/Strong)
+     * @param creator        who created the constraint
+     */
+    public void connect(ConstraintAnchor.Type constraintFrom,
+            ConstraintWidget target,
+            ConstraintAnchor.Type constraintTo, int margin,
+            ConstraintAnchor.Strength strength, int creator) {
         if (constraintFrom == ConstraintAnchor.Type.CENTER) {
             // If we have center, we connect instead to the corresponding
             // left/right or top/bottom pairs
@@ -946,9 +979,9 @@ public class ConstraintWidget implements Solvable {
                     // don't apply center here
                 } else {
                     connect(ConstraintAnchor.Type.LEFT, target,
-                            ConstraintAnchor.Type.LEFT, 0, strength);
+                            ConstraintAnchor.Type.LEFT, 0, strength, creator);
                     connect(ConstraintAnchor.Type.RIGHT, target,
-                            ConstraintAnchor.Type.RIGHT, 0, strength);
+                            ConstraintAnchor.Type.RIGHT, 0, strength, creator);
                     centerX = true;
                 }
                 if ((top != null && top.isConnected())
@@ -956,60 +989,60 @@ public class ConstraintWidget implements Solvable {
                     // don't apply center here
                 } else {
                     connect(ConstraintAnchor.Type.TOP, target,
-                            ConstraintAnchor.Type.TOP, 0, strength);
+                            ConstraintAnchor.Type.TOP, 0, strength, creator);
                     connect(ConstraintAnchor.Type.BOTTOM, target,
-                            ConstraintAnchor.Type.BOTTOM, 0, strength);
+                            ConstraintAnchor.Type.BOTTOM, 0, strength, creator);
                     centerY = true;
                 }
                 if (centerX && centerY) {
                     ConstraintAnchor center = getAnchor(ConstraintAnchor.Type.CENTER);
-                    center.connect(target.getAnchor(ConstraintAnchor.Type.CENTER), 0);
+                    center.connect(target.getAnchor(ConstraintAnchor.Type.CENTER), 0, creator);
                 } else if (centerX) {
                     ConstraintAnchor center = getAnchor(ConstraintAnchor.Type.CENTER_X);
-                    center.connect(target.getAnchor(ConstraintAnchor.Type.CENTER_X), 0);
+                    center.connect(target.getAnchor(ConstraintAnchor.Type.CENTER_X), 0, creator);
                 } else if (centerY) {
                     ConstraintAnchor center = getAnchor(ConstraintAnchor.Type.CENTER_Y);
-                    center.connect(target.getAnchor(ConstraintAnchor.Type.CENTER_Y), 0);
+                    center.connect(target.getAnchor(ConstraintAnchor.Type.CENTER_Y), 0, creator);
                 }
             } else if ((constraintTo == ConstraintAnchor.Type.LEFT)
                     || (constraintTo == ConstraintAnchor.Type.RIGHT)) {
                 connect(ConstraintAnchor.Type.LEFT, target,
-                        constraintTo, 0, strength);
+                        constraintTo, 0, strength, creator);
                 connect(ConstraintAnchor.Type.RIGHT, target,
-                        constraintTo, 0, strength);
+                        constraintTo, 0, strength, creator);
                 ConstraintAnchor center = getAnchor(ConstraintAnchor.Type.CENTER);
-                center.connect(target.getAnchor(constraintTo), 0);
+                center.connect(target.getAnchor(constraintTo), 0, creator);
             } else if ((constraintTo == ConstraintAnchor.Type.TOP)
                     || (constraintTo == ConstraintAnchor.Type.BOTTOM)) {
                 connect(ConstraintAnchor.Type.TOP, target,
-                        constraintTo, 0, strength);
+                        constraintTo, 0, strength, creator);
                 connect(ConstraintAnchor.Type.BOTTOM, target,
-                        constraintTo, 0, strength);
+                        constraintTo, 0, strength, creator);
                 ConstraintAnchor center = getAnchor(ConstraintAnchor.Type.CENTER);
-                center.connect(target.getAnchor(constraintTo), 0);
+                center.connect(target.getAnchor(constraintTo), 0, creator);
             }
         } else if (constraintFrom == ConstraintAnchor.Type.CENTER_X
                 && constraintTo == ConstraintAnchor.Type.CENTER_X) {
             // Center X connection will connect left & right
             ConstraintAnchor left = getAnchor(ConstraintAnchor.Type.LEFT);
             ConstraintAnchor leftTarget = target.getAnchor(ConstraintAnchor.Type.LEFT);
-            left.connect(leftTarget, 0);
+            left.connect(leftTarget, 0, creator);
             ConstraintAnchor right = getAnchor(ConstraintAnchor.Type.RIGHT);
             ConstraintAnchor rightTarget = target.getAnchor(ConstraintAnchor.Type.RIGHT);
-            right.connect(rightTarget, 0);
+            right.connect(rightTarget, 0, creator);
             ConstraintAnchor centerX = getAnchor(ConstraintAnchor.Type.CENTER_X);
-            centerX.connect(target.getAnchor(constraintTo), 0);
+            centerX.connect(target.getAnchor(constraintTo), 0, creator);
         } else if (constraintFrom == ConstraintAnchor.Type.CENTER_Y
                 && constraintTo == ConstraintAnchor.Type.CENTER_Y) {
             // Center Y connection will connect top & bottom.
             ConstraintAnchor top = getAnchor(ConstraintAnchor.Type.TOP);
             ConstraintAnchor topTarget = target.getAnchor(ConstraintAnchor.Type.TOP);
-            top.connect(topTarget, 0);
+            top.connect(topTarget, 0, creator);
             ConstraintAnchor bottom = getAnchor(ConstraintAnchor.Type.BOTTOM);
             ConstraintAnchor bottomTarget = target.getAnchor(ConstraintAnchor.Type.BOTTOM);
-            bottom.connect(bottomTarget, 0);
+            bottom.connect(bottomTarget, 0, creator);
             ConstraintAnchor centerY = getAnchor(ConstraintAnchor.Type.CENTER_Y);
-            centerY.connect(target.getAnchor(constraintTo), 0);
+            centerY.connect(target.getAnchor(constraintTo), 0, creator);
         } else {
             ConstraintAnchor fromAnchor = getAnchor(constraintFrom);
             ConstraintAnchor toAnchor = target.getAnchor(constraintTo);
@@ -1048,7 +1081,7 @@ public class ConstraintWidget implements Solvable {
                                     == toAnchor.getOwner()) {
                                 ConstraintAnchor targetCenterY = toAnchor.getOwner().getAnchor(
                                         ConstraintAnchor.Type.CENTER_Y);
-                                centerY.connect(targetCenterY, 0);
+                                centerY.connect(targetCenterY, 0, creator);
                             }
                         }
                     }
@@ -1070,13 +1103,13 @@ public class ConstraintWidget implements Solvable {
                                     == toAnchor.getOwner()) {
                                 ConstraintAnchor targetCenterX = toAnchor.getOwner().getAnchor(
                                         ConstraintAnchor.Type.CENTER_X);
-                                centerX.connect(targetCenterX, 0);
+                                centerX.connect(targetCenterX, 0, creator);
                             }
                         }
                     }
 
                 }
-                fromAnchor.connect(toAnchor, margin, strength);
+                fromAnchor.connect(toAnchor, margin, strength, creator);
                 toAnchor.getOwner().connectedTo(fromAnchor.getOwner());
             }
         }
@@ -1100,6 +1133,8 @@ public class ConstraintWidget implements Solvable {
         ConstraintAnchor top = getAnchor(ConstraintAnchor.Type.TOP);
         ConstraintAnchor bottom = getAnchor(ConstraintAnchor.Type.BOTTOM);
         ConstraintAnchor center = getAnchor(ConstraintAnchor.Type.CENTER);
+        ConstraintAnchor centerX = getAnchor(ConstraintAnchor.Type.CENTER_X);
+        ConstraintAnchor centerY = getAnchor(ConstraintAnchor.Type.CENTER_Y);
 
         if (anchor == center) {
             if (left.isConnected() && right.isConnected()
@@ -1112,6 +1147,22 @@ public class ConstraintWidget implements Solvable {
                 top.reset();
                 bottom.reset();
             }
+            mHorizontalBiasPercent = 0.5f;
+            mVerticalBiasPercent = 0.5f;
+        } else if (anchor == centerX) {
+            if (left.isConnected() && right.isConnected()
+                    && left.getTarget().getOwner() == right.getTarget().getOwner()) {
+                left.reset();
+                right.reset();
+            }
+            mHorizontalBiasPercent = 0.5f;
+        } else if (anchor == centerY) {
+            if (top.isConnected() && bottom.isConnected()
+                    && top.getTarget().getOwner() == bottom.getTarget().getOwner()) {
+                top.reset();
+                bottom.reset();
+            }
+            mVerticalBiasPercent = 0.5f;
         } else if (anchor == left || anchor == right) {
             if (left.isConnected() && left.getTarget() == right.getTarget()) {
                 center.reset();

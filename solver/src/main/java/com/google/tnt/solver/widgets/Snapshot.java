@@ -38,6 +38,7 @@ public class Snapshot {
         private ConstraintAnchor mTarget;
         private int mMargin;
         private ConstraintAnchor.Strength mStrengh;
+        private int mCreator;
 
         /**
          * Base constructor
@@ -49,6 +50,7 @@ public class Snapshot {
             mTarget = anchor.getTarget();
             mMargin = anchor.getMargin();
             mStrengh = anchor.getStrength();
+            mCreator = anchor.getConnectionCreator();
         }
 
         /**
@@ -62,10 +64,12 @@ public class Snapshot {
                 mTarget = mAnchor.getTarget();
                 mMargin = mAnchor.getMargin();
                 mStrengh = mAnchor.getStrength();
+                mCreator = mAnchor.getConnectionCreator();
             } else {
                 mTarget = null;
                 mMargin = 0;
                 mStrengh = ConstraintAnchor.Strength.STRONG;
+                mCreator = ConstraintAnchor.USER_CREATOR;
             }
         }
 
@@ -76,7 +80,7 @@ public class Snapshot {
          */
         public void applyTo(ConstraintWidget widget) {
             ConstraintAnchor anchor = widget.getAnchor(mAnchor.getType());
-            anchor.connect(mTarget, mMargin, mStrengh);
+            anchor.connect(mTarget, mMargin, mStrengh, mCreator);
         }
     }
 
