@@ -1022,6 +1022,26 @@ public class ConstraintWidget implements Solvable {
                 center.connect(target.getAnchor(constraintTo), 0, creator);
             }
         } else if (constraintFrom == ConstraintAnchor.Type.CENTER_X
+                && (constraintTo == ConstraintAnchor.Type.LEFT
+                    || constraintTo == ConstraintAnchor.Type.RIGHT)) {
+            ConstraintAnchor left = getAnchor(ConstraintAnchor.Type.LEFT);
+            ConstraintAnchor targetAnchor = target.getAnchor(constraintTo);
+            ConstraintAnchor right = getAnchor(ConstraintAnchor.Type.RIGHT);
+            left.connect(targetAnchor, 0, creator);
+            right.connect(targetAnchor, 0, creator);
+            ConstraintAnchor centerX = getAnchor(ConstraintAnchor.Type.CENTER_X);
+            centerX.connect(targetAnchor, 0, creator);
+        } else if (constraintFrom == ConstraintAnchor.Type.CENTER_Y
+                && (constraintTo == ConstraintAnchor.Type.TOP
+                     || constraintTo == ConstraintAnchor.Type.BOTTOM)) {
+            ConstraintAnchor targetAnchor = target.getAnchor(constraintTo);
+            ConstraintAnchor top = getAnchor(ConstraintAnchor.Type.TOP);
+            top.connect(targetAnchor, 0, creator);
+            ConstraintAnchor bottom = getAnchor(ConstraintAnchor.Type.BOTTOM);
+            bottom.connect(targetAnchor, 0, creator);
+            ConstraintAnchor centerY = getAnchor(ConstraintAnchor.Type.CENTER_Y);
+            centerY.connect(targetAnchor, 0, creator);
+        } else if (constraintFrom == ConstraintAnchor.Type.CENTER_X
                 && constraintTo == ConstraintAnchor.Type.CENTER_X) {
             // Center X connection will connect left & right
             ConstraintAnchor left = getAnchor(ConstraintAnchor.Type.LEFT);
