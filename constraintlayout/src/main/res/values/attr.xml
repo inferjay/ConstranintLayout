@@ -36,6 +36,15 @@
         <attr name="layout_constraintEnd_toStartOf" format="reference"/>
         <attr name="layout_constraintEnd_toEndOf" format="reference"/>
 
+        <attr name="layout_constraintHorizontal_Bias" format="float"/>
+        <attr name="layout_constraintVertical_Bias" format="float"/>
+
+        <attr name="layout_constraintLeft_creator" format="integer"/>
+        <attr name="layout_constraintTop_creator" format="integer"/>
+        <attr name="layout_constraintRight_creator" format="integer"/>
+        <attr name="layout_constraintBottom_creator" format="integer"/>
+        <attr name="layout_constraintBaseline_creator" format="integer"/>
+
         <attr name="layout_constraintLeft_strength">
             <enum name="strong" value="0"/>
             <enum name="weak" value="1"/>

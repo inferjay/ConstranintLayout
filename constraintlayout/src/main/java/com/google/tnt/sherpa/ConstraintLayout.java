@@ -338,6 +338,12 @@ public class ConstraintLayout extends ViewGroup {
                                 ConstraintAnchor.Type.BOTTOM, layoutParams.bottom_margin);
                     }
                 }
+                if (layoutParams.horizontal_bias >= 0 && layoutParams.horizontal_bias != 0.5f) {
+                    widget.setHorizontalBiasPercent(layoutParams.horizontal_bias);
+                }
+                if (layoutParams.vertical_bias >= 0 && layoutParams.vertical_bias != 0.5f) {
+                    widget.setVerticalBiasPercent(layoutParams.vertical_bias);
+                }
 
                 // Set the strength
                 if (layoutParams.left_strength != LayoutParams.UNSET) {
@@ -698,6 +704,9 @@ public class ConstraintLayout extends ViewGroup {
         public int end_to_start = UNSET;
         public int end_to_end = UNSET;
 
+        public float horizontal_bias = 0.5f;
+        public float vertical_bias = 0.5f;
+
         public int editor_absolute_x = UNSET;
         public int editor_absolute_y = UNSET;
 
@@ -788,6 +797,10 @@ public class ConstraintLayout extends ViewGroup {
                     end_margin = a.getDimensionPixelOffset(attr, end_margin);
                 } else if (attr == R.styleable.ConstraintLayout_LayoutParams_containerItemSkip) {
                     container_skip = a.getInteger(attr, container_skip);
+                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintHorizontal_Bias) {
+                    horizontal_bias = a.getFloat(attr, horizontal_bias);
+                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintVertical_Bias) {
+                    vertical_bias = a.getFloat(attr, vertical_bias);
                 } else {
                     Log.w(TAG, " UNSUPPORTED attr ! = " + attr);
                 }
