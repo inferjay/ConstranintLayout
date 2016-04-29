@@ -151,10 +151,7 @@ public class ConstraintWidget implements Solvable {
         mWidth = width;
         mHeight = height;
         addAnchors();
-        boolean previousAnimationState = Animator.isAnimationEnabled();
-        Animator.setAnimationEnabled(false);
-        updateDrawPosition();
-        Animator.setAnimationEnabled(previousAnimationState);
+        forceUpdateDrawPosition();
     }
 
     /**
@@ -661,6 +658,20 @@ public class ConstraintWidget implements Solvable {
             right = mAnimator.getCurrentRight();
             bottom = mAnimator.getCurrentBottom();
         }
+        mDrawX = left;
+        mDrawY = top;
+        mDrawWidth = right - left;
+        mDrawHeight = bottom - top;
+    }
+
+  /**
+   * Update the draw positition immediately to match the true position
+   */
+  public void forceUpdateDrawPosition() {
+        int left = mX;
+        int top = mY;
+        int right = mX + mWidth;
+        int bottom = mY + mHeight;
         mDrawX = left;
         mDrawY = top;
         mDrawWidth = right - left;
