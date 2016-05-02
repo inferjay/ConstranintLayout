@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="ConstraintLayout_LayoutParams">
+    <declare-styleable name="ConstraintLayout_Layout">
 
         <attr name="orientation">
             <enum name="horizontal" value="0"/>

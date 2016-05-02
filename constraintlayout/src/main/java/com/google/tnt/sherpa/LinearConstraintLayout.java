@@ -37,9 +37,9 @@ public class LinearConstraintLayout extends ConstraintLayout {
     }
 
     private void setAttributes(Context context, AttributeSet attrs) {
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ConstraintLayout_LayoutParams);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ConstraintLayout_Layout);
         int orientation = -1;
-        orientation = a.getInt(R.styleable.ConstraintLayout_LayoutParams_orientation, orientation);
+        orientation = a.getInt(R.styleable.ConstraintLayout_Layout_orientation, orientation);
         if (orientation == 1) {
             mIsHorizontal = false;
         }

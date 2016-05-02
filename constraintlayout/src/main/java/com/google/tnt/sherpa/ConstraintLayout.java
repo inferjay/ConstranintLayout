@@ -721,85 +721,85 @@ public class ConstraintLayout extends ViewGroup {
 
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
-            TypedArray a = c.obtainStyledAttributes(attrs, R.styleable.ConstraintLayout_LayoutParams);
+            TypedArray a = c.obtainStyledAttributes(attrs, R.styleable.ConstraintLayout_Layout);
             final int N = a.getIndexCount();
             for (int i = 0; i < N; i++) {
                 int attr = a.getIndex(i);
-                if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintLeft_toLeftOf) {
+                if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_toLeftOf) {
                     left_to_left = a.getResourceId(attr, left_to_left);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintLeft_toRightOf) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_toRightOf) {
                     left_to_right = a.getResourceId(attr, left_to_right);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintRight_toLeftOf) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_toLeftOf) {
                     right_to_left = a.getResourceId(attr, right_to_left);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintRight_toRightOf) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_toRightOf) {
                     right_to_right = a.getResourceId(attr, right_to_right);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintTop_toTopOf) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_toTopOf) {
                     top_to_top = a.getResourceId(attr, top_to_top);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintTop_toBottomOf) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_toBottomOf) {
                     top_to_bottom = a.getResourceId(attr, top_to_bottom);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintBottom_toTopOf) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBottom_toTopOf) {
                     bottom_to_top = a.getResourceId(attr, bottom_to_top);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintBottom_toBottomOf) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBottom_toBottomOf) {
                     bottom_to_bottom = a.getResourceId(attr, bottom_to_bottom);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintBaseline_toBaselineOf) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBaseline_toBaselineOf) {
                     baseline_to_baseline = a.getResourceId(attr, baseline_to_baseline);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintCenterX_toCenterX) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintCenterX_toCenterX) {
                     centerX_to_centerX = a.getResourceId(attr, centerX_to_centerX);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintCenterY_toCenterY) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintCenterY_toCenterY) {
                     centerY_to_centerY = a.getResourceId(attr, centerY_to_centerY);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_editor_absoluteX) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_editor_absoluteX) {
                     editor_absolute_x = a.getDimensionPixelOffset(attr, editor_absolute_x);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_editor_absoluteY) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_editor_absoluteY) {
                     editor_absolute_y = a.getDimensionPixelOffset(attr, editor_absolute_y);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintLeft_margin) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_margin) {
                     left_margin = a.getDimensionPixelOffset(attr, left_margin);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintTop_margin) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_margin) {
                     top_margin = a.getDimensionPixelOffset(attr, top_margin);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintRight_margin) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_margin) {
                     right_margin = a.getDimensionPixelOffset(attr, right_margin);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintBottom_margin) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBottom_margin) {
                     bottom_margin = a.getDimensionPixelOffset(attr, bottom_margin);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintLeft_strength) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_strength) {
                     left_strength = a.getInteger(attr, left_strength);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintTop_strength) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_strength) {
                     top_strength = a.getInteger(attr, top_strength);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintRight_strength) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_strength) {
                     right_strength = a.getInteger(attr, right_strength);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintBottom_strength) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBottom_strength) {
                     bottom_strength = a.getInteger(attr, bottom_strength);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_relativeBegin) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_relativeBegin) {
                     relativeBegin = a.getDimensionPixelOffset(attr, relativeBegin);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_relativeEnd) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_relativeEnd) {
                     relativeEnd = a.getDimensionPixelOffset(attr, relativeEnd);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_relativePercent) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_relativePercent) {
                     relativePercent = a.getInt(attr, relativePercent);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_orientation) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_orientation) {
                     orientation = a.getInt(attr, orientation);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_table_numRows) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_table_numRows) {
                     numRows = a.getInteger(attr, numRows);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_table_numColumns) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_table_numColumns) {
                     numColumns = a.getInteger(attr, numColumns);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_table_columnsAlignment) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_table_columnsAlignment) {
                     columnsAlignment = a.getString(attr);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_table_padding) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_table_padding) {
                     padding = a.getDimensionPixelOffset(attr, padding);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintStart_toEndOf) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintStart_toEndOf) {
                     start_to_end = a.getResourceId(attr, start_to_end);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintStart_toStartOf) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintStart_toStartOf) {
                     start_to_start = a.getResourceId(attr, start_to_start);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintEnd_toStartOf) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintEnd_toStartOf) {
                     end_to_start = a.getResourceId(attr, end_to_start);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintEnd_toEndOf) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintEnd_toEndOf) {
                     end_to_end = a.getResourceId(attr, end_to_end);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintStart_margin) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintStart_margin) {
                     start_margin = a.getDimensionPixelOffset(attr, start_margin);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintEnd_margin) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintEnd_margin) {
                     end_margin = a.getDimensionPixelOffset(attr, end_margin);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_containerItemSkip) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_containerItemSkip) {
                     container_skip = a.getInteger(attr, container_skip);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintHorizontal_Bias) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_Bias) {
                     horizontal_bias = a.getFloat(attr, horizontal_bias);
-                } else if (attr == R.styleable.ConstraintLayout_LayoutParams_layout_constraintVertical_Bias) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_Bias) {
                     vertical_bias = a.getFloat(attr, vertical_bias);
                 } else {
                     Log.w(TAG, " UNSUPPORTED attr ! = " + attr);
