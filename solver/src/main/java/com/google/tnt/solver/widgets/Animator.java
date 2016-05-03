@@ -58,25 +58,25 @@ public class Animator {
         mAnimating = true;
     }
 
-    public static int EaseInOutinterpolator(double progress, double begin, double end) {
+    public static double EaseInOutinterpolator(double progress, double begin, double end) {
         double change = (end - begin) / 2f;
         progress *= 2f;
         if (progress < 1f) {
-            return (int) (change * progress * progress + begin);
+            return (change * progress * progress + begin);
         }
         progress -= 1f;
-        return (int) (-change * (progress * (progress - 2f) - 1f) + begin);
+        return (-change * (progress * (progress - 2f) - 1f) + begin);
     }
 
-    private int linearInterpolator(float progress, float begin, float end) {
-        return (int) (end * progress + begin * (1 - progress));
+    private static float linearInterpolator(float progress, float begin, float end) {
+        return (end * progress + begin * (1 - progress));
     }
 
-    private int interpolator(float progress, float begin, float end) {
+    private static int interpolator(float progress, float begin, float end) {
         if (USE_EASE_IN_OUT) {
-            return EaseInOutinterpolator(progress, begin, end);
+            return (int) EaseInOutinterpolator(progress, begin, end);
         }
-        return linearInterpolator(progress, begin, end);
+        return (int) linearInterpolator(progress, begin, end);
     }
 
     public void step() {
@@ -146,7 +146,7 @@ public class Animator {
         return animCurrent.bottom;
     }
 
-    class Frame {
+    static class Frame {
         int left;
         int right;
         int top;
