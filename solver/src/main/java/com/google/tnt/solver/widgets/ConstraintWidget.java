@@ -105,6 +105,10 @@ public class ConstraintWidget implements Solvable {
     private int mMinWidth;
     private int mMinHeight;
 
+    // Wrap content sizes for the widget
+    private int mWrapWidth;
+    private int mWrapHeight;
+
     // Percentages used for biasing one connection over another when dual connections
     // of the same strength exist
     public static float DEFAULT_BIAS = 0.5f;
@@ -792,6 +796,24 @@ public class ConstraintWidget implements Solvable {
     }
 
     /**
+     * Set the wrap content width of the widget
+     *
+     * @param w wrap content width
+     */
+    public void setWrapWidth(int w) {
+        mWrapWidth = w;
+    }
+
+    /**
+     * Set the wrap content height of the widget
+     *
+     * @param h wrap content height
+     */
+    public void setWrapHeight(int h) {
+        mWrapHeight = h;
+    }
+
+    /**
      * Set both width and height of the widget
      *
      * @param w width
@@ -1427,7 +1449,7 @@ public class ConstraintWidget implements Solvable {
             width = mMinWidth;
         }
         if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
-            width = mMinWidth;
+            width = mWrapWidth;
         }
         applyConstraints(system, wrapContent, dimensionLocked, mLeft, mRight,
                 mX, mX + width, width, mHorizontalBiasPercent);
@@ -1445,7 +1467,7 @@ public class ConstraintWidget implements Solvable {
                 height = mMinHeight;
             }
             if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
-                height = mMinHeight;
+                height = mWrapHeight;
             }
             system.addConstraint(
                     EquationCreation.createRowEquals(system, bottom, baseline,
@@ -1463,7 +1485,7 @@ public class ConstraintWidget implements Solvable {
                 height = mMinHeight;
             }
             if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
-                height = mMinHeight;
+                height = mWrapHeight;
             }
             applyConstraints(system, wrapContent, dimensionLocked,
                     mTop, mBottom, mY, mY + height, height, mVerticalBiasPercent);
