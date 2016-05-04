@@ -1341,6 +1341,9 @@ public class ConstraintWidget implements Solvable {
      */
     public void setHorizontalDimensionBehaviour(DimensionBehaviour behaviour) {
         mHorizontalDimensionBehaviour = behaviour;
+        if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
+            setWidth(mWrapWidth);
+        }
     }
 
     /**
@@ -1350,6 +1353,9 @@ public class ConstraintWidget implements Solvable {
      */
     public void setVerticalDimensionBehaviour(DimensionBehaviour behaviour) {
         mVerticalDimensionBehaviour = behaviour;
+        if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
+            setWidth(mWrapHeight);
+        }
     }
 
     /*-----------------------------------------------------------------------*/
@@ -1448,9 +1454,6 @@ public class ConstraintWidget implements Solvable {
         if (width < mMinWidth) {
             width = mMinWidth;
         }
-        if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
-            width = mWrapWidth;
-        }
         applyConstraints(system, wrapContent, dimensionLocked, mLeft, mRight,
                 mX, mX + width, width, mHorizontalBiasPercent);
         dimensionLocked = mVerticalDimensionBehaviour != DimensionBehaviour.ANY;
@@ -1466,9 +1469,6 @@ public class ConstraintWidget implements Solvable {
             if (height < mMinHeight) {
                 height = mMinHeight;
             }
-            if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
-                height = mWrapHeight;
-            }
             system.addConstraint(
                     EquationCreation.createRowEquals(system, bottom, baseline,
                             height - getBaselineDistance(),
@@ -1483,9 +1483,6 @@ public class ConstraintWidget implements Solvable {
             int height = mHeight;
             if (height < mMinHeight) {
                 height = mMinHeight;
-            }
-            if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
-                height = mWrapHeight;
             }
             applyConstraints(system, wrapContent, dimensionLocked,
                     mTop, mBottom, mY, mY + height, height, mVerticalBiasPercent);
