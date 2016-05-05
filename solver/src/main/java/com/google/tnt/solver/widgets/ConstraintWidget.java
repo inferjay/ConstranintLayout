@@ -1354,7 +1354,7 @@ public class ConstraintWidget implements Solvable {
     public void setVerticalDimensionBehaviour(DimensionBehaviour behaviour) {
         mVerticalDimensionBehaviour = behaviour;
         if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
-            setWidth(mWrapHeight);
+            setHeight(mWrapHeight);
         }
     }
 
