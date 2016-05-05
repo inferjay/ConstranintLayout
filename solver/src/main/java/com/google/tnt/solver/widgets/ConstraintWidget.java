@@ -419,6 +419,15 @@ public class ConstraintWidget implements Solvable {
     }
 
     /**
+     * Return the wrap width of the widget
+     *
+     * @return the wrap width
+     */
+    public int getWrapWidth() {
+        return mWrapWidth;
+    }
+
+    /**
      * Return the height of the widget
      *
      * @return height height
@@ -428,6 +437,15 @@ public class ConstraintWidget implements Solvable {
             return 0;
         }
         return mHeight;
+    }
+
+    /**
+     * Return the wrap height of the widget
+     *
+     * @return the wrap height
+     */
+    public int getWrapHeight() {
+        return mWrapHeight;
     }
 
     /**
@@ -1164,6 +1182,29 @@ public class ConstraintWidget implements Solvable {
                 }
                 fromAnchor.connect(toAnchor, margin, strength, creator);
                 toAnchor.getOwner().connectedTo(fromAnchor.getOwner());
+            }
+        }
+    }
+
+    /**
+     * Reset all the constraints set on this widget
+     */
+    public void resetAllConstraints() {
+        resetAnchors();
+        setVerticalBiasPercent(DEFAULT_BIAS);
+        setHorizontalBiasPercent(DEFAULT_BIAS);
+        if (getHorizontalDimensionBehaviour() == ConstraintWidget.DimensionBehaviour.ANY) {
+            if (getWidth() == getWrapWidth()) {
+                setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
+            } else if (getWidth() > getMinWidth()) {
+                setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
+            }
+        }
+        if (getVerticalDimensionBehaviour() == ConstraintWidget.DimensionBehaviour.ANY) {
+            if (getHeight() == getWrapHeight()) {
+                setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
+            } else if (getHeight() > getMinHeight()) {
+                setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
             }
         }
     }
