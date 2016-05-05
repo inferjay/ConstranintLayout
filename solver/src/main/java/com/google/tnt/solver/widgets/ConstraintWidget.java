@@ -1281,6 +1281,20 @@ public class ConstraintWidget implements Solvable {
     }
 
     /**
+     * Disconnect this widget if we have a auto connection to it
+     *
+     * @param widget the widget we are removing
+     */
+    public void disconnectUnlockedWidget(ConstraintWidget widget) {
+        for (ConstraintAnchor anchor : getAnchors()) {
+            if (anchor.isConnected() && (anchor.getTarget().getOwner() == widget)
+                && anchor.getConnectionCreator() == ConstraintAnchor.AUTO_CONSTRAINT_CREATOR) {
+                anchor.reset();
+            }
+        }
+    }
+
+    /**
      * Given a type of anchor, returns the corresponding anchor.
      *
      * @param anchorType type of the anchor (LEFT, TOP, RIGHT, BOTTOM, BASELINE, CENTER_X, CENTER_Y)
