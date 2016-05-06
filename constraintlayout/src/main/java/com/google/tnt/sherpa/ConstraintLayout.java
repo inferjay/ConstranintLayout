@@ -443,13 +443,15 @@ public class ConstraintLayout extends ViewGroup {
                 int childWidthMeasureSpec = 0;
                 int childHeightMeasureSpec = 0;
                 if (width == 0) {
-                    childWidthMeasureSpec = LayoutParams.WRAP_CONTENT;
+                    childWidthMeasureSpec = getChildMeasureSpec(parentWidthSpec,
+                            widthPadding, LayoutParams.WRAP_CONTENT);
                 } else {
                     childWidthMeasureSpec = getChildMeasureSpec(parentWidthSpec,
                             widthPadding, width);
                 }
                 if (height == 0) {
-                    childHeightMeasureSpec = LayoutParams.WRAP_CONTENT;
+                    childHeightMeasureSpec = getChildMeasureSpec(parentHeightSpec,
+                            heightPadding, LayoutParams.WRAP_CONTENT);
                 } else {
                     childHeightMeasureSpec = getChildMeasureSpec(parentHeightSpec,
                             heightPadding, height);
@@ -505,6 +507,10 @@ public class ConstraintLayout extends ViewGroup {
 
         // let's update the size dependent widgets if any...
         final int sizeDependentWidgetsCount = mSizeDependentsWidgets.size();
+
+        int heightPadding = getPaddingTop() + getPaddingBottom();
+        int widthPadding = getPaddingLeft() + getPaddingRight();
+
         if (sizeDependentWidgetsCount > 0) {
             for (int i = 0; i < sizeDependentWidgetsCount; i++) {
                 ConstraintWidget widget = mSizeDependentsWidgets.get(i);
@@ -516,10 +522,12 @@ public class ConstraintLayout extends ViewGroup {
                 int heightSpec = MeasureSpec.makeMeasureSpec(widget.getHeight(), MeasureSpec.EXACTLY);
                 final ViewGroup.LayoutParams lp = child.getLayoutParams();
                 if (lp.width == LayoutParams.WRAP_CONTENT) {
-                    widthSpec = LayoutParams.WRAP_CONTENT;
+                    widthSpec = getChildMeasureSpec(widthMeasureSpec,
+                            widthPadding, lp.width);
                 }
                 if (lp.height == LayoutParams.WRAP_CONTENT) {
-                    heightSpec = LayoutParams.WRAP_CONTENT;
+                    heightSpec = getChildMeasureSpec(heightMeasureSpec,
+                            heightPadding, lp.height);
                 }
                 // we need to re-measure the child...
                 child.measure(widthSpec, heightSpec);
