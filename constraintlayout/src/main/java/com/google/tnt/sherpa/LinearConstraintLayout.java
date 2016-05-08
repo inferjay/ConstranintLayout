@@ -24,7 +24,8 @@ import android.view.View;
 import com.google.tnt.solver.widgets.ConstraintAnchor;
 import com.google.tnt.solver.widgets.ConstraintWidget;
 
-public class LinearConstraintLayout extends ConstraintLayout {
+// TODO: Not ready for public consumption
+/*public*/ class LinearConstraintLayout extends ConstraintLayout {
     boolean mIsHorizontal = true;
 
     public LinearConstraintLayout(Context context) {

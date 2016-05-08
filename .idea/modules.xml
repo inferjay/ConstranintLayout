@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/constraintlayout/constraintlayout.iml" filepath="$PROJECT_DIR$/constraintlayout/constraintlayout.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sherpa.iml" filepath="$PROJECT_DIR$/sherpa.iml" />
+      <module fileurl="file://$PROJECT_DIR$/solver/solver.iml" filepath="$PROJECT_DIR$/solver/solver.iml" />
+    </modules>
+  </component>
+</project>

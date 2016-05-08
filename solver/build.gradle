@@ -3,8 +3,8 @@ apply plugin: 'maven'
 
 
 compileJava {
-    targetCompatibility = 1.6
-    sourceCompatibility = 1.6
+    targetCompatibility = 1.7
+    sourceCompatibility = 1.7
 }
 
 dependencies {
@@ -28,8 +28,8 @@ group = 'com.android.support.sherpa'
 archivesBaseName = 'solver'
 version = '1.0'
 
-project.ext.pomName = 'Android Sherpa Solver'
-project.ext.pomDesc = 'Solver for the Sherpa constraint Layout'
+project.ext.pomName = 'Android ConstraintLayout Solver'
+project.ext.pomDesc = 'Solver for ConstraintLayout'
 
 task publishLocal(type: Upload) {
     configuration = configurations.archives

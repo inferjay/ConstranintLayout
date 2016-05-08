@@ -19,10 +19,11 @@ package com.google.tnt.sherpa;
 import android.content.Context;
 import android.util.AttributeSet;
 
-import com.google.tnt.solver.widgets.*;
+import com.google.tnt.solver.widgets.ConstraintTableLayout;
+import com.google.tnt.solver.widgets.ConstraintWidgetContainer;
 
-public class TableConstraintLayout extends ConstraintLayout {
-
+// TODO: Not ready for public consumption
+/* public */ class TableConstraintLayout extends ConstraintLayout {
     @Override
     protected ConstraintWidgetContainer getLayoutWidget() {
         if (mLayoutWidget == null) {
@@ -77,6 +78,7 @@ public class TableConstraintLayout extends ConstraintLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        //noinspection PointlessBooleanExpression
         if (!ALLOWS_EMBEDDED || mLayoutWidget.getParent() == null) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         } else {

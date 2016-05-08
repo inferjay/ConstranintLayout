@@ -3,7 +3,7 @@ apply plugin: 'maven'
 
 
 android {
-    compileSdkVersion 21
+    compileSdkVersion 23
     buildToolsVersion "23.0.1"
 
     defaultConfig {
@@ -25,8 +25,8 @@ group = 'com.android.support.sherpa'
 archivesBaseName = 'constraint-layout'
 version = '1.0'
 
-project.ext.pomName = 'Android Constraint Layout'
-project.ext.pomDesc = 'Constraint Layout for Android'
+project.ext.pomName = 'Android ConstraintLayout'
+project.ext.pomDesc = 'ConstraintLayout for Android'
 
 task publishLocal(type: Upload) {
     configuration = configurations.archives

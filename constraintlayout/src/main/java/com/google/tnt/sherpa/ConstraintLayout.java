@@ -16,8 +16,10 @@
 
 package com.google.tnt.sherpa;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -47,24 +49,24 @@ import java.util.HashMap;
  * </p>
  */
 public class ConstraintLayout extends ViewGroup {
-
     // For now, disallow embedded (single-layer resolution) situations.
     // While it works, the constraints of the layout have the same importance as any other
     // constraint of the overall layout, which can cause issues. Let's revisit this
     // after implementing priorities/hierarchy of constraints.
     static final boolean ALLOWS_EMBEDDED = false;
 
-    private static final boolean DEBUG = false;
     private static final String TAG = "ConstraintLayout";
 
-    protected HashMap<View, ConstraintWidget> mConstrainedViews = new HashMap<View, ConstraintWidget>();
-    protected ArrayList<ConstraintWidget> mConstrainedWidgets = new ArrayList<ConstraintWidget>();
-    protected HashMap<View, ConstraintWidget> mConstrainedViewTargets = new HashMap<View, ConstraintWidget>();
-    protected ArrayList<ConstraintWidget> mConstrainedTargets = new ArrayList<ConstraintWidget>();
-    private ArrayList<ConstraintWidget> mSizeDependentsWidgets = new ArrayList<ConstraintWidget>();
+    final HashMap<View, ConstraintWidget> mConstrainedViews = new HashMap<>();
+    private final ArrayList<ConstraintWidget> mConstrainedWidgets = new ArrayList<>();
+    private final HashMap<View, ConstraintWidget> mConstrainedViewTargets = new HashMap<>();
+    private final ArrayList<ConstraintWidget> mConstrainedTargets = new ArrayList<>();
+    private final ArrayList<ConstraintWidget> mSizeDependentsWidgets = new ArrayList<>();
 
-    protected ConstraintWidgetContainer mLayoutWidget = null;
-    protected LinearSystem mEquationSystem = new LinearSystem();
+    private final LinearSystem mEquationSystem = new LinearSystem();
+
+    ConstraintWidgetContainer mLayoutWidget = null;
+
     private boolean mDirtyHierarchy;
 
     public ConstraintLayout(Context context) {
@@ -79,7 +81,7 @@ public class ConstraintLayout extends ViewGroup {
         super(context, attrs, defStyleAttr);
     }
 
-    protected ConstraintWidgetContainer getLayoutWidget() {
+    ConstraintWidgetContainer getLayoutWidget() {
         if (mLayoutWidget == null) {
             mLayoutWidget = new ConstraintWidgetContainer();
         }
@@ -109,7 +111,7 @@ public class ConstraintLayout extends ViewGroup {
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (!mConstrainedViews.containsKey(child)) {
-                ConstraintWidget widget = null;
+                ConstraintWidget widget;
                 if (child instanceof Guideline) {
                     final LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
                     com.google.tnt.solver.widgets.Guideline guideline = new com.google.tnt.solver.widgets.Guideline();
@@ -144,29 +146,28 @@ public class ConstraintLayout extends ViewGroup {
         setChildrenConstraints();
     }
 
-    protected void addConstrainedChild(View child, ConstraintWidget widget) {
+    private void addConstrainedChild(View child, ConstraintWidget widget) {
         mConstrainedViews.put(child, widget);
         mConstrainedWidgets.add(widget);
         widget.setCompanionWidget(child);
-        if (mLayoutWidget instanceof ConstraintWidgetContainer) {
-            ConstraintWidgetContainer container = (ConstraintWidgetContainer) mLayoutWidget;
+        if (mLayoutWidget != null) {
+            ConstraintWidgetContainer container = mLayoutWidget;
             container.add(widget);
-        } else {
-            widget.setParent(mLayoutWidget);
         }
     }
 
-    protected void setChildrenConstraints() {
+    void setChildrenConstraints() {
         final int count = getChildCount();
-        // Now, let's set the constraints from the xml
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             ConstraintWidget widget = mConstrainedViews.get(child);
             if (widget == null) {
                 continue;
             }
+
             widget.setVisibility(child.getVisibility());
             widget.setParent(mLayoutWidget);
+
             final LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
             if ((layoutParams.left_to_left != LayoutParams.UNSET)
                     || (layoutParams.left_to_right != LayoutParams.UNSET)
@@ -181,9 +182,6 @@ public class ConstraintLayout extends ViewGroup {
                     || (layoutParams.centerY_to_centerY != LayoutParams.UNSET)
                     || (layoutParams.editor_absolute_x != LayoutParams.UNSET)
                     || (layoutParams.editor_absolute_y != LayoutParams.UNSET)) {
-                if (widget == null) {
-                    continue;
-                }
 
                 // Process match_Parent converting it to 0dp & constrain left and right to root
                 if (layoutParams.width == LayoutParams.MATCH_PARENT) {
@@ -420,7 +418,7 @@ public class ConstraintLayout extends ViewGroup {
         }
     }
 
-    protected void internalMeasureChildren(int parentWidthSpec, int parentHeightSpec) {
+    void internalMeasureChildren(int parentWidthSpec, int parentHeightSpec) {
         int heightPadding = getPaddingTop() + getPaddingBottom();
         int widthPadding = getPaddingLeft() + getPaddingRight();
 
@@ -430,15 +428,15 @@ public class ConstraintLayout extends ViewGroup {
             if (widget == null) {
                 continue;
             }
+
             final View child = (View) widget.getCompanionWidget();
-            if (child == null) {
+            if (child == null || child.getVisibility() == GONE) {
                 continue;
             }
-            if (child.getVisibility() == GONE) {
-                continue;
-            }
+
             int width = child.getLayoutParams().width;
             int height = child.getLayoutParams().height;
+
             if (width == 0 || height == 0) {
                 int childWidthMeasureSpec = 0;
                 int childHeightMeasureSpec = 0;
@@ -460,10 +458,12 @@ public class ConstraintLayout extends ViewGroup {
             } else {
                 measureChild(child, parentWidthSpec, parentHeightSpec);
             }
+
             width = child.getMeasuredWidth();
             height = child.getMeasuredHeight();
             widget.setWidth(width);
             widget.setHeight(height);
+
             if (hasBaseline(child)) {
                 widget.setBaselineDistance(child.getBaseline());
             }
@@ -486,10 +486,13 @@ public class ConstraintLayout extends ViewGroup {
 
         setSelfDimensionBehaviour(widthMeasureSpec, heightMeasureSpec);
         internalMeasureChildren(widthMeasureSpec, heightMeasureSpec);
+
+        //noinspection PointlessBooleanExpression
         if (ALLOWS_EMBEDDED && mLayoutWidget.getParent() != null) {
             setVisibility(INVISIBLE);
             return;
         }
+
         mSizeDependentsWidgets.clear();
 
         final int widgetsCount = mConstrainedWidgets.size();
@@ -546,7 +549,7 @@ public class ConstraintLayout extends ViewGroup {
                         childState << MEASURED_HEIGHT_STATE_SHIFT));
     }
 
-    protected void setSelfDimensionBehaviour(int widthMeasureSpec, int heightMeasureSpec) {
+    void setSelfDimensionBehaviour(int widthMeasureSpec, int heightMeasureSpec) {
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
@@ -554,6 +557,7 @@ public class ConstraintLayout extends ViewGroup {
 
         int heightPadding = getPaddingTop() + getPaddingBottom();
         int widthPadding = getPaddingLeft() + getPaddingRight();
+
         // TODO: investigate measure too small (check MeasureSpec)
         if (widthMode == MeasureSpec.AT_MOST) {
             mLayoutWidget.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
@@ -587,13 +591,16 @@ public class ConstraintLayout extends ViewGroup {
         for (int i = 0; i < widgetsCount; i++) {
             ConstraintWidget widget = mConstrainedWidgets.get(i);
             final View child = (View) widget.getCompanionWidget();
+
             if (child == null) {
                 continue;
             }
+
             int l = widget.getDrawX();
             int t = widget.getDrawY();
             int r = l + widget.getWidth();
             int b = t + widget.getHeight();
+
             if (ALLOWS_EMBEDDED) {
                 if (getParent() instanceof ConstraintLayout) {
                     int dx = 0;
@@ -612,6 +619,7 @@ public class ConstraintLayout extends ViewGroup {
             }
             child.layout(l, t, r, b);
         }
+
         final int targetsCount = mConstrainedTargets.size();
         for (int i = 0; i < targetsCount; i++) {
             ConstraintWidget target = mConstrainedTargets.get(i);
@@ -623,15 +631,17 @@ public class ConstraintLayout extends ViewGroup {
             int t = target.getDrawY();
             int r = l + target.getWidth();
             int b = t + target.getHeight();
+
             if (target instanceof com.google.tnt.solver.widgets.Guideline) {
-                com.google.tnt.solver.widgets.Guideline guideline = (com.google.tnt.solver.widgets.Guideline) target;
+                com.google.tnt.solver.widgets.Guideline guideline =
+                        (com.google.tnt.solver.widgets.Guideline) target;
                 if (guideline.getOrientation() == com.google.tnt.solver.widgets.Guideline.HORIZONTAL) {
-                    t = ((com.google.tnt.solver.widgets.Guideline) target).getParent().getDrawY();
-                    b = ((com.google.tnt.solver.widgets.Guideline) target).getParent().getBottom();
+                    t = target.getParent().getDrawY();
+                    b = target.getParent().getBottom();
                     r = l;
                 } else {
-                    l = ((com.google.tnt.solver.widgets.Guideline) target).getParent().getDrawX();
-                    r = ((com.google.tnt.solver.widgets.Guideline) target).getParent().getRight();
+                    l = target.getParent().getDrawX();
+                    r = target.getParent().getRight();
                     b = t;
                 }
             }
@@ -662,7 +672,6 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     public static class LayoutParams extends android.view.ViewGroup.LayoutParams {
-
         public static int UNSET = -1;
         public static int LEFT = 0;
         public static int TOP = 1;
@@ -722,10 +731,10 @@ public class ConstraintLayout extends ViewGroup {
         public boolean verticalLock = true;
 
         // Used by TableConstraintLayout
-        public int numRows = 1;
-        public int numColumns = 1;
-        public String columnsAlignment = null;
-        public int padding = 0;
+        int numRows = 1;
+        int numColumns = 1;
+        String columnsAlignment = null;
+        int padding = 0;
 
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
@@ -841,11 +850,6 @@ public class ConstraintLayout extends ViewGroup {
         }
     }
 
-    /**
-     * Support rtl
-     *
-     * @param layoutDirection
-     */
     @Override
     public void onRtlPropertiesChanged(int layoutDirection) {
         final int count = getChildCount();
@@ -856,10 +860,9 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     /**
-     * swap start and end to left and right as needed by RTL
-     *
-     * @param layoutParams
+     * Swap start and end to left and right as needed by RTL
      */
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private void resolveRtlProperties(LayoutParams layoutParams) {
         boolean isRtl = (View.LAYOUT_DIRECTION_RTL == getLayoutDirection());
         if (isRtl) {
