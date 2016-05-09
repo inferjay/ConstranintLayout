@@ -24,8 +24,8 @@ test {
 }
 
 // TBD
-group = 'com.android.support.sherpa'
-archivesBaseName = 'solver'
+group = 'android.support.constraint'
+archivesBaseName = 'constraint-layout-solver'
 version = '1.0'
 
 project.ext.pomName = 'Android ConstraintLayout Solver'

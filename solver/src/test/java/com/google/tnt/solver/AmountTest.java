@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.tnt.solver;
+package android.support.constraint.solver;
+
+import android.support.constraint.solver.Amount;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

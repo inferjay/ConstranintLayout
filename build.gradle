@@ -11,11 +11,9 @@ buildscript {
 }
 
 
-// Currently, the minimum requirement to run Android SDK tools is Java 1.6
-// So make sure that we are compiling with 1.6
 task('checkJavaVersion') << {
     def jvmVersion = System.getProperty('java.version')
-    def requiredVersion = System.getenv('JAVA_FOR_TESTS') ?: '1.6'
+    def requiredVersion = System.getenv('JAVA_FOR_TESTS') ?: '1.8'
     if (!jvmVersion.startsWith(requiredVersion)) {
         throw new RuntimeException("Tools need to be compiled with Java $requiredVersion, you are using Java $jvmVersion.")
     }

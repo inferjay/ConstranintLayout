@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.tnt.solver;
+package android.support.constraint.solver;
+
+import android.support.constraint.solver.LinearEquation;
+import android.support.constraint.solver.LinearSystem;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

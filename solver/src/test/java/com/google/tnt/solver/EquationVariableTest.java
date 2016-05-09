@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-package com.google.tnt.solver;
+package android.support.constraint.solver;
+
+import android.support.constraint.solver.EquationVariable;
+import android.support.constraint.solver.LinearSystem;
+import android.support.constraint.solver.SolverVariable;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

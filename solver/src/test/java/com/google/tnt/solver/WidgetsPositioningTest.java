@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.tnt.solver;
+package android.support.constraint.solver;
 
-import com.google.tnt.solver.widgets.Animator;
-import com.google.tnt.solver.widgets.ConstraintAnchor;
-import com.google.tnt.solver.widgets.ConstraintHorizontalLayout;
-import com.google.tnt.solver.widgets.ConstraintTableLayout;
-import com.google.tnt.solver.widgets.ConstraintWidget;
-import com.google.tnt.solver.widgets.ConstraintWidgetContainer;
-import com.google.tnt.solver.widgets.Guideline;
+import android.support.constraint.solver.LinearEquation;
+import android.support.constraint.solver.LinearSystem;
+import android.support.constraint.solver.widgets.Animator;
+import android.support.constraint.solver.widgets.ConstraintAnchor;
+import android.support.constraint.solver.widgets.ConstraintHorizontalLayout;
+import android.support.constraint.solver.widgets.ConstraintTableLayout;
+import android.support.constraint.solver.widgets.ConstraintWidget;
+import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
+import android.support.constraint.solver.widgets.Guideline;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
