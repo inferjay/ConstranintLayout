@@ -186,18 +186,18 @@ public class ConstraintLayout extends ViewGroup {
                 // Process match_Parent converting it to 0dp & constrain left and right to root
                 if (layoutParams.width == LayoutParams.MATCH_PARENT) {
                     widget.connect(ConstraintAnchor.Type.LEFT, mLayoutWidget,
-                            ConstraintAnchor.Type.LEFT, layoutParams.left_margin);
+                            ConstraintAnchor.Type.LEFT, layoutParams.leftMargin);
                     widget.connect(ConstraintAnchor.Type.RIGHT, mLayoutWidget,
-                            ConstraintAnchor.Type.RIGHT, layoutParams.right_margin);
+                            ConstraintAnchor.Type.RIGHT, layoutParams.rightMargin);
                     layoutParams.width = 0;
                     layoutParams.horizontalLock = false;
                 }
                 // Process match_Parent converting it to 0dp & constrain top and bottom to root
                 if (layoutParams.height == LayoutParams.MATCH_PARENT) {
                     widget.connect(ConstraintAnchor.Type.TOP, mLayoutWidget,
-                            ConstraintAnchor.Type.TOP, layoutParams.top_margin);
+                            ConstraintAnchor.Type.TOP, layoutParams.topMargin);
                     widget.connect(ConstraintAnchor.Type.BOTTOM, mLayoutWidget,
-                            ConstraintAnchor.Type.BOTTOM, layoutParams.bottom_margin);
+                            ConstraintAnchor.Type.BOTTOM, layoutParams.bottomMargin);
                     layoutParams.height = 0;
                     layoutParams.verticalLock = false;
                 }
@@ -211,7 +211,7 @@ public class ConstraintLayout extends ViewGroup {
                     }
                     if (target != null) {
                         widget.connect(ConstraintAnchor.Type.LEFT, target,
-                                ConstraintAnchor.Type.LEFT, layoutParams.left_margin);
+                                ConstraintAnchor.Type.LEFT, layoutParams.leftMargin);
                     }
                 }
                 if (layoutParams.left_to_right != LayoutParams.UNSET) {
@@ -222,7 +222,7 @@ public class ConstraintLayout extends ViewGroup {
                     }
                     if (target != null) {
                         widget.connect(ConstraintAnchor.Type.LEFT, target,
-                                ConstraintAnchor.Type.RIGHT, layoutParams.left_margin);
+                                ConstraintAnchor.Type.RIGHT, layoutParams.leftMargin);
                     }
                 }
 
@@ -235,7 +235,7 @@ public class ConstraintLayout extends ViewGroup {
                     }
                     if (target != null) {
                         widget.connect(ConstraintAnchor.Type.RIGHT, target,
-                                ConstraintAnchor.Type.LEFT, layoutParams.right_margin);
+                                ConstraintAnchor.Type.LEFT, layoutParams.rightMargin);
                     }
                 }
                 if (layoutParams.right_to_right != LayoutParams.UNSET) {
@@ -246,7 +246,7 @@ public class ConstraintLayout extends ViewGroup {
                     }
                     if (target != null) {
                         widget.connect(ConstraintAnchor.Type.RIGHT, target,
-                                ConstraintAnchor.Type.RIGHT, layoutParams.right_margin);
+                                ConstraintAnchor.Type.RIGHT, layoutParams.rightMargin);
                     }
                 }
 
@@ -259,7 +259,7 @@ public class ConstraintLayout extends ViewGroup {
                     }
                     if (target != null) {
                         widget.connect(ConstraintAnchor.Type.TOP, target,
-                                ConstraintAnchor.Type.TOP, layoutParams.top_margin);
+                                ConstraintAnchor.Type.TOP, layoutParams.topMargin);
                     }
                 }
                 if (layoutParams.top_to_bottom != LayoutParams.UNSET) {
@@ -270,7 +270,7 @@ public class ConstraintLayout extends ViewGroup {
                     }
                     if (target != null) {
                         widget.connect(ConstraintAnchor.Type.TOP, target,
-                                ConstraintAnchor.Type.BOTTOM, layoutParams.top_margin);
+                                ConstraintAnchor.Type.BOTTOM, layoutParams.topMargin);
                     }
                 }
 
@@ -283,7 +283,7 @@ public class ConstraintLayout extends ViewGroup {
                     }
                     if (target != null) {
                         widget.connect(ConstraintAnchor.Type.BOTTOM, target,
-                                ConstraintAnchor.Type.TOP, layoutParams.bottom_margin);
+                                ConstraintAnchor.Type.TOP, layoutParams.bottomMargin);
                     }
                 }
                 if (layoutParams.bottom_to_bottom != LayoutParams.UNSET) {
@@ -294,7 +294,7 @@ public class ConstraintLayout extends ViewGroup {
                     }
                     if (target != null) {
                         widget.connect(ConstraintAnchor.Type.BOTTOM, target,
-                                ConstraintAnchor.Type.BOTTOM, layoutParams.bottom_margin);
+                                ConstraintAnchor.Type.BOTTOM, layoutParams.bottomMargin);
                     }
                 }
 
@@ -316,9 +316,9 @@ public class ConstraintLayout extends ViewGroup {
                     }
                     if (target != null) {
                         widget.connect(ConstraintAnchor.Type.LEFT, target,
-                                ConstraintAnchor.Type.LEFT, layoutParams.left_margin);
+                                ConstraintAnchor.Type.LEFT, layoutParams.leftMargin);
                         widget.connect(ConstraintAnchor.Type.RIGHT, target,
-                                ConstraintAnchor.Type.RIGHT, layoutParams.right_margin);
+                                ConstraintAnchor.Type.RIGHT, layoutParams.rightMargin);
                     }
                 }
 
@@ -331,9 +331,9 @@ public class ConstraintLayout extends ViewGroup {
                     }
                     if (target != null) {
                         widget.connect(ConstraintAnchor.Type.TOP, target,
-                                ConstraintAnchor.Type.TOP, layoutParams.top_margin);
+                                ConstraintAnchor.Type.TOP, layoutParams.topMargin);
                         widget.connect(ConstraintAnchor.Type.BOTTOM, target,
-                                ConstraintAnchor.Type.BOTTOM, layoutParams.bottom_margin);
+                                ConstraintAnchor.Type.BOTTOM, layoutParams.bottomMargin);
                     }
                 }
                 if (layoutParams.horizontal_bias >= 0 && layoutParams.horizontal_bias != 0.5f) {
@@ -344,43 +344,10 @@ public class ConstraintLayout extends ViewGroup {
                 }
 
                 // Set the strength
-                if (layoutParams.left_strength != LayoutParams.UNSET) {
-                    if (layoutParams.left_strength == LayoutParams.STRONG) {
-                        widget.getAnchor(ConstraintAnchor.Type.LEFT).setStrength(ConstraintAnchor.Strength.STRONG);
-                    } else {
-                        widget.getAnchor(ConstraintAnchor.Type.LEFT).setStrength(ConstraintAnchor.Strength.WEAK);
-                    }
-                } else {
-                    widget.getAnchor(ConstraintAnchor.Type.LEFT).setStrength(ConstraintAnchor.Strength.STRONG);
-                }
-
-                if (layoutParams.top_strength != LayoutParams.UNSET) {
-                    if (layoutParams.top_strength == LayoutParams.STRONG) {
-                        widget.getAnchor(ConstraintAnchor.Type.TOP).setStrength(ConstraintAnchor.Strength.STRONG);
-                    } else {
-                        widget.getAnchor(ConstraintAnchor.Type.TOP).setStrength(ConstraintAnchor.Strength.WEAK);
-                    }
-                } else {
-                    widget.getAnchor(ConstraintAnchor.Type.TOP).setStrength(ConstraintAnchor.Strength.STRONG);
-                }
-                if (layoutParams.right_strength != LayoutParams.UNSET) {
-                    if (layoutParams.right_strength == LayoutParams.STRONG) {
-                        widget.getAnchor(ConstraintAnchor.Type.RIGHT).setStrength(ConstraintAnchor.Strength.STRONG);
-                    } else {
-                        widget.getAnchor(ConstraintAnchor.Type.RIGHT).setStrength(ConstraintAnchor.Strength.WEAK);
-                    }
-                } else {
-                    widget.getAnchor(ConstraintAnchor.Type.RIGHT).setStrength(ConstraintAnchor.Strength.STRONG);
-                }
-                if (layoutParams.bottom_strength != LayoutParams.UNSET) {
-                    if (layoutParams.bottom_strength == LayoutParams.STRONG) {
-                        widget.getAnchor(ConstraintAnchor.Type.BOTTOM).setStrength(ConstraintAnchor.Strength.STRONG);
-                    } else {
-                        widget.getAnchor(ConstraintAnchor.Type.BOTTOM).setStrength(ConstraintAnchor.Strength.WEAK);
-                    }
-                } else {
-                    widget.getAnchor(ConstraintAnchor.Type.BOTTOM).setStrength(ConstraintAnchor.Strength.STRONG);
-                }
+                widget.getAnchor(ConstraintAnchor.Type.LEFT).setStrength(ConstraintAnchor.Strength.STRONG);
+                widget.getAnchor(ConstraintAnchor.Type.TOP).setStrength(ConstraintAnchor.Strength.STRONG);
+                widget.getAnchor(ConstraintAnchor.Type.RIGHT).setStrength(ConstraintAnchor.Strength.STRONG);
+                widget.getAnchor(ConstraintAnchor.Type.BOTTOM).setStrength(ConstraintAnchor.Strength.STRONG);
 
                 // FIXME: need to agree on the correct magic value for this rather than simply using zero.
                 if (!layoutParams.horizontalLock) {
@@ -671,31 +638,11 @@ public class ConstraintLayout extends ViewGroup {
         return p instanceof LayoutParams;
     }
 
-    public static class LayoutParams extends android.view.ViewGroup.LayoutParams {
+    public static class LayoutParams extends ViewGroup.MarginLayoutParams {
         public static int UNSET = -1;
-        public static int LEFT = 0;
-        public static int TOP = 1;
-        public static int RIGHT = 2;
-        public static int BOTTOM = 3;
-        public static int BASELINE = 4;
 
         public static int HORIZONTAL = 0;
         public static int VERTICAL = 1;
-
-        public static int STRONG = 0;
-        public static int WEAK = 1;
-
-        public int left_margin = UNSET;
-        public int top_margin = UNSET;
-        public int right_margin = UNSET;
-        public int bottom_margin = UNSET;
-
-        public int left_strength = UNSET;
-        public int top_strength = UNSET;
-        public int right_strength = UNSET;
-        public int bottom_strength = UNSET;
-
-        public int orientation = UNSET;
 
         public int relativeBegin = -1;
         public int relativeEnd = -1;
@@ -713,9 +660,6 @@ public class ConstraintLayout extends ViewGroup {
         public int centerX_to_centerX = UNSET;
         public int centerY_to_centerY = UNSET;
 
-        public int container_skip = UNSET;
-        public int start_margin = UNSET;
-        public int end_margin = UNSET;
         public int start_to_end = UNSET;
         public int start_to_start = UNSET;
         public int end_to_start = UNSET;
@@ -727,10 +671,16 @@ public class ConstraintLayout extends ViewGroup {
         public int editor_absolute_x = UNSET;
         public int editor_absolute_y = UNSET;
 
-        public boolean horizontalLock = true;
-        public boolean verticalLock = true;
+        // TODO: Hide those for now (for table layout)
+        int orientation = UNSET;
+        int container_skip = UNSET;
+
+        // Internal use only
+        boolean horizontalLock = true;
+        boolean verticalLock = true;
 
         // Used by TableConstraintLayout
+        // TODO: Inflate these from XML
         int numRows = 1;
         int numColumns = 1;
         String columnsAlignment = null;
@@ -768,22 +718,6 @@ public class ConstraintLayout extends ViewGroup {
                     editor_absolute_x = a.getDimensionPixelOffset(attr, editor_absolute_x);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_editor_absoluteY) {
                     editor_absolute_y = a.getDimensionPixelOffset(attr, editor_absolute_y);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_margin) {
-                    left_margin = a.getDimensionPixelOffset(attr, left_margin);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_margin) {
-                    top_margin = a.getDimensionPixelOffset(attr, top_margin);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_margin) {
-                    right_margin = a.getDimensionPixelOffset(attr, right_margin);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBottom_margin) {
-                    bottom_margin = a.getDimensionPixelOffset(attr, bottom_margin);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_strength) {
-                    left_strength = a.getInteger(attr, left_strength);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_strength) {
-                    top_strength = a.getInteger(attr, top_strength);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_strength) {
-                    right_strength = a.getInteger(attr, right_strength);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBottom_strength) {
-                    bottom_strength = a.getInteger(attr, bottom_strength);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_relativeBegin) {
                     relativeBegin = a.getDimensionPixelOffset(attr, relativeBegin);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_relativeEnd) {
@@ -792,14 +726,6 @@ public class ConstraintLayout extends ViewGroup {
                     relativePercent = a.getInt(attr, relativePercent);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_orientation) {
                     orientation = a.getInt(attr, orientation);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_table_numRows) {
-                    numRows = a.getInteger(attr, numRows);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_table_numColumns) {
-                    numColumns = a.getInteger(attr, numColumns);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_table_columnsAlignment) {
-                    columnsAlignment = a.getString(attr);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_table_padding) {
-                    padding = a.getDimensionPixelOffset(attr, padding);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintStart_toEndOf) {
                     start_to_end = a.getResourceId(attr, start_to_end);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintStart_toStartOf) {
@@ -808,10 +734,6 @@ public class ConstraintLayout extends ViewGroup {
                     end_to_start = a.getResourceId(attr, end_to_start);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintEnd_toEndOf) {
                     end_to_end = a.getResourceId(attr, end_to_end);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintStart_margin) {
-                    start_margin = a.getDimensionPixelOffset(attr, start_margin);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintEnd_margin) {
-                    end_margin = a.getDimensionPixelOffset(attr, end_margin);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_containerItemSkip) {
                     container_skip = a.getInteger(attr, container_skip);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_Bias) {
@@ -819,7 +741,7 @@ public class ConstraintLayout extends ViewGroup {
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_Bias) {
                     vertical_bias = a.getFloat(attr, vertical_bias);
                 } else {
-                    Log.w(TAG, " UNSUPPORTED attr ! = " + attr);
+                    Log.w(TAG, " Unknown attribute 0x" + Integer.toHexString(attr));
                 }
             }
 
@@ -878,12 +800,6 @@ public class ConstraintLayout extends ViewGroup {
             if (layoutParams.end_to_end != LayoutParams.UNSET) {
                 layoutParams.left_to_left = layoutParams.end_to_end;
             }
-            if (layoutParams.start_margin != LayoutParams.UNSET) {
-                layoutParams.right_margin = layoutParams.start_margin;
-            }
-            if (layoutParams.end_margin != LayoutParams.UNSET) {
-                layoutParams.left_margin = layoutParams.end_margin;
-            }
         } else {
             if (layoutParams.start_to_end != LayoutParams.UNSET) {
                 layoutParams.left_to_right = layoutParams.start_to_end;
@@ -896,12 +812,6 @@ public class ConstraintLayout extends ViewGroup {
             }
             if (layoutParams.end_to_end != LayoutParams.UNSET) {
                 layoutParams.right_to_right = layoutParams.end_to_end;
-            }
-            if (layoutParams.start_margin != LayoutParams.UNSET) {
-                layoutParams.left_margin = layoutParams.start_margin;
-            }
-            if (layoutParams.end_margin != LayoutParams.UNSET) {
-                layoutParams.right_margin = layoutParams.end_margin;
             }
         }
     }

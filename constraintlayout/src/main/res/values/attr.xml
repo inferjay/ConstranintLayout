@@ -24,13 +24,6 @@
         <attr name="layout_constraintCenterX_toCenterX" format="reference"/>
         <attr name="layout_constraintCenterY_toCenterY" format="reference"/>
 
-        <attr name="layout_constraintLeft_margin" format="dimension"/>
-        <attr name="layout_constraintTop_margin" format="dimension"/>
-        <attr name="layout_constraintRight_margin" format="dimension"/>
-        <attr name="layout_constraintBottom_margin" format="dimension"/>
-
-        <attr name="layout_constraintStart_margin" format="dimension"/>
-        <attr name="layout_constraintEnd_margin" format="dimension"/>
         <attr name="layout_constraintStart_toEndOf" format="reference"/>
         <attr name="layout_constraintStart_toStartOf" format="reference"/>
         <attr name="layout_constraintEnd_toStartOf" format="reference"/>
@@ -45,34 +38,15 @@
         <attr name="layout_constraintBottom_creator" format="integer"/>
         <attr name="layout_constraintBaseline_creator" format="integer"/>
 
-        <attr name="layout_constraintLeft_strength">
-            <enum name="strong" value="0"/>
-            <enum name="weak" value="1"/>
-        </attr>
-
-        <attr name="layout_constraintTop_strength">
-            <enum name="strong" value="0"/>
-            <enum name="weak" value="1"/>
-        </attr>
-
-        <attr name="layout_constraintRight_strength">
-            <enum name="strong" value="0"/>
-            <enum name="weak" value="1"/>
-        </attr>
-
-        <attr name="layout_constraintBottom_strength">
-            <enum name="strong" value="0"/>
-            <enum name="weak" value="1"/>
-        </attr>
-
         <attr name="layout_editor_absoluteX" format="dimension"/>
         <attr name="layout_editor_absoluteY" format="dimension"/>
 
         <!-- Used by TableConstraintLayout -->
-        <attr name="table_numRows" format="integer"/>
-        <attr name="table_numColumns" format="integer"/>
-        <attr name="table_columnsAlignment" format="string"/>
-        <attr name="table_padding" format="dimension"/>
+        <!-- TODO: Hide these for now -->
+        <!--<attr name="table_numRows" format="integer"/>-->
+        <!--<attr name="table_numColumns" format="integer"/>-->
+        <!--<attr name="table_columnsAlignment" format="string"/>-->
+        <!--<attr name="table_padding" format="dimension"/>-->
 
     </declare-styleable>
 </resources>
