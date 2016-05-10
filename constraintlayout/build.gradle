@@ -21,7 +21,7 @@ dependencies {
 }
 
 // TBD
-group = 'android.support.constraint'
+group = 'com.android.support'
 archivesBaseName = 'constraint-layout'
 version = '1.0'
 
