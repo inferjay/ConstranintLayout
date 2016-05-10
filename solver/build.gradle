@@ -24,9 +24,9 @@ test {
 }
 
 // TBD
-group = 'com.android.support'
+group = 'com.android.support.constraint'
 archivesBaseName = 'constraint-layout-solver'
-version = '1.0'
+version = '1.0.0-alpha1'
 
 project.ext.pomName = 'Android ConstraintLayout Solver'
 project.ext.pomDesc = 'Solver for ConstraintLayout'
