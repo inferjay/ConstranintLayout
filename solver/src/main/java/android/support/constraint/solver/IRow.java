@@ -63,5 +63,8 @@ interface IRow {
     IRow createRowDimensionPercent(SolverVariable variableA, SolverVariable variableB,
             SolverVariable variableC, int percent);
 
+    IRow createRowDimensionRatio(SolverVariable variableA, SolverVariable variableB,
+                                   SolverVariable variableC, SolverVariable variableD, float ratio);
+
     void updateClientEquations();
 }

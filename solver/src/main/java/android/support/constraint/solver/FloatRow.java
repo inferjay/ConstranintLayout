@@ -48,6 +48,16 @@ class FloatRow implements IRow {
     }
 
     @Override
+    public IRow createRowDimensionRatio(SolverVariable variableA, SolverVariable variableB,
+                                        SolverVariable variableC, SolverVariable variableD, float ratio) {
+        row[variableA.mId] = -1;
+        row[variableB.mId] = 1;
+        row[variableC.mId] = ratio;
+        row[variableD.mId] = -ratio;
+        return this;
+    }
+
+    @Override
     public float getConstant() {
         return row[0];
     }

@@ -299,6 +299,17 @@ class ArrayRow implements IRow {
     }
 
     @Override
+    public IRow createRowDimensionRatio(SolverVariable variableA, SolverVariable variableB,
+                                          SolverVariable variableC, SolverVariable variableD, float ratio) {
+        // A = B + (C - D) * ratio
+        setVariable(variableA, -1);
+        setVariable(variableB, 1);
+        setVariable(variableC, ratio);
+        setVariable(variableD, -ratio);
+        return this;
+    }
+
+    @Override
     public void setUsed(boolean b) {
         this.used = b;
     }

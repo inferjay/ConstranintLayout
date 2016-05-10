@@ -86,6 +86,31 @@ public class EquationCreation {
         return row.createRowDimensionPercent(variableA, variableB, variableC, percent);
     }
 
+    /**
+     * Create a constraint to express A = B + (C - D) * ratio
+     * We use this for ratio, where for exemple Right = Left + (Bottom - Top) * percent
+     *
+     * @param linearSystem
+     * @param variableA
+     * @param variableB
+     * @param variableC
+     * @param variableD
+     * @param withError
+     * @return
+     */
+    public static IRow createRowDimensionRatio(LinearSystem linearSystem,
+                                                 SolverVariable variableA,
+                                                 SolverVariable variableB,
+                                                 SolverVariable variableC,
+                                                 SolverVariable variableD,
+                                                 float ratio, boolean withError) {
+        IRow row = linearSystem.createRow(11);
+        if (withError) {
+            linearSystem.addError(row, 1);
+        }
+        return row.createRowDimensionRatio(variableA, variableB, variableC, variableD, ratio);
+    }
+
     public static IRow createRowGreaterThan(LinearSystem linearSystem, SolverVariable variableA,
             SolverVariable variableB, int margin,
             boolean withError, int errorStrength) {

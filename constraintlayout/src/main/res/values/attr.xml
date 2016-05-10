@@ -38,6 +38,8 @@
         <attr name="layout_constraintBottom_creator" format="integer"/>
         <attr name="layout_constraintBaseline_creator" format="integer"/>
 
+        <attr name="layout_constraintDimensionRatio" format="string"/>
+
         <attr name="layout_editor_absoluteX" format="dimension"/>
         <attr name="layout_editor_absoluteY" format="dimension"/>
 

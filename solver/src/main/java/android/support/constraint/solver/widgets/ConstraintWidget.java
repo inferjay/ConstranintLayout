@@ -82,6 +82,7 @@ public class ConstraintWidget implements Solvable {
     // Dimensions of the widget
     private int mWidth = 0;
     private int mHeight = 0;
+    private float mDimensionRatio = 0;
 
     // Origin of the widget
     private int mX = 0;
@@ -772,6 +773,23 @@ public class ConstraintWidget implements Solvable {
         if (mHeight < mMinHeight) {
             mHeight = mMinHeight;
         }
+    }
+
+    /**
+     * Set the ratio of the widget
+     * The ratio will be applied if at least one of the dimension (width or height) is set to a behaviour
+     * of DimensionBehaviour.ANY -- the dimension's value will be set to the other dimension * ratio.
+     */
+    public void setDimensionRatio(float ratio) {
+        mDimensionRatio = ratio;
+    }
+
+    /**
+     * Return the current ratio of this widget
+     * @return the dimension ratio
+     */
+    public float getDimensionRatio() {
+        return mDimensionRatio;
     }
 
     /**
@@ -1507,16 +1525,43 @@ public class ConstraintWidget implements Solvable {
             }
         }
 
-        boolean dimensionLocked = mHorizontalDimensionBehaviour != DimensionBehaviour.ANY;
-        boolean wrapContent = (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)
-                && (this instanceof ConstraintWidgetContainer);
         int width = mWidth;
         if (width < mMinWidth) {
             width = mMinWidth;
         }
-        applyConstraints(system, wrapContent, dimensionLocked, mLeft, mRight,
-                mX, mX + width, width, mHorizontalBiasPercent);
-        dimensionLocked = mVerticalDimensionBehaviour != DimensionBehaviour.ANY;
+        int height = mHeight;
+        if (height < mMinHeight) {
+            height = mMinHeight;
+        }
+
+        boolean horizontalDimensionLocked = mHorizontalDimensionBehaviour != DimensionBehaviour.ANY;
+        boolean verticalDimensionLocked = mVerticalDimensionBehaviour != DimensionBehaviour.ANY;
+
+        boolean useRatio = false;
+        if (mDimensionRatio > 0) {
+            if (!horizontalDimensionLocked && !verticalDimensionLocked) {
+                useRatio = true;
+                // add an equation
+                SolverVariable left = system.createObjectVariable(mLeft);
+                SolverVariable right = system.createObjectVariable(mRight);
+                SolverVariable top = system.createObjectVariable(mTop);
+                SolverVariable bottom = system.createObjectVariable(mBottom);
+                system.addConstraint(EquationCreation.createRowDimensionRatio(system, right, left, bottom, top,
+                        mDimensionRatio, false));
+            } else if (!horizontalDimensionLocked && verticalDimensionLocked) {
+                width = (int) (mDimensionRatio * mHeight);
+                horizontalDimensionLocked = true;
+            } else if (horizontalDimensionLocked && !verticalDimensionLocked) {
+                height = (int) (mDimensionRatio * mWidth);
+                verticalDimensionLocked = true;
+            }
+        }
+
+        boolean wrapContent = (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)
+                && (this instanceof ConstraintWidgetContainer);
+        applyConstraints(system, wrapContent, horizontalDimensionLocked, mLeft, mRight,
+                mX, mX + width, width, mHorizontalBiasPercent, useRatio);
+
         wrapContent = (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)
                 && (this instanceof ConstraintWidgetContainer);
 
@@ -1524,11 +1569,7 @@ public class ConstraintWidget implements Solvable {
             SolverVariable top = system.createObjectVariable(mTop);
             SolverVariable bottom = system.createObjectVariable(mBottom);
             SolverVariable baseline = system.createObjectVariable(mBaseline);
-            int height = mHeight;
             ConstraintAnchor end = mBottom;
-            if (height < mMinHeight) {
-                height = mMinHeight;
-            }
             system.addConstraint(
                     EquationCreation.createRowEquals(system, bottom, baseline,
                             height - getBaselineDistance(),
@@ -1537,16 +1578,13 @@ public class ConstraintWidget implements Solvable {
                 height = getBaselineDistance();
                 end = mBaseline;
             }
-            applyConstraints(system, wrapContent, dimensionLocked,
-                    mTop, end, mY, mY + height, height, mVerticalBiasPercent);
+            applyConstraints(system, wrapContent, verticalDimensionLocked,
+                    mTop, end, mY, mY + height, height, mVerticalBiasPercent, useRatio);
         } else {
-            int height = mHeight;
-            if (height < mMinHeight) {
-                height = mMinHeight;
-            }
-            applyConstraints(system, wrapContent, dimensionLocked,
-                    mTop, mBottom, mY, mY + height, height, mVerticalBiasPercent);
+            applyConstraints(system, wrapContent, verticalDimensionLocked,
+                    mTop, mBottom, mY, mY + height, height, mVerticalBiasPercent, useRatio);
         }
+
     }
 
     /**
@@ -1563,7 +1601,7 @@ public class ConstraintWidget implements Solvable {
      */
     private void applyConstraints(LinearSystem system, boolean wrapContent, boolean dimensionLocked,
             ConstraintAnchor beginAnchor, ConstraintAnchor endAnchor,
-            int beginPosition, int endPosition, int dimension, float bias) {
+            int beginPosition, int endPosition, int dimension, float bias, boolean useRatio) {
         SolverVariable begin = system.createObjectVariable(beginAnchor);
         SolverVariable end = system.createObjectVariable(endAnchor);
         SolverVariable beginTarget = system.createObjectVariable(beginAnchor.getTarget());
@@ -1666,6 +1704,16 @@ public class ConstraintWidget implements Solvable {
                                         constraintStrength));
                     }
                 }
+            } else  if (useRatio) {
+                system.addConstraint(EquationCreation
+                        .createRowEquals(system, begin, beginTarget, beginAnchor.getMargin(),
+                                true));
+                system.addConstraint(EquationCreation
+                        .createRowEquals(system, end, endTarget, -1 * endAnchor.getMargin(),
+                                true));
+                system.addConstraint(EquationCreation
+                        .createRowCentering(system, begin, beginTarget,
+                                0, 0.5f, endTarget, end, 0, true, 1));
             } else {
                 system.addConstraint(EquationCreation
                         .createRowEquals(system, begin, beginTarget, beginAnchor.getMargin(),

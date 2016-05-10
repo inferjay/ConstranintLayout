@@ -367,6 +367,11 @@ public class ConstraintLayout extends ViewGroup {
                         || (layoutParams.editorAbsoluteY != LayoutParams.UNSET)) {
                     widget.setOrigin(layoutParams.editorAbsoluteX, layoutParams.editorAbsoluteY);
                 }
+
+                if (layoutParams.dimensionRatio > 0) {
+                    widget.setDimensionRatio(layoutParams.dimensionRatio);
+                }
+
                 if (hasBaseline(child)) {
                     widget.setBaselineDistance(child.getBaseline());
                 }
@@ -663,6 +668,7 @@ public class ConstraintLayout extends ViewGroup {
 
         public float horizontalBias = 0.5f;
         public float verticalBias = 0.5f;
+        public float dimensionRatio = 0f;
 
         public int editorAbsoluteX = UNSET;
         public int editorAbsoluteY = UNSET;
@@ -736,6 +742,20 @@ public class ConstraintLayout extends ViewGroup {
                     horizontalBias = a.getFloat(attr, horizontalBias);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_Bias) {
                     verticalBias = a.getFloat(attr, verticalBias);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintDimensionRatio) {
+                    String ratio = a.getString(attr);
+                    int colonIndex = ratio.indexOf(':');
+                    if (colonIndex >= 0 && colonIndex < ratio.length() - 1) {
+                        String nominator = ratio.substring(0, colonIndex);
+                        String denominator = ratio.substring(colonIndex + 1);
+                        if (nominator.length() > 0 && denominator.length() > 0) {
+                            float nominatorValue = Float.parseFloat(nominator);
+                            float denominatorValue = Float.parseFloat(denominator);
+                            if (denominatorValue > 0) {
+                                dimensionRatio = nominatorValue / denominatorValue;
+                            }
+                        }
+                    }
                 } else {
                     Log.w(TAG, " Unknown attribute 0x" + Integer.toHexString(attr));
                 }
