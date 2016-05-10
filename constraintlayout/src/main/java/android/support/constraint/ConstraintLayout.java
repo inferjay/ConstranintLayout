@@ -169,19 +169,19 @@ public class ConstraintLayout extends ViewGroup {
             widget.setParent(mLayoutWidget);
 
             final LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
-            if ((layoutParams.left_to_left != LayoutParams.UNSET)
-                    || (layoutParams.left_to_right != LayoutParams.UNSET)
-                    || (layoutParams.right_to_left != LayoutParams.UNSET)
-                    || (layoutParams.right_to_right != LayoutParams.UNSET)
-                    || (layoutParams.top_to_top != LayoutParams.UNSET)
-                    || (layoutParams.top_to_bottom != LayoutParams.UNSET)
-                    || (layoutParams.bottom_to_top != LayoutParams.UNSET)
-                    || (layoutParams.bottom_to_bottom != LayoutParams.UNSET)
-                    || (layoutParams.baseline_to_baseline != LayoutParams.UNSET)
-                    || (layoutParams.centerX_to_centerX != LayoutParams.UNSET)
-                    || (layoutParams.centerY_to_centerY != LayoutParams.UNSET)
-                    || (layoutParams.editor_absolute_x != LayoutParams.UNSET)
-                    || (layoutParams.editor_absolute_y != LayoutParams.UNSET)) {
+            if ((layoutParams.lefToLeft != LayoutParams.UNSET)
+                    || (layoutParams.leftToRight != LayoutParams.UNSET)
+                    || (layoutParams.rightToLeft != LayoutParams.UNSET)
+                    || (layoutParams.rightToRight != LayoutParams.UNSET)
+                    || (layoutParams.topToTop != LayoutParams.UNSET)
+                    || (layoutParams.topToBottom != LayoutParams.UNSET)
+                    || (layoutParams.bottomToTop != LayoutParams.UNSET)
+                    || (layoutParams.bottomToBottom != LayoutParams.UNSET)
+                    || (layoutParams.baselineToBaseline != LayoutParams.UNSET)
+                    || (layoutParams.centerXToCenterX != LayoutParams.UNSET)
+                    || (layoutParams.centerYToCenterY != LayoutParams.UNSET)
+                    || (layoutParams.editorAbsoluteX != LayoutParams.UNSET)
+                    || (layoutParams.editorAbsoluteY != LayoutParams.UNSET)) {
 
                 // Process match_Parent converting it to 0dp & constrain left and right to root
                 if (layoutParams.width == LayoutParams.MATCH_PARENT) {
@@ -203,8 +203,8 @@ public class ConstraintLayout extends ViewGroup {
                 }
 
                 // Left constraint
-                if (layoutParams.left_to_left != LayoutParams.UNSET) {
-                    View view = findViewById(layoutParams.left_to_left);
+                if (layoutParams.lefToLeft != LayoutParams.UNSET) {
+                    View view = findViewById(layoutParams.lefToLeft);
                     ConstraintWidget target = mConstrainedViews.get(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
@@ -214,8 +214,8 @@ public class ConstraintLayout extends ViewGroup {
                                 ConstraintAnchor.Type.LEFT, layoutParams.leftMargin);
                     }
                 }
-                if (layoutParams.left_to_right != LayoutParams.UNSET) {
-                    View view = findViewById(layoutParams.left_to_right);
+                if (layoutParams.leftToRight != LayoutParams.UNSET) {
+                    View view = findViewById(layoutParams.leftToRight);
                     ConstraintWidget target = mConstrainedViews.get(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
@@ -227,8 +227,8 @@ public class ConstraintLayout extends ViewGroup {
                 }
 
                 // Right constraint
-                if (layoutParams.right_to_left != LayoutParams.UNSET) {
-                    View view = findViewById(layoutParams.right_to_left);
+                if (layoutParams.rightToLeft != LayoutParams.UNSET) {
+                    View view = findViewById(layoutParams.rightToLeft);
                     ConstraintWidget target = mConstrainedViews.get(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
@@ -238,8 +238,8 @@ public class ConstraintLayout extends ViewGroup {
                                 ConstraintAnchor.Type.LEFT, layoutParams.rightMargin);
                     }
                 }
-                if (layoutParams.right_to_right != LayoutParams.UNSET) {
-                    View view = findViewById(layoutParams.right_to_right);
+                if (layoutParams.rightToRight != LayoutParams.UNSET) {
+                    View view = findViewById(layoutParams.rightToRight);
                     ConstraintWidget target = mConstrainedViews.get(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
@@ -251,8 +251,8 @@ public class ConstraintLayout extends ViewGroup {
                 }
 
                 // Top constraint
-                if (layoutParams.top_to_top != LayoutParams.UNSET) {
-                    View view = findViewById(layoutParams.top_to_top);
+                if (layoutParams.topToTop != LayoutParams.UNSET) {
+                    View view = findViewById(layoutParams.topToTop);
                     ConstraintWidget target = mConstrainedViews.get(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
@@ -262,8 +262,8 @@ public class ConstraintLayout extends ViewGroup {
                                 ConstraintAnchor.Type.TOP, layoutParams.topMargin);
                     }
                 }
-                if (layoutParams.top_to_bottom != LayoutParams.UNSET) {
-                    View view = findViewById(layoutParams.top_to_bottom);
+                if (layoutParams.topToBottom != LayoutParams.UNSET) {
+                    View view = findViewById(layoutParams.topToBottom);
                     ConstraintWidget target = mConstrainedViews.get(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
@@ -275,8 +275,8 @@ public class ConstraintLayout extends ViewGroup {
                 }
 
                 // Bottom constraint
-                if (layoutParams.bottom_to_top != LayoutParams.UNSET) {
-                    View view = findViewById(layoutParams.bottom_to_top);
+                if (layoutParams.bottomToTop != LayoutParams.UNSET) {
+                    View view = findViewById(layoutParams.bottomToTop);
                     ConstraintWidget target = mConstrainedViews.get(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
@@ -286,8 +286,8 @@ public class ConstraintLayout extends ViewGroup {
                                 ConstraintAnchor.Type.TOP, layoutParams.bottomMargin);
                     }
                 }
-                if (layoutParams.bottom_to_bottom != LayoutParams.UNSET) {
-                    View view = findViewById(layoutParams.bottom_to_bottom);
+                if (layoutParams.bottomToBottom != LayoutParams.UNSET) {
+                    View view = findViewById(layoutParams.bottomToBottom);
                     ConstraintWidget target = mConstrainedViews.get(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
@@ -299,8 +299,8 @@ public class ConstraintLayout extends ViewGroup {
                 }
 
                 // Baseline constraint
-                if (layoutParams.baseline_to_baseline != LayoutParams.UNSET) {
-                    ConstraintWidget target = mConstrainedViews.get(findViewById(layoutParams.baseline_to_baseline));
+                if (layoutParams.baselineToBaseline != LayoutParams.UNSET) {
+                    ConstraintWidget target = mConstrainedViews.get(findViewById(layoutParams.baselineToBaseline));
                     if (target != null) {
                         widget.connect(ConstraintAnchor.Type.BASELINE, target,
                                 ConstraintAnchor.Type.BASELINE);
@@ -308,8 +308,8 @@ public class ConstraintLayout extends ViewGroup {
                 }
 
                 // Horizontal Center constraint
-                if (layoutParams.centerX_to_centerX != LayoutParams.UNSET) {
-                    View view = findViewById(layoutParams.centerX_to_centerX);
+                if (layoutParams.centerXToCenterX != LayoutParams.UNSET) {
+                    View view = findViewById(layoutParams.centerXToCenterX);
                     ConstraintWidget target = mConstrainedViews.get(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
@@ -323,8 +323,8 @@ public class ConstraintLayout extends ViewGroup {
                 }
 
                 // Vertical Center constraint
-                if (layoutParams.centerY_to_centerY != LayoutParams.UNSET) {
-                    View view = findViewById(layoutParams.centerY_to_centerY);
+                if (layoutParams.centerYToCenterY != LayoutParams.UNSET) {
+                    View view = findViewById(layoutParams.centerYToCenterY);
                     ConstraintWidget target = mConstrainedViews.get(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
@@ -336,11 +336,11 @@ public class ConstraintLayout extends ViewGroup {
                                 ConstraintAnchor.Type.BOTTOM, layoutParams.bottomMargin);
                     }
                 }
-                if (layoutParams.horizontal_bias >= 0 && layoutParams.horizontal_bias != 0.5f) {
-                    widget.setHorizontalBiasPercent(layoutParams.horizontal_bias);
+                if (layoutParams.horizontalBias >= 0 && layoutParams.horizontalBias != 0.5f) {
+                    widget.setHorizontalBiasPercent(layoutParams.horizontalBias);
                 }
-                if (layoutParams.vertical_bias >= 0 && layoutParams.vertical_bias != 0.5f) {
-                    widget.setVerticalBiasPercent(layoutParams.vertical_bias);
+                if (layoutParams.verticalBias >= 0 && layoutParams.verticalBias != 0.5f) {
+                    widget.setVerticalBiasPercent(layoutParams.verticalBias);
                 }
 
                 // Set the strength
@@ -363,9 +363,9 @@ public class ConstraintLayout extends ViewGroup {
                     widget.setHeight(layoutParams.height);
                 }
 
-                if ((layoutParams.editor_absolute_x != LayoutParams.UNSET)
-                        || (layoutParams.editor_absolute_y != LayoutParams.UNSET)) {
-                    widget.setOrigin(layoutParams.editor_absolute_x, layoutParams.editor_absolute_y);
+                if ((layoutParams.editorAbsoluteX != LayoutParams.UNSET)
+                        || (layoutParams.editorAbsoluteY != LayoutParams.UNSET)) {
+                    widget.setOrigin(layoutParams.editorAbsoluteX, layoutParams.editorAbsoluteY);
                 }
                 if (hasBaseline(child)) {
                     widget.setBaselineDistance(child.getBaseline());
@@ -616,11 +616,7 @@ public class ConstraintLayout extends ViewGroup {
 
     @Override
     public LayoutParams generateLayoutParams(AttributeSet attrs) {
-        LayoutParams layoutParams = new ConstraintLayout.LayoutParams(getContext(), attrs);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            resolveRtlProperties(layoutParams);
-        }
-        return layoutParams;
+        return new LayoutParams(getContext(), attrs);
     }
 
     @Override
@@ -648,32 +644,32 @@ public class ConstraintLayout extends ViewGroup {
         public int relativeEnd = -1;
         public int relativePercent = -1;
 
-        public int left_to_left = UNSET;
-        public int left_to_right = UNSET;
-        public int right_to_left = UNSET;
-        public int right_to_right = UNSET;
-        public int top_to_top = UNSET;
-        public int top_to_bottom = UNSET;
-        public int bottom_to_top = UNSET;
-        public int bottom_to_bottom = UNSET;
-        public int baseline_to_baseline = UNSET;
-        public int centerX_to_centerX = UNSET;
-        public int centerY_to_centerY = UNSET;
+        public int lefToLeft = UNSET;
+        public int leftToRight = UNSET;
+        public int rightToLeft = UNSET;
+        public int rightToRight = UNSET;
+        public int topToTop = UNSET;
+        public int topToBottom = UNSET;
+        public int bottomToTop = UNSET;
+        public int bottomToBottom = UNSET;
+        public int baselineToBaseline = UNSET;
+        public int centerXToCenterX = UNSET;
+        public int centerYToCenterY = UNSET;
 
-        public int start_to_end = UNSET;
-        public int start_to_start = UNSET;
-        public int end_to_start = UNSET;
-        public int end_to_end = UNSET;
+        public int startToEnd = UNSET;
+        public int startToStart = UNSET;
+        public int endToStart = UNSET;
+        public int endToEnd = UNSET;
 
-        public float horizontal_bias = 0.5f;
-        public float vertical_bias = 0.5f;
+        public float horizontalBias = 0.5f;
+        public float verticalBias = 0.5f;
 
-        public int editor_absolute_x = UNSET;
-        public int editor_absolute_y = UNSET;
+        public int editorAbsoluteX = UNSET;
+        public int editorAbsoluteY = UNSET;
 
         // TODO: Hide those for now (for table layout)
         int orientation = UNSET;
-        int container_skip = UNSET;
+        int containerSkip = UNSET;
 
         // Internal use only
         boolean horizontalLock = true;
@@ -693,31 +689,31 @@ public class ConstraintLayout extends ViewGroup {
             for (int i = 0; i < N; i++) {
                 int attr = a.getIndex(i);
                 if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_toLeftOf) {
-                    left_to_left = a.getResourceId(attr, left_to_left);
+                    lefToLeft = a.getResourceId(attr, lefToLeft);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_toRightOf) {
-                    left_to_right = a.getResourceId(attr, left_to_right);
+                    leftToRight = a.getResourceId(attr, leftToRight);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_toLeftOf) {
-                    right_to_left = a.getResourceId(attr, right_to_left);
+                    rightToLeft = a.getResourceId(attr, rightToLeft);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_toRightOf) {
-                    right_to_right = a.getResourceId(attr, right_to_right);
+                    rightToRight = a.getResourceId(attr, rightToRight);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_toTopOf) {
-                    top_to_top = a.getResourceId(attr, top_to_top);
+                    topToTop = a.getResourceId(attr, topToTop);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_toBottomOf) {
-                    top_to_bottom = a.getResourceId(attr, top_to_bottom);
+                    topToBottom = a.getResourceId(attr, topToBottom);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBottom_toTopOf) {
-                    bottom_to_top = a.getResourceId(attr, bottom_to_top);
+                    bottomToTop = a.getResourceId(attr, bottomToTop);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBottom_toBottomOf) {
-                    bottom_to_bottom = a.getResourceId(attr, bottom_to_bottom);
+                    bottomToBottom = a.getResourceId(attr, bottomToBottom);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBaseline_toBaselineOf) {
-                    baseline_to_baseline = a.getResourceId(attr, baseline_to_baseline);
+                    baselineToBaseline = a.getResourceId(attr, baselineToBaseline);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintCenterX_toCenterX) {
-                    centerX_to_centerX = a.getResourceId(attr, centerX_to_centerX);
+                    centerXToCenterX = a.getResourceId(attr, centerXToCenterX);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintCenterY_toCenterY) {
-                    centerY_to_centerY = a.getResourceId(attr, centerY_to_centerY);
+                    centerYToCenterY = a.getResourceId(attr, centerYToCenterY);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_editor_absoluteX) {
-                    editor_absolute_x = a.getDimensionPixelOffset(attr, editor_absolute_x);
+                    editorAbsoluteX = a.getDimensionPixelOffset(attr, editorAbsoluteX);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_editor_absoluteY) {
-                    editor_absolute_y = a.getDimensionPixelOffset(attr, editor_absolute_y);
+                    editorAbsoluteY = a.getDimensionPixelOffset(attr, editorAbsoluteY);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_relativeBegin) {
                     relativeBegin = a.getDimensionPixelOffset(attr, relativeBegin);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_relativeEnd) {
@@ -727,28 +723,28 @@ public class ConstraintLayout extends ViewGroup {
                 } else if (attr == R.styleable.ConstraintLayout_Layout_orientation) {
                     orientation = a.getInt(attr, orientation);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintStart_toEndOf) {
-                    start_to_end = a.getResourceId(attr, start_to_end);
+                    startToEnd = a.getResourceId(attr, startToEnd);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintStart_toStartOf) {
-                    start_to_start = a.getResourceId(attr, start_to_start);
+                    startToStart = a.getResourceId(attr, startToStart);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintEnd_toStartOf) {
-                    end_to_start = a.getResourceId(attr, end_to_start);
+                    endToStart = a.getResourceId(attr, endToStart);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintEnd_toEndOf) {
-                    end_to_end = a.getResourceId(attr, end_to_end);
+                    endToEnd = a.getResourceId(attr, endToEnd);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_containerItemSkip) {
-                    container_skip = a.getInteger(attr, container_skip);
+                    containerSkip = a.getInteger(attr, containerSkip);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_Bias) {
-                    horizontal_bias = a.getFloat(attr, horizontal_bias);
+                    horizontalBias = a.getFloat(attr, horizontalBias);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_Bias) {
-                    vertical_bias = a.getFloat(attr, vertical_bias);
+                    verticalBias = a.getFloat(attr, verticalBias);
                 } else {
                     Log.w(TAG, " Unknown attribute 0x" + Integer.toHexString(attr));
                 }
             }
 
-            if (this.width == 0) {
+            if (width == 0) {
                 horizontalLock = false;
             }
-            if (this.height == 0) {
+            if (height == 0) {
                 verticalLock = false;
             }
         }
@@ -770,48 +766,39 @@ public class ConstraintLayout extends ViewGroup {
                 // we ignore the runtime exception for now if layout_width and layout_height aren't there.
             }
         }
-    }
 
-    @Override
-    public void onRtlPropertiesChanged(int layoutDirection) {
-        final int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            resolveRtlProperties((LayoutParams) getChildAt(i).getLayoutParams());
-        }
-        setChildrenConstraints();
-    }
+        @Override
+        @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+        public void resolveLayoutDirection(int layoutDirection) {
+            super.resolveLayoutDirection(layoutDirection);
 
-    /**
-     * Swap start and end to left and right as needed by RTL
-     */
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    private void resolveRtlProperties(LayoutParams layoutParams) {
-        boolean isRtl = (View.LAYOUT_DIRECTION_RTL == getLayoutDirection());
-        if (isRtl) {
-            if (layoutParams.start_to_end != LayoutParams.UNSET) {
-                layoutParams.right_to_left = layoutParams.start_to_end;
-            }
-            if (layoutParams.start_to_start != LayoutParams.UNSET) {
-                layoutParams.right_to_right = layoutParams.start_to_start;
-            }
-            if (layoutParams.end_to_start != LayoutParams.UNSET) {
-                layoutParams.left_to_right = layoutParams.end_to_start;
-            }
-            if (layoutParams.end_to_end != LayoutParams.UNSET) {
-                layoutParams.left_to_left = layoutParams.end_to_end;
-            }
-        } else {
-            if (layoutParams.start_to_end != LayoutParams.UNSET) {
-                layoutParams.left_to_right = layoutParams.start_to_end;
-            }
-            if (layoutParams.start_to_start != LayoutParams.UNSET) {
-                layoutParams.left_to_left = layoutParams.start_to_start;
-            }
-            if (layoutParams.end_to_start != LayoutParams.UNSET) {
-                layoutParams.right_to_left = layoutParams.end_to_start;
-            }
-            if (layoutParams.end_to_end != LayoutParams.UNSET) {
-                layoutParams.right_to_right = layoutParams.end_to_end;
+            boolean isRtl = (View.LAYOUT_DIRECTION_RTL == getLayoutDirection());
+            if (isRtl) {
+                if (startToEnd != UNSET) {
+                    rightToLeft = startToEnd;
+                }
+                if (startToStart != UNSET) {
+                    rightToRight = startToStart;
+                }
+                if (endToStart != UNSET) {
+                    leftToRight = endToStart;
+                }
+                if (endToEnd != UNSET) {
+                    lefToLeft = endToEnd;
+                }
+            } else {
+                if (startToEnd != UNSET) {
+                    leftToRight = startToEnd;
+                }
+                if (startToStart != UNSET) {
+                    lefToLeft = startToStart;
+                }
+                if (endToStart != UNSET) {
+                    rightToLeft = endToStart;
+                }
+                if (endToEnd != UNSET) {
+                    rightToRight = endToEnd;
+                }
             }
         }
     }
