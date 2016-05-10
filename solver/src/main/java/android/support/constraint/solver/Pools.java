@@ -21,8 +21,8 @@ package android.support.constraint.solver;
  * <pre>
  * public class MyPooledClass {
  *
- *     private static final SynchronizedPool<MyPooledClass> sPool =
- *             new SynchronizedPool<MyPooledClass>(10);
+ *     private static final SimplePool<MyPooledClass> sPool =
+ *             new SimplePool<MyPooledClass>(10);
  *
  *     public static MyPooledClass obtain() {
  *         MyPooledClass instance = sPool.acquire();
@@ -49,7 +49,7 @@ final class Pools {
         /**
          * @return An instance from the pool if such, null otherwise.
          */
-        public T acquire();
+        T acquire();
 
         /**
          * Release an instance to the pool.
@@ -59,7 +59,7 @@ final class Pools {
          *
          * @throws IllegalStateException If the instance is already in the pool.
          */
-        public boolean release(T instance);
+        boolean release(T instance);
     }
 
     private Pools() {
@@ -126,37 +126,4 @@ final class Pools {
         }
     }
 
-    /**
-     * Synchronized) pool of objects.
-     *
-     * @param <T> The pooled type.
-     */
-    public static class SynchronizedPool<T> extends SimplePool<T> {
-        private final Object mLock = new Object();
-
-        /**
-         * Creates a new instance.
-         *
-         * @param maxPoolSize The max pool size.
-         *
-         * @throws IllegalArgumentException If the max pool size is less than zero.
-         */
-        public SynchronizedPool(int maxPoolSize) {
-            super(maxPoolSize);
-        }
-
-        @Override
-        public T acquire() {
-            synchronized (mLock) {
-                return super.acquire();
-            }
-        }
-
-        @Override
-        public boolean release(T element) {
-            synchronized (mLock) {
-                return super.release(element);
-            }
-        }
-    }
 }

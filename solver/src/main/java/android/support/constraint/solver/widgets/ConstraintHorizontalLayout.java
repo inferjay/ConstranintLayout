@@ -60,7 +60,8 @@ public class ConstraintHorizontalLayout extends ConstraintWidgetContainer {
             return;
         }
         ConstraintWidget previous = this;
-        for (ConstraintWidget widget : mChildren) {
+        for (int i = 0, mChildrenSize = mChildren.size(); i < mChildrenSize; i++) {
+            final ConstraintWidget widget = mChildren.get(i);
             if (previous != this) {
                 widget.connect(ConstraintAnchor.Type.LEFT, previous, ConstraintAnchor.Type.RIGHT);
                 previous.connect(ConstraintAnchor.Type.RIGHT, widget, ConstraintAnchor.Type.LEFT);
@@ -70,7 +71,7 @@ public class ConstraintHorizontalLayout extends ConstraintWidgetContainer {
                     strength = ConstraintAnchor.Strength.WEAK;
                 }
                 widget.connect(ConstraintAnchor.Type.LEFT, previous,
-                               ConstraintAnchor.Type.LEFT, 0, strength);
+                        ConstraintAnchor.Type.LEFT, 0, strength);
             }
             widget.connect(ConstraintAnchor.Type.TOP, this, ConstraintAnchor.Type.TOP);
             widget.connect(ConstraintAnchor.Type.BOTTOM, this, ConstraintAnchor.Type.BOTTOM);
@@ -84,7 +85,8 @@ public class ConstraintHorizontalLayout extends ConstraintWidgetContainer {
             previous.connect(ConstraintAnchor.Type.RIGHT, this,
                              ConstraintAnchor.Type.RIGHT, 0, strength);
         }
-        for (ConstraintWidget widget : mChildren) {
+        for (int i = 0, mChildrenSize = mChildren.size(); i < mChildrenSize; i++) {
+            final ConstraintWidget widget = mChildren.get(i);
             widget.addToSolver(system);
         }
     }

@@ -23,8 +23,7 @@ import java.util.ArrayList;
  * A container of ConstraintWidget
  */
 public class WidgetContainer extends ConstraintWidget {
-
-    protected ArrayList<ConstraintWidget> mChildren = new ArrayList<ConstraintWidget>();
+    protected ArrayList<ConstraintWidget> mChildren = new ArrayList<>();
 
     /*-----------------------------------------------------------------------*/
     // Construction
@@ -133,14 +132,14 @@ public class WidgetContainer extends ConstraintWidget {
         if (x >= l && x <= r && y >= t && y <= b) {
             found = this;
         }
-        for (ConstraintWidget widget : mChildren) {
+        for (int i = 0, mChildrenSize = mChildren.size(); i < mChildrenSize; i++) {
+            final ConstraintWidget widget = mChildren.get(i);
             if (widget instanceof WidgetContainer) {
-                ConstraintWidget f = ((WidgetContainer)widget).findWidget(x, y);
+                ConstraintWidget f = ((WidgetContainer) widget).findWidget(x, y);
                 if (f != null) {
                     found = f;
                 }
-            }
-            else {
+            } else {
                 l = widget.getDrawX();
                 t = widget.getDrawY();
                 r = l + widget.getWidth();
@@ -165,9 +164,10 @@ public class WidgetContainer extends ConstraintWidget {
     public ArrayList<ConstraintWidget> findWidgets(int x, int y, int width, int height) {
         ArrayList<ConstraintWidget> found = new ArrayList<ConstraintWidget>();
         Rectangle area = new Rectangle(x, y, width, height);
-        for (ConstraintWidget widget : mChildren) {
+        for (int i = 0, mChildrenSize = mChildren.size(); i < mChildrenSize; i++) {
+            final ConstraintWidget widget = mChildren.get(i);
             Rectangle bounds = new Rectangle(widget.getDrawX(), widget.getDrawY(),
-                                             widget.getWidth(), widget.getHeight());
+                    widget.getWidth(), widget.getHeight());
             if (area.intersects(bounds)) {
                 found.add(widget);
             }
@@ -190,7 +190,8 @@ public class WidgetContainer extends ConstraintWidget {
         int maxX = 0;
         int minY = Integer.MAX_VALUE;
         int maxY = 0;
-        for (ConstraintWidget widget : widgets) {
+        for (int i = 0, widgetsSize = widgets.size(); i < widgetsSize; i++) {
+            final ConstraintWidget widget = widgets.get(i);
             if (widget.getX() < minX) {
                 minX = widget.getX();
             }

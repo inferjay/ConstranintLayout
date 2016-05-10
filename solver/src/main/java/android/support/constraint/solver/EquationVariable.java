@@ -37,10 +37,9 @@ public class EquationVariable {
 
     /**
      * Alternate constructor, will set the type to be {@link SolverVariable.Type CONSTANT}
-     * @param system the {@link LinearSystem linear system} this equation variable belongs to
      * @param amount the amount associated with this variable
      */
-    public EquationVariable(LinearSystem system, Amount amount) {
+    public EquationVariable(Amount amount) {
         mAmount = amount;
     }
 

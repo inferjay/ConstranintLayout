@@ -407,17 +407,6 @@ public class ConstraintLayout extends ViewGroup {
         }
     }
 
-    private void showMeasureSpec(String label, int spec) {
-        System.out.print(label);
-        if (spec == MeasureSpec.AT_MOST) {
-            System.out.println("AT_MOST");
-        } else if (spec == MeasureSpec.EXACTLY) {
-            System.out.println("EXACTLY");
-        } else if (spec == MeasureSpec.UNSPECIFIED) {
-            System.out.println("UNSPECIFIED");
-        }
-    }
-
     void internalMeasureChildren(int parentWidthSpec, int parentHeightSpec) {
         int heightPadding = getPaddingTop() + getPaddingBottom();
         int widthPadding = getPaddingLeft() + getPaddingRight();
@@ -438,8 +427,8 @@ public class ConstraintLayout extends ViewGroup {
             int height = child.getLayoutParams().height;
 
             if (width == 0 || height == 0) {
-                int childWidthMeasureSpec = 0;
-                int childHeightMeasureSpec = 0;
+                int childWidthMeasureSpec;
+                int childHeightMeasureSpec;
                 if (width == 0) {
                     childWidthMeasureSpec = getChildMeasureSpec(parentWidthSpec,
                             widthPadding, LayoutParams.WRAP_CONTENT);

@@ -100,7 +100,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         container.setDebugName(name);
 
         ConstraintWidget parent = widgets.get(0).getParent();
-        for (ConstraintWidget widget : widgets) {
+        for (int i = 0, widgetsSize = widgets.size(); i < widgetsSize; i++) {
+            final ConstraintWidget widget = widgets.get(i);
             if (widget.getParent() != parent) {
                 continue; // only allow widgets sharing a parent to be counted
             }
@@ -219,7 +220,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         if (super.isAnimating()) {
             return true;
         }
-        for (ConstraintWidget widget : mChildren) {
+        for (int i = 0, mChildrenSize = mChildren.size(); i < mChildrenSize; i++) {
+            final ConstraintWidget widget = mChildren.get(i);
             if (widget.isAnimating()) {
                 return true;
             }
@@ -244,8 +246,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      * @return array of guidelines
      */
     public ArrayList<Guideline> getVerticalGuidelines() {
-        ArrayList<Guideline> guidelines = new ArrayList<Guideline>();
-        for (ConstraintWidget widget : mChildren) {
+        ArrayList<Guideline> guidelines = new ArrayList<>();
+        for (int i = 0, mChildrenSize = mChildren.size(); i < mChildrenSize; i++) {
+            final ConstraintWidget widget = mChildren.get(i);
             if (widget instanceof Guideline) {
                 Guideline guideline = (Guideline) widget;
                 if (guideline.getOrientation() == Guideline.HORIZONTAL) {
@@ -261,8 +264,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      * @return array of guidelines
      */
     public ArrayList<Guideline> getHorizontalGuidelines() {
-        ArrayList<Guideline> guidelines = new ArrayList<Guideline>();
-        for (ConstraintWidget widget : mChildren) {
+        ArrayList<Guideline> guidelines = new ArrayList<>();
+        for (int i = 0, mChildrenSize = mChildren.size(); i < mChildrenSize; i++) {
+            final ConstraintWidget widget = mChildren.get(i);
             if (widget instanceof Guideline) {
                 Guideline guideline = (Guideline) widget;
                 if (guideline.getOrientation() != Guideline.HORIZONTAL) {

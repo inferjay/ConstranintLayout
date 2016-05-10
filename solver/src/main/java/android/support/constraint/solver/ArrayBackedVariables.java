@@ -23,6 +23,7 @@ import java.util.Arrays;
  */
 public class ArrayBackedVariables {
     private static final boolean DEBUG = false;
+
     SolverVariable[] variables = null;
     float[] values = null;
     int[] indexes = null;

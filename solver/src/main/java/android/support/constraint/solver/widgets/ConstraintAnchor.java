@@ -145,7 +145,7 @@ public class ConstraintAnchor {
      */
     public boolean connect(ConstraintAnchor toAnchor, int margin, Strength strength, int creator) {
         if (toAnchor == null) {
-            mTarget = toAnchor;
+            mTarget = null;
             mMargin = 0;
             mStrength = Strength.NONE;
             mConnectionCreator = AUTO_CONSTRAINT_CREATOR;
@@ -464,7 +464,8 @@ public class ConstraintAnchor {
             return false;
         }
         ArrayList<ConstraintAnchor> targetAnchors = target.getAnchors();
-        for (ConstraintAnchor anchor : targetAnchors) {
+        for (int i = 0, targetAnchorsSize = targetAnchors.size(); i < targetAnchorsSize; i++) {
+            final ConstraintAnchor anchor = targetAnchors.get(i);
             if (anchor.isSimilarDimensionConnection(this) && anchor.isConnected()) {
                 ConstraintWidget nextTarget = anchor.getTarget().getOwner();
                 if (nextTarget == getOwner()) {

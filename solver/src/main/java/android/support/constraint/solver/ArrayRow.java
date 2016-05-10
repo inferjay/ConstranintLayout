@@ -18,13 +18,14 @@ package android.support.constraint.solver;
 
 class ArrayRow implements IRow {
     private static final boolean DEBUG = false;
+
     SolverVariable variable = null;
     float variableValue = 0;
     float constantTerm = 0;
     boolean used = false;
     final float epsilon = 0.001f;
 
-    ArrayBackedVariables variables = new ArrayBackedVariables();
+    final ArrayBackedVariables variables = new ArrayBackedVariables();
 
     @Override
     public void updateClientEquations() {
@@ -327,7 +328,7 @@ class ArrayRow implements IRow {
                 int idx = equation.variables.indexes[i];
                 SolverVariable v = equation.variables.variables[idx];
                 float sourceAmount = equation.variables.values[idx];
-                float previousAmount = 0;
+                float previousAmount;
                 previousAmount = variables.get(v);
                 float finalValue = previousAmount + (sourceAmount * amount);
                 variables.put(v, finalValue);
@@ -382,8 +383,10 @@ class ArrayRow implements IRow {
             }
 
             if (candidateVariable == null) {
-                System.out.println("problem!");
+                // TODO: Log error condition
+                continue;
             }
+
             if (candidateVariable.getType() == SolverVariable.Type.UNRESTRICTED) {
                 // If there's an unrestricted variable, it's a candidate to pivot on.
                 if (variableAmount < 0) {

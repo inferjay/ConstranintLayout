@@ -23,7 +23,6 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 
 public class Guideline extends ConstraintWidget {
-
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
 

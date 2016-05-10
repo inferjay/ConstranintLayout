@@ -23,12 +23,10 @@ class FloatRow implements IRow {
     private LinearSystem mLinearSystem;
     SolverVariable variable = null;
     float[] row = null;
-    private boolean used = true;
     final float epsilon = 0.001f;
 
     @Override
     public void setUsed(boolean b) {
-        this.used = b;
     }
 
     @Override
@@ -261,7 +259,6 @@ class FloatRow implements IRow {
     public void reset() {
         Arrays.fill(row, 0);
         variable = null;
-        used = true;
     }
 
     @Override

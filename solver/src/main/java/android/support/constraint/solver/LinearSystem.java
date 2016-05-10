@@ -25,7 +25,6 @@ import java.util.HashSet;
  * Represents and solve a system of linear equations.
  */
 public class LinearSystem {
-
     private static final boolean DEBUG = false;
     private static boolean USE_FLOAT_ROW = false;
 
@@ -54,10 +53,10 @@ public class LinearSystem {
     private IRow[] mRows = null;
 
     // Used by ConstraintWidget to map anchors to variables
-    private HashMap<Object, SolverVariable> mObjectVariables = new HashMap<Object, SolverVariable>();
+    private HashMap<Object, SolverVariable> mObjectVariables = new HashMap<>();
 
     // Used in optimize()
-    private HashSet<SolverVariable> mAlreadyTestedCandidates = new HashSet<SolverVariable>();
+    private HashSet<SolverVariable> mAlreadyTestedCandidates = new HashSet<>();
 
     int mNumColumns = 1;
     SolverVariable[] mIndexedVariables = new SolverVariable[TABLE_SIZE];
@@ -66,12 +65,12 @@ public class LinearSystem {
     float[][] mBackend = new float[TABLE_SIZE][TABLE_SIZE];
 
     private static Pools.Pool<ArrayRow> sArrayRowPool;
-    private static Pools.Pool<SolverVariable> sSolverVariablePool = new Pools.SimplePool<SolverVariable>(POOL_SIZE);
+    private static Pools.Pool<SolverVariable> sSolverVariablePool = new Pools.SimplePool<>(POOL_SIZE);
 
     public LinearSystem() {
         mRows = new IRow[TABLE_SIZE];
         if (!USE_FLOAT_ROW && sArrayRowPool == null) {
-            sArrayRowPool = new Pools.SimplePool<ArrayRow>(POOL_SIZE);
+            sArrayRowPool = new Pools.SimplePool<>(POOL_SIZE);
         }
         releaseRows();
     }
@@ -137,14 +136,11 @@ public class LinearSystem {
         if (USE_FLOAT_ROW) {
             return;
         }
-        int released = 0;
         for (int i = 0; i < mRows.length; i++) {
             ArrayRow row = (ArrayRow) mRows[i];
             if (row != null) {
                 row.reset();
-                if (sArrayRowPool.release(row)) {
-                    released++;
-                }
+                sArrayRowPool.release(row);
             }
             mRows[i] = null;
         }
@@ -290,7 +286,7 @@ public class LinearSystem {
         mNumColumns++;
         variable.setId(mVariablesID);
         if (mVariables == null) {
-            mVariables = new HashMap<String, SolverVariable>();
+            mVariables = new HashMap<>();
         }
         mVariables.put(name, variable);
         mIndexedVariables[mVariablesID] = variable;
@@ -370,7 +366,7 @@ public class LinearSystem {
      */
     public SolverVariable getVariable(String name, SolverVariable.Type type) {
         if (mVariables == null) {
-            mVariables = new HashMap<String, SolverVariable>();
+            mVariables = new HashMap<>();
         }
         SolverVariable variable = mVariables.get(name);
         if (variable == null) {

@@ -49,11 +49,11 @@ public class ConstraintTableLayout extends ConstraintWidgetContainer {
         int padding;
     }
 
-    private ArrayList<VerticalSlice> mVerticalSlices = new ArrayList<VerticalSlice>();
-    private ArrayList<HorizontalSlice> mHorizontalSlices = new ArrayList<HorizontalSlice>();
+    private ArrayList<VerticalSlice> mVerticalSlices = new ArrayList<>();
+    private ArrayList<HorizontalSlice> mHorizontalSlices = new ArrayList<>();
 
-    private ArrayList<Guideline> mVerticalGuidelines = new ArrayList<Guideline>();
-    private ArrayList<Guideline> mHorizontalGuidelines = new ArrayList<Guideline>();
+    private ArrayList<Guideline> mVerticalGuidelines = new ArrayList<>();
+    private ArrayList<Guideline> mHorizontalGuidelines = new ArrayList<>();
 
     public static final int ALIGN_CENTER = 0;
     public static final int ALIGN_LEFT = 1;

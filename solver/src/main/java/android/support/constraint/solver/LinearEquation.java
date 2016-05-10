@@ -29,8 +29,8 @@ import java.util.HashMap;
  */
 public class LinearEquation {
 
-    private ArrayList<EquationVariable> mLeftSide = new ArrayList<EquationVariable>();
-    private ArrayList<EquationVariable> mRightSide = new ArrayList<EquationVariable>();
+    private ArrayList<EquationVariable> mLeftSide = new ArrayList<>();
+    private ArrayList<EquationVariable> mRightSide = new ArrayList<>();
     private ArrayList<EquationVariable> mCurrentSide = null;
 
     public boolean isNull() {
@@ -81,11 +81,15 @@ public class LinearEquation {
      * @param equation to copy
      */
     public LinearEquation(LinearEquation equation) {
-        for (EquationVariable v : equation.mLeftSide) {
+        final ArrayList<EquationVariable> mLeftSide1 = equation.mLeftSide;
+        for (int i = 0, mLeftSide1Size = mLeftSide1.size(); i < mLeftSide1Size; i++) {
+            final EquationVariable v = mLeftSide1.get(i);
             EquationVariable v2 = new EquationVariable(v);
             mLeftSide.add(v2);
         }
-        for (EquationVariable v : equation.mRightSide) {
+        final ArrayList<EquationVariable> mRightSide1 = equation.mRightSide;
+        for (int i = 0, mRightSide1Size = mRightSide1.size(); i < mRightSide1Size; i++) {
+            final EquationVariable v = mRightSide1.get(i);
             EquationVariable v2 = new EquationVariable(v);
             mRightSide.add(v2);
         }
@@ -216,9 +220,10 @@ public class LinearEquation {
      */
     private void simplifySide(ArrayList<EquationVariable> side) {
         EquationVariable constant = null;
-        HashMap<String, EquationVariable> variables = new HashMap<String, EquationVariable>();
-        ArrayList<String> variablesNames = new ArrayList<String>();
-        for (EquationVariable v : side) {
+        HashMap<String, EquationVariable> variables = new HashMap<>();
+        ArrayList<String> variablesNames = new ArrayList<>();
+        for (int i = 0, sideSize = side.size(); i < sideSize; i++) {
+            final EquationVariable v = side.get(i);
             if (v.isConstant()) {
                 if (constant == null) {
                     constant = v;
@@ -240,7 +245,8 @@ public class LinearEquation {
             side.add(constant);
         }
         Collections.sort(variablesNames);
-        for (String name : variablesNames) {
+        for (int i = 0, variablesNamesSize = variablesNames.size(); i < variablesNamesSize; i++) {
+            final String name = variablesNames.get(i);
             EquationVariable v = variables.get(name);
             side.add(v);
         }
@@ -248,7 +254,8 @@ public class LinearEquation {
     }
 
     public void moveAllToTheRight() {
-        for (EquationVariable v : mLeftSide) {
+        for (int i = 0, mLeftSideSize = mLeftSide.size(); i < mLeftSideSize; i++) {
+            final EquationVariable v = mLeftSide.get(i);
             mRightSide.add(v.inverse());
         }
         mLeftSide.clear();
@@ -263,20 +270,23 @@ public class LinearEquation {
             return;
         }
         mCurrentSide = mLeftSide;
-        for (EquationVariable v : mLeftSide) {
+        for (int i = 0, mLeftSideSize = mLeftSide.size(); i < mLeftSideSize; i++) {
+            final EquationVariable v = mLeftSide.get(i);
             mRightSide.add(v.inverse());
         }
         mLeftSide.clear();
         simplifySide(mRightSide);
         EquationVariable found = null;
-        for (EquationVariable v : mRightSide) {
+        for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+            final EquationVariable v = mRightSide.get(i);
             if (v.getType() == SolverVariable.Type.UNRESTRICTED) {
                 found = v;
                 break;
             }
         }
         if (found == null) {
-            for (EquationVariable v : mRightSide) {
+            for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+                final EquationVariable v = mRightSide.get(i);
                 if (v.getType() == SolverVariable.Type.SLACK) {
                     found = v;
                     break;
@@ -284,7 +294,8 @@ public class LinearEquation {
             }
         }
         if (found == null) {
-            for (EquationVariable v : mRightSide) {
+            for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+                final EquationVariable v = mRightSide.get(i);
                 if (v.getType() == SolverVariable.Type.ERROR) {
                     found = v;
                     break;
@@ -298,7 +309,8 @@ public class LinearEquation {
         found.inverse();
         if (!found.getAmount().isOne()) {
             Amount foundAmount = found.getAmount();
-            for (EquationVariable v : mRightSide) {
+            for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+                final EquationVariable v = mRightSide.get(i);
                 v.getAmount().divide(foundAmount);
             }
             found.setAmount(new Amount(1));
@@ -312,7 +324,8 @@ public class LinearEquation {
      */
     private void removeNullTerms(ArrayList<EquationVariable> list) {
         boolean hasNullTerm = false;
-        for (EquationVariable v : list) {
+        for (int i = 0, listSize = list.size(); i < listSize; i++) {
+            final EquationVariable v = list.get(i);
             if (v.getAmount().isNull()) {
                 hasNullTerm = true;
                 break;
@@ -320,8 +333,10 @@ public class LinearEquation {
         }
         if (hasNullTerm) {
             // if some elements are now zero, we need to remove them from the right side
-            ArrayList<EquationVariable> newSide = new ArrayList<EquationVariable>();
-            for (EquationVariable v : list) {
+            ArrayList<EquationVariable> newSide;
+            newSide = new ArrayList<>();
+            for (int i = 0, listSize = list.size(); i < listSize; i++) {
+                final EquationVariable v = list.get(i);
                 if (!v.getAmount().isNull()) {
                     newSide.add(v);
                 }
@@ -341,28 +356,33 @@ public class LinearEquation {
             // no-op, we're already pivoted.
             return;
         }
-        for (EquationVariable v : mLeftSide) {
+        for (int i = 0, mLeftSideSize = mLeftSide.size(); i < mLeftSideSize; i++) {
+            final EquationVariable v = mLeftSide.get(i);
             mRightSide.add(v.inverse());
         }
         mLeftSide.clear();
         simplifySide(mRightSide);
         EquationVariable found = null;
-        for (EquationVariable v : mRightSide) {
+        for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+            final EquationVariable v = mRightSide.get(i);
             if (v.getSolverVariable() == variable) {
                 found = v;
                 break;
             }
         }
-        mRightSide.remove(found);
-        found.inverse();
-        if (!found.getAmount().isOne()) {
-            Amount foundAmount = found.getAmount();
-            for (EquationVariable v : mRightSide) {
-                v.getAmount().divide(foundAmount);
+        if (found != null) {
+            mRightSide.remove(found);
+            found.inverse();
+            if (!found.getAmount().isOne()) {
+                Amount foundAmount = found.getAmount();
+                for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+                    final EquationVariable v = mRightSide.get(i);
+                    v.getAmount().divide(foundAmount);
+                }
+                found.setAmount(new Amount(1));
             }
-            found.setAmount(new Amount(1));
+            mLeftSide.add(found);
         }
-        mLeftSide.add(found);
     }
 
     /**
@@ -370,7 +390,8 @@ public class LinearEquation {
      * @return true if the constant is negative.
      */
     public boolean hasNegativeConstant() {
-        for (EquationVariable v : mRightSide) {
+        for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+            final EquationVariable v = mRightSide.get(i);
             if (v.isConstant()) {
                 if (v.getAmount().isNegative()) {
                     return true;
@@ -386,7 +407,8 @@ public class LinearEquation {
      * @return The equation constant
      */
     public Amount getConstant() {
-        for (EquationVariable v : mRightSide) {
+        for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+            final EquationVariable v = mRightSide.get(i);
             if (v.isConstant()) {
                 return v.getAmount();
             }
@@ -399,10 +421,12 @@ public class LinearEquation {
      */
     public void inverse() {
         Amount amount = new Amount(-1);
-        for (EquationVariable v : mLeftSide) {
+        for (int i = 0, mLeftSideSize = mLeftSide.size(); i < mLeftSideSize; i++) {
+            final EquationVariable v = mLeftSide.get(i);
             v.multiply(amount);
         }
-        for (EquationVariable v : mRightSide) {
+        for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+            final EquationVariable v = mRightSide.get(i);
             v.multiply(amount);
         }
     }
@@ -412,12 +436,14 @@ public class LinearEquation {
      * @return an unconstrained variable or null if none are found
      */
     public EquationVariable getFirstUnconstrainedVariable() {
-        for (EquationVariable v : mLeftSide) {
+        for (int i = 0, mLeftSideSize = mLeftSide.size(); i < mLeftSideSize; i++) {
+            final EquationVariable v = mLeftSide.get(i);
             if (v.getType() == SolverVariable.Type.UNRESTRICTED) {
                 return v;
             }
         }
-        for (EquationVariable v : mRightSide) {
+        for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+            final EquationVariable v = mRightSide.get(i);
             if (v.getType() == SolverVariable.Type.UNRESTRICTED) {
                 return v;
             }
@@ -458,7 +484,9 @@ public class LinearEquation {
         if (toReplace != null) {
             list.remove(toReplace);
             Amount amount = toReplace.getAmount();
-            for (EquationVariable lv : l.mRightSide) {
+            final ArrayList<EquationVariable> mRightSide1 = l.mRightSide;
+            for (int i = 0, mRightSide1Size = mRightSide1.size(); i < mRightSide1Size; i++) {
+                final EquationVariable lv = mRightSide1.get(i);
                 list.add(new EquationVariable(amount, lv));
             }
         }
@@ -473,7 +501,8 @@ public class LinearEquation {
      * @return the associated {@link EquationVariable}
      */
     private EquationVariable find(SolverVariable v, ArrayList<EquationVariable> list) {
-        for (EquationVariable ev : list) {
+        for (int i = 0, listSize = list.size(); i < listSize; i++) {
+            final EquationVariable ev = list.get(i);
             if (ev.getSolverVariable() == v) {
                 return ev;
             }
@@ -538,7 +567,7 @@ public class LinearEquation {
      * @return this
      */
     public LinearEquation var(int numerator, int denominator) {
-        EquationVariable e = new EquationVariable(mSystem, new Amount(numerator, denominator));
+        EquationVariable e = new EquationVariable(new Amount(numerator, denominator));
         mCurrentSide.add(e);
         return this;
     }
@@ -803,12 +832,13 @@ public class LinearEquation {
     private String sideToString(ArrayList<EquationVariable> side) {
         String result = "";
         boolean first = true;
-        for (EquationVariable v : side) {
+        for (int i = 0, sideSize = side.size(); i < sideSize; i++) {
+            final EquationVariable v = side.get(i);
             if (first) {
                 if (v.getAmount().isPositive()) {
                     result += v + " ";
                 } else {
-                    result += v.signString() +  " " + v + " ";
+                    result += v.signString() + " " + v + " ";
                 }
                 first = false;
             } else {

@@ -20,7 +20,6 @@ import android.support.constraint.solver.LinearSystem;
 import java.util.ArrayList;
 
 public class VirtualLayout implements Solvable {
-
     protected ConstraintWidget mParent = null;
 
     protected ArrayList<ConstraintWidget> mWidgets = null;
@@ -33,7 +32,7 @@ public class VirtualLayout implements Solvable {
 
     public void addChild(ConstraintWidget widget) {
         if (mWidgets == null) {
-            mWidgets = new ArrayList<ConstraintWidget>();
+            mWidgets = new ArrayList<>();
         }
         if (mWidgets.contains(widget)) {
             return;

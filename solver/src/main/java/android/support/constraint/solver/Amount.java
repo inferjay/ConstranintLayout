@@ -195,7 +195,7 @@ public class Amount {
             mDenominator *= -1;
         }
         if (mDenominator > 1) {
-            int commonDenominator = 1;
+            int commonDenominator;
             if (mDenominator == 2 && mNumerator % 2 == 0) {
                 commonDenominator = 2;
             } else {
@@ -212,7 +212,7 @@ public class Amount {
      * @param v second number
      * @return Greater Common Divisor
      */
-    private int gcd(int u, int v) {
+    private static int gcd(int u, int v) {
         int shift;
 
         if (u < 0) {

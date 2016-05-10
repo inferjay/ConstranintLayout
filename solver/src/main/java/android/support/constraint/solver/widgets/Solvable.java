@@ -18,7 +18,7 @@ package android.support.constraint.solver.widgets;
 import android.support.constraint.solver.LinearSystem;
 
 public interface Solvable {
-    public void addToSolver(LinearSystem system);
-    public void updateFromSolver(LinearSystem system);
-    public void setDebugSolverName(LinearSystem system, String name);
+    void addToSolver(LinearSystem system);
+    void updateFromSolver(LinearSystem system);
+    void setDebugSolverName(LinearSystem system, String name);
 }

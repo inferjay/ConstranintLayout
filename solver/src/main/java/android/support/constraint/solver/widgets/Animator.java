@@ -17,7 +17,6 @@
 package android.support.constraint.solver.widgets;
 
 public class Animator {
-
     private static final boolean DEBUG = false;
     private static final boolean USE_EASE_IN_OUT = true;
 

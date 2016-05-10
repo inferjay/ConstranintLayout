@@ -40,7 +40,6 @@ import java.util.ArrayList;
  * {@link #connect} function.
  */
 public class ConstraintWidget implements Solvable {
-
     private static final boolean AUTOTAG_CENTER = false;
     private Animator mAnimator = new Animator(this);
     private String mDebugName = null;
@@ -1280,7 +1279,8 @@ public class ConstraintWidget implements Solvable {
                 return;
             }
         }
-        for (ConstraintAnchor anchor : mAnchors) {
+        for (int i = 0, mAnchorsSize = mAnchors.size(); i < mAnchorsSize; i++) {
+            final ConstraintAnchor anchor = mAnchors.get(i);
             anchor.reset();
         }
     }
@@ -1296,7 +1296,8 @@ public class ConstraintWidget implements Solvable {
                 return;
             }
         }
-        for (ConstraintAnchor anchor : mAnchors) {
+        for (int i = 0, mAnchorsSize = mAnchors.size(); i < mAnchorsSize; i++) {
+            final ConstraintAnchor anchor = mAnchors.get(i);
             if (connectionCreator == anchor.getConnectionCreator()) {
                 if (anchor.isVerticalAnchor()) {
                     setVerticalBiasPercent(ConstraintWidget.DEFAULT_BIAS);
@@ -1314,7 +1315,9 @@ public class ConstraintWidget implements Solvable {
      * @param widget the widget we are removing
      */
     public void disconnectWidget(ConstraintWidget widget) {
-        for (ConstraintAnchor anchor : getAnchors()) {
+        final ArrayList<ConstraintAnchor> anchors = getAnchors();
+        for (int i = 0, anchorsSize = anchors.size(); i < anchorsSize; i++) {
+            final ConstraintAnchor anchor = anchors.get(i);
             if (anchor.isConnected() && (anchor.getTarget().getOwner() == widget)) {
                 anchor.reset();
             }
@@ -1327,9 +1330,11 @@ public class ConstraintWidget implements Solvable {
      * @param widget the widget we are removing
      */
     public void disconnectUnlockedWidget(ConstraintWidget widget) {
-        for (ConstraintAnchor anchor : getAnchors()) {
+        final ArrayList<ConstraintAnchor> anchors = getAnchors();
+        for (int i = 0, anchorsSize = anchors.size(); i < anchorsSize; i++) {
+            final ConstraintAnchor anchor = anchors.get(i);
             if (anchor.isConnected() && (anchor.getTarget().getOwner() == widget)
-                && anchor.getConnectionCreator() == ConstraintAnchor.AUTO_CONSTRAINT_CREATOR) {
+                    && anchor.getConnectionCreator() == ConstraintAnchor.AUTO_CONSTRAINT_CREATOR) {
                 anchor.reset();
             }
         }

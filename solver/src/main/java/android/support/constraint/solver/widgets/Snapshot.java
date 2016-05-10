@@ -22,18 +22,17 @@ import java.util.ArrayList;
  * Simple container class to hold a state snapshot of a widget
  */
 public class Snapshot {
-
     private int mX;
     private int mY;
     private int mWidth;
     private int mHeight;
 
-    private ArrayList<Connection> mConnections = new ArrayList<Connection>();
+    private ArrayList<Connection> mConnections = new ArrayList<>();
 
     /**
      * Utility inner class holding widgets' connections
      */
-    class Connection {
+    static class Connection {
         private ConstraintAnchor mAnchor;
         private ConstraintAnchor mTarget;
         private int mMargin;
@@ -94,7 +93,9 @@ public class Snapshot {
         mY = widget.getY();
         mWidth = widget.getWidth();
         mHeight = widget.getHeight();
-        for (ConstraintAnchor a : widget.getAnchors()) {
+        final ArrayList<ConstraintAnchor> anchors = widget.getAnchors();
+        for (int i = 0, anchorsSize = anchors.size(); i < anchorsSize; i++) {
+            final ConstraintAnchor a = anchors.get(i);
             mConnections.add(new Connection(a));
         }
     }
@@ -126,7 +127,8 @@ public class Snapshot {
         widget.setY(mY);
         widget.setWidth(mWidth);
         widget.setHeight(mHeight);
-        for (Connection connection : mConnections) {
+        for (int i = 0, mConnectionsSize = mConnections.size(); i < mConnectionsSize; i++) {
+            final Connection connection = mConnections.get(i);
             connection.applyTo(widget);
         }
     }

@@ -25,29 +25,29 @@ import java.util.ArrayList;
 public class SolverVariable {
 
     private static final boolean INTERNAL_DEBUG = false;
-    static int n = 1;
+    static int uniqueId = 1;
     public float mComputedValue;
 
-    public static String getUniqueName() { n++; return "V" + n; }
+    public static String getUniqueName() { uniqueId++; return "V" + uniqueId; }
 
     public static String getUniqueName(Type type, Strength strength) {
-        n++;
+        uniqueId++;
         switch (type) {
-            case UNRESTRICTED: return "U" + n;
-            case CONSTANT: return "C" + n;
-            case SLACK: return "S" + n;
+            case UNRESTRICTED: return "U" + uniqueId;
+            case CONSTANT: return "C" + uniqueId;
+            case SLACK: return "S" + uniqueId;
             case ERROR: {
                 if (strength == Strength.STRONG) {
-                    return "E" + n;
+                    return "E" + uniqueId;
                 } else {
-                    return "e" + n;
+                    return "e" + uniqueId;
                 }
             }
         }
-        return "V" + n;
+        return "V" + uniqueId;
     }
 
-    ArrayList<IRow> mClientEquations = new ArrayList<IRow>();
+    ArrayList<IRow> mClientEquations = new ArrayList<>();
 
     public ArrayList<IRow> getClientEquations() {
         return mClientEquations;
