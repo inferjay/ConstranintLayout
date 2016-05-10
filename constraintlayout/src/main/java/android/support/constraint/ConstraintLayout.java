@@ -510,32 +510,41 @@ public class ConstraintLayout extends ViewGroup {
                 if (child == null) {
                     continue;
                 }
+
                 int widthSpec = MeasureSpec.makeMeasureSpec(widget.getWidth(), MeasureSpec.EXACTLY);
                 int heightSpec = MeasureSpec.makeMeasureSpec(widget.getHeight(), MeasureSpec.EXACTLY);
+
                 final ViewGroup.LayoutParams lp = child.getLayoutParams();
                 if (lp.width == LayoutParams.WRAP_CONTENT) {
-                    widthSpec = getChildMeasureSpec(widthMeasureSpec,
-                            widthPadding, lp.width);
+                    widthSpec = getChildMeasureSpec(widthMeasureSpec, widthPadding, lp.width);
                 }
                 if (lp.height == LayoutParams.WRAP_CONTENT) {
-                    heightSpec = getChildMeasureSpec(heightMeasureSpec,
-                            heightPadding, lp.height);
+                    heightSpec = getChildMeasureSpec(heightMeasureSpec, heightPadding, lp.height);
                 }
+
                 // we need to re-measure the child...
                 child.measure(widthSpec, heightSpec);
+
                 int width = child.getMeasuredWidth();
                 int height = child.getMeasuredHeight();
                 widget.setWidth(width);
                 widget.setHeight(height);
-                childState = combineMeasuredStates(childState, child.getMeasuredState());
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                    childState = combineMeasuredStates(childState, child.getMeasuredState());
+                }
             }
             solveLinearSystem(); // second pass
         }
 
-        setMeasuredDimension(
-                resolveSizeAndState(mLayoutWidget.getWidth(), widthMeasureSpec, childState),
-                resolveSizeAndState(mLayoutWidget.getHeight(), heightMeasureSpec,
-                        childState << MEASURED_HEIGHT_STATE_SHIFT));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            int widthSize = resolveSizeAndState(mLayoutWidget.getWidth(), widthMeasureSpec, childState);
+            int heightSize = resolveSizeAndState(mLayoutWidget.getHeight(), heightMeasureSpec,
+                    childState << MEASURED_HEIGHT_STATE_SHIFT);
+            setMeasuredDimension(widthSize & MEASURED_SIZE_MASK, heightSize & MEASURED_SIZE_MASK);
+        } else {
+            setMeasuredDimension(mLayoutWidget.getWidth(), mLayoutWidget.getHeight());
+        }
     }
 
     void setSelfDimensionBehaviour(int widthMeasureSpec, int heightMeasureSpec) {
@@ -641,7 +650,9 @@ public class ConstraintLayout extends ViewGroup {
     @Override
     public LayoutParams generateLayoutParams(AttributeSet attrs) {
         LayoutParams layoutParams = new ConstraintLayout.LayoutParams(getContext(), attrs);
-        resolveRtlProperties(layoutParams);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            resolveRtlProperties(layoutParams);
+        }
         return layoutParams;
     }
 

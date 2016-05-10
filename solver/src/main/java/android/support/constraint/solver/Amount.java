@@ -19,7 +19,7 @@ package android.support.constraint.solver;
 /**
  * Represents the amount of a given {@link EquationVariable variable}, can be fractional.
  */
-public class Amount {
+class Amount {
     private int mNumerator = 0;
     private int mDenominator = 1;
 

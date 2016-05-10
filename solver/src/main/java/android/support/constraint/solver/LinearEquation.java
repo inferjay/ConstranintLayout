@@ -27,7 +27,7 @@ import java.util.HashMap;
  * a variable x0 of an amount a0, and C represent a constant term. The amount of terms on the left side or the right
  * side of the equation is arbitrary.
  */
-public class LinearEquation {
+class LinearEquation {
 
     private ArrayList<EquationVariable> mLeftSide = new ArrayList<>();
     private ArrayList<EquationVariable> mRightSide = new ArrayList<>();

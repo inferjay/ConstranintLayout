@@ -44,7 +44,7 @@ final class Pools {
      *
      * @param <T> The pooled type.
      */
-    public interface Pool<T> {
+    interface Pool<T> {
 
         /**
          * @return An instance from the pool if such, null otherwise.
@@ -71,7 +71,7 @@ final class Pools {
      *
      * @param <T> The pooled type.
      */
-    public static class SimplePool<T> implements Pool<T> {
+    static class SimplePool<T> implements Pool<T> {
         private final Object[] mPool;
 
         private int mPoolSize;

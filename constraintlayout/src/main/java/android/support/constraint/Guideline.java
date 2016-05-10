@@ -17,6 +17,7 @@
 package android.support.constraint;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -27,5 +28,22 @@ public class Guideline extends View {
 
     public Guideline(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    public Guideline(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+
+    public Guideline(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        setMeasuredDimension(0, 0);
     }
 }

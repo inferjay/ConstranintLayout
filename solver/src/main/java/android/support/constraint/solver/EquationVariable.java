@@ -19,7 +19,7 @@ package android.support.constraint.solver;
 /**
  * EquationVariable is used to represent a variable in a {@link LinearEquation LinearEquation}
  */
-public class EquationVariable {
+class EquationVariable {
 
     private Amount mAmount = null;
     private SolverVariable mVariable = null;

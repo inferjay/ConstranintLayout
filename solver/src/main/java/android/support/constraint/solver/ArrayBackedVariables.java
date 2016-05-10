@@ -21,7 +21,7 @@ import java.util.Arrays;
 /**
  * Store a set of variables and their values in an array.
  */
-public class ArrayBackedVariables {
+class ArrayBackedVariables {
     private static final boolean DEBUG = false;
 
     SolverVariable[] variables = null;
