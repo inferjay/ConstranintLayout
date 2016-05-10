@@ -738,21 +738,27 @@ public class ConstraintLayout extends ViewGroup {
                     endToEnd = a.getResourceId(attr, endToEnd);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_containerItemSkip) {
                     containerSkip = a.getInteger(attr, containerSkip);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_Bias) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_bias) {
                     horizontalBias = a.getFloat(attr, horizontalBias);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_Bias) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_bias) {
                     verticalBias = a.getFloat(attr, verticalBias);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintDimensionRatio) {
                     String ratio = a.getString(attr);
-                    int colonIndex = ratio.indexOf(':');
-                    if (colonIndex >= 0 && colonIndex < ratio.length() - 1) {
-                        String nominator = ratio.substring(0, colonIndex);
-                        String denominator = ratio.substring(colonIndex + 1);
-                        if (nominator.length() > 0 && denominator.length() > 0) {
-                            float nominatorValue = Float.parseFloat(nominator);
-                            float denominatorValue = Float.parseFloat(denominator);
-                            if (denominatorValue > 0) {
-                                dimensionRatio = nominatorValue / denominatorValue;
+                    if (ratio != null) {
+                        int colonIndex = ratio.indexOf(':');
+                        if (colonIndex >= 0 && colonIndex < ratio.length() - 1) {
+                            String nominator = ratio.substring(0, colonIndex);
+                            String denominator = ratio.substring(colonIndex + 1);
+                            if (nominator.length() > 0 && denominator.length() > 0) {
+                                try {
+                                    float nominatorValue = Float.parseFloat(nominator);
+                                    float denominatorValue = Float.parseFloat(denominator);
+                                    if (nominatorValue > 0 && denominatorValue > 0) {
+                                        dimensionRatio = Math.abs(nominatorValue / denominatorValue);
+                                    }
+                                } catch (NumberFormatException e) {
+                                    // Ignore
+                                }
                             }
                         }
                     }

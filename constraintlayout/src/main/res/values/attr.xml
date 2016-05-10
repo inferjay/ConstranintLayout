@@ -29,8 +29,8 @@
         <attr name="layout_constraintEnd_toStartOf" format="reference"/>
         <attr name="layout_constraintEnd_toEndOf" format="reference"/>
 
-        <attr name="layout_constraintHorizontal_Bias" format="float"/>
-        <attr name="layout_constraintVertical_Bias" format="float"/>
+        <attr name="layout_constraintHorizontal_bias" format="float"/>
+        <attr name="layout_constraintVertical_bias" format="float"/>
 
         <attr name="layout_constraintLeft_creator" format="integer"/>
         <attr name="layout_constraintTop_creator" format="integer"/>
