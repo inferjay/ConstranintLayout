@@ -35,7 +35,7 @@ public class Guideline extends ConstraintWidget {
     protected int mRelativeBegin = -1;
     protected int mRelativeEnd = -1;
 
-    private ConstraintAnchor mAnchor = mLeft;
+    private ConstraintAnchor mAnchor = mTop;
     private int mOrientation = HORIZONTAL;
     private boolean mIsPositionRelaxed = false;
     private int mMinimumPosition = 0;
@@ -64,7 +64,7 @@ public class Guideline extends ConstraintWidget {
     public Rectangle getHead() {
         mHead.setBounds(getDrawX() - mHeadSize, getDrawY() - 2 * mHeadSize, 2 * mHeadSize,
                 2 * mHeadSize);
-        if (getOrientation() == Guideline.VERTICAL) {
+        if (getOrientation() == HORIZONTAL) {
             mHead.setBounds(getDrawX() - 2 * mHeadSize,
                     getDrawY() - mHeadSize,
                     2 * mHeadSize, 2 * mHeadSize);
@@ -78,7 +78,7 @@ public class Guideline extends ConstraintWidget {
         }
         mOrientation = orientation;
         mAnchors.clear();
-        if (mOrientation == HORIZONTAL) {
+        if (mOrientation == VERTICAL) {
             mAnchor = mLeft;
         } else {
             mAnchor = mTop;
@@ -120,14 +120,14 @@ public class Guideline extends ConstraintWidget {
         switch (anchorType) {
             case LEFT:
             case RIGHT: {
-                if (mOrientation == HORIZONTAL) {
+                if (mOrientation == VERTICAL) {
                     return mAnchor;
                 }
             }
             break;
             case TOP:
             case BOTTOM: {
-                if (mOrientation == VERTICAL) {
+                if (mOrientation == HORIZONTAL) {
                     return mAnchor;
                 }
             }
@@ -185,7 +185,7 @@ public class Guideline extends ConstraintWidget {
         }
         ConstraintAnchor begin = parent.getAnchor(ConstraintAnchor.Type.LEFT);
         ConstraintAnchor end = parent.getAnchor(ConstraintAnchor.Type.RIGHT);
-        if (mOrientation == VERTICAL) {
+        if (mOrientation == HORIZONTAL) {
             begin = parent.getAnchor(ConstraintAnchor.Type.TOP);
             end = parent.getAnchor(ConstraintAnchor.Type.BOTTOM);
         }
@@ -238,7 +238,7 @@ public class Guideline extends ConstraintWidget {
             return;
         }
         int value = system.getObjectVariableValue(mAnchor);
-        if (mOrientation == HORIZONTAL) {
+        if (mOrientation == VERTICAL) {
             setX(value);
             setY(0);
             setHeight(getParent().getHeight());
@@ -253,7 +253,7 @@ public class Guideline extends ConstraintWidget {
 
     @Override
     public void setDrawOrigin(int x, int y) {
-        if (mOrientation == HORIZONTAL) {
+        if (mOrientation == VERTICAL) {
             int position = x - mOffsetX;
             if (mRelativeBegin != -1) {
                 setRelativeBegin(position);
@@ -278,7 +278,7 @@ public class Guideline extends ConstraintWidget {
 
     void inferRelativePercentPosition() {
         int percent = (int) (Math.ceil((getX() / (float) getParent().getWidth()) * 100));
-        if (mOrientation == VERTICAL) {
+        if (mOrientation == HORIZONTAL) {
             percent = (int) (Math.ceil((getY() / (float) getParent().getHeight()) * 100));
         }
         setRelativePercent(percent);
@@ -286,7 +286,7 @@ public class Guideline extends ConstraintWidget {
 
     void inferRelativeBeginPosition() {
         int position = getX();
-        if (mOrientation == VERTICAL) {
+        if (mOrientation == HORIZONTAL) {
             position = getY();
         }
         setRelativeBegin(position);
@@ -294,7 +294,7 @@ public class Guideline extends ConstraintWidget {
 
     void inferRelativeEndPosition() {
         int position = getParent().getWidth() - getX();
-        if (mOrientation == VERTICAL) {
+        if (mOrientation == HORIZONTAL) {
             position = getParent().getHeight() - getY();
         }
         setRelativeEnd(position);

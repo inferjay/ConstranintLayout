@@ -24,18 +24,26 @@ import android.view.View;
 public class Guideline extends View {
     public Guideline(Context context) {
         super(context);
+        super.setVisibility(View.GONE);
     }
 
     public Guideline(Context context, AttributeSet attrs) {
         super(context, attrs);
+        super.setVisibility(View.GONE);
     }
 
     public Guideline(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        super.setVisibility(View.GONE);
     }
 
     public Guideline(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        super.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
     }
 
     @Override

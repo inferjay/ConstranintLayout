@@ -258,7 +258,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             final ConstraintWidget widget = mChildren.get(i);
             if (widget instanceof Guideline) {
                 Guideline guideline = (Guideline) widget;
-                if (guideline.getOrientation() == Guideline.HORIZONTAL) {
+                if (guideline.getOrientation() == Guideline.VERTICAL) {
                     guidelines.add(guideline);
                 }
             }
@@ -276,7 +276,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             final ConstraintWidget widget = mChildren.get(i);
             if (widget instanceof Guideline) {
                 Guideline guideline = (Guideline) widget;
-                if (guideline.getOrientation() != Guideline.HORIZONTAL) {
+                if (guideline.getOrientation() == Guideline.HORIZONTAL) {
                     guidelines.add(guideline);
                 }
             }
