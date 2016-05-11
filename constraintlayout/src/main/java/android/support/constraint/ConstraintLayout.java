@@ -355,8 +355,8 @@ public class ConstraintLayout extends ViewGroup {
                     widget.setHeight(layoutParams.height);
                 }
 
-                if ((layoutParams.editorAbsoluteX != LayoutParams.UNSET)
-                        || (layoutParams.editorAbsoluteY != LayoutParams.UNSET)) {
+                if (isInEditMode() && ((layoutParams.editorAbsoluteX != LayoutParams.UNSET)
+                        || (layoutParams.editorAbsoluteY != LayoutParams.UNSET))) {
                     widget.setOrigin(layoutParams.editorAbsoluteX, layoutParams.editorAbsoluteY);
                 }
 
@@ -364,8 +364,9 @@ public class ConstraintLayout extends ViewGroup {
                     widget.setDimensionRatio(layoutParams.dimensionRatio);
                 }
 
-                if (hasBaseline(child)) {
-                    widget.setBaselineDistance(child.getBaseline());
+                int baseline = child.getBaseline();
+                if (baseline != -1) {
+                    widget.setBaselineDistance(baseline);
                 }
             }
         }
@@ -422,14 +423,11 @@ public class ConstraintLayout extends ViewGroup {
             widget.setWidth(width);
             widget.setHeight(height);
 
-            if (hasBaseline(child)) {
-                widget.setBaselineDistance(child.getBaseline());
+            int baseline = child.getBaseline();
+            if (baseline != -1) {
+                widget.setBaselineDistance(baseline);
             }
         }
-    }
-
-    private boolean hasBaseline(View view) {
-        return (view instanceof EditText) || (view instanceof TextView) || (view instanceof Spinner);
     }
 
     @Override

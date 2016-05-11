@@ -214,7 +214,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         setWidth(width);
         setHeight(height);
         if (this == getRootConstraintContainer()) {
-            updateDrawPosition();
+            forceUpdateDrawPosition();
         }
     }
 

@@ -1606,7 +1606,6 @@ public class ConstraintWidget implements Solvable {
                 && (this instanceof ConstraintWidgetContainer);
 
         if (mBaselineDistance > 0) {
-            SolverVariable top = system.createObjectVariable(mTop);
             SolverVariable bottom = system.createObjectVariable(mBottom);
             SolverVariable baseline = system.createObjectVariable(mBaseline);
             ConstraintAnchor end = mBottom;
