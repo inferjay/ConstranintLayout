@@ -7,6 +7,10 @@ compileJava {
     sourceCompatibility = 1.7
 }
 
+repositories {
+    jcenter()
+}
+
 dependencies {
     testCompile 'org.testng:testng:6.9.10'
 }
