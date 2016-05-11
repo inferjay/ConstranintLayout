@@ -57,6 +57,12 @@ public class WidgetContainer extends ConstraintWidget {
         super(width, height);
     }
 
+    @Override
+    public void reset() {
+        mChildren.clear();
+        super.reset();
+    }
+
     /**
      * Add a child widget
      *

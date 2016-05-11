@@ -57,7 +57,6 @@ public class ConstraintLayout extends ViewGroup {
 
     private static final String TAG = "ConstraintLayout";
 
-    final HashMap<View, ConstraintWidget> mConstrainedViews = new HashMap<>();
     private final ArrayList<ConstraintWidget> mConstrainedWidgets = new ArrayList<>();
     private final HashMap<View, ConstraintWidget> mConstrainedViewTargets = new HashMap<>();
     private final ArrayList<ConstraintWidget> mConstrainedTargets = new ArrayList<>();
@@ -95,8 +94,9 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     private void updateHierarchy() {
-        mLayoutWidget = null;
-        mConstrainedViews.clear();
+        if (mLayoutWidget != null) {
+            mLayoutWidget.reset();
+        }
         mConstrainedWidgets.clear();
         mConstrainedViewTargets.clear();
         mConstrainedTargets.clear();
@@ -104,63 +104,54 @@ public class ConstraintLayout extends ViewGroup {
 
         mLayoutWidget = getLayoutWidget();
         mLayoutWidget.setCompanionWidget(this);
-        mConstrainedViews.put(this, mLayoutWidget);
         final int count = getChildCount();
 
         // First, let's gather all the children
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            if (!mConstrainedViews.containsKey(child)) {
-                ConstraintWidget widget;
-                if (child instanceof Guideline) {
-                    final LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
-                    android.support.constraint.solver.widgets.Guideline guideline = new android.support.constraint.solver.widgets.Guideline();
-                    if (layoutParams.orientation == LayoutParams.HORIZONTAL) {
-                        guideline.setOrientation(android.support.constraint.solver.widgets.Guideline.VERTICAL);
-                    } else {
-                        guideline.setOrientation(android.support.constraint.solver.widgets.Guideline.HORIZONTAL);
-                    }
-                    if (layoutParams.relativeBegin != -1) {
-                        guideline.setRelativeBegin(layoutParams.relativeBegin);
-                    }
-                    if (layoutParams.relativeEnd != -1) {
-                        guideline.setRelativeEnd(layoutParams.relativeEnd);
-                    }
-                    if (layoutParams.relativePercent != -1) {
-                        guideline.setRelativePercent(layoutParams.relativePercent);
-                    }
-                    guideline.setCompanionWidget(child);
-                    guideline.setParent(mLayoutWidget);
-                    mLayoutWidget.add(guideline);
-                    mConstrainedTargets.add(guideline);
-                    mConstrainedViewTargets.put(child, guideline);
-                    continue;
-                } else if (ALLOWS_EMBEDDED && child instanceof ConstraintLayout) {
-                    widget = ((ConstraintLayout) child).getLayoutWidget();
+            if (child instanceof Guideline) {
+                final LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
+                android.support.constraint.solver.widgets.Guideline guideline = new android.support.constraint.solver.widgets.Guideline();
+                if (layoutParams.orientation == LayoutParams.HORIZONTAL) {
+                    guideline.setOrientation(android.support.constraint.solver.widgets.Guideline.VERTICAL);
                 } else {
-                    widget = new ConstraintWidget();
+                    guideline.setOrientation(android.support.constraint.solver.widgets.Guideline.HORIZONTAL);
                 }
-                addConstrainedChild(child, widget);
+                if (layoutParams.relativeBegin != -1) {
+                    guideline.setRelativeBegin(layoutParams.relativeBegin);
+                }
+                if (layoutParams.relativeEnd != -1) {
+                    guideline.setRelativeEnd(layoutParams.relativeEnd);
+                }
+                if (layoutParams.relativePercent != -1) {
+                    guideline.setRelativePercent(layoutParams.relativePercent);
+                }
+                guideline.setCompanionWidget(child);
+                guideline.setParent(mLayoutWidget);
+                mLayoutWidget.add(guideline);
+                mConstrainedTargets.add(guideline);
+                mConstrainedViewTargets.put(child, guideline);
+                continue;
             }
+            addConstrainedChild(child);
         }
         setChildrenConstraints();
     }
 
-    private void addConstrainedChild(View child, ConstraintWidget widget) {
-        mConstrainedViews.put(child, widget);
+    private void addConstrainedChild(View child) {
+        ConstraintWidget widget = getViewWidget(child);
+        // TODO: see if we can only partially reset the widget
+        widget.reset();
         mConstrainedWidgets.add(widget);
         widget.setCompanionWidget(child);
-        if (mLayoutWidget != null) {
-            ConstraintWidgetContainer container = mLayoutWidget;
-            container.add(widget);
-        }
+        mLayoutWidget.add(widget);
     }
 
     void setChildrenConstraints() {
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            ConstraintWidget widget = mConstrainedViews.get(child);
+            ConstraintWidget widget = getViewWidget(child);
             if (widget == null) {
                 continue;
             }
@@ -205,7 +196,7 @@ public class ConstraintLayout extends ViewGroup {
                 // Left constraint
                 if (layoutParams.lefToLeft != LayoutParams.UNSET) {
                     View view = findViewById(layoutParams.lefToLeft);
-                    ConstraintWidget target = mConstrainedViews.get(view);
+                    ConstraintWidget target = getViewWidget(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
                     }
@@ -216,7 +207,7 @@ public class ConstraintLayout extends ViewGroup {
                 }
                 if (layoutParams.leftToRight != LayoutParams.UNSET) {
                     View view = findViewById(layoutParams.leftToRight);
-                    ConstraintWidget target = mConstrainedViews.get(view);
+                    ConstraintWidget target = getViewWidget(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
                     }
@@ -229,7 +220,7 @@ public class ConstraintLayout extends ViewGroup {
                 // Right constraint
                 if (layoutParams.rightToLeft != LayoutParams.UNSET) {
                     View view = findViewById(layoutParams.rightToLeft);
-                    ConstraintWidget target = mConstrainedViews.get(view);
+                    ConstraintWidget target = getViewWidget(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
                     }
@@ -240,7 +231,7 @@ public class ConstraintLayout extends ViewGroup {
                 }
                 if (layoutParams.rightToRight != LayoutParams.UNSET) {
                     View view = findViewById(layoutParams.rightToRight);
-                    ConstraintWidget target = mConstrainedViews.get(view);
+                    ConstraintWidget target = getViewWidget(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
                     }
@@ -253,7 +244,7 @@ public class ConstraintLayout extends ViewGroup {
                 // Top constraint
                 if (layoutParams.topToTop != LayoutParams.UNSET) {
                     View view = findViewById(layoutParams.topToTop);
-                    ConstraintWidget target = mConstrainedViews.get(view);
+                    ConstraintWidget target = getViewWidget(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
                     }
@@ -264,7 +255,7 @@ public class ConstraintLayout extends ViewGroup {
                 }
                 if (layoutParams.topToBottom != LayoutParams.UNSET) {
                     View view = findViewById(layoutParams.topToBottom);
-                    ConstraintWidget target = mConstrainedViews.get(view);
+                    ConstraintWidget target = getViewWidget(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
                     }
@@ -277,7 +268,7 @@ public class ConstraintLayout extends ViewGroup {
                 // Bottom constraint
                 if (layoutParams.bottomToTop != LayoutParams.UNSET) {
                     View view = findViewById(layoutParams.bottomToTop);
-                    ConstraintWidget target = mConstrainedViews.get(view);
+                    ConstraintWidget target = getViewWidget(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
                     }
@@ -288,7 +279,7 @@ public class ConstraintLayout extends ViewGroup {
                 }
                 if (layoutParams.bottomToBottom != LayoutParams.UNSET) {
                     View view = findViewById(layoutParams.bottomToBottom);
-                    ConstraintWidget target = mConstrainedViews.get(view);
+                    ConstraintWidget target = getViewWidget(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
                     }
@@ -300,7 +291,8 @@ public class ConstraintLayout extends ViewGroup {
 
                 // Baseline constraint
                 if (layoutParams.baselineToBaseline != LayoutParams.UNSET) {
-                    ConstraintWidget target = mConstrainedViews.get(findViewById(layoutParams.baselineToBaseline));
+                    View view = findViewById(layoutParams.baselineToBaseline);
+                    ConstraintWidget target = getViewWidget(view);
                     if (target != null) {
                         widget.connect(ConstraintAnchor.Type.BASELINE, target,
                                 ConstraintAnchor.Type.BASELINE);
@@ -310,7 +302,7 @@ public class ConstraintLayout extends ViewGroup {
                 // Horizontal Center constraint
                 if (layoutParams.centerXToCenterX != LayoutParams.UNSET) {
                     View view = findViewById(layoutParams.centerXToCenterX);
-                    ConstraintWidget target = mConstrainedViews.get(view);
+                    ConstraintWidget target = getViewWidget(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
                     }
@@ -325,7 +317,7 @@ public class ConstraintLayout extends ViewGroup {
                 // Vertical Center constraint
                 if (layoutParams.centerYToCenterY != LayoutParams.UNSET) {
                     View view = findViewById(layoutParams.centerYToCenterY);
-                    ConstraintWidget target = mConstrainedViews.get(view);
+                    ConstraintWidget target = getViewWidget(view);
                     if (target == null) {
                         target = mConstrainedViewTargets.get(view);
                     }
@@ -377,6 +369,11 @@ public class ConstraintLayout extends ViewGroup {
                 }
             }
         }
+    }
+
+    ConstraintWidget getViewWidget(View view) {
+        if (view instanceof ConstraintLayout) return ((ConstraintLayout) view).getLayoutWidget();
+        return view == null ? null : ((LayoutParams) view.getLayoutParams()).widget;
     }
 
     void internalMeasureChildren(int parentWidthSpec, int parentHeightSpec) {
@@ -687,6 +684,8 @@ public class ConstraintLayout extends ViewGroup {
         int numColumns = 1;
         String columnsAlignment = null;
         int padding = 0;
+
+        final ConstraintWidget widget = new ConstraintWidget();
 
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);

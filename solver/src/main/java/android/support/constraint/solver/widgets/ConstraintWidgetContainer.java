@@ -71,6 +71,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         return "ConstraintLayout";
     }
 
+    @Override
+    public void reset() {
+        mSystem.reset();
+        mSnapshot.updateFrom(this);
+        super.reset();
+    }
+
     /**
      * Set a new ConstraintWidgetContainer containing the list of supplied
      * children. The dimensions of the container will be the bounding box

@@ -54,7 +54,7 @@ public class ConstraintAnchor {
     private int mMargin;
     private Strength mStrength = Strength.NONE;
     private ConnectionType mConnectionType = ConnectionType.RELAXED;
-    private int mConnectionCreator = 0;
+    private int mConnectionCreator = USER_CREATOR;
 
     /**
      * Constructor
@@ -132,7 +132,8 @@ public class ConstraintAnchor {
         mTarget = null;
         mMargin = 0;
         mStrength = Strength.NONE;
-        mConnectionCreator = AUTO_CONSTRAINT_CREATOR;
+        mConnectionCreator = USER_CREATOR;
+        mConnectionType = ConnectionType.RELAXED;
     }
 
     /**

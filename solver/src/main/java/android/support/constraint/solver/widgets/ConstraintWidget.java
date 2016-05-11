@@ -41,9 +41,8 @@ import java.util.ArrayList;
  */
 public class ConstraintWidget implements Solvable {
     private static final boolean AUTOTAG_CENTER = false;
+
     private Animator mAnimator = new Animator(this);
-    private String mDebugName = null;
-    private String mType = null;
 
     public final static int VISIBLE = 0;
     public final static int INVISIBLE = 4;
@@ -74,7 +73,7 @@ public class ConstraintWidget implements Solvable {
     private ConstraintAnchor mCenterY = new ConstraintAnchor(this, ConstraintAnchor.Type.CENTER_Y);
     private ConstraintAnchor mCenter = new ConstraintAnchor(this, ConstraintAnchor.Type.CENTER);
 
-    protected ArrayList<ConstraintAnchor> mAnchors = new ArrayList<ConstraintAnchor>();
+    protected ArrayList<ConstraintAnchor> mAnchors = new ArrayList<>();
 
     // Parent of this widget
     private ConstraintWidget mParent = null;
@@ -130,6 +129,47 @@ public class ConstraintWidget implements Solvable {
     // Contains the visibility status of the widget (VISIBLE, INVISIBLE, or GONE)
     private int mVisibility = VISIBLE;
 
+    private String mDebugName = null;
+    private String mType = null;
+
+    // TODO: see if we can make this simpler
+    public void reset() {
+        mLeft.reset();
+        mTop.reset();
+        mRight.reset();
+        mBottom.reset();
+        mBaseline.reset();
+        mCenterX.reset();
+        mCenterY.reset();
+        mCenter.reset();
+        mParent = null;
+        mWidth = 0;
+        mHeight = 0;
+        mDimensionRatio = 0.0f;
+        mX = 0;
+        mY = 0;
+        mDrawX = 0;
+        mDrawY = 0;
+        mDrawWidth = 0;
+        mDrawHeight = 0;
+        mOffsetX = 0;
+        mOffsetY = 0;
+        mBaselineDistance = 0;
+        mMinWidth = 0;
+        mMinHeight = 0;
+        mWrapWidth = 0;
+        mWrapHeight = 0;
+        mHorizontalBiasPercent = DEFAULT_BIAS;
+        mVerticalBiasPercent = DEFAULT_BIAS;
+        mHorizontalDimensionBehaviour = DimensionBehaviour.FIXED;
+        mVerticalDimensionBehaviour = DimensionBehaviour.FIXED;
+        mCompanionWidget = null;
+        mContainerItemSkip = 0;
+        mVisibility = VISIBLE;
+        mDebugName = null;
+        mType = null;
+    }
+
     /*-----------------------------------------------------------------------*/
     // Creation
     /*-----------------------------------------------------------------------*/
@@ -179,7 +219,7 @@ public class ConstraintWidget implements Solvable {
         mAnchors.add(mCenterX);
         mAnchors.add(mCenterY);
         if (ConstraintAnchor.USE_CENTER_ANCHOR) {
-            mAnchors.add(mCenter);
+           mAnchors.add(mCenter);
         }
         mAnchors.add(mBaseline);
     }

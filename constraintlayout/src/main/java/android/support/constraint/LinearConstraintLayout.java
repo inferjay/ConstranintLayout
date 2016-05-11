@@ -60,7 +60,7 @@ import android.support.constraint.solver.widgets.ConstraintWidget;
             if (child.getVisibility() == GONE) {
                 continue;
             }
-            ConstraintWidget widget = mConstrainedViews.get(child);
+            ConstraintWidget widget = getViewWidget(child);
             widget.setParent(mLayoutWidget);
             if (mIsHorizontal) {
                 widget.connect(ConstraintAnchor.Type.TOP, mLayoutWidget, ConstraintAnchor.Type.TOP);
@@ -91,5 +91,4 @@ import android.support.constraint.solver.widgets.ConstraintWidget;
             }
         }
     }
-
 }
