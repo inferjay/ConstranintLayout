@@ -762,8 +762,18 @@ public class ConstraintLayout extends ViewGroup {
                             }
                         }
                     }
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_creator) {
+                    // Skip
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_creator) {
+                    // Skip
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_creator) {
+                    // Skip
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBottom_creator) {
+                    // Skip
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBaseline_creator) {
+                    // Skip
                 } else {
-                    Log.w(TAG, " Unknown attribute 0x" + Integer.toHexString(attr));
+                    Log.w(TAG, "Unknown attribute 0x" + Integer.toHexString(attr));
                 }
             }
 
