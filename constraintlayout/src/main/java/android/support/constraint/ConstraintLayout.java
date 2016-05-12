@@ -20,23 +20,18 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.TextView;
-
 import android.support.constraint.solver.LinearSystem;
 import android.support.constraint.solver.widgets.Animator;
 import android.support.constraint.solver.widgets.ConstraintAnchor;
 import android.support.constraint.solver.widgets.ConstraintWidget;
-import android.support.constraint.solver.widgets.Guideline;
 import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
+import android.support.constraint.solver.widgets.Guideline;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * A Layout where the positions of the children is described as constraints in relation to each
@@ -143,9 +138,9 @@ public class ConstraintLayout extends ViewGroup {
 
             final LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
             if ((widget instanceof Guideline)
-                && (layoutParams.relativeBegin != LayoutParams.UNSET)
+                && ((layoutParams.relativeBegin != LayoutParams.UNSET)
                 || (layoutParams.relativeEnd != LayoutParams.UNSET)
-                || (layoutParams.relativePercent != LayoutParams.UNSET)) {
+                || (layoutParams.relativePercent != LayoutParams.UNSET))) {
                 Guideline guideline = (Guideline) widget;
                 if (layoutParams.relativeBegin != -1) {
                     guideline.setRelativeBegin(layoutParams.relativeBegin);
@@ -271,8 +266,14 @@ public class ConstraintLayout extends ViewGroup {
                     View view = findViewById(layoutParams.baselineToBaseline);
                     ConstraintWidget target = getViewWidget(view);
                     if (target != null) {
-                        widget.connect(ConstraintAnchor.Type.BASELINE, target,
-                                ConstraintAnchor.Type.BASELINE);
+                        ConstraintAnchor baseline = widget.getAnchor(ConstraintAnchor.Type.BASELINE);
+                        ConstraintAnchor targetBaseline =
+                                target.getAnchor(ConstraintAnchor.Type.BASELINE);
+                        baseline.connect(targetBaseline, 0, ConstraintAnchor.Strength.STRONG,
+                                ConstraintAnchor.USER_CREATOR, true);
+
+                        widget.getAnchor(ConstraintAnchor.Type.TOP).reset();
+                        widget.getAnchor(ConstraintAnchor.Type.BOTTOM).reset();
                     }
                 }
 
