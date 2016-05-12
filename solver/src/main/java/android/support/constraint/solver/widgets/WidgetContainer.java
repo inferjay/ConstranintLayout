@@ -241,8 +241,8 @@ public class WidgetContainer extends ConstraintWidget {
      * Recursive call to the children
      */
     @Override
-    public void forceUpdateDrawPosition() {
-        super.forceUpdateDrawPosition();
+    public void updateDrawPosition() {
+        super.updateDrawPosition();
         if (mChildren == null) {
             return;
         }
@@ -250,7 +250,7 @@ public class WidgetContainer extends ConstraintWidget {
         for (int i = 0; i < count; i++) {
             ConstraintWidget widget = mChildren.get(i);
             widget.setOffset(getDrawX(), getDrawY());
-            widget.forceUpdateDrawPosition();
+            widget.updateDrawPosition();
         }
     }
 
@@ -258,7 +258,7 @@ public class WidgetContainer extends ConstraintWidget {
      * Function implemented by ConstraintWidgetContainer
      */
     public void layout() {
-        forceUpdateDrawPosition();
+        updateDrawPosition();
         if (mChildren == null) {
             return;
         }
