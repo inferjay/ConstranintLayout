@@ -30,15 +30,11 @@ public class Animator {
 
     private boolean mAnimating = false;
 
-    public static boolean isAnimationEnabled() {
-        return sAllowsAnimation;
-    }
+    private static boolean sAllowsAnimation = false;
 
     public static void setAnimationEnabled(boolean value) {
         sAllowsAnimation = value;
     }
-
-    private static boolean sAllowsAnimation = false;
 
     public static boolean doAnimation() {
         return sAllowsAnimation;
