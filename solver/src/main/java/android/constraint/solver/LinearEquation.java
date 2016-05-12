@@ -1,0 +1,853 @@
+/*
+ * Copyright (C) 2015 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.constraint.solver;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+
+/**
+ * LinearEquation is used to represent the linear equations fed into the solver.<br>
+ * A linear equation can be an equality or an inequation (left term &le; or &ge; to the right term).<br>
+ * The general form will be similar to a0x0 + a1x1 + ... = C + a2x2 + a3x3 + ... , where a0x0 is a term representing
+ * a variable x0 of an amount a0, and C represent a constant term. The amount of terms on the left side or the right
+ * side of the equation is arbitrary.
+ */
+class LinearEquation {
+
+    private ArrayList<android.constraint.solver.EquationVariable> mLeftSide = new ArrayList<>();
+    private ArrayList<android.constraint.solver.EquationVariable> mRightSide = new ArrayList<>();
+    private ArrayList<android.constraint.solver.EquationVariable> mCurrentSide = null;
+
+    public boolean isNull() {
+        if (mLeftSide.size() == 0 && mRightSide.size() == 0) {
+            return true;
+        }
+        if (mLeftSide.size() == 1 && mRightSide.size() == 1) {
+            android.constraint.solver.EquationVariable v1 = mLeftSide.get(0);
+            android.constraint.solver.EquationVariable v2 = mRightSide.get(0);
+            if (v1.isConstant() && v2.isConstant() && v1.getAmount().isNull() && v2.getAmount().isNull()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private enum Type {EQUALS, LOWER_THAN, GREATER_THAN}
+
+    private Type mType = Type.EQUALS;
+
+    private LinearSystem mSystem = null;
+
+    private static int artificialIndex = 0;
+    private static int slackIndex = 0;
+    private static int errorIndex = 0;
+
+    static String getNextArtificialVariableName() {
+        return "a" + ++artificialIndex;
+    }
+    static String getNextSlackVariableName() {
+        return "s" + ++slackIndex;
+    }
+    static String getNextErrorVariableName() {
+        return "e" + ++errorIndex;
+    }
+
+    /**
+     * Reset the counters for the automatic slack and error variable naming
+     */
+    public static void resetNaming() {
+        artificialIndex = 0;
+        slackIndex = 0;
+        errorIndex = 0;
+    }
+
+    /**
+     * Copy constructor
+     * @param equation to copy
+     */
+    public LinearEquation(LinearEquation equation) {
+        final ArrayList<android.constraint.solver.EquationVariable> mLeftSide1 = equation.mLeftSide;
+        for (int i = 0, mLeftSide1Size = mLeftSide1.size(); i < mLeftSide1Size; i++) {
+            final android.constraint.solver.EquationVariable v = mLeftSide1.get(i);
+            android.constraint.solver.EquationVariable v2 = new android.constraint.solver.EquationVariable(v);
+            mLeftSide.add(v2);
+        }
+        final ArrayList<android.constraint.solver.EquationVariable> mRightSide1 = equation.mRightSide;
+        for (int i = 0, mRightSide1Size = mRightSide1.size(); i < mRightSide1Size; i++) {
+            final android.constraint.solver.EquationVariable v = mRightSide1.get(i);
+            android.constraint.solver.EquationVariable v2 = new android.constraint.solver.EquationVariable(v);
+            mRightSide.add(v2);
+        }
+        mCurrentSide = mRightSide;
+    }
+
+    /**
+     * Insert the equation in the system
+     */
+    public void i() {
+        if (mSystem == null) {
+            return;
+        }
+        mSystem.addConstraint(this);
+    }
+
+    /**
+     * Set the current side to be the left side
+     */
+    public void setLeftSide() {
+        mCurrentSide = mLeftSide;
+    }
+
+    /**
+     * Remove any terms on the left side of the equation
+     */
+    public void clearLeftSide() {
+        mLeftSide.clear();
+    }
+
+    /**
+     * Remove {@link android.constraint.solver.EquationVariable} pointing to {@link android.constraint.solver.SolverVariable}
+     * @param v the {@link android.constraint.solver.SolverVariable} we want to remove from the equation
+     */
+    public void remove(android.constraint.solver.SolverVariable v) {
+        android.constraint.solver.EquationVariable ev = find(v, mLeftSide);
+        if (ev != null) {
+            mLeftSide.remove(ev);
+        }
+        ev = find(v, mRightSide);
+        if (ev != null) {
+            mRightSide.remove(ev);
+        }
+    }
+
+    /**
+     * Base constructor, set the current side to the left side.
+     */
+    public LinearEquation() {
+        mCurrentSide = mLeftSide;
+    }
+
+    /**
+     * Base constructor, set the current side to the left side.
+     */
+    public LinearEquation(LinearSystem system) {
+        mCurrentSide = mLeftSide;
+        mSystem = system;
+    }
+
+    /**
+     * Set the current equation system for this equation
+     * @param system the equation system this equation belongs to
+     */
+    public void setSystem(LinearSystem system) {
+        mSystem = system;
+    }
+
+    /**
+     * Set the equality operator for the equation, and switch the current side to the right side
+     * @return this
+     */
+    public LinearEquation equalsTo() {
+        mCurrentSide = mRightSide;
+        return this;
+    }
+
+    /**
+     * Set the greater than operator for the equation, and switch the current side to the right side
+     * @return this
+     */
+    public LinearEquation greaterThan() {
+        mCurrentSide = mRightSide;
+        mType = Type.GREATER_THAN;
+        return this;
+    }
+
+    /**
+     * Set the lower than operator for the equation, and switch the current side to the right side
+     * @return this
+     */
+    public LinearEquation lowerThan() {
+        mCurrentSide = mRightSide;
+        mType = Type.LOWER_THAN;
+        return this;
+    }
+
+    /**
+     * Normalize the linear equation. If the equation is an equality, transforms it into
+     * an equality, adding automatically slack or error variables.
+     */
+    public void normalize() {
+        if (mType == Type.EQUALS) {
+            return;
+        }
+        mCurrentSide = mLeftSide;
+        if (mType == Type.LOWER_THAN) {
+            withSlack(1);
+        } else if (mType == Type.GREATER_THAN) {
+            withSlack(-1);
+        }
+        mType = Type.EQUALS;
+        mCurrentSide = mRightSide;
+    }
+
+    /**
+     * Will simplify the equation per side -- regroup similar variables into one.
+     * E.g. 2a + b + 3a = b - c will be turned into 5a + b = b - c.
+     */
+    public void simplify() {
+        simplifySide(mLeftSide);
+        simplifySide(mRightSide);
+    }
+
+    /**
+     * Simplify an array of {@link android.constraint.solver.EquationVariable}
+     * @param side Array of EquationVariable
+     */
+    private void simplifySide(ArrayList<android.constraint.solver.EquationVariable> side) {
+        android.constraint.solver.EquationVariable constant = null;
+        HashMap<String, android.constraint.solver.EquationVariable> variables = new HashMap<>();
+        ArrayList<String> variablesNames = new ArrayList<>();
+        for (int i = 0, sideSize = side.size(); i < sideSize; i++) {
+            final android.constraint.solver.EquationVariable v = side.get(i);
+            if (v.isConstant()) {
+                if (constant == null) {
+                    constant = v;
+                } else {
+                    constant.add(v);
+                }
+            } else {
+                if (variables.containsKey(v.getName())) {
+                    android.constraint.solver.EquationVariable original = variables.get(v.getName());
+                    original.add(v);
+                } else {
+                    variables.put(v.getName(), v);
+                    variablesNames.add(v.getName());
+                }
+            }
+        }
+        side.clear();
+        if (constant != null) {
+            side.add(constant);
+        }
+        Collections.sort(variablesNames);
+        for (int i = 0, variablesNamesSize = variablesNames.size(); i < variablesNamesSize; i++) {
+            final String name = variablesNames.get(i);
+            android.constraint.solver.EquationVariable v = variables.get(name);
+            side.add(v);
+        }
+        removeNullTerms(side);
+    }
+
+    public void moveAllToTheRight() {
+        for (int i = 0, mLeftSideSize = mLeftSide.size(); i < mLeftSideSize; i++) {
+            final android.constraint.solver.EquationVariable v = mLeftSide.get(i);
+            mRightSide.add(v.inverse());
+        }
+        mLeftSide.clear();
+    }
+
+    /**
+     * Balance an equation to have only one term on the left side.
+     * The preference is to first pick an unconstrained variable, then a slack variable, then an error variable.
+     */
+    public void balance() {
+        if (mLeftSide.size() == 0 && mRightSide.size() == 0) {
+            return;
+        }
+        mCurrentSide = mLeftSide;
+        for (int i = 0, mLeftSideSize = mLeftSide.size(); i < mLeftSideSize; i++) {
+            final android.constraint.solver.EquationVariable v = mLeftSide.get(i);
+            mRightSide.add(v.inverse());
+        }
+        mLeftSide.clear();
+        simplifySide(mRightSide);
+        android.constraint.solver.EquationVariable found = null;
+        for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+            final android.constraint.solver.EquationVariable v = mRightSide.get(i);
+            if (v.getType() == android.constraint.solver.SolverVariable.Type.UNRESTRICTED) {
+                found = v;
+                break;
+            }
+        }
+        if (found == null) {
+            for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+                final android.constraint.solver.EquationVariable v = mRightSide.get(i);
+                if (v.getType() == android.constraint.solver.SolverVariable.Type.SLACK) {
+                    found = v;
+                    break;
+                }
+            }
+        }
+        if (found == null) {
+            for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+                final android.constraint.solver.EquationVariable v = mRightSide.get(i);
+                if (v.getType() == android.constraint.solver.SolverVariable.Type.ERROR) {
+                    found = v;
+                    break;
+                }
+            }
+        }
+        if (found == null) {
+            return;
+        }
+        mRightSide.remove(found);
+        found.inverse();
+        if (!found.getAmount().isOne()) {
+            android.constraint.solver.Amount foundAmount = found.getAmount();
+            for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+                final android.constraint.solver.EquationVariable v = mRightSide.get(i);
+                v.getAmount().divide(foundAmount);
+            }
+            found.setAmount(new android.constraint.solver.Amount(1));
+        }
+        simplifySide(mRightSide);
+        mLeftSide.add(found);
+    }
+
+    /**
+     * Check the equation to possibly remove null terms
+     */
+    private void removeNullTerms(ArrayList<android.constraint.solver.EquationVariable> list) {
+        boolean hasNullTerm = false;
+        for (int i = 0, listSize = list.size(); i < listSize; i++) {
+            final android.constraint.solver.EquationVariable v = list.get(i);
+            if (v.getAmount().isNull()) {
+                hasNullTerm = true;
+                break;
+            }
+        }
+        if (hasNullTerm) {
+            // if some elements are now zero, we need to remove them from the right side
+            ArrayList<android.constraint.solver.EquationVariable> newSide;
+            newSide = new ArrayList<>();
+            for (int i = 0, listSize = list.size(); i < listSize; i++) {
+                final android.constraint.solver.EquationVariable v = list.get(i);
+                if (!v.getAmount().isNull()) {
+                    newSide.add(v);
+                }
+            }
+            list.clear();
+            list.addAll(newSide);
+        }
+    }
+
+    /**
+     * Pivot this equation on the variable -- e.g. the variable will be the only term on the left side of the equation.
+     * @param variable variable pivoted on
+     */
+    public void pivot(android.constraint.solver.SolverVariable variable) {
+        if (mLeftSide.size() == 1
+                && mLeftSide.get(0).getSolverVariable() == variable) {
+            // no-op, we're already pivoted.
+            return;
+        }
+        for (int i = 0, mLeftSideSize = mLeftSide.size(); i < mLeftSideSize; i++) {
+            final android.constraint.solver.EquationVariable v = mLeftSide.get(i);
+            mRightSide.add(v.inverse());
+        }
+        mLeftSide.clear();
+        simplifySide(mRightSide);
+        android.constraint.solver.EquationVariable found = null;
+        for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+            final android.constraint.solver.EquationVariable v = mRightSide.get(i);
+            if (v.getSolverVariable() == variable) {
+                found = v;
+                break;
+            }
+        }
+        if (found != null) {
+            mRightSide.remove(found);
+            found.inverse();
+            if (!found.getAmount().isOne()) {
+                android.constraint.solver.Amount foundAmount = found.getAmount();
+                for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+                    final android.constraint.solver.EquationVariable v = mRightSide.get(i);
+                    v.getAmount().divide(foundAmount);
+                }
+                found.setAmount(new android.constraint.solver.Amount(1));
+            }
+            mLeftSide.add(found);
+        }
+    }
+
+    /**
+     * Returns true if the constant is negative
+     * @return true if the constant is negative.
+     */
+    public boolean hasNegativeConstant() {
+        for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+            final android.constraint.solver.EquationVariable v = mRightSide.get(i);
+            if (v.isConstant()) {
+                if (v.getAmount().isNegative()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * If present, returns the constant on the right side of the equation.
+     * The equation is expected to be balanced before using this function.
+     * @return The equation constant
+     */
+    public android.constraint.solver.Amount getConstant() {
+        for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+            final android.constraint.solver.EquationVariable v = mRightSide.get(i);
+            if (v.isConstant()) {
+                return v.getAmount();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Inverse the equation (multiply both left and right terms by -1)
+     */
+    public void inverse() {
+        android.constraint.solver.Amount amount = new android.constraint.solver.Amount(-1);
+        for (int i = 0, mLeftSideSize = mLeftSide.size(); i < mLeftSideSize; i++) {
+            final android.constraint.solver.EquationVariable v = mLeftSide.get(i);
+            v.multiply(amount);
+        }
+        for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+            final android.constraint.solver.EquationVariable v = mRightSide.get(i);
+            v.multiply(amount);
+        }
+    }
+
+    /**
+     * Returns the first unconstrained variable encountered in this equation
+     * @return an unconstrained variable or null if none are found
+     */
+    public android.constraint.solver.EquationVariable getFirstUnconstrainedVariable() {
+        for (int i = 0, mLeftSideSize = mLeftSide.size(); i < mLeftSideSize; i++) {
+            final android.constraint.solver.EquationVariable v = mLeftSide.get(i);
+            if (v.getType() == android.constraint.solver.SolverVariable.Type.UNRESTRICTED) {
+                return v;
+            }
+        }
+        for (int i = 0, mRightSideSize = mRightSide.size(); i < mRightSideSize; i++) {
+            final android.constraint.solver.EquationVariable v = mRightSide.get(i);
+            if (v.getType() == android.constraint.solver.SolverVariable.Type.UNRESTRICTED) {
+                return v;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the basic variable of the equation
+     * @return basic variable
+     */
+    public android.constraint.solver.EquationVariable getLeftVariable() {
+        if (mLeftSide.size() == 1) {
+            return mLeftSide.get(0);
+        }
+        return null;
+    }
+
+    /**
+     * Replace the variable v in this equation (left or right side) by the right side of the equation l
+     * @param v the variable to replace
+     * @param l the equation we use to replace it with
+     */
+    public void replace(android.constraint.solver.SolverVariable v, LinearEquation l) {
+        replace(v, l, mLeftSide);
+        replace(v, l, mRightSide);
+    }
+
+    /**
+     * Convenience function to replace the variable v possibly contained inside list
+     * by the right side of the equation l
+     * @param v the variable to replace
+     * @param l the equation we use to replace it with
+     * @param list the list of {@link android.constraint.solver.EquationVariable} to work on
+     */
+    private void replace(android.constraint.solver.SolverVariable v, LinearEquation l, ArrayList<android.constraint.solver.EquationVariable> list) {
+        android.constraint.solver.EquationVariable toReplace = find(v, list);
+        if (toReplace != null) {
+            list.remove(toReplace);
+            android.constraint.solver.Amount amount = toReplace.getAmount();
+            final ArrayList<android.constraint.solver.EquationVariable> mRightSide1 = l.mRightSide;
+            for (int i = 0, mRightSide1Size = mRightSide1.size(); i < mRightSide1Size; i++) {
+                final android.constraint.solver.EquationVariable lv = mRightSide1.get(i);
+                list.add(new android.constraint.solver.EquationVariable(amount, lv));
+            }
+        }
+    }
+
+    /**
+     * Returns the {@link android.constraint.solver.EquationVariable} associated to
+     * the {@link android.constraint.solver.SolverVariable} found in the
+     * list of {@link android.constraint.solver.EquationVariable}
+     * @param v the variable to find
+     * @param list list the list of {@link android.constraint.solver.EquationVariable} to search in
+     * @return the associated {@link android.constraint.solver.EquationVariable}
+     */
+    private android.constraint.solver.EquationVariable find(android.constraint.solver.SolverVariable v, ArrayList<android.constraint.solver.EquationVariable> list) {
+        for (int i = 0, listSize = list.size(); i < listSize; i++) {
+            final android.constraint.solver.EquationVariable ev = list.get(i);
+            if (ev.getSolverVariable() == v) {
+                return ev;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Accessor for the right side of the equation.
+     * @return the equation's right side.
+     */
+    public ArrayList<android.constraint.solver.EquationVariable> getRightSide() {
+        return mRightSide;
+    }
+
+    /**
+     * Returns true if this equation contains a give variable
+     * @param solverVariable the variable we are looking for
+     * @return true if found, false if not.
+     */
+    public boolean contains(android.constraint.solver.SolverVariable solverVariable) {
+        if (find(solverVariable, mLeftSide) != null) {
+            return true;
+        }
+        if (find(solverVariable, mRightSide) != null) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns the {@link android.constraint.solver.EquationVariable} associated with a given
+     * {@link android.constraint.solver.SolverVariable} in this equation
+     * @param solverVariable the variable we are looking for
+     * @return the {@link android.constraint.solver.EquationVariable} associated if found, otherwise null
+     */
+    public android.constraint.solver.EquationVariable getVariable(android.constraint.solver.SolverVariable solverVariable) {
+        android.constraint.solver.EquationVariable variable = find(solverVariable, mRightSide);
+        if (variable != null) {
+            return variable;
+        }
+        return find(solverVariable, mLeftSide);
+    }
+
+    /**
+     * Add a constant to the current side of the equation
+     *
+     * @param amount the value of the constant
+     * @return this
+     */
+    public LinearEquation var(int amount) {
+        android.constraint.solver.EquationVariable e = new android.constraint.solver.EquationVariable(mSystem, amount);
+        mCurrentSide.add(e);
+        return this;
+    }
+
+    /**
+     * Add a fractional constant to the current side of the equation
+     *
+     * @param numerator   the value of the constant's numerator
+     * @param denominator the value of the constant's denominator
+     * @return this
+     */
+    public LinearEquation var(int numerator, int denominator) {
+        android.constraint.solver.EquationVariable e = new android.constraint.solver.EquationVariable(new android.constraint.solver.Amount(numerator, denominator));
+        mCurrentSide.add(e);
+        return this;
+    }
+
+    /**
+     * Add an unrestricted variable to the current side of the equation
+     *
+     * @param name the name of the variable
+     * @return this
+     */
+    public LinearEquation var(String name) {
+        android.constraint.solver.EquationVariable e = new android.constraint.solver.EquationVariable(mSystem, name, android.constraint.solver.SolverVariable.Type.UNRESTRICTED);
+        mCurrentSide.add(e);
+        return this;
+    }
+
+    /**
+     * Add an unrestricted variable to the current side of the equation
+     *
+     * @param amount the amount of the variable
+     * @param name   the name of the variable
+     * @return this
+     */
+    public LinearEquation var(int amount, String name) {
+        android.constraint.solver.EquationVariable e = new android.constraint.solver.EquationVariable(mSystem, amount, name, android.constraint.solver.SolverVariable.Type.UNRESTRICTED);
+        mCurrentSide.add(e);
+        return this;
+    }
+
+    /**
+     * Add an unrestricted fractional variable to the current side of the equation
+     *
+     * @param numerator   the value of the variable's numerator
+     * @param denominator the value of the variable's denominator
+     * @param name        the name of the variable
+     * @return this
+     */
+    public LinearEquation var(int numerator, int denominator, String name) {
+        android.constraint.solver.Amount amount = new android.constraint.solver.Amount(numerator, denominator);
+        android.constraint.solver.EquationVariable e = new android.constraint.solver.EquationVariable(mSystem, amount, name, android.constraint.solver.SolverVariable.Type.UNRESTRICTED);
+        mCurrentSide.add(e);
+        return this;
+    }
+
+    /**
+     * Convenience function to add a variable, based on {@link LinearEquation#var(String) var)}
+     *
+     * @param name the variable's name
+     * @return this
+     */
+    public LinearEquation plus(String name) {
+        var(name);
+        return this;
+    }
+
+    /**
+     * Convenience function to add a variable, based on {@link LinearEquation#var(String) var)}
+     *
+     * @param amount the variable's amount
+     * @param name the variable's name
+     * @return this
+     */
+    public LinearEquation plus(int amount, String name) {
+        var(amount, name);
+        return this;
+    }
+
+    /**
+     * Convenience function to add a negative variable, based on {@link LinearEquation#var(String) var)}
+     *
+     * @param name the variable's name
+     * @return this
+     */
+    public LinearEquation minus(String name) {
+        var(-1, name);
+        return this;
+    }
+
+    /**
+     * Convenience function to add a negative variable, based on {@link LinearEquation#var(String) var)}
+     *
+     * @param amount the variable's amount
+     * @param name the variable's name
+     * @return this
+     */
+    public LinearEquation minus(int amount, String name) {
+        var(-1 * amount, name);
+        return this;
+    }
+
+    /**
+     * Convenience function to add a constant, based on {@link LinearEquation#var(int) var)}
+     *
+     * @param amount the constant's amount
+     * @return this
+     */
+    public LinearEquation plus(int amount) {
+        var(amount);
+        return this;
+    }
+
+    /**
+     * Convenience function to add a negative constant, based on {@link LinearEquation#var(int) var)}
+     *
+     * @param amount the constant's amount
+     * @return this
+     */
+    public LinearEquation minus(int amount) {
+        var(amount * -1);
+        return this;
+    }
+
+    /**
+     * Convenience function to add a fractional constant, based on {@link LinearEquation#var(int) var)}
+     *
+     * @param numerator   the value of the variable's numerator
+     * @param denominator the value of the variable's denominator
+     * @return this
+     */
+    public LinearEquation plus(int numerator, int denominator) {
+        var(numerator, denominator);
+        return this;
+    }
+
+    /**
+     * Convenience function to add a negative fractional constant, based on {@link LinearEquation#var(int) var)}
+     *
+     * @param numerator   the value of the constant's numerator
+     * @param denominator the value of the constant's denominator
+     * @return this
+     */
+    public LinearEquation minus(int numerator, int denominator) {
+        var(numerator * -1, denominator);
+        return this;
+    }
+
+    /**
+     * Add an error variable to the current side
+     *
+     * @param name     the name of the error variable
+     * @param strength the strength of the error variable
+     * @return this
+     */
+    public LinearEquation withError(String name, int strength) {
+        android.constraint.solver.EquationVariable e = new android.constraint.solver.EquationVariable(mSystem, strength, name, android.constraint.solver.SolverVariable.Type.ERROR);
+        mCurrentSide.add(e);
+        return this;
+    }
+
+    public LinearEquation withError(android.constraint.solver.Amount amount, String name) {
+        android.constraint.solver.EquationVariable e = new android.constraint.solver.EquationVariable(mSystem, amount, name, android.constraint.solver.SolverVariable.Type.ERROR);
+        mCurrentSide.add(e);
+        return this;
+    }
+
+    /**
+     * Add an error variable to the current side
+     * @return this
+     */
+    public LinearEquation withError() {
+        String name = getNextErrorVariableName();
+        withError(name + "+", 1);
+        withError(name + "-", -1);
+        return this;
+    }
+
+    public LinearEquation withPositiveError() {
+        String name = getNextErrorVariableName();
+        withError(name + "+", 1);
+        return this;
+    }
+
+    public LinearEquation withStrongError() {
+        String name = getNextErrorVariableName();
+        android.constraint.solver.EquationVariable e = new android.constraint.solver.EquationVariable(mSystem, 1, name + "+", android.constraint.solver.SolverVariable.Type.ERROR);
+        e.getSolverVariable().setStrength(android.constraint.solver.SolverVariable.Strength.STRONG);
+        mCurrentSide.add(e);
+        e = new android.constraint.solver.EquationVariable(mSystem, -1, name + "-", android.constraint.solver.SolverVariable.Type.ERROR);
+        e.getSolverVariable().setStrength(android.constraint.solver.SolverVariable.Strength.STRONG);
+        mCurrentSide.add(e);
+        return this;
+    }
+
+    public android.constraint.solver.EquationVariable addArtificialVar() {
+        android.constraint.solver.EquationVariable e = new android.constraint.solver.EquationVariable(mSystem, 1,
+                getNextArtificialVariableName(), android.constraint.solver.SolverVariable.Type.ERROR);
+        mCurrentSide.add(e);
+        return e;
+    }
+
+    /**
+     * Add an error variable to the current side
+     *
+     * @param strength the strength of the error variable
+     * @return this
+     */
+    public LinearEquation withError(int strength) {
+        withError(getNextErrorVariableName(), strength);
+        return this;
+    }
+
+    /**
+     * Add a slack variable to the current side
+     *
+     * @param name     the name of the slack variable
+     * @param strength the strength of the slack variable
+     * @return this
+     */
+    public LinearEquation withSlack(String name, int strength) {
+        android.constraint.solver.EquationVariable e = new android.constraint.solver.EquationVariable(mSystem, strength, name, android.constraint.solver.SolverVariable.Type.SLACK);
+        mCurrentSide.add(e);
+        return this;
+    }
+
+    public LinearEquation withSlack(android.constraint.solver.Amount amount, String name) {
+        android.constraint.solver.EquationVariable e = new android.constraint.solver.EquationVariable(mSystem, amount, name, android.constraint.solver.SolverVariable.Type.SLACK);
+        mCurrentSide.add(e);
+        return this;
+    }
+
+    /**
+     * Add a slack variable to the current side
+     * @return this
+     */
+    public LinearEquation withSlack() {
+        withSlack(getNextSlackVariableName(), 1);
+        return this;
+    }
+
+    /**
+     * Add a slack variable to the current side
+     *
+     * @param strength the strength of the slack variable
+     * @return this
+     */
+    public LinearEquation withSlack(int strength) {
+        withSlack(getNextSlackVariableName(), strength);
+        return this;
+    }
+
+    /**
+     * Override the toString() method to display the linear equation
+     */
+    @Override
+    public String toString() {
+        String result = "";
+        result = sideToString(mLeftSide);
+        switch (mType) {
+            case EQUALS: { result += "= "; break; }
+            case LOWER_THAN: { result += "<= "; break; }
+            case GREATER_THAN: { result += ">= "; break; }
+        }
+        result += sideToString(mRightSide);
+        return result.trim();
+    }
+
+    /**
+     * Returns a string representation of an array of {@link android.constraint.solver.EquationVariable}
+     * @param side array of {@link android.constraint.solver.EquationVariable}
+     * @return a String representation of the array of variables
+     */
+    private String sideToString(ArrayList<android.constraint.solver.EquationVariable> side) {
+        String result = "";
+        boolean first = true;
+        for (int i = 0, sideSize = side.size(); i < sideSize; i++) {
+            final android.constraint.solver.EquationVariable v = side.get(i);
+            if (first) {
+                if (v.getAmount().isPositive()) {
+                    result += v + " ";
+                } else {
+                    result += v.signString() + " " + v + " ";
+                }
+                first = false;
+            } else {
+                result += v.signString() + " " + v + " ";
+            }
+        }
+        if (side.size() == 0) {
+            result = "0";
+        }
+        return result;
+    }
+}
