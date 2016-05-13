@@ -484,6 +484,9 @@ public class ConstraintAnchor {
             final ConstraintAnchor anchor = targetAnchors.get(i);
             if (anchor.isSimilarDimensionConnection(this) && anchor.isConnected()) {
                 ConstraintWidget nextTarget = anchor.getTarget().getOwner();
+                if (nextTarget == anchor.getOwner()) {
+                    return false;
+                }
                 if (nextTarget == getOwner()) {
                     return false;
                 }
