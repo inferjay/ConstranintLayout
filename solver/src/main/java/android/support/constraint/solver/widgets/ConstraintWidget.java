@@ -241,6 +241,9 @@ public class ConstraintWidget implements Solvable {
      */
     public boolean hasAncestor(ConstraintWidget widget) {
         ConstraintWidget parent = getParent();
+        if (parent == widget) {
+            return true;
+        }
         if (parent == widget.getParent()) {
             return false; // the widget is one of our sibling
         }
