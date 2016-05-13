@@ -198,9 +198,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         }
 
         // Now let's solve our system as usual
-        mSystem.reset();
-        addToSolver(mSystem);
         try {
+            mSystem.reset();
+            addToSolver(mSystem);
             mSystem.minimize();
         } catch (Exception e) {
             e.printStackTrace();
