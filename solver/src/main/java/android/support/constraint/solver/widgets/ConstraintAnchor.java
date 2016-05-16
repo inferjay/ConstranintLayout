@@ -16,6 +16,7 @@
 package android.support.constraint.solver.widgets;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Model a constraint relation. Widgets contains anchors, and a constraint relation between
@@ -464,7 +465,20 @@ public class ConstraintAnchor {
      * @return true if the connection is allowed, false otherwise
      */
     public boolean isConnectionAllowed(ConstraintWidget target) {
-        if (target == getOwner()) {
+        HashSet<ConstraintWidget> checked = new HashSet<>();
+        checked.add(getOwner());
+        return isConnectionAllowedRecursive(target, checked);
+    }
+
+    /**
+     * Recursive with check for loop
+     *
+     * @param target
+     * @param checked
+     * @return
+     */
+    private boolean isConnectionAllowedRecursive(ConstraintWidget target, HashSet<ConstraintWidget> checked) {
+        if (checked.contains(target)) {
             // we connect back to ourselves
             return false;
         }
@@ -490,7 +504,7 @@ public class ConstraintAnchor {
                 if (nextTarget == getOwner()) {
                     return false;
                 }
-                if (!isConnectionAllowed(nextTarget)) {
+                if (!isConnectionAllowedRecursive(nextTarget, checked)) {
                     return false;
                 }
             }
