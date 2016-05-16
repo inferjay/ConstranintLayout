@@ -137,24 +137,26 @@ public class ConstraintLayout extends ViewGroup {
             widget.setParent(mLayoutWidget);
 
             final LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
-            if ((widget instanceof Guideline)
-                && ((layoutParams.relativeBegin != LayoutParams.UNSET)
-                || (layoutParams.relativeEnd != LayoutParams.UNSET)
-                || (layoutParams.relativePercent != LayoutParams.UNSET))) {
-                Guideline guideline = (Guideline) widget;
-                if (layoutParams.relativeBegin != -1) {
-                    guideline.setRelativeBegin(layoutParams.relativeBegin);
-                }
-                if (layoutParams.relativeEnd != -1) {
-                    guideline.setRelativeEnd(layoutParams.relativeEnd);
-                }
-                if (layoutParams.relativePercent != -1) {
-                    guideline.setRelativePercent(layoutParams.relativePercent);
-                }
-                if (layoutParams.orientation == LayoutParams.VERTICAL) {
-                    guideline.setOrientation(Guideline.VERTICAL);
-                } else {
-                    guideline.setOrientation(Guideline.HORIZONTAL);
+            if ((widget instanceof Guideline)) {
+                if ((layoutParams.relativeBegin != LayoutParams.UNSET)
+                  || (layoutParams.relativeEnd != LayoutParams.UNSET)
+                  || (layoutParams.relativePercent != LayoutParams.UNSET)
+                  || (layoutParams.orientation != LayoutParams.UNSET)) {
+                    Guideline guideline = (Guideline) widget;
+                    if (layoutParams.relativeBegin != -1) {
+                        guideline.setRelativeBegin(layoutParams.relativeBegin);
+                    }
+                    if (layoutParams.relativeEnd != -1) {
+                        guideline.setRelativeEnd(layoutParams.relativeEnd);
+                    }
+                    if (layoutParams.relativePercent != -1) {
+                        guideline.setRelativePercent(layoutParams.relativePercent);
+                    }
+                    if (layoutParams.orientation == LayoutParams.VERTICAL) {
+                        guideline.setOrientation(Guideline.VERTICAL);
+                    } else {
+                        guideline.setOrientation(Guideline.HORIZONTAL);
+                    }
                 }
             } else if ((layoutParams.lefToLeft != LayoutParams.UNSET)
                     || (layoutParams.leftToRight != LayoutParams.UNSET)
