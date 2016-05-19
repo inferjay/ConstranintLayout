@@ -507,7 +507,7 @@ public class ConstraintLayout extends ViewGroup {
         int widthPadding = getPaddingLeft() + getPaddingRight();
 
         // TODO: investigate measure too small (check MeasureSpec)
-        if (widthMode == MeasureSpec.AT_MOST) {
+        if (widthMode == MeasureSpec.AT_MOST || widthMode == MeasureSpec.UNSPECIFIED) {
             mLayoutWidget.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
             mLayoutWidget.setWidth(0);
         } else {
@@ -515,7 +515,7 @@ public class ConstraintLayout extends ViewGroup {
             mLayoutWidget.setWidth(widthSize - widthPadding);
         }
 
-        if (heightMode == MeasureSpec.AT_MOST) {
+        if (heightMode == MeasureSpec.AT_MOST || heightMode == MeasureSpec.UNSPECIFIED) {
             mLayoutWidget.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
             mLayoutWidget.setHeight(0);
         } else {
