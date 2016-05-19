@@ -18,7 +18,6 @@ package android.support.constraint.solver.widgets;
 
 import android.support.constraint.solver.LinearSystem;
 
-import java.awt.Rectangle;
 import java.util.ArrayList;
 
 /**
@@ -92,7 +91,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     public static ConstraintWidgetContainer createContainer(ConstraintWidgetContainer
             container, String name, ArrayList<ConstraintWidget> widgets, int padding) {
         Rectangle bounds = getBounds(widgets);
-        if (bounds.getWidth() == 0 || bounds.getHeight() == 0) {
+        if (bounds.width == 0 || bounds.height == 0) {
             return null;
         }
         if (padding > 0) {

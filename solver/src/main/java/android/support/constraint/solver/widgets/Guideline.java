@@ -19,7 +19,6 @@ import android.support.constraint.solver.EquationCreation;
 import android.support.constraint.solver.LinearSystem;
 import android.support.constraint.solver.SolverVariable;
 
-import java.awt.Rectangle;
 import java.util.ArrayList;
 
 public class Guideline extends ConstraintWidget {
