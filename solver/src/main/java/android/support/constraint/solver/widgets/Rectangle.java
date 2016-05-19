@@ -19,10 +19,10 @@ package android.support.constraint.solver.widgets;
  * Simple rect class
  */
 public class Rectangle {
-    int x;
-    int y;
-    int width;
-    int height;
+    public int x;
+    public int y;
+    public int width;
+    public int height;
 
     public void setBounds(int x, int y, int width, int height) {
         this.x = x;
@@ -41,4 +41,12 @@ public class Rectangle {
         return x >= bounds.x && x < bounds.x + bounds.width
                 && y >= bounds.y && y < bounds.y + bounds.height;
     }
+
+    public boolean contains(int x, int y) {
+        return x >= this.x && x < this.x + this.width
+                && y >= this.y && y < this.y + this.height;
+    }
+
+    public int getCenterX() { return (x + width) / 2; }
+    public int getCenterY() { return (y + height) / 2; }
 }
