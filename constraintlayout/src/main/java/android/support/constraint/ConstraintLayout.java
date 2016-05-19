@@ -158,7 +158,7 @@ public class ConstraintLayout extends ViewGroup {
                         guideline.setOrientation(Guideline.HORIZONTAL);
                     }
                 }
-            } else if ((layoutParams.lefToLeft != LayoutParams.UNSET)
+            } else if ((layoutParams.leftToLeft != LayoutParams.UNSET)
                     || (layoutParams.leftToRight != LayoutParams.UNSET)
                     || (layoutParams.rightToLeft != LayoutParams.UNSET)
                     || (layoutParams.rightToRight != LayoutParams.UNSET)
@@ -192,8 +192,8 @@ public class ConstraintLayout extends ViewGroup {
                 }
 
                 // Left constraint
-                if (layoutParams.lefToLeft != LayoutParams.UNSET) {
-                    View view = findViewById(layoutParams.lefToLeft);
+                if (layoutParams.leftToLeft != LayoutParams.UNSET) {
+                    View view = findViewById(layoutParams.leftToLeft);
                     ConstraintWidget target = getViewWidget(view);
                     if (target != null) {
                         widget.connect(ConstraintAnchor.Type.LEFT, target,
@@ -599,7 +599,7 @@ public class ConstraintLayout extends ViewGroup {
         public int relativeEnd = -1;
         public int relativePercent = -1;
 
-        public int lefToLeft = UNSET;
+        public int leftToLeft = UNSET;
         public int leftToRight = UNSET;
         public int rightToLeft = UNSET;
         public int rightToRight = UNSET;
@@ -648,7 +648,7 @@ public class ConstraintLayout extends ViewGroup {
             for (int i = 0; i < N; i++) {
                 int attr = a.getIndex(i);
                 if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_toLeftOf) {
-                    lefToLeft = a.getResourceId(attr, lefToLeft);
+                    leftToLeft = a.getResourceId(attr, leftToLeft);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_toRightOf) {
                     leftToRight = a.getResourceId(attr, leftToRight);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_toLeftOf) {
@@ -773,14 +773,14 @@ public class ConstraintLayout extends ViewGroup {
                     leftToRight = endToStart;
                 }
                 if (endToEnd != UNSET) {
-                    lefToLeft = endToEnd;
+                    leftToLeft = endToEnd;
                 }
             } else {
                 if (startToEnd != UNSET) {
                     leftToRight = startToEnd;
                 }
                 if (startToStart != UNSET) {
-                    lefToLeft = startToStart;
+                    leftToLeft = startToStart;
                 }
                 if (endToStart != UNSET) {
                     rightToLeft = endToStart;
