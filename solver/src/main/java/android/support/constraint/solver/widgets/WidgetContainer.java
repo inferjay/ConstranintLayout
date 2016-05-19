@@ -16,9 +16,7 @@
 
 package android.support.constraint.solver.widgets;
 
-import java.awt.Rectangle;
 import java.util.ArrayList;
-
 /**
  * A container of ConstraintWidget
  */
@@ -169,10 +167,12 @@ public class WidgetContainer extends ConstraintWidget {
      */
     public ArrayList<ConstraintWidget> findWidgets(int x, int y, int width, int height) {
         ArrayList<ConstraintWidget> found = new ArrayList<ConstraintWidget>();
-        Rectangle area = new Rectangle(x, y, width, height);
+        Rectangle area = new Rectangle();
+        area.setBounds(x, y, width, height);
         for (int i = 0, mChildrenSize = mChildren.size(); i < mChildrenSize; i++) {
             final ConstraintWidget widget = mChildren.get(i);
-            Rectangle bounds = new Rectangle(widget.getDrawX(), widget.getDrawY(),
+            Rectangle bounds = new Rectangle();
+            bounds.setBounds(widget.getDrawX(), widget.getDrawY(),
                     widget.getWidth(), widget.getHeight());
             if (area.intersects(bounds)) {
                 found.add(widget);
