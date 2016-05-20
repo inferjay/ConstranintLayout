@@ -679,7 +679,7 @@ public class ConstraintLayout extends ViewGroup {
                     relativeEnd = a.getDimensionPixelOffset(attr, relativeEnd);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_relativePercent) {
                     relativePercent = a.getInt(attr, relativePercent);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_orientation) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_android_orientation) {
                     orientation = a.getInt(attr, orientation);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintStart_toEndOf) {
                     startToEnd = a.getResourceId(attr, startToEnd);
