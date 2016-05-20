@@ -38,9 +38,9 @@ import android.support.constraint.solver.widgets.ConstraintWidget;
     }
 
     private void setAttributes(Context context, AttributeSet attrs) {
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ConstraintLayout_Layout);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.LinearConstraintLayout);
         int orientation = -1;
-        orientation = a.getInt(R.styleable.ConstraintLayout_Layout_orientation, orientation);
+        orientation = a.getInt(R.styleable.LinearConstraintLayout_android_orientation, orientation);
         if (orientation == 1) {
             mIsHorizontal = false;
         }
