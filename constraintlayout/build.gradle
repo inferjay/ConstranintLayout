@@ -25,10 +25,7 @@ dependencies {
     compile project(':solver')
 }
 
-// TBD
-group = 'com.android.support.constraint'
 archivesBaseName = 'constraint-layout'
-version = '1.0.0-alpha2'
 
 project.ext.pomName = 'Android ConstraintLayout'
 project.ext.pomDesc = 'ConstraintLayout for Android'

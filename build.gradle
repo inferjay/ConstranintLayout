@@ -10,6 +10,8 @@ buildscript {
     }
 }
 
+import com.google.common.io.Files
+import com.google.common.base.Charsets
 
 task('checkJavaVersion') << {
     def jvmVersion = System.getProperty('java.version')
@@ -19,6 +21,8 @@ task('checkJavaVersion') << {
     }
 }
 final def checkJavaVersionTask = tasks['checkJavaVersion']
+
+ext.version = '1.0.0-alpha2'
 
 /*
  * With the build server you are given two env variables.
@@ -30,26 +34,81 @@ final def checkJavaVersionTask = tasks['checkJavaVersion']
 if (System.env.DIST_DIR != null && System.env.OUT_DIR != null) {
     ext.androidHostOut = file(System.env.OUT_DIR)
     ext.androidHostDist = file(System.env.DIST_DIR)
+    ext.buildNumber = Systen.env.BUILD
 } else {
     // ext.androidHostOut is shared by all tools/{base,build,swt} gradle projects/
     ext.androidHostOut = file("$rootDir/../../out")
     ext.androidHostDist = new File(ext.androidHostOut, "dist")
+    ext.buildNumber = 1
 }
 
 // rootProject.buildDir is specific to this gradle build.
 buildDir = new File(ext.androidHostOut, "build/root")
+ext.supportRepoOut = new File(buildDir, 'repo')
 
 ext.localRepo = project.hasProperty('localRepo') ? localRepo : "$ext.androidHostOut/repo"
 
+// basic task for custom distribution of project via the build server.
+task dist << {
+}
+
 subprojects { Project project ->
+    // Change buildDir first so that all plugins pick up the new value.
+    project.buildDir = project.file("$project.parent.buildDir/../$project.name/build")
+
+    group = 'com.android.support.constraint'
+    version = rootProject.ext.version
+
+    apply plugin: 'maven'
+
     repositories {
         maven { url "$rootProject.projectDir/../../prebuilts/tools/common/m2/repository" }
     }
 
-    // Change buildDir first so that all plugins pick up the new value.
-    project.buildDir = project.file("$project.parent.buildDir/../$project.name/build")
-}
+    task release(type: Upload) {
+        configuration = configurations.archives
+        repositories {
+            mavenDeployer {
+                repository(url: uri("$rootProject.ext.supportRepoOut"))
+           }
+        }
+    }
 
-// basic task for custom distribution of project should the build server.
-task dist << {
+    def versionDir = {
+        def groupDir = new File(rootProject.ext.supportRepoOut, project.group.replace('.','/'))
+        def artifactDir = new File(groupDir, archivesBaseName)
+        return new File(artifactDir, version)
+    }
+
+    def deployer = release.repositories.mavenDeployer
+    task generateSourceProps(dependsOn: release) << {
+        def content = "Maven.GroupId=$deployer.pom.groupId\n" +
+            "Maven.ArtifactId=$deployer.pom.artifactId\n" +
+            "Maven.Version=$deployer.pom.version\n" +
+            "Pkg.Desc=$project.name\n" +
+            "Pkg.Revision=1\n" +
+            "Dependencies=" +
+            String.join(",", project.configurations.compile.allDependencies.collect {
+                    def p = parent.findProject(it.name)
+                    return p ? "$p.group:$p.archivesBaseName:$p.version" : null
+                }.grep()) +
+            "\n"
+        Files.write(content, new File(versionDir(), 'source.properties'), Charsets.UTF_8)
+    }
+
+    task createSeparateZip(type: Zip, dependsOn: generateSourceProps)  {
+        into archivesBaseName
+        destinationDir project.parent.ext.androidHostDist
+        baseName = project.group
+        version = project.parent.ext.buildNumber
+    }
+    project.parent.dist.dependsOn createSeparateZip
+    createSeparateZip.dependsOn release
+
+    project.afterEvaluate {
+        // The archivesBaseName isn't available intially, so set it now
+        def createZipTask = project.tasks.getByName("createSeparateZip")
+        createZipTask.appendix = archivesBaseName
+        createZipTask.from versionDir()
+    }
 }
