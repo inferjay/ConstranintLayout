@@ -1253,6 +1253,9 @@ public class ConstraintWidget implements Solvable {
         resetAnchors();
         setVerticalBiasPercent(DEFAULT_BIAS);
         setHorizontalBiasPercent(DEFAULT_BIAS);
+        if (this instanceof ConstraintWidgetContainer) {
+            return;
+        }
         if (getHorizontalDimensionBehaviour() == ConstraintWidget.DimensionBehaviour.ANY) {
             if (getWidth() == getWrapWidth()) {
                 setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
