@@ -172,22 +172,12 @@ public class ConstraintLayout extends ViewGroup {
                     || (layoutParams.editorAbsoluteX != LayoutParams.UNSET)
                     || (layoutParams.editorAbsoluteY != LayoutParams.UNSET)) {
 
-                // Process match_Parent converting it to 0dp & constrain left and right to root
+                // Process match_Parent converting it to 0dp
                 if (layoutParams.width == LayoutParams.MATCH_PARENT) {
-                    widget.connect(ConstraintAnchor.Type.LEFT, mLayoutWidget,
-                            ConstraintAnchor.Type.LEFT, layoutParams.leftMargin);
-                    widget.connect(ConstraintAnchor.Type.RIGHT, mLayoutWidget,
-                            ConstraintAnchor.Type.RIGHT, layoutParams.rightMargin);
-                    layoutParams.width = 0;
                     layoutParams.horizontalLock = false;
                 }
-                // Process match_Parent converting it to 0dp & constrain top and bottom to root
+                // Process match_Parent converting it to 0dp
                 if (layoutParams.height == LayoutParams.MATCH_PARENT) {
-                    widget.connect(ConstraintAnchor.Type.TOP, mLayoutWidget,
-                            ConstraintAnchor.Type.TOP, layoutParams.topMargin);
-                    widget.connect(ConstraintAnchor.Type.BOTTOM, mLayoutWidget,
-                            ConstraintAnchor.Type.BOTTOM, layoutParams.bottomMargin);
-                    layoutParams.height = 0;
                     layoutParams.verticalLock = false;
                 }
 
@@ -318,12 +308,20 @@ public class ConstraintLayout extends ViewGroup {
                 // FIXME: need to agree on the correct magic value for this rather than simply using zero.
                 if (!layoutParams.horizontalLock) {
                     widget.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.ANY);
+                    widget.setWidth(0);
+                    if (layoutParams.width == LayoutParams.MATCH_PARENT) {
+                        widget.setWidth(mLayoutWidget.getWidth());
+                    }
                 } else {
                     widget.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
                     widget.setWidth(layoutParams.width);
                 }
                 if (!layoutParams.verticalLock) {
                     widget.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.ANY);
+                    widget.setHeight(0);
+                    if (layoutParams.height == LayoutParams.MATCH_PARENT) {
+                        widget.setWidth(mLayoutWidget.getHeight());
+                    }
                 } else {
                     widget.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
                     widget.setHeight(layoutParams.height);
