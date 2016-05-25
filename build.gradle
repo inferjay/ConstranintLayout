@@ -85,8 +85,10 @@ subprojects { Project project ->
         def content = "Maven.GroupId=$deployer.pom.groupId\n" +
             "Maven.ArtifactId=$deployer.pom.artifactId\n" +
             "Maven.Version=$deployer.pom.version\n" +
-            "Pkg.Desc=$project.name\n" +
+            "Pkg.Desc=$deployer.pom.groupId:$deployer.pom.artifactId:$deployer.pom.version\n" +
             "Pkg.Revision=1\n" +
+            "Extra.VendorId=android\n" +
+            "Extra.VendorDisplay=Android\n" +
             "Dependencies=" +
             String.join(",", project.configurations.compile.allDependencies.collect {
                     def p = parent.findProject(it.name)
