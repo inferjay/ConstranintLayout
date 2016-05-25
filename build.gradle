@@ -89,7 +89,7 @@ subprojects { Project project ->
             "Pkg.Revision=1\n" +
             "Extra.VendorId=android\n" +
             "Extra.VendorDisplay=Android\n" +
-            "Dependencies=" +
+            "Maven.Dependencies=" +
             String.join(",", project.configurations.compile.allDependencies.collect {
                     def p = parent.findProject(it.name)
                     return p ? "$p.group:$p.archivesBaseName:$p.version" : null
