@@ -1583,6 +1583,20 @@ public class ConstraintWidget implements Solvable {
         boolean horizontalDimensionLocked = mHorizontalDimensionBehaviour != DimensionBehaviour.ANY;
         boolean verticalDimensionLocked = mVerticalDimensionBehaviour != DimensionBehaviour.ANY;
 
+        if (!horizontalDimensionLocked && mLeft != null && mRight != null
+            && (!mLeft.isConnected() || !mRight.isConnected())) {
+            horizontalDimensionLocked = true;
+        }
+        if (!verticalDimensionLocked && mTop != null && mBottom != null) {
+           if (!(mTop.isConnected() && mBottom.isConnected())) {
+               // if we are in any mode but either top or bottom aren't connected
+               if (mBaselineDistance == 0
+                   || (mBaseline != null && !(mTop.isConnected() && mBaseline.isConnected()))) {
+                   // if there are no baseline, or if the baseline is also not connected...
+                   verticalDimensionLocked = true;
+               }
+           }
+        }
         boolean useRatio = false;
         if (mDimensionRatio > 0) {
             if (!horizontalDimensionLocked && !verticalDimensionLocked) {
