@@ -40,6 +40,10 @@ public class Animator {
         return sAllowsAnimation;
     }
 
+    public static boolean isAnimationEnabled() {
+        return sAllowsAnimation;
+    }
+
     public Animator(ConstraintWidget widget) {
         mWidget = widget;
     }
