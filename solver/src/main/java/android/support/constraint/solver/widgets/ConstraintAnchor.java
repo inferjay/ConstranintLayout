@@ -26,6 +26,7 @@ import java.util.HashSet;
 public class ConstraintAnchor {
 
     public static final boolean USE_CENTER_ANCHOR = false;
+    private static final boolean ALLOW_BINARY = true;
 
     /**
      * Define the type of anchor
@@ -456,6 +457,26 @@ public class ConstraintAnchor {
     }
 
     /**
+     *
+     *  Return true if we can connect this anchor to this target.
+     * We recursively follow connections in order to detect eventual cycles; if we
+     * do we disallow the connection.
+     * We also only allow connections to direct parent, siblings, and descendants.
+     *
+     * @param target the ConstraintWidget we are trying to connect to
+     * @param anchor Allow anchor if it loops back to me directly
+     * @return if the connection is allowed, false otherwise
+     */
+    public boolean isConnectionAllowed(ConstraintWidget target, ConstraintAnchor anchor) {
+        if (ALLOW_BINARY) {
+            if (anchor != null && anchor.getTarget() == this) {
+                return true;
+            }
+        }
+        return isConnectionAllowed(target);
+    }
+
+    /**
      * Return true if we can connect this anchor to this target.
      * We recursively follow connections in order to detect eventual cycles; if we
      * do we disallow the connection.
@@ -466,50 +487,45 @@ public class ConstraintAnchor {
      */
     public boolean isConnectionAllowed(ConstraintWidget target) {
         HashSet<ConstraintWidget> checked = new HashSet<>();
-        checked.add(getOwner());
-        return isConnectionAllowedRecursive(target, checked);
+        if (isConnectionToMe(target, checked)) {
+            return false;
+        }
+        ConstraintWidget parent = getOwner().getParent();
+        if (parent == target) { // allow connections to parent
+            return true;
+        }
+        if (target.getParent() == parent) { // allow if we share the same parent
+            return true;
+        }
+        return false;
     }
 
     /**
      * Recursive with check for loop
      *
      * @param target
-     * @param checked
-     * @return
+     * @param checked set of things already checked
+     * @return true if it is connected to me
      */
-    private boolean isConnectionAllowedRecursive(ConstraintWidget target, HashSet<ConstraintWidget> checked) {
+    private boolean isConnectionToMe(ConstraintWidget target, HashSet<ConstraintWidget> checked) {
         if (checked.contains(target)) {
-            // we connect back to ourselves
             return false;
         }
-        if (getOwner().hasAncestor(target)) {
-            // the target is one of our ancestor, we should only allow the connection
-            // if it's a direct ancestor
-            if (target != getOwner().getParent()) {
-                return false;
-            }
-        }
-        if (target.hasAncestor(getOwner())) {
-            // the target is one of our children, we won't allow the connection
-            return false;
+        checked.add(target);
+
+        if (target == getOwner()) {
+            return true;
         }
         ArrayList<ConstraintAnchor> targetAnchors = target.getAnchors();
         for (int i = 0, targetAnchorsSize = targetAnchors.size(); i < targetAnchorsSize; i++) {
-            final ConstraintAnchor anchor = targetAnchors.get(i);
+            ConstraintAnchor anchor = targetAnchors.get(i);
             if (anchor.isSimilarDimensionConnection(this) && anchor.isConnected()) {
-                ConstraintWidget nextTarget = anchor.getTarget().getOwner();
-                if (nextTarget == anchor.getOwner()) {
-                    return false;
-                }
-                if (nextTarget == getOwner()) {
-                    return false;
-                }
-                if (!isConnectionAllowedRecursive(nextTarget, checked)) {
-                    return false;
+                if (isConnectionToMe(anchor.getTarget().getOwner(), checked)) {
+                    return true;
                 }
             }
         }
-        return true;
+        return false;
     }
 
     /**
