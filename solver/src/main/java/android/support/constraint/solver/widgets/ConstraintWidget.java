@@ -234,6 +234,35 @@ public class ConstraintWidget implements Solvable {
     }
 
     /**
+     * Returns true if the widget is a root container in the hierarchy,
+     * or the root widget itself
+     *
+     * @return true if root container
+     */
+    public boolean isRootContainer() {
+        return (this instanceof ConstraintWidgetContainer)
+               && (mParent == null || !(mParent instanceof ConstraintWidgetContainer));
+    }
+
+    /**
+     * Returns true if the widget is contained in a ConstraintLayout
+     * @return
+     */
+    public boolean isInsideConstraintLayout() {
+        ConstraintWidget widget = getParent();
+        if (widget == null) {
+            return false;
+        }
+        while (widget != null) {
+            if (widget instanceof ConstraintWidgetContainer) {
+                return true;
+            }
+            widget = widget.getParent();
+        }
+        return false;
+    }
+
+    /**
      * Return true if the widget is one of our ancestor
      *
      * @param widget widget we want to check
@@ -1280,9 +1309,11 @@ public class ConstraintWidget implements Solvable {
      */
     public void resetAnchor(ConstraintAnchor anchor) {
         if (getParent() != null) {
-            ConstraintWidgetContainer parent = (ConstraintWidgetContainer) getParent();
-            if (parent.handlesInternalConstraints()) {
-                return;
+            if (getParent() instanceof ConstraintWidgetContainer) {
+                ConstraintWidgetContainer parent = (ConstraintWidgetContainer)getParent();
+                if (parent.handlesInternalConstraints()) {
+                    return;
+                }
             }
         }
         ConstraintAnchor left = getAnchor(ConstraintAnchor.Type.LEFT);
