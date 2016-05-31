@@ -485,13 +485,17 @@ public class ConstraintLayout extends ViewGroup {
             solveLinearSystem(); // second pass
         }
 
+
+        final int androidLayoutWidth = mLayoutWidget.getWidth() + widthPadding;
+        final int androidLayoutHeight = mLayoutWidget.getHeight() + heightPadding;
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            int widthSize = resolveSizeAndState(mLayoutWidget.getWidth(), widthMeasureSpec, childState);
-            int heightSize = resolveSizeAndState(mLayoutWidget.getHeight(), heightMeasureSpec,
+            int widthSize = resolveSizeAndState(androidLayoutWidth, widthMeasureSpec, childState);
+            int heightSize = resolveSizeAndState(androidLayoutHeight, heightMeasureSpec,
                     childState << MEASURED_HEIGHT_STATE_SHIFT);
             setMeasuredDimension(widthSize & MEASURED_SIZE_MASK, heightSize & MEASURED_SIZE_MASK);
         } else {
-            setMeasuredDimension(mLayoutWidget.getWidth(), mLayoutWidget.getHeight());
+            setMeasuredDimension(androidLayoutWidth, androidLayoutHeight);
         }
     }
 
