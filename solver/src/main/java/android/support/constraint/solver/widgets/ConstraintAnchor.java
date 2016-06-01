@@ -26,7 +26,7 @@ import java.util.HashSet;
 public class ConstraintAnchor {
 
     public static final boolean USE_CENTER_ANCHOR = false;
-    private static final boolean ALLOW_BINARY = true;
+    private static final boolean ALLOW_BINARY = false;
 
     /**
      * Define the type of anchor
