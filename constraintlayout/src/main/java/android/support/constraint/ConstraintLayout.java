@@ -53,8 +53,8 @@ public class ConstraintLayout extends ViewGroup {
 
     private static final String TAG = "ConstraintLayout";
 
-    private final ArrayList<ConstraintWidget> mConstrainedWidgets = new ArrayList<>();
-    private final ArrayList<ConstraintWidget> mSizeDependentsWidgets = new ArrayList<>();
+    private final ArrayList<ConstraintWidget> mConstrainedWidgets = new ArrayList<>(100);
+    private final ArrayList<ConstraintWidget> mSizeDependentsWidgets = new ArrayList<>(100);
 
     private final LinearSystem mEquationSystem = new LinearSystem();
 
@@ -113,6 +113,11 @@ public class ConstraintLayout extends ViewGroup {
         mConstrainedWidgets.add(widget);
         widget.setCompanionWidget(child);
         mLayoutWidget.add(widget);
+        if (!(widget instanceof Guideline)
+            && ((widget.getHorizontalDimensionBehaviour() == ConstraintWidget.DimensionBehaviour.ANY
+                || widget.getVerticalDimensionBehaviour() == ConstraintWidget.DimensionBehaviour.ANY))) {
+            mSizeDependentsWidgets.add(widget);
+        }
     }
 
     void setChildrenConstraints() {
@@ -424,20 +429,6 @@ public class ConstraintLayout extends ViewGroup {
             return;
         }
 
-        mSizeDependentsWidgets.clear();
-
-        final int widgetsCount = mConstrainedWidgets.size();
-        for (int i = 0; i < widgetsCount; i++) {
-            ConstraintWidget widget = mConstrainedWidgets.get(i);
-            if (widget instanceof Guideline) {
-                continue;
-            }
-            if (widget.getHorizontalDimensionBehaviour() == ConstraintWidget.DimensionBehaviour.ANY
-                    || widget.getVerticalDimensionBehaviour() == ConstraintWidget.DimensionBehaviour.ANY) {
-                mSizeDependentsWidgets.add(widget);
-            }
-        }
-
         // let's solve the linear system.
         solveLinearSystem(); // first pass
         int childState = 0;
@@ -484,7 +475,6 @@ public class ConstraintLayout extends ViewGroup {
             }
             solveLinearSystem(); // second pass
         }
-
 
         final int androidLayoutWidth = mLayoutWidget.getWidth() + widthPadding;
         final int androidLayoutHeight = mLayoutWidget.getHeight() + heightPadding;

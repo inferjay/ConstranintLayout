@@ -17,6 +17,7 @@
 package android.support.constraint.solver;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Represents a given variable used in the {@link LinearSystem linear expression solver}.
@@ -47,21 +48,26 @@ public class SolverVariable {
         return "V" + uniqueId;
     }
 
-    ArrayList<IRow> mClientEquations = new ArrayList<>();
+    IRow[] mClientEquations = new IRow[32];
+    int mClientEquationsCount = 0;
 
-    public ArrayList<IRow> getClientEquations() {
+    public final IRow[] getClientEquations() {
         return mClientEquations;
     }
 
-    public void addClientEquation(IRow equation) {
-        if (mClientEquations.contains(equation)) {
-            return;
-        }
-        mClientEquations.add(equation);
-    }
+    public final int getClientEquationsCount() { return mClientEquationsCount; }
 
-    public void removeClientEquation(IRow equation) {
-        mClientEquations.remove(equation);
+    public void addClientEquation(IRow equation) {
+        for (int i = 0; i < mClientEquationsCount; i++) {
+            if (mClientEquations[i] == equation) {
+                return;
+            }
+        }
+        if (mClientEquationsCount >= mClientEquations.length) {
+            mClientEquations = Arrays.copyOf(mClientEquations, mClientEquations.length * 2);
+        }
+        mClientEquations[mClientEquationsCount] = equation;
+        mClientEquationsCount++;
     }
 
     public void reset() {
@@ -71,7 +77,7 @@ public class SolverVariable {
         mId = -1;
         mDefinitionId = -1;
         mComputedValue = 0;
-        mClientEquations.clear();
+        mClientEquationsCount = 0;
     }
 
     /**
@@ -109,7 +115,7 @@ public class SolverVariable {
     private String mName;
     private Type mType;
     private Strength mStrength = Strength.WEAK;
-    public int mId;
+    public int mId = -1;
     public int mDefinitionId = -1;
 
     /**

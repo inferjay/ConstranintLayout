@@ -15,6 +15,8 @@
  */
 package android.support.constraint.solver.widgets;
 
+import android.support.constraint.solver.SolverVariable;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -57,6 +59,7 @@ public class ConstraintAnchor {
     private Strength mStrength = Strength.NONE;
     private ConnectionType mConnectionType = ConnectionType.RELAXED;
     private int mConnectionCreator = USER_CREATOR;
+    private SolverVariable mSolverVariable = new SolverVariable(SolverVariable.Type.UNRESTRICTED);
 
     /**
      * Constructor
@@ -67,6 +70,12 @@ public class ConstraintAnchor {
         mOwner = owner;
         mType = type;
     }
+
+    /**
+     * Return the solver variable for this anchor
+     * @return
+     */
+    public SolverVariable getSolverVariable() { return mSolverVariable; }
 
     /**
      * Return the anchor's owner

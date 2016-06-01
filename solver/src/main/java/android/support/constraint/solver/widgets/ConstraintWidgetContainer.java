@@ -185,6 +185,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         setX(0);
         setY(0);
         resetAnchors();
+        resetSolverVariables();
 
         // Before we solve our system, we should call layout() on any
         // of our children that is a container.

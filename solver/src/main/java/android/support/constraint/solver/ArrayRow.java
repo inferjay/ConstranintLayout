@@ -37,12 +37,12 @@ class ArrayRow implements IRow {
     }
 
     @Override
-    public boolean hasPositiveConstant() {
+    public final boolean hasPositiveConstant() {
         return constantTerm >= 0;
     }
 
     @Override
-    public float getConstant() {
+    public final float getConstant() {
         return constantTerm;
     }
 
@@ -129,7 +129,7 @@ class ArrayRow implements IRow {
     }
 
     @Override
-    public SolverVariable getKeyVariable() {
+    public final SolverVariable getKeyVariable() {
         return variable;
     }
 
@@ -139,7 +139,7 @@ class ArrayRow implements IRow {
     }
 
     @Override
-    public float getVariable(SolverVariable v) {
+    public final float getVariable(SolverVariable v) {
         return variables.get(v);
     }
 

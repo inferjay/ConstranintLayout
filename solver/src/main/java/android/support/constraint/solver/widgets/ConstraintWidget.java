@@ -209,6 +209,16 @@ public class ConstraintWidget implements Solvable {
     }
 
     /**
+     * Reset the solver variables of the anchors
+     */
+    public void resetSolverVariables() {
+        final int numAnchors = mAnchors.size();
+        for (int i = 0; i < numAnchors; i++) {
+            mAnchors.get(i).getSolverVariable().reset();
+        }
+    }
+
+    /**
      * Add all the anchors to the mAnchors array
      */
     private void addAnchors() {

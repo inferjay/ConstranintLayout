@@ -16,6 +16,8 @@
 
 package android.support.constraint.solver;
 
+import android.support.constraint.solver.widgets.ConstraintAnchor;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,6 +28,7 @@ import java.util.HashSet;
  */
 public class LinearSystem {
     private static final boolean DEBUG = false;
+    private static final boolean USE_EMBEDDED_VARIABLE = true;
     private static boolean USE_FLOAT_ROW = false;
 
     /*
@@ -166,7 +169,9 @@ public class LinearSystem {
             SolverVariable variable = mIndexedVariables[i];
             if (variable != null) {
                 variable.reset();
-                sSolverVariablePool.release(variable);
+                if (!USE_EMBEDDED_VARIABLE) {
+                    sSolverVariablePool.release(variable);
+                }
             }
         }
         Arrays.fill(mIndexedVariables, null);
@@ -182,7 +187,9 @@ public class LinearSystem {
         }
         releaseRows();
         mNumRows = 0;
-        mObjectVariables.clear();
+        if (!USE_EMBEDDED_VARIABLE) {
+            mObjectVariables.clear();
+        }
         mAlreadyTestedCandidates.clear();
     }
 
@@ -206,14 +213,27 @@ public class LinearSystem {
         if (mNumColumns + 1 >= mMaxColumns) {
             increaseTableSize();
         }
-        SolverVariable variable = mObjectVariables.get(anchor);
-        if (variable == null) {
-            variable = acquireSolverVariable(SolverVariable.Type.UNRESTRICTED);
-            mVariablesID++;
-            mNumColumns++;
-            variable.setId(mVariablesID);
-            mIndexedVariables[mVariablesID] = variable;
-            mObjectVariables.put(anchor, variable);
+        SolverVariable variable = null;
+        if (USE_EMBEDDED_VARIABLE) {
+            if (anchor instanceof ConstraintAnchor) {
+                variable = ((ConstraintAnchor) anchor).getSolverVariable();
+                if (variable.getId() == -1) {
+                    mVariablesID++;
+                    mNumColumns++;
+                    variable.setId(mVariablesID);
+                    mIndexedVariables[mVariablesID] = variable;
+                }
+            }
+        } else {
+            variable = mObjectVariables.get(anchor);
+            if (variable == null) {
+                variable = acquireSolverVariable(SolverVariable.Type.UNRESTRICTED);
+                mVariablesID++;
+                mNumColumns++;
+                variable.setId(mVariablesID);
+                mIndexedVariables[mVariablesID] = variable;
+                mObjectVariables.put(anchor, variable);
+            }
         }
         return variable;
     }
@@ -350,7 +370,12 @@ public class LinearSystem {
     }
 
     public int getObjectVariableValue(Object anchor) {
-        SolverVariable variable = mObjectVariables.get(anchor);
+        SolverVariable variable = null;
+        if (USE_EMBEDDED_VARIABLE) {
+            variable = ((ConstraintAnchor) anchor).getSolverVariable();
+        } else {
+            variable = mObjectVariables.get(anchor);
+        }
         if (variable != null) {
             return (int) variable.mComputedValue;
         }
@@ -527,10 +552,10 @@ public class LinearSystem {
         row.getKeyVariable().mDefinitionId = mNumRows;
         mNumRows++;
 
-        ArrayList<IRow> clients = row.getKeyVariable().getClientEquations();
-        final int count = clients.size();
+        IRow[] clients = row.getKeyVariable().getClientEquations();
+        final int count = row.getKeyVariable().getClientEquationsCount();
         for (int i = 0; i < count; i++) {
-            IRow client = clients.get(i);
+            IRow client = clients[i];
             if (client == row) {
                 continue;
             }

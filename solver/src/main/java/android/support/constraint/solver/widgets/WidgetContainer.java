@@ -270,4 +270,14 @@ public class WidgetContainer extends ConstraintWidget {
             }
         }
     }
+
+    @Override
+    public void resetSolverVariables() {
+        super.resetSolverVariables();
+        final int count = mChildren.size();
+        for (int i = 0; i < count; i++) {
+            ConstraintWidget widget = mChildren.get(i);
+            widget.resetSolverVariables();
+        }
+    }
 }

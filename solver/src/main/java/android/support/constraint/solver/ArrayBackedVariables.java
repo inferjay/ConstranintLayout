@@ -58,15 +58,15 @@ class ArrayBackedVariables {
         indexes = Arrays.copyOf(indexes, maxSize);
     }
 
-    public int size() {
+    public final int size() {
         return currentSize;
     }
 
-    public SolverVariable getVariable(int index) {
+    public final SolverVariable getVariable(int index) {
         return variables[indexes[index]];
     }
 
-    public float getVariableValue(int index) {
+    public final float getVariableValue(int index) {
         return values[indexes[index]];
     }
 
@@ -78,7 +78,7 @@ class ArrayBackedVariables {
         }
     }
 
-    public float get(SolverVariable v) {
+    public final float get(SolverVariable v) {
         if (currentSize < 4) {
             for (int i = 0; i < currentSize; i++) {
                 int idx = indexes[i];
