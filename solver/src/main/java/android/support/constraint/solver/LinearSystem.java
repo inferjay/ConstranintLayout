@@ -29,7 +29,6 @@ import java.util.HashSet;
 public class LinearSystem {
     private static final boolean DEBUG = false;
     private static final boolean USE_EMBEDDED_VARIABLE = true;
-    private static boolean USE_FLOAT_ROW = false;
 
     /*
      * Default size for the object pools
@@ -65,25 +64,16 @@ public class LinearSystem {
     SolverVariable[] mIndexedVariables = new SolverVariable[TABLE_SIZE];
     int mNumRows = 0;
     int mMaxRows = TABLE_SIZE;
-    float[][] mBackend = new float[TABLE_SIZE][TABLE_SIZE];
 
     private static Pools.Pool<ArrayRow> sArrayRowPool;
     private static Pools.Pool<SolverVariable> sSolverVariablePool = new Pools.SimplePool<>(POOL_SIZE);
 
     public LinearSystem() {
         mRows = new IRow[TABLE_SIZE];
-        if (!USE_FLOAT_ROW && sArrayRowPool == null) {
+        if (sArrayRowPool == null) {
             sArrayRowPool = new Pools.SimplePool<>(POOL_SIZE);
         }
         releaseRows();
-    }
-
-    /**
-     * Set the type of rows used by the system
-     * @param value true to use FloatRow, false to use ArrayRow
-     */
-    public static void setUseFloatRow(boolean value) {
-        USE_FLOAT_ROW = value;
     }
 
     /*--------------------------------------------------------------------------------------------*/
@@ -94,41 +84,12 @@ public class LinearSystem {
      * Reallocate memory to accommodate increased amount of variables
      */
     void increaseTableSize() {
-        if (!USE_FLOAT_ROW) {
-            TABLE_SIZE *= 2;
-            mRows = Arrays.copyOf(mRows, TABLE_SIZE);
-            mIndexedVariables = Arrays.copyOf(mIndexedVariables, TABLE_SIZE);
-            mMaxColumns = TABLE_SIZE;
-            mMaxRows = TABLE_SIZE;
-            releaseGoal();
-            mGoal = null;
-            return;
-        }
-        int previousSize = TABLE_SIZE;
         TABLE_SIZE *= 2;
-        if (DEBUG) {
-            System.out.println(this.hashCode() + " increaseTableSize to " + TABLE_SIZE
-                    + " as max: " + mNumRows + "/" + mMaxRows
-                    + "x" + mNumColumns + "/" + mMaxColumns);
-        }
+        mRows = Arrays.copyOf(mRows, TABLE_SIZE);
+        mIndexedVariables = Arrays.copyOf(mIndexedVariables, TABLE_SIZE);
         mMaxColumns = TABLE_SIZE;
         mMaxRows = TABLE_SIZE;
-        mIndexedVariables = Arrays.copyOf(mIndexedVariables, TABLE_SIZE);
-        float[][] backendCopy = new float[TABLE_SIZE][TABLE_SIZE];
-        for (int i = 0; i <= mNumRows; i++) { // as we might have one in flight
-            if (DEBUG) {
-                System.out
-                        .println("copy row " + i + "/" + mNumRows + " mBackend: " + mBackend.length
-                                + " (previous size: " + previousSize + " new size: " + TABLE_SIZE +
-                                ")");
-            }
-            System.arraycopy(mBackend[i], 0, backendCopy[i], 0, previousSize);
-            if (mRows[i] != null) {
-                ((FloatRow) mRows[i]).updateBackend(backendCopy[i]);
-            }
-        }
-        mRows = Arrays.copyOf(mRows, TABLE_SIZE);
-        mBackend = backendCopy;
+        releaseGoal();
         mGoal = null;
     }
 
@@ -136,9 +97,6 @@ public class LinearSystem {
      * Release ArrayRows back to their pool
      */
     private void releaseRows() {
-        if (USE_FLOAT_ROW) {
-            return;
-        }
         for (int i = 0; i < mRows.length; i++) {
             ArrayRow row = (ArrayRow) mRows[i];
             if (row != null) {
@@ -154,10 +112,8 @@ public class LinearSystem {
      */
     private void releaseGoal() {
         if (mGoal != null) {
-            if (!USE_FLOAT_ROW) {
-                mGoal.reset();
-                sArrayRowPool.release((ArrayRow) mGoal);
-            }
+            mGoal.reset();
+            sArrayRowPool.release((ArrayRow) mGoal);
         }
     }
 
@@ -243,9 +199,6 @@ public class LinearSystem {
     }
 
     IRow createRow(int sizeHint) {
-        if (USE_FLOAT_ROW) {
-            return acquireFloatRow(sizeHint);
-        }
         IRow row = sArrayRowPool.acquire();
         if (row == null) {
             row = new ArrayRow();
@@ -277,23 +230,6 @@ public class LinearSystem {
     void addSingleError(IRow row, int sign, int strength) {
         SolverVariable error = createErrorVariable(strength);
         row.addSingleError(error, sign);
-    }
-
-    private FloatRow acquireFloatRow(int newVariables) {
-        if (mNumColumns + newVariables >= mMaxColumns) {
-            increaseTableSize();
-        }
-        if (mNumRows + 1 >= mMaxRows) {
-            increaseTableSize();
-        }
-        FloatRow row = (FloatRow) mRows[mNumRows]; // reuse existing row if possible
-        if (row == null) {
-            // TODO: use object pool
-            row = new FloatRow(this);
-        } else {
-            row.reset();
-        }
-        return row;
     }
 
     private SolverVariable createVariable(String name, SolverVariable.Type type) {
@@ -485,18 +421,12 @@ public class LinearSystem {
      * @param row row to update
      */
     private void updateRowFromVariables(IRow row) {
-        if (!USE_FLOAT_ROW) {
-            ArrayRow equation = (ArrayRow) row;
-            int numVariables = equation.variables.currentSize;
-            for (int i = 0; i < numVariables; i++) {
-                SolverVariable variable = equation.variables.variables[i];
-                if (variable != null) {
-                    this.replaceVariable(row, variable);
-                }
-            }
-        } else {
-            for (int i = 0; i < mNumRows; i++) {
-                row.updateRowWithEquation(mRows[i]);
+        ArrayRow equation = (ArrayRow) row;
+        int numVariables = equation.variables.currentSize;
+        for (int i = 0; i < numVariables; i++) {
+            SolverVariable variable = equation.variables.variables[i];
+            if (variable != null) {
+                this.replaceVariable(row, variable);
             }
         }
     }
@@ -542,10 +472,8 @@ public class LinearSystem {
             return;
         }
 
-        if (!USE_FLOAT_ROW) {
-            if (mRows[mNumRows] != null) {
-                sArrayRowPool.release((ArrayRow) mRows[mNumRows]);
-            }
+        if (mRows[mNumRows] != null) {
+            sArrayRowPool.release((ArrayRow) mRows[mNumRows]);
         }
         row.updateClientEquations();
         mRows[mNumRows] = row;
@@ -844,35 +772,6 @@ public class LinearSystem {
     }
 
     /*--------------------------------------------------------------------------------------------*/
-    // Testing functions
-    /*--------------------------------------------------------------------------------------------*/
-
-    /**
-     * Utility testing function
-     * FIXME: shouldn't be public.
-     * @param n row number
-     * @param v variable name
-     */
-    public void testingPivotRow(int n, String v) {
-        FloatRow row = (FloatRow) mRows[n];
-        row.pivot(this.getVariable(v, SolverVariable.Type.ERROR));
-        // let's update the system with the new pivoted equation
-        for (int i = 0; i < mNumRows; i++) {
-            if (i == n) {
-                continue;
-            }
-            mRows[i].updateRowWithEquation(row);
-        }
-        // let's update the goal equation as well
-        if (mGoal != null) {
-            mGoal.updateRowWithEquation(row);
-        }
-        if (DEBUG) {
-            System.out.println("new goal after pivot: " + mGoal);
-        }
-    }
-
-    /*--------------------------------------------------------------------------------------------*/
     // Display utility functions
     /*--------------------------------------------------------------------------------------------*/
 
@@ -935,15 +834,6 @@ public class LinearSystem {
      */
     public void displaySystemInformations() {
         int count = 0;
-        if (USE_FLOAT_ROW) {
-            for (int i = 0; i < TABLE_SIZE; i++) {
-                for (int j = 0; j < TABLE_SIZE; j++) {
-                    if (mBackend[i][j] != 0) {
-                        count++;
-                    }
-                }
-            }
-        }
         int rowSize = 0;
         for (int i = 0; i < TABLE_SIZE; i++) {
             if (mRows[i] != null) {
