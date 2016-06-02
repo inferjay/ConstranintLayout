@@ -16,7 +16,6 @@
 
 package android.support.constraint.solver;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -48,16 +47,16 @@ public class SolverVariable {
         return "V" + uniqueId;
     }
 
-    IRow[] mClientEquations = new IRow[32];
+    ArrayRow[] mClientEquations = new ArrayRow[32];
     int mClientEquationsCount = 0;
 
-    public final IRow[] getClientEquations() {
+    public final ArrayRow[] getClientEquations() {
         return mClientEquations;
     }
 
     public final int getClientEquationsCount() { return mClientEquationsCount; }
 
-    public void addClientEquation(IRow equation) {
+    public void addClientEquation(ArrayRow equation) {
         for (int i = 0; i < mClientEquationsCount; i++) {
             if (mClientEquations[i] == equation) {
                 return;

@@ -16,7 +16,7 @@
 
 package android.support.constraint.solver;
 
-class ArrayRow implements IRow {
+class ArrayRow {
     private static final boolean DEBUG = false;
 
     SolverVariable variable = null;
@@ -27,7 +27,6 @@ class ArrayRow implements IRow {
 
     final ArrayBackedVariables variables = new ArrayBackedVariables();
 
-    @Override
     public void updateClientEquations() {
         int count = variables.size();
         for (int i = 0; i < count; i++) {
@@ -36,17 +35,14 @@ class ArrayRow implements IRow {
         }
     }
 
-    @Override
     public final boolean hasPositiveConstant() {
         return constantTerm >= 0;
     }
 
-    @Override
     public final float getConstant() {
         return constantTerm;
     }
 
-    @Override
     public boolean hasAtLeastOneVariable() {
         int count = variables.size();
         for (int i = 0; i < count; i++) {
@@ -58,12 +54,10 @@ class ArrayRow implements IRow {
         return false;
     }
 
-    @Override
     public void addVariable(SolverVariable v) {
         variables.put(v, 1.f);
     }
 
-    @Override
     public boolean hasKeyVariable() {
         return !(
                 (variable == null)
@@ -72,7 +66,6 @@ class ArrayRow implements IRow {
         );
     }
 
-    @Override
     public String toReadableString() {
         String s = "";
         if (variable == null) {
@@ -120,7 +113,6 @@ class ArrayRow implements IRow {
         return s;
     }
 
-    @Override
     public void reset() {
         variable = null;
         variables.clear();
@@ -128,33 +120,27 @@ class ArrayRow implements IRow {
         constantTerm = 0;
     }
 
-    @Override
     public final SolverVariable getKeyVariable() {
         return variable;
     }
 
-    @Override
     public boolean hasVariable(SolverVariable v) {
         return variables.containsKey(v);
     }
 
-    @Override
     public final float getVariable(SolverVariable v) {
         return variables.get(v);
     }
 
-    @Override
     public void setVariable(SolverVariable v, float value) {
         variables.put(v, value);
     }
 
-    @Override
     public void setConstant(float v) {
         constantTerm = v;
     }
 
-    @Override
-    public IRow createRowEquals(SolverVariable variable, int value) {
+    public ArrayRow createRowEquals(SolverVariable variable, int value) {
         if (value < 0) {
             this.constantTerm = -1 * value;
             setVariable(variable, 1);
@@ -165,9 +151,8 @@ class ArrayRow implements IRow {
         return this;
     }
 
-    @Override
-    public IRow createRowEquals(SolverVariable variableA, SolverVariable variableB,
-            int margin, boolean withError, int errorStrength) {
+    public ArrayRow createRowEquals(SolverVariable variableA, SolverVariable variableB,
+                                    int margin, boolean withError, int errorStrength) {
         boolean inverse = false;
         if (margin != 0) {
             int m = margin;
@@ -187,16 +172,14 @@ class ArrayRow implements IRow {
         return this;
     }
 
-    @Override
-    public IRow addSingleError(SolverVariable error, int sign) {
+    public ArrayRow addSingleError(SolverVariable error, int sign) {
         setVariable(error, sign);
         return this;
     }
 
-    @Override
-    public IRow createRowGreaterThan(SolverVariable variableA,
-            SolverVariable variableB, SolverVariable slack,
-            int margin, boolean withError, int errorStrength) {
+    public ArrayRow createRowGreaterThan(SolverVariable variableA,
+                                         SolverVariable variableB, SolverVariable slack,
+                                         int margin, boolean withError, int errorStrength) {
         boolean inverse = false;
         if (margin != 0) {
             int m = margin;
@@ -218,9 +201,8 @@ class ArrayRow implements IRow {
         return this;
     }
 
-    @Override
-    public IRow createRowLowerThan(SolverVariable variableA, SolverVariable variableB,
-            SolverVariable slack, int margin, boolean withError, int errorStrength) {
+    public ArrayRow createRowLowerThan(SolverVariable variableA, SolverVariable variableB,
+                                       SolverVariable slack, int margin, boolean withError, int errorStrength) {
         boolean inverse = false;
         if (margin != 0) {
             int m = margin;
@@ -242,10 +224,9 @@ class ArrayRow implements IRow {
         return this;
     }
 
-    @Override
-    public IRow createRowCentering(SolverVariable variableA, SolverVariable variableB, int marginA,
-            float bias, SolverVariable variableC, SolverVariable variableD, int marginB,
-            boolean withError, int errorStrength) {
+    public ArrayRow createRowCentering(SolverVariable variableA, SolverVariable variableB, int marginA,
+                                       float bias, SolverVariable variableC, SolverVariable variableD, int marginB,
+                                       boolean withError, int errorStrength) {
         if (variableB == variableC) {
             // centering on the same position
             // B - A == D - B
@@ -281,16 +262,14 @@ class ArrayRow implements IRow {
         return this;
     }
 
-    @Override
-    public IRow addError(SolverVariable error1, SolverVariable error2) {
+    public ArrayRow addError(SolverVariable error1, SolverVariable error2) {
         setVariable(error1, 1);
         setVariable(error2, -1);
         return this;
     }
 
-    @Override
-    public IRow createRowDimensionPercent(SolverVariable variableA,
-            SolverVariable variableB, SolverVariable variableC, int percent) {
+    public ArrayRow createRowDimensionPercent(SolverVariable variableA,
+                                              SolverVariable variableB, SolverVariable variableC, int percent) {
         float p = (percent / 100f);
         setVariable(variableA, -1);
         setVariable(variableB, (1 - p));
@@ -298,9 +277,8 @@ class ArrayRow implements IRow {
         return this;
     }
 
-    @Override
-    public IRow createRowDimensionRatio(SolverVariable variableA, SolverVariable variableB,
-                                          SolverVariable variableC, SolverVariable variableD, float ratio) {
+    public ArrayRow createRowDimensionRatio(SolverVariable variableA, SolverVariable variableB,
+                                            SolverVariable variableC, SolverVariable variableD, float ratio) {
         // A = B + (C - D) * ratio
         setVariable(variableA, -1);
         setVariable(variableB, 1);
@@ -309,12 +287,10 @@ class ArrayRow implements IRow {
         return this;
     }
 
-    @Override
     public void setUsed(boolean b) {
         this.used = b;
     }
 
-    @Override
     public int sizeInBytes() {
         int size = 0;
         if (variable != null) {
@@ -328,8 +304,7 @@ class ArrayRow implements IRow {
         return size;
     }
 
-    @Override
-    public boolean updateRowWithEquation(IRow row) {
+    public boolean updateRowWithEquation(ArrayRow row) {
         ArrayRow equation = (ArrayRow) row;
         float amount = variables.get(equation.variable);
         // let's replace this with the new definition
@@ -351,7 +326,6 @@ class ArrayRow implements IRow {
         return false;
     }
 
-    @Override
     public void ensurePositiveConstant() {
         // Ensure that if we have a constant it's positive
         if (constantTerm < 0) {
@@ -365,7 +339,6 @@ class ArrayRow implements IRow {
         }
     }
 
-    @Override
     public void pickRowVariable() {
         SolverVariable restrictedCandidate = null;
         SolverVariable unrestrictedCandidate = null;
@@ -431,7 +404,6 @@ class ArrayRow implements IRow {
         }
     }
 
-    @Override
     public void pivot(SolverVariable v) {
         if (variable != null) {
             // first, move back the variable to its column
@@ -462,7 +434,6 @@ class ArrayRow implements IRow {
         }
     }
 
-    @Override
     public SolverVariable findPivotCandidate() {
         SolverVariable candidate = variables.getPivotCandidate();
         if (candidate != null) {

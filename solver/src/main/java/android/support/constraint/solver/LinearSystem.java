@@ -18,7 +18,6 @@ package android.support.constraint.solver;
 
 import android.support.constraint.solver.widgets.ConstraintAnchor;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,11 +47,11 @@ public class LinearSystem {
     /*
      * The goal that is used when minimizing the system.
      */
-    private IRow mGoal;
+    private ArrayRow mGoal;
 
     private int TABLE_SIZE = 32; // default table size for the allocation
     private int mMaxColumns = TABLE_SIZE;
-    private IRow[] mRows = null;
+    private ArrayRow[] mRows = null;
 
     // Used by ConstraintWidget to map anchors to variables
     private HashMap<Object, SolverVariable> mObjectVariables = new HashMap<>();
@@ -69,7 +68,7 @@ public class LinearSystem {
     private static Pools.Pool<SolverVariable> sSolverVariablePool = new Pools.SimplePool<>(POOL_SIZE);
 
     public LinearSystem() {
-        mRows = new IRow[TABLE_SIZE];
+        mRows = new ArrayRow[TABLE_SIZE];
         if (sArrayRowPool == null) {
             sArrayRowPool = new Pools.SimplePool<>(POOL_SIZE);
         }
@@ -158,7 +157,7 @@ public class LinearSystem {
      * @param e the equation we want to add.
      */
     public void addConstraint(LinearEquation e) {
-        IRow row = EquationCreation.createRowFromEquation(this, e);
+        ArrayRow row = EquationCreation.createRowFromEquation(this, e);
         addConstraint(row);
     }
 
@@ -194,12 +193,12 @@ public class LinearSystem {
         return variable;
     }
 
-    IRow createRow() {
+    ArrayRow createRow() {
         return createRow(1);
     }
 
-    IRow createRow(int sizeHint) {
-        IRow row = sArrayRowPool.acquire();
+    ArrayRow createRow(int sizeHint) {
+        ArrayRow row = sArrayRowPool.acquire();
         if (row == null) {
             row = new ArrayRow();
         } else {
@@ -220,14 +219,14 @@ public class LinearSystem {
         return variable;
     }
 
-    void addError(IRow row, int strength) {
+    void addError(ArrayRow row, int strength) {
         SolverVariable error1 = createErrorVariable(strength);
         SolverVariable error2 = createErrorVariable(strength);
 
         row.addError(error1, error2);
     }
 
-    void addSingleError(IRow row, int sign, int strength) {
+    void addSingleError(ArrayRow row, int sign, int strength) {
         SolverVariable error = createErrorVariable(strength);
         row.addSingleError(error, sign);
     }
@@ -291,9 +290,9 @@ public class LinearSystem {
      * Simple accessor for the current goal. Used when minimizing the system's goal.
      * @return the current goal.
      */
-    public IRow getGoal() { return mGoal; }
+    public ArrayRow getGoal() { return mGoal; }
 
-    public IRow getRow(int n) {
+    public ArrayRow getRow(int n) {
         return mRows[n];
     }
 
@@ -375,7 +374,7 @@ public class LinearSystem {
      * Minimize the given goal with the current system.
      * @param goal the goal to minimize.
      */
-    public void minimizeGoal(IRow goal) throws Exception {
+    public void minimizeGoal(ArrayRow goal) throws Exception {
         // Update the equation with the variables already defined in the system
 
         for (int i = 0; i < mNumRows; i++) {
@@ -420,7 +419,7 @@ public class LinearSystem {
      * Update the equation with the variables already defined in the system
      * @param row row to update
      */
-    private void updateRowFromVariables(IRow row) {
+    private void updateRowFromVariables(ArrayRow row) {
         ArrayRow equation = (ArrayRow) row;
         int numVariables = equation.variables.currentSize;
         for (int i = 0; i < numVariables; i++) {
@@ -435,7 +434,7 @@ public class LinearSystem {
      * Add the equation to the system
      * @param row the equation we want to add expressed as a system row.
      */
-    public void addConstraint(IRow row) {
+    public void addConstraint(ArrayRow row) {
         if (row == null) {
             return;
         }
@@ -480,10 +479,10 @@ public class LinearSystem {
         row.getKeyVariable().mDefinitionId = mNumRows;
         mNumRows++;
 
-        IRow[] clients = row.getKeyVariable().getClientEquations();
+        ArrayRow[] clients = row.getKeyVariable().getClientEquations();
         final int count = row.getKeyVariable().getClientEquationsCount();
         for (int i = 0; i < count; i++) {
-            IRow client = clients[i];
+            ArrayRow client = clients[i];
             if (client == row) {
                 continue;
             }
@@ -502,7 +501,7 @@ public class LinearSystem {
      * @param goal goal to optimize.
      * @return number of iterations.
      */
-    private int optimize(IRow goal) {
+    private int optimize(ArrayRow goal) {
         boolean done = false;
         int tries = 0;
         mAlreadyTestedCandidates.clear();
@@ -541,7 +540,7 @@ public class LinearSystem {
                 int pivotRowIndexStrong = -1;
 
                 for (int i = 0; i < mNumRows; i++) {
-                    IRow current = mRows[i];
+                    ArrayRow current = mRows[i];
                     SolverVariable variable = current.getKeyVariable();
                     if (variable.getType() == SolverVariable.Type.UNRESTRICTED) {
                         // skip unrestricted variables equations.
@@ -582,7 +581,7 @@ public class LinearSystem {
                     if (DEBUG) {
                         System.out.println("We pivot on " + pivotRowIndex);
                     }
-                    IRow pivotEquation = mRows[pivotRowIndex];
+                    ArrayRow pivotEquation = mRows[pivotRowIndex];
                     pivotEquation.getKeyVariable().mDefinitionId = -1;
                     pivotEquation.pivot(pivotCandidate);
                     pivotEquation.getKeyVariable().mDefinitionId = pivotRowIndex;
@@ -616,7 +615,7 @@ public class LinearSystem {
      * @param goal
      * @return number of iterations
      */
-    private int enforceBFS(IRow goal) throws Exception {
+    private int enforceBFS(ArrayRow goal) throws Exception {
         int tries = 0;
         boolean done;
 
@@ -661,7 +660,7 @@ public class LinearSystem {
                 int pivotColumnIndex;
 
                 for (int i = 0; i < mNumRows; i++) {
-                    IRow current = mRows[i];
+                    ArrayRow current = mRows[i];
                     SolverVariable variable = current.getKeyVariable();
                     if (variable.getType() == SolverVariable.Type.UNRESTRICTED) {
                         // skip unrestricted variables equations, as C
@@ -706,7 +705,7 @@ public class LinearSystem {
 
                 if (pivotRowIndex != -1) {
                     // We have a pivot!
-                    IRow pivotEquation = mRows[pivotRowIndex];
+                    ArrayRow pivotEquation = mRows[pivotRowIndex];
                     pivotEquation.getKeyVariable().mDefinitionId = -1;
                     pivotEquation.pivot(mIndexedVariables[pivotColumnIndex]);
                     pivotEquation.getKeyVariable().mDefinitionId = pivotRowIndex;
@@ -753,7 +752,7 @@ public class LinearSystem {
 
     private void computeValues() {
         for (int i = 0; i < mNumRows; i++) {
-            IRow row = mRows[i];
+            ArrayRow row = mRows[i];
             row.getKeyVariable().mComputedValue = row.getConstant();
         }
     }
@@ -764,7 +763,7 @@ public class LinearSystem {
      * @param target target row
      * @param variable variable to replace
      */
-    void replaceVariable(IRow target, SolverVariable variable) {
+    void replaceVariable(ArrayRow target, SolverVariable variable) {
         int idx = variable.mDefinitionId;
         if (idx != -1) {
             target.updateRowWithEquation(mRows[idx]);
