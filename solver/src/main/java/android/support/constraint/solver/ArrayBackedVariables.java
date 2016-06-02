@@ -95,7 +95,7 @@ class ArrayBackedVariables {
                 SolverVariable current = variables[idx];
                 if (current == v) {
                     return values[idx];
-                } else if (current.mId < v.mId) {
+                } else if (current.id < v.id) {
                     start = index + 1;
                 } else {
                     end = index - 1;
@@ -134,7 +134,7 @@ class ArrayBackedVariables {
                 boolean inserted = false;
                 for (int j = 0; j < currentSize; j++) {
                     int index = indexes[j];
-                    if (variables[index].mId > variable.mId) {
+                    if (variables[index].id > variable.id) {
                         // this is our insertion point
                         System.arraycopy(indexes, j, indexes, j + 1, (currentSize - j));
                         indexes[j] = firstEmptyIndex;
@@ -179,7 +179,7 @@ class ArrayBackedVariables {
                 SolverVariable current = variables[indexes[index]];
                 if (current == variable) {
                     return true;
-                } else if (current.mId < variable.mId) {
+                } else if (current.id < variable.id) {
                     start = index + 1;
                 } else {
                     end = index - 1;

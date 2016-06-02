@@ -114,7 +114,7 @@ class EquationVariable {
         if (mVariable == null) {
             return SolverVariable.Type.CONSTANT;
         }
-        return mVariable.getType();
+        return mVariable.mType;
     }
 
     /**

@@ -21,7 +21,7 @@ class ArrayRow {
 
     SolverVariable variable = null;
     float variableValue = 0;
-    float constantTerm = 0;
+    float constantValue = 0;
     boolean used = false;
     final float epsilon = 0.001f;
 
@@ -36,11 +36,7 @@ class ArrayRow {
     }
 
     public final boolean hasPositiveConstant() {
-        return constantTerm >= 0;
-    }
-
-    public final float getConstant() {
-        return constantTerm;
+        return constantValue >= 0;
     }
 
     public boolean hasAtLeastOneVariable() {
@@ -61,8 +57,8 @@ class ArrayRow {
     public boolean hasKeyVariable() {
         return !(
                 (variable == null)
-                        || (variable.getType() != SolverVariable.Type.UNRESTRICTED
-                        && constantTerm < 0)
+                        || (variable.mType != SolverVariable.Type.UNRESTRICTED
+                        && constantValue < 0)
         );
     }
 
@@ -75,8 +71,8 @@ class ArrayRow {
         }
         s += " = ";
         boolean addedVariable = false;
-        if (constantTerm != 0) {
-            s += constantTerm;
+        if (constantValue != 0) {
+            s += constantValue;
             addedVariable = true;
         }
         int count = variables.size();
@@ -117,11 +113,7 @@ class ArrayRow {
         variable = null;
         variables.clear();
         variableValue = 0;
-        constantTerm = 0;
-    }
-
-    public final SolverVariable getKeyVariable() {
-        return variable;
+        constantValue = 0;
     }
 
     public boolean hasVariable(SolverVariable v) {
@@ -137,15 +129,15 @@ class ArrayRow {
     }
 
     public void setConstant(float v) {
-        constantTerm = v;
+        constantValue = v;
     }
 
     public ArrayRow createRowEquals(SolverVariable variable, int value) {
         if (value < 0) {
-            this.constantTerm = -1 * value;
+            this.constantValue = -1 * value;
             setVariable(variable, 1);
         } else {
-            this.constantTerm = value;
+            this.constantValue = value;
             setVariable(variable, -1);
         }
         return this;
@@ -160,7 +152,7 @@ class ArrayRow {
                 m = -1 * m;
                 inverse = true;
             }
-            constantTerm = m;
+            constantValue = m;
         }
         if (!inverse) {
             setVariable(variableA, -1);
@@ -187,7 +179,7 @@ class ArrayRow {
                 m = -1 * m;
                 inverse = true;
             }
-            constantTerm = m;
+            constantValue = m;
         }
         if (!inverse) {
             setVariable(variableA, -1);
@@ -210,7 +202,7 @@ class ArrayRow {
                 m = -1 * m;
                 inverse = true;
             }
-            constantTerm = m;
+            constantValue = m;
         }
         if (!inverse) {
             setVariable(variableA, -1);
@@ -297,7 +289,7 @@ class ArrayRow {
             size += 4; // object
         }
         size += 4; // variableValue;
-        size += 4; // constantTerm
+        size += 4; // constantValue
         size += 4; // used
 
         size += variables.sizeInBytes();
@@ -319,7 +311,7 @@ class ArrayRow {
                 float finalValue = previousAmount + (sourceAmount * amount);
                 variables.put(v, finalValue);
             }
-            constantTerm += equation.constantTerm * amount;
+            constantValue += equation.constantValue * amount;
             variables.remove(equation.variable);
             return true;
         }
@@ -328,9 +320,9 @@ class ArrayRow {
 
     public void ensurePositiveConstant() {
         // Ensure that if we have a constant it's positive
-        if (constantTerm < 0) {
+        if (constantValue < 0) {
             // If not, simply multiply the equation by -1
-            constantTerm *= -1;
+            constantValue *= -1;
             int count = variables.size();
             for (int i = 0; i < count; i++) {
                 float previousAmount = variables.getVariableValue(i);
@@ -371,7 +363,7 @@ class ArrayRow {
                 continue;
             }
 
-            if (candidateVariable.getType() == SolverVariable.Type.UNRESTRICTED) {
+            if (candidateVariable.mType == SolverVariable.Type.UNRESTRICTED) {
                 // If there's an unrestricted variable, it's a candidate to pivot on.
                 if (variableAmount < 0) {
                     // if it has a negative value, simply pivot immediately
@@ -416,7 +408,7 @@ class ArrayRow {
         variables.remove(v);
         variable = v;
         variableValue = 1;
-        constantTerm = constantTerm / amount;
+        constantValue = constantValue / amount;
         int count = variables.size();
         for (int i = 0; i < count; i++) {
             float previousAmount = variables.getVariableValue(i);

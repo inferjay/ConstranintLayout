@@ -25,59 +25,20 @@ import java.util.Arrays;
 public class SolverVariable {
 
     private static final boolean INTERNAL_DEBUG = false;
+
     static int uniqueId = 1;
-    public float mComputedValue;
 
-    public static String getUniqueName() { uniqueId++; return "V" + uniqueId; }
+    private String mName;
 
-    public static String getUniqueName(Type type, Strength strength) {
-        uniqueId++;
-        switch (type) {
-            case UNRESTRICTED: return "U" + uniqueId;
-            case CONSTANT: return "C" + uniqueId;
-            case SLACK: return "S" + uniqueId;
-            case ERROR: {
-                if (strength == Strength.STRONG) {
-                    return "E" + uniqueId;
-                } else {
-                    return "e" + uniqueId;
-                }
-            }
-        }
-        return "V" + uniqueId;
-    }
+    public int id = -1;
+    public int definitionId = -1;
+    public float copmutedValue;
+
+    Type mType;
+    Strength mStrength = Strength.WEAK;
 
     ArrayRow[] mClientEquations = new ArrayRow[32];
     int mClientEquationsCount = 0;
-
-    public final ArrayRow[] getClientEquations() {
-        return mClientEquations;
-    }
-
-    public final int getClientEquationsCount() { return mClientEquationsCount; }
-
-    public void addClientEquation(ArrayRow equation) {
-        for (int i = 0; i < mClientEquationsCount; i++) {
-            if (mClientEquations[i] == equation) {
-                return;
-            }
-        }
-        if (mClientEquationsCount >= mClientEquations.length) {
-            mClientEquations = Arrays.copyOf(mClientEquations, mClientEquations.length * 2);
-        }
-        mClientEquations[mClientEquationsCount] = equation;
-        mClientEquationsCount++;
-    }
-
-    public void reset() {
-        mName = null;
-        mType = Type.UNKNOWN;
-        mStrength = Strength.WEAK;
-        mId = -1;
-        mDefinitionId = -1;
-        mComputedValue = 0;
-        mClientEquationsCount = 0;
-    }
 
     /**
      * Type of variables
@@ -111,11 +72,24 @@ public class SolverVariable {
         UNKNOWN
     }
 
-    private String mName;
-    private Type mType;
-    private Strength mStrength = Strength.WEAK;
-    public int mId = -1;
-    public int mDefinitionId = -1;
+    public static String getUniqueName() { uniqueId++; return "V" + uniqueId; }
+
+    public static String getUniqueName(Type type, Strength strength) {
+        uniqueId++;
+        switch (type) {
+            case UNRESTRICTED: return "U" + uniqueId;
+            case CONSTANT: return "C" + uniqueId;
+            case SLACK: return "S" + uniqueId;
+            case ERROR: {
+                if (strength == Strength.STRONG) {
+                    return "E" + uniqueId;
+                } else {
+                    return "e" + uniqueId;
+                }
+            }
+        }
+        return "V" + uniqueId;
+    }
 
     /**
      * Base constructor
@@ -135,6 +109,29 @@ public class SolverVariable {
         }
     }
 
+    public void addClientEquation(ArrayRow equation) {
+        for (int i = 0; i < mClientEquationsCount; i++) {
+            if (mClientEquations[i] == equation) {
+                return;
+            }
+        }
+        if (mClientEquationsCount >= mClientEquations.length) {
+            mClientEquations = Arrays.copyOf(mClientEquations, mClientEquations.length * 2);
+        }
+        mClientEquations[mClientEquationsCount] = equation;
+        mClientEquationsCount++;
+    }
+
+    public void reset() {
+        mName = null;
+        mType = Type.UNKNOWN;
+        mStrength = Strength.WEAK;
+        id = -1;
+        definitionId = -1;
+        copmutedValue = 0;
+        mClientEquationsCount = 0;
+    }
+
     /**
      * Accessor for the name
      *
@@ -142,15 +139,6 @@ public class SolverVariable {
      */
     public String getName() {
         return mName;
-    }
-
-    /**
-     * Accessor for the type
-     *
-     * @return the type of the variable
-     */
-    public Type getType() {
-        return mType;
     }
 
     public void setName(String name) { mName = name; }
@@ -173,12 +161,6 @@ public class SolverVariable {
     }
 
     /**
-     * Accessor for the strength (used for errors and slack variables in evaluating the goal)
-     * @return the strength
-     */
-    public Strength getStrength() { return mStrength; }
-
-    /**
      * Override the toString() method to display the variable
      */
     @Override
@@ -192,19 +174,4 @@ public class SolverVariable {
         return result;
     }
 
-    /**
-     * Set the global id for this variable
-     * @param id
-     */
-    void setId(int id) {
-        mId = id;
-    }
-
-    /**
-     * Returns the global id of this variable
-     * @return
-     */
-    int getId() {
-        return mId;
-    }
 }

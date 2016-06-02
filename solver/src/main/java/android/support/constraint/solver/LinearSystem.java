@@ -172,10 +172,10 @@ public class LinearSystem {
         if (USE_EMBEDDED_VARIABLE) {
             if (anchor instanceof ConstraintAnchor) {
                 variable = ((ConstraintAnchor) anchor).getSolverVariable();
-                if (variable.getId() == -1) {
+                if (variable.id == -1) {
                     mVariablesID++;
                     mNumColumns++;
-                    variable.setId(mVariablesID);
+                    variable.id = mVariablesID;
                     mIndexedVariables[mVariablesID] = variable;
                 }
             }
@@ -185,7 +185,7 @@ public class LinearSystem {
                 variable = acquireSolverVariable(SolverVariable.Type.UNRESTRICTED);
                 mVariablesID++;
                 mNumColumns++;
-                variable.setId(mVariablesID);
+                variable.id = mVariablesID;
                 mIndexedVariables[mVariablesID] = variable;
                 mObjectVariables.put(anchor, variable);
             }
@@ -214,7 +214,7 @@ public class LinearSystem {
         SolverVariable variable = acquireSolverVariable(SolverVariable.Type.SLACK);
         mVariablesID++;
         mNumColumns++;
-        variable.setId(mVariablesID);
+        variable.id = mVariablesID;
         mIndexedVariables[mVariablesID] = variable;
         return variable;
     }
@@ -239,7 +239,7 @@ public class LinearSystem {
         variable.setName(name);
         mVariablesID++;
         mNumColumns++;
-        variable.setId(mVariablesID);
+        variable.id = mVariablesID;
         if (mVariables == null) {
             mVariables = new HashMap<>();
         }
@@ -262,7 +262,7 @@ public class LinearSystem {
         }
         mVariablesID++;
         mNumColumns++;
-        variable.setId(mVariablesID);
+        variable.id = mVariablesID;
         mIndexedVariables[mVariablesID] = variable;
         return variable;
     }
@@ -301,7 +301,7 @@ public class LinearSystem {
         if (v == null) {
             return 0;
         }
-        return v.mComputedValue;
+        return v.copmutedValue;
     }
 
     public int getObjectVariableValue(Object anchor) {
@@ -312,7 +312,7 @@ public class LinearSystem {
             variable = mObjectVariables.get(anchor);
         }
         if (variable != null) {
-            return (int) variable.mComputedValue;
+            return (int) variable.copmutedValue;
         }
         return 0;
     }
@@ -350,7 +350,7 @@ public class LinearSystem {
         }
         for (int i = 1; i < mNumColumns; i++) {
             SolverVariable variable = mIndexedVariables[i];
-            if (variable.getType() == SolverVariable.Type.ERROR
+            if (variable.mType == SolverVariable.Type.ERROR
                 /* || variable.getType() == SolverVariable.Type.SLACK */) {
                 mGoal.addVariable(variable);
             }
@@ -472,15 +472,15 @@ public class LinearSystem {
         }
 
         if (mRows[mNumRows] != null) {
-            sArrayRowPool.release((ArrayRow) mRows[mNumRows]);
+            sArrayRowPool.release(mRows[mNumRows]);
         }
         row.updateClientEquations();
         mRows[mNumRows] = row;
-        row.getKeyVariable().mDefinitionId = mNumRows;
+        row.variable.definitionId = mNumRows;
         mNumRows++;
 
-        ArrayRow[] clients = row.getKeyVariable().getClientEquations();
-        final int count = row.getKeyVariable().getClientEquationsCount();
+        ArrayRow[] clients = row.variable.mClientEquations;
+        final int count = row.variable.mClientEquationsCount;
         for (int i = 0; i < count; i++) {
             ArrayRow client = clients[i];
             if (client == row) {
@@ -541,19 +541,19 @@ public class LinearSystem {
 
                 for (int i = 0; i < mNumRows; i++) {
                     ArrayRow current = mRows[i];
-                    SolverVariable variable = current.getKeyVariable();
-                    if (variable.getType() == SolverVariable.Type.UNRESTRICTED) {
+                    SolverVariable variable = current.variable;
+                    if (variable.mType == SolverVariable.Type.UNRESTRICTED) {
                         // skip unrestricted variables equations.
                         continue;
                     }
                     if (current.hasVariable(pivotCandidate)) {
                         // the current row does contains the variable
                         // we want to pivot on
-                        float C = current.getConstant();
+                        float C = current.constantValue;
                         float a_j = current.getVariable(pivotCandidate);
                         if (a_j < 0) {
                             float value = (C * -1) / a_j;
-                            if (pivotCandidate.getStrength() ==
+                            if (pivotCandidate.mStrength ==
                                     SolverVariable.Strength.STRONG) {
                                 if (value < minStrong) {
                                     minStrong = value;
@@ -582,9 +582,9 @@ public class LinearSystem {
                         System.out.println("We pivot on " + pivotRowIndex);
                     }
                     ArrayRow pivotEquation = mRows[pivotRowIndex];
-                    pivotEquation.getKeyVariable().mDefinitionId = -1;
+                    pivotEquation.variable.definitionId = -1;
                     pivotEquation.pivot(pivotCandidate);
-                    pivotEquation.getKeyVariable().mDefinitionId = pivotRowIndex;
+                    pivotEquation.variable.definitionId = pivotRowIndex;
                     // let's update the system with the new pivoted equation
                     for (int i = 0; i < mNumRows; i++) {
                         mRows[i].updateRowWithEquation(pivotEquation);
@@ -624,8 +624,8 @@ public class LinearSystem {
         // Let's check if that's the case or not.
         boolean infeasibleSystem = false;
         for (int i = 0; i < mNumRows; i++) {
-            SolverVariable variable = mRows[i].getKeyVariable();
-            if (variable.getType() == SolverVariable.Type.UNRESTRICTED) {
+            SolverVariable variable = mRows[i].variable;
+            if (variable.mType == SolverVariable.Type.UNRESTRICTED) {
                 continue; // C can be either positive or negative.
             }
             if (!mRows[i].hasPositiveConstant()) {
@@ -661,8 +661,8 @@ public class LinearSystem {
 
                 for (int i = 0; i < mNumRows; i++) {
                     ArrayRow current = mRows[i];
-                    SolverVariable variable = current.getKeyVariable();
-                    if (variable.getType() == SolverVariable.Type.UNRESTRICTED) {
+                    SolverVariable variable = current.variable;
+                    if (variable.mType == SolverVariable.Type.UNRESTRICTED) {
                         // skip unrestricted variables equations, as C
                         // can be either positive or negative.
                         continue;
@@ -678,7 +678,7 @@ public class LinearSystem {
                             float d_j = goal.getVariable(candidate);
                             float value = d_j / a_j;
 
-                            if (variable.getStrength() == SolverVariable.Strength.STRONG) {
+                            if (variable.mStrength == SolverVariable.Strength.STRONG) {
                                 if (value < minStrong) {
                                     minStrong = value;
                                     pivotRowIndexStrong = i;
@@ -706,9 +706,9 @@ public class LinearSystem {
                 if (pivotRowIndex != -1) {
                     // We have a pivot!
                     ArrayRow pivotEquation = mRows[pivotRowIndex];
-                    pivotEquation.getKeyVariable().mDefinitionId = -1;
+                    pivotEquation.variable.definitionId = -1;
                     pivotEquation.pivot(mIndexedVariables[pivotColumnIndex]);
-                    pivotEquation.getKeyVariable().mDefinitionId = pivotRowIndex;
+                    pivotEquation.variable.definitionId = pivotRowIndex;
                     // let's update the system with the new pivoted equation
                     for (int i = 0; i < mNumRows; i++) {
                         mRows[i].updateRowWithEquation(pivotEquation);
@@ -733,8 +733,8 @@ public class LinearSystem {
         // Let's make sure the system is correct
         infeasibleSystem = false;
         for (int i = 0; i < mNumRows; i++) {
-            SolverVariable variable = mRows[i].getKeyVariable();
-            if (variable.getType() == SolverVariable.Type.UNRESTRICTED) {
+            SolverVariable variable = mRows[i].variable;
+            if (variable.mType == SolverVariable.Type.UNRESTRICTED) {
                 continue; // C can be either positive or negative.
             }
             if (!mRows[i].hasPositiveConstant()) {
@@ -753,7 +753,7 @@ public class LinearSystem {
     private void computeValues() {
         for (int i = 0; i < mNumRows; i++) {
             ArrayRow row = mRows[i];
-            row.getKeyVariable().mComputedValue = row.getConstant();
+            row.variable.copmutedValue = row.constantValue;
         }
     }
 
@@ -764,7 +764,7 @@ public class LinearSystem {
      * @param variable variable to replace
      */
     void replaceVariable(ArrayRow target, SolverVariable variable) {
-        int idx = variable.mDefinitionId;
+        int idx = variable.definitionId;
         if (idx != -1) {
             target.updateRowWithEquation(mRows[idx]);
         }
@@ -804,7 +804,7 @@ public class LinearSystem {
         displaySolverVariables();
         String s = "";
         for (int i = 0; i < mNumRows; i++) {
-            if (mRows[i].getKeyVariable().getType() == SolverVariable.Type.UNRESTRICTED) {
+            if (mRows[i].variable.mType == SolverVariable.Type.UNRESTRICTED) {
                 s += mRows[i].toReadableString();
                 s += "\n";
             }
