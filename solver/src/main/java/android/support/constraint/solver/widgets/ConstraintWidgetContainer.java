@@ -128,8 +128,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      * @param system the solver we want to add the widget to
      */
     @Override
-    public void addToSolver(LinearSystem system) {
-        super.addToSolver(system);
+    public void addToSolver(LinearSystem system, int group) {
+        super.addToSolver(system, group);
         final int count = mChildren.size();
         for (int i = 0; i < count; i++) {
             ConstraintWidget widget = mChildren.get(i);
@@ -142,7 +142,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 if (verticalBehaviour == DimensionBehaviour.WRAP_CONTENT) {
                     widget.setVerticalDimensionBehaviour(DimensionBehaviour.FIXED);
                 }
-                widget.addToSolver(system);
+                widget.addToSolver(system, group);
                 if (horizontalBehaviour == DimensionBehaviour.WRAP_CONTENT) {
                     widget.setHorizontalDimensionBehaviour(horizontalBehaviour);
                 }
@@ -150,7 +150,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                     widget.setVerticalDimensionBehaviour(verticalBehaviour);
                 }
             } else {
-                widget.addToSolver(system);
+                widget.addToSolver(system, group);
             }
         }
     }
@@ -161,13 +161,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      * @param system the solver we get the values from.
      */
     @Override
-    public void updateFromSolver(LinearSystem system) {
-        super.updateFromSolver(system);
+    public void updateFromSolver(LinearSystem system, int group) {
+        super.updateFromSolver(system, group);
         if (system == mSystem) {
             final int count = mChildren.size();
             for (int i = 0; i < count; i++) {
                 ConstraintWidget widget = mChildren.get(i);
-                widget.updateFromSolver(system);
+                widget.updateFromSolver(system, group);
             }
         }
     }
@@ -200,12 +200,116 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         // Now let's solve our system as usual
         try {
             mSystem.reset();
-            addToSolver(mSystem);
+            addToSolver(mSystem, ConstraintAnchor.ANY_GROUP);
             mSystem.minimize();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        updateFromSolver(mSystem);
+        updateFromSolver(mSystem, ConstraintAnchor.ANY_GROUP);
+
+        int width = getWidth();
+        int height = getHeight();
+        // Let's restore our state...
+        mSnapshot.applyTo(this);
+        setWidth(width);
+        setHeight(height);
+        if (this == getRootConstraintContainer()) {
+            updateDrawPosition();
+        }
+    }
+
+    static int sGroup = 0;
+
+    static int findExistingGroup(ConstraintAnchor anchor) {
+        int group = anchor.getGroup();
+        if (group != ConstraintAnchor.ANY_GROUP) {
+            return group;
+        }
+        ConstraintWidget parent = anchor.getOwner().getParent();
+        if (anchor.isConnected()) {
+            ConstraintWidget target = anchor.getTarget().getOwner();
+            if (parent != target) {
+                int next = findExistingGroup(anchor.getTarget());
+                if (next != ConstraintAnchor.ANY_GROUP) {
+                    return next;
+                }
+            }
+        }
+        ConstraintAnchor opposite = anchor.getOpposite();
+        if (opposite != null) {
+            return findExistingGroup(opposite);
+        }
+        return ConstraintAnchor.ANY_GROUP;
+    }
+
+    static void findGroup(ConstraintAnchor anchor) {
+        if (anchor.isConnected() && anchor.getGroup() == ConstraintAnchor.ANY_GROUP) {
+            ConstraintAnchor target = anchor.getTarget();
+            int group = ConstraintAnchor.ANY_GROUP;
+            if (target.getOwner() != anchor.getOwner().getParent()) {
+                group = findExistingGroup(anchor.getTarget());
+            }
+            if (group == ConstraintAnchor.ANY_GROUP) {
+                group = sGroup;
+                sGroup++;
+            }
+            anchor.setGroup(group);
+            target.setGroup(group);
+            findGroup(target);
+        }
+    }
+
+    /**
+     * Find groups
+     */
+    public void layoutFindGroups() {
+        sGroup = 0;
+        for (ConstraintWidget widget : mChildren) {
+            widget.resetGroups();
+            findGroup(widget.getAnchor(ConstraintAnchor.Type.LEFT));
+            findGroup(widget.getAnchor(ConstraintAnchor.Type.RIGHT));
+            findGroup(widget.getAnchor(ConstraintAnchor.Type.TOP));
+            findGroup(widget.getAnchor(ConstraintAnchor.Type.BASELINE));
+            findGroup(widget.getAnchor(ConstraintAnchor.Type.BOTTOM));
+        }
+    }
+
+    /**
+     * Layout by groups
+     */
+    public void layoutWithGroup() {
+        mSnapshot.updateFrom(this);
+        // We clear ourselves of external anchors as
+        // well as repositioning us to (0, 0)
+        // before inserting us in the solver, so that our
+        // children's positions get computed relative to us.
+        setX(0);
+        setY(0);
+        resetAnchors();
+        resetSolverVariables();
+
+        // Before we solve our system, we should call layout() on any
+        // of our children that is a container.
+        final int count = mChildren.size();
+        for (int i = 0; i < count; i++) {
+            ConstraintWidget widget = mChildren.get(i);
+            if (widget instanceof WidgetContainer) {
+                ((WidgetContainer) widget).layout();
+            }
+        }
+
+        for (int i = 0; i < sGroup; i++) {
+            // Now let's solve our system as usual
+            try {
+                mSystem.reset();
+                addToSolver(mSystem, i);
+                mSystem.minimize();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            updateFromSolver(mSystem, i);
+        }
+        updateFromSolver(mSystem, ConstraintAnchor.APPLY_GROUP_RESULTS);
 
         int width = getWidth();
         int height = getHeight();

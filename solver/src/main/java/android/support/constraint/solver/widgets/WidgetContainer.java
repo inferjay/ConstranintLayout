@@ -280,4 +280,14 @@ public class WidgetContainer extends ConstraintWidget {
             widget.resetSolverVariables();
         }
     }
+
+    @Override
+    public void resetGroups() {
+        super.resetGroups();
+        final int count = mChildren.size();
+        for (int i = 0; i < count; i++) {
+            ConstraintWidget widget = mChildren.get(i);
+            widget.resetGroups();
+        }
+    }
 }

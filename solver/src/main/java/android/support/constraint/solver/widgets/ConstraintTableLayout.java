@@ -310,8 +310,8 @@ public class ConstraintTableLayout extends ConstraintWidgetContainer {
      * @param system the solver we want to add the widget to
      */
     @Override
-    public void addToSolver(LinearSystem system) {
-        super.addToSolver(system);
+    public void addToSolver(LinearSystem system, int group) {
+        super.addToSolver(system, group);
         int count = mChildren.size();
         if (count == 0) {
             return;
@@ -325,18 +325,18 @@ public class ConstraintTableLayout extends ConstraintWidgetContainer {
                 Guideline guideline = mVerticalGuidelines.get(i);
                 guideline.setPositionRelaxed(
                         getHorizontalDimensionBehaviour() == DimensionBehaviour.WRAP_CONTENT);
-                guideline.addToSolver(system);
+                guideline.addToSolver(system, group);
             }
             num = mHorizontalGuidelines.size();
             for (int i = 0; i < num; i++) {
                 Guideline guideline = mHorizontalGuidelines.get(i);
                 guideline.setPositionRelaxed(
                         getVerticalDimensionBehaviour() == DimensionBehaviour.WRAP_CONTENT);
-                guideline.addToSolver(system);
+                guideline.addToSolver(system, group);
             }
             for (int i = 0; i < count; i++) {
                 ConstraintWidget child = mChildren.get(i);
-                child.addToSolver(system);
+                child.addToSolver(system, group);
             }
         }
     }
@@ -543,20 +543,20 @@ public class ConstraintTableLayout extends ConstraintWidgetContainer {
      * @param system the solver we get the values from.
      */
     @Override
-    public void updateFromSolver(LinearSystem system) {
-        super.updateFromSolver(system);
+    public void updateFromSolver(LinearSystem system, int group) {
+        super.updateFromSolver(system, group);
 
         // We don't want to update guidelines on a different system than our own
         if (system == mSystem) {
             int num = mVerticalGuidelines.size();
             for (int i = 0; i < num; i++) {
                 Guideline guideline = mVerticalGuidelines.get(i);
-                guideline.updateFromSolver(system);
+                guideline.updateFromSolver(system, group);
             }
             num = mHorizontalGuidelines.size();
             for (int i = 0; i < num; i++) {
                 Guideline guideline = mHorizontalGuidelines.get(i);
-                guideline.updateFromSolver(system);
+                guideline.updateFromSolver(system, group);
             }
         }
     }

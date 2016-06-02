@@ -83,6 +83,11 @@ public class ConstraintWidget implements Solvable {
     private int mHeight = 0;
     private float mDimensionRatio = 0;
 
+    private int mSolverLeft = 0;
+    private int mSolverTop = 0;
+    private int mSolverRight = 0;
+    private int mSolverBottom = 0;
+
     // Origin of the widget
     private int mX = 0;
     private int mY = 0;
@@ -214,7 +219,17 @@ public class ConstraintWidget implements Solvable {
     public void resetSolverVariables() {
         final int numAnchors = mAnchors.size();
         for (int i = 0; i < numAnchors; i++) {
-            mAnchors.get(i).getSolverVariable().reset();
+            mAnchors.get(i).resetSolverVariable();
+        }
+    }
+
+    /**
+     * Reset the anchors' group
+     */
+    public void resetGroups() {
+        final int numAnchors = mAnchors.size();
+        for (int i = 0; i < numAnchors; i++) {
+            mAnchors.get(i).setGroup(-1);
         }
     }
 
@@ -1527,13 +1542,17 @@ public class ConstraintWidget implements Solvable {
     // Constraints
     /*-----------------------------------------------------------------------*/
 
+    public void addToSolver(LinearSystem system) {
+        addToSolver(system, ConstraintAnchor.ANY_GROUP);
+    }
+
     /**
      * Add this widget to the solver
      *
      * @param system the solver we want to add the widget to
      */
     @Override
-    public void addToSolver(LinearSystem system) {
+    public void addToSolver(LinearSystem system, int group) {
         if (getParent() != null) {
 
             // If the parent is set to wrap content, we need to:
@@ -1660,8 +1679,10 @@ public class ConstraintWidget implements Solvable {
 
         boolean wrapContent = (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)
                 && (this instanceof ConstraintWidgetContainer);
-        applyConstraints(system, wrapContent, horizontalDimensionLocked, mLeft, mRight,
-                mX, mX + width, width, mHorizontalBiasPercent, useRatio);
+        if (group == ConstraintAnchor.ANY_GROUP || mLeft.getGroup() == group || mRight.getGroup() == group) {
+            applyConstraints(system, wrapContent, horizontalDimensionLocked, mLeft, mRight,
+                    mX, mX + width, width, mHorizontalBiasPercent, useRatio);
+        }
 
         wrapContent = (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)
                 && (this instanceof ConstraintWidgetContainer);
@@ -1670,21 +1691,26 @@ public class ConstraintWidget implements Solvable {
             SolverVariable bottom = system.createObjectVariable(mBottom);
             SolverVariable baseline = system.createObjectVariable(mBaseline);
             ConstraintAnchor end = mBottom;
-            system.addConstraint(
-                    EquationCreation.createRowEquals(system, bottom, baseline,
-                            height - getBaselineDistance(),
-                            false));
+            if (group == ConstraintAnchor.ANY_GROUP || mBottom.getGroup() == group || mBaseline.getGroup() == group) {
+                system.addConstraint(
+                        EquationCreation.createRowEquals(system, bottom, baseline,
+                                height - getBaselineDistance(),
+                                false));
+            }
             if (mBaseline.isConnected()) {
                 height = getBaselineDistance();
                 end = mBaseline;
             }
-            applyConstraints(system, wrapContent, verticalDimensionLocked,
-                    mTop, end, mY, mY + height, height, mVerticalBiasPercent, useRatio);
+            if (group == ConstraintAnchor.ANY_GROUP || mTop.getGroup() == group || end.getGroup() == group) {
+                applyConstraints(system, wrapContent, verticalDimensionLocked,
+                        mTop, end, mY, mY + height, height, mVerticalBiasPercent, useRatio);
+            }
         } else {
-            applyConstraints(system, wrapContent, verticalDimensionLocked,
-                    mTop, mBottom, mY, mY + height, height, mVerticalBiasPercent, useRatio);
+            if (group == ConstraintAnchor.ANY_GROUP || mTop.getGroup() == group || mBottom.getGroup() == group) {
+                applyConstraints(system, wrapContent, verticalDimensionLocked,
+                        mTop, mBottom, mY, mY + height, height, mVerticalBiasPercent, useRatio);
+            }
         }
-
     }
 
     /**
@@ -1831,12 +1857,32 @@ public class ConstraintWidget implements Solvable {
      * @param system the solver we get the values from.
      */
     @Override
-    public void updateFromSolver(LinearSystem system) {
-        int left = system.getObjectVariableValue(mLeft);
-        int top = system.getObjectVariableValue(mTop);
-        int right = system.getObjectVariableValue(mRight);
-        int bottom = system.getObjectVariableValue(mBottom);
-        setFrame(left, top, right, bottom);
+    public void updateFromSolver(LinearSystem system, int group) {
+        if (group ==  ConstraintAnchor.ANY_GROUP) {
+            int left = system.getObjectVariableValue(mLeft);
+            int top = system.getObjectVariableValue(mTop);
+            int right = system.getObjectVariableValue(mRight);
+            int bottom = system.getObjectVariableValue(mBottom);
+            setFrame(left, top, right, bottom);
+        } else if (group == ConstraintAnchor.APPLY_GROUP_RESULTS) {
+            setFrame(mSolverLeft, mSolverTop, mSolverRight, mSolverBottom);
+        } else {
+            if (mLeft.getGroup() == group) {
+                mSolverLeft = system.getObjectVariableValue(mLeft);
+            }
+            if (mTop.getGroup() == group) {
+                mSolverTop = system.getObjectVariableValue(mTop);
+            }
+            if (mRight.getGroup() == group) {
+                mSolverRight = system.getObjectVariableValue(mRight);
+            }
+            if (mBottom.getGroup() == group) {
+                mSolverBottom = system.getObjectVariableValue(mBottom);
+            }
+        }
     }
 
+    public void updateFromSolver(LinearSystem system) {
+        updateFromSolver(system, ConstraintAnchor.ANY_GROUP);
+    }
 }
