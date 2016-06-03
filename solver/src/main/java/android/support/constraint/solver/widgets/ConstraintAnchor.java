@@ -33,7 +33,7 @@ public class ConstraintAnchor {
     /**
      * group management
      */
-    public static final int ANY_GROUP = -1;
+    public static final int ANY_GROUP = Integer.MAX_VALUE;
     public static final int APPLY_GROUP_RESULTS = -2;
 
     /**
@@ -58,15 +58,15 @@ public class ConstraintAnchor {
     public static final int SCOUT_CREATOR = 1;
     public static final int AUTO_CONSTRAINT_CREATOR = 2;
 
-    private final ConstraintWidget mOwner;
+    final ConstraintWidget mOwner;
     private final Type mType;
-    private ConstraintAnchor mTarget;
+    ConstraintAnchor mTarget;
     private int mMargin;
     private Strength mStrength = Strength.NONE;
     private ConnectionType mConnectionType = ConnectionType.RELAXED;
     private int mConnectionCreator = USER_CREATOR;
     private SolverVariable mSolverVariable = new SolverVariable(SolverVariable.Type.UNRESTRICTED);
-    private int mGroup = ANY_GROUP;
+    int mGroup = ANY_GROUP;
 
     /**
      * Constructor
@@ -571,19 +571,19 @@ public class ConstraintAnchor {
      * Returns the opposite anchor to this one
      * @return opposite anchor
      */
-    public ConstraintAnchor getOpposite() {
+    public final ConstraintAnchor getOpposite() {
         switch (mType) {
             case LEFT: {
-                return mOwner.getAnchor(Type.RIGHT);
+                return mOwner.mRight;
             }
             case RIGHT: {
-                return mOwner.getAnchor(Type.LEFT);
+                return mOwner.mLeft;
             }
             case TOP: {
-                return mOwner.getAnchor(Type.BOTTOM);
+                return mOwner.mBottom;
             }
             case BOTTOM: {
-                return mOwner.getAnchor(Type.TOP);
+                return mOwner.mTop;
             }
         }
         return null;

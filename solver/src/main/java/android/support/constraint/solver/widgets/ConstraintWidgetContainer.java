@@ -19,6 +19,7 @@ package android.support.constraint.solver.widgets;
 import android.support.constraint.solver.LinearSystem;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * A container of ConstraintWidget that can layout its children
@@ -28,6 +29,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     protected LinearSystem mSystem = new LinearSystem();
 
     private Snapshot mSnapshot = new Snapshot(this);
+
+    static boolean ALLOW_ROOT_GROUP = true;
 
     /*-----------------------------------------------------------------------*/
     // Construction
@@ -63,6 +66,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
 
     /**
      * Specify the xml type for the container
+     *
      * @return
      */
     @Override
@@ -83,13 +87,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      * containing all the children.
      *
      * @param container the container instance
-     * @param name the name / id of the container
-     * @param widgets the list of widgets we want to move inside the container
-     * @param padding if padding > 0, the container returned will be enlarged by this amount
+     * @param name      the name / id of the container
+     * @param widgets   the list of widgets we want to move inside the container
+     * @param padding   if padding > 0, the container returned will be enlarged by this amount
      * @return
      */
     public static ConstraintWidgetContainer createContainer(ConstraintWidgetContainer
-            container, String name, ArrayList<ConstraintWidget> widgets, int padding) {
+                                                                    container, String name, ArrayList<ConstraintWidget> widgets, int padding) {
         Rectangle bounds = getBounds(widgets);
         if (bounds.width == 0 || bounds.height == 0) {
             return null;
@@ -218,66 +222,226 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         }
     }
 
-    static int sGroup = 0;
-
-    static int findExistingGroup(ConstraintAnchor anchor) {
-        int group = anchor.getGroup();
-        if (group != ConstraintAnchor.ANY_GROUP) {
+    /**
+     * set the anchor to the group value if it less than my current group value
+     * True if i was able to set it.
+     * recurse to other if you were set.
+     *
+     * @param anchor
+     * @return
+     */
+    static int setGroup(ConstraintAnchor anchor, int group) {
+        int oldGroup = anchor.mGroup;
+        if (anchor.mOwner.getParent() == null) {
             return group;
         }
-        ConstraintWidget parent = anchor.getOwner().getParent();
-        if (anchor.isConnected()) {
-            ConstraintWidget target = anchor.getTarget().getOwner();
-            if (parent != target) {
-                int next = findExistingGroup(anchor.getTarget());
-                if (next != ConstraintAnchor.ANY_GROUP) {
-                    return next;
-                }
-            }
+        if (oldGroup <= group) {
+            return oldGroup;
         }
+
+        anchor.mGroup = group;
         ConstraintAnchor opposite = anchor.getOpposite();
-        if (opposite != null) {
-            return findExistingGroup(opposite);
-        }
-        return ConstraintAnchor.ANY_GROUP;
+        ConstraintAnchor target = anchor.mTarget;
+
+        group = (opposite != null) ? setGroup(opposite, group) : group;
+        group = (target != null) ? setGroup(target, group) : group;
+        group = (opposite != null) ? setGroup(opposite, group) : group;
+
+        anchor.mGroup = group;
+
+        return group;
     }
 
-    static void findGroup(ConstraintAnchor anchor) {
-        if (anchor.isConnected() && anchor.getGroup() == ConstraintAnchor.ANY_GROUP) {
-            ConstraintAnchor target = anchor.getTarget();
-            int group = ConstraintAnchor.ANY_GROUP;
-            if (target.getOwner() != anchor.getOwner().getParent()) {
-                group = findExistingGroup(anchor.getTarget());
-            }
-            if (group == ConstraintAnchor.ANY_GROUP) {
-                group = sGroup;
-                sGroup++;
-            }
-            anchor.setGroup(group);
-            target.setGroup(group);
-            findGroup(target);
+    public int layoutFindGroupsSimple() {
+        final int size = mChildren.size();
+        for (int j = 0; j < size; j++) {
+            ConstraintWidget widget = mChildren.get(j);
+            widget.mLeft.mGroup = 0;
+            widget.mRight.mGroup = 0;
+            widget.mTop.mGroup = 1;
+            widget.mBottom.mGroup = 1;
+            widget.mBaseline.mGroup = 1;
         }
+        return 2;
     }
 
     /**
      * Find groups
      */
-    public void layoutFindGroups() {
-        sGroup = 0;
-        for (ConstraintWidget widget : mChildren) {
-            widget.resetGroups();
-            findGroup(widget.getAnchor(ConstraintAnchor.Type.LEFT));
-            findGroup(widget.getAnchor(ConstraintAnchor.Type.RIGHT));
-            findGroup(widget.getAnchor(ConstraintAnchor.Type.TOP));
-            findGroup(widget.getAnchor(ConstraintAnchor.Type.BASELINE));
-            findGroup(widget.getAnchor(ConstraintAnchor.Type.BOTTOM));
+    public int layoutFindGroups() {
+         ConstraintAnchor.Type[] dir = {
+                ConstraintAnchor.Type.LEFT, ConstraintAnchor.Type.RIGHT, ConstraintAnchor.Type.TOP,
+                ConstraintAnchor.Type.BASELINE, ConstraintAnchor.Type.BOTTOM
+        };
+
+        int label = 1;
+        final int size = mChildren.size();
+        for (int j = 0; j < size; j++) {
+            ConstraintWidget widget = mChildren.get(j);
+            ConstraintAnchor anchor = null;
+
+            anchor = widget.mLeft;
+            if (anchor.mTarget != null) {
+                if (setGroup(anchor, label) == label) {
+                    label++;
+                }
+            } else {
+                anchor.mGroup = ConstraintAnchor.ANY_GROUP;
+            }
+
+            anchor = widget.mTop;
+            if (anchor.mTarget != null) {
+                if (setGroup(anchor, label) == label) {
+                    label++;
+                }
+            } else {
+                anchor.mGroup = ConstraintAnchor.ANY_GROUP;
+            }
+
+            anchor = widget.mRight;
+            if (anchor.mTarget != null) {
+                if (setGroup(anchor, label) == label) {
+                    label++;
+                }
+            } else {
+                anchor.mGroup = ConstraintAnchor.ANY_GROUP;
+            }
+
+            anchor = widget.mBottom;
+            if (anchor.mTarget != null) {
+                if (setGroup(anchor, label) == label) {
+                    label++;
+                }
+            } else {
+                anchor.mGroup = ConstraintAnchor.ANY_GROUP;
+            }
+
+            anchor = widget.mBaseline;
+            if (anchor.mTarget != null) {
+                if (setGroup(anchor, label) == label) {
+                    label++;
+                }
+            } else {
+                anchor.mGroup = ConstraintAnchor.ANY_GROUP;
+            }
         }
+        boolean notDone = true;
+        int count = 0;
+        int fix = 0;
+
+        // This cleans up the misses of the previous step
+        // It is a brute force algorithm that is related to bubble sort O(N*Log(N))
+        while (notDone) {
+            notDone = false;
+            count++;
+            for (int j = 0; j < size; j++) {
+                ConstraintWidget widget = mChildren.get(j);
+                for (int i = 0; i < dir.length; i++) {
+                    ConstraintAnchor.Type type = dir[i];
+                    ConstraintAnchor anchor = null;
+                    switch (type) {
+                        case LEFT: {
+                            anchor = widget.mLeft;
+                        }
+                        break;
+                        case TOP: {
+                            anchor = widget.mTop;
+                        }
+                        break;
+                        case RIGHT: {
+                            anchor = widget.mRight;
+                        }
+                        break;
+                        case BOTTOM: {
+                            anchor = widget.mBottom;
+                        }
+                        break;
+                        case BASELINE: {
+                            anchor = widget.mBaseline;
+                        }
+                        break;
+                    }
+                    ConstraintAnchor target = anchor.mTarget;
+                    if (target == null) {
+                        continue;
+                    }
+
+                    if (target.mOwner.getParent() != null && target.mGroup != anchor.mGroup) {
+                        target.mGroup = anchor.mGroup = (anchor.mGroup > target.mGroup) ? target.mGroup : anchor.mGroup;
+                        fix++;
+                        notDone = true;
+                    }
+
+                    ConstraintAnchor opposite = target.getOpposite();
+                    if (opposite != null && opposite.mGroup != anchor.mGroup) {
+                        opposite.mGroup = anchor.mGroup = (anchor.mGroup > opposite.mGroup) ? opposite.mGroup : anchor.mGroup;
+                        fix++;
+                        notDone = true;
+                    }
+                }
+            }
+        }
+
+        // This remaps the groups to a compact range
+        int index = 0;
+        int[] table = new int[mChildren.size() * dir.length + 1];
+        Arrays.fill(table, -1);
+        for (int j = 0; j < size; j++) {
+            ConstraintWidget widget = mChildren.get(j);
+            ConstraintAnchor anchor = null;
+
+            anchor = widget.mLeft;
+            if (anchor.mGroup != ConstraintAnchor.ANY_GROUP) {
+                int g = anchor.mGroup;
+                if (table[g] == -1) {
+                    table[g] = index++;
+                }
+                anchor.mGroup = table[g];
+            }
+
+            anchor = widget.mTop;
+            if (anchor.mGroup != ConstraintAnchor.ANY_GROUP) {
+                int g = anchor.mGroup;
+                if (table[g] == -1) {
+                    table[g] = index++;
+                }
+                anchor.mGroup = table[g];
+            }
+
+            anchor = widget.mRight;
+            if (anchor.mGroup != ConstraintAnchor.ANY_GROUP) {
+                int g = anchor.mGroup;
+                if (table[g] == -1) {
+                    table[g] = index++;
+                }
+                anchor.mGroup = table[g];
+            }
+
+            anchor = widget.mBottom;
+            if (anchor.mGroup != ConstraintAnchor.ANY_GROUP) {
+                int g = anchor.mGroup;
+                if (table[g] == -1) {
+                    table[g] = index++;
+                }
+                anchor.mGroup = table[g];
+            }
+
+            anchor = widget.mBaseline;
+            if (anchor.mGroup != ConstraintAnchor.ANY_GROUP) {
+                int g = anchor.mGroup;
+                if (table[g] == -1) {
+                    table[g] = index++;
+                }
+                anchor.mGroup = table[g];
+            }
+        }
+        return index;
     }
 
     /**
      * Layout by groups
      */
-    public void layoutWithGroup() {
+    public void layoutWithGroup(int numOfGroups) {
         mSnapshot.updateFrom(this);
         // We clear ourselves of external anchors as
         // well as repositioning us to (0, 0)
@@ -298,10 +462,14 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             }
         }
 
-        for (int i = 0; i < sGroup; i++) {
+        for (int i = 0; i < numOfGroups; i++) {
             // Now let's solve our system as usual
             try {
                 mSystem.reset();
+                getAnchor(ConstraintAnchor.Type.LEFT).mGroup = i;
+                getAnchor(ConstraintAnchor.Type.RIGHT).mGroup = i;
+                getAnchor(ConstraintAnchor.Type.TOP).mGroup = i;
+                getAnchor(ConstraintAnchor.Type.BOTTOM).mGroup = i;
                 addToSolver(mSystem, i);
                 mSystem.minimize();
             } catch (Exception e) {
@@ -324,6 +492,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
 
     /**
      * Returns true if the widget is animating
+     *
      * @return
      */
     @Override
@@ -342,6 +511,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
 
     /**
      * Indicates if the container knows how to layout its content on its own
+     *
      * @return true if the container does the layout, false otherwise
      */
     public boolean handlesInternalConstraints() {
@@ -354,6 +524,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
 
     /**
      * Accessor to the vertical guidelines contained in the table.
+     *
      * @return array of guidelines
      */
     public ArrayList<Guideline> getVerticalGuidelines() {
@@ -372,6 +543,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
 
     /**
      * Accessor to the horizontal guidelines contained in the table.
+     *
      * @return array of guidelines
      */
     public ArrayList<Guideline> getHorizontalGuidelines() {

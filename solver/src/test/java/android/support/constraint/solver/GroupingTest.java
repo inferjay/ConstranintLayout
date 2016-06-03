@@ -77,18 +77,18 @@ public class GroupingTest {
         System.out.println("C: " + C + " leftC: " + leftC + " topC: " + topC);
 
         start = System.currentTimeMillis();
-        root.layoutFindGroups();
+        int group = root.layoutFindGroups();
         for (int i = 0; i < 1000; i++) {
-            root.layoutWithGroup();
+            root.layoutWithGroup(group);
         }
         long time2 = System.currentTimeMillis() - start;
         System.out.println("layout: " + time + " ms "  + " group layout: " + time2 + " ms");
-        assertEquals(A.getAnchor(ConstraintAnchor.Type.LEFT).getGroup(), 0);
-        assertEquals(B.getAnchor(ConstraintAnchor.Type.LEFT).getGroup(), 0);
-        assertEquals(C.getAnchor(ConstraintAnchor.Type.LEFT).getGroup(), 0);
-        assertEquals(A.getAnchor(ConstraintAnchor.Type.TOP).getGroup(), 1);
-        assertEquals(B.getAnchor(ConstraintAnchor.Type.BOTTOM).getGroup(), 1);
-        assertEquals(C.getAnchor(ConstraintAnchor.Type.TOP).getGroup(), 2);
+        assertEquals(A.getAnchor(ConstraintAnchor.Type.LEFT).getGroup(), 0,"A left group");
+        assertEquals(B.getAnchor(ConstraintAnchor.Type.LEFT).getGroup(), 0,"B left group");
+        assertEquals(C.getAnchor(ConstraintAnchor.Type.LEFT).getGroup(), 0,"A left group");
+        assertEquals(A.getAnchor(ConstraintAnchor.Type.TOP).getGroup(), 1,"B top group");
+        assertEquals(B.getAnchor(ConstraintAnchor.Type.BOTTOM).getGroup(), 1,"B botom group");
+        assertEquals(C.getAnchor(ConstraintAnchor.Type.TOP).getGroup(), 2,"c top group");
         assertEquals(leftA, A.getLeft());
         assertEquals(topA, A.getTop());
         assertEquals(leftB, B.getLeft());

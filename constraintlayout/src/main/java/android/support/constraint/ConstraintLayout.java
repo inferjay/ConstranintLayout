@@ -52,11 +52,10 @@ public class ConstraintLayout extends ViewGroup {
     static final boolean ALLOWS_EMBEDDED = false;
 
     private static final String TAG = "ConstraintLayout";
+    private static final boolean SIMPLE_LAYOUT = false;
 
     private final ArrayList<ConstraintWidget> mConstrainedWidgets = new ArrayList<>(100);
     private final ArrayList<ConstraintWidget> mSizeDependentsWidgets = new ArrayList<>(100);
-
-    private final LinearSystem mEquationSystem = new LinearSystem();
 
     ConstraintWidgetContainer mLayoutWidget = null;
 
@@ -520,9 +519,13 @@ public class ConstraintLayout extends ViewGroup {
      * Solve the linear system
      */
     private void solveLinearSystem() {
-        mEquationSystem.reset();
         Animator.setAnimationEnabled(false);
-        mLayoutWidget.layout();
+        if (SIMPLE_LAYOUT) {
+            mLayoutWidget.layout();
+        } else {
+            int groups = mLayoutWidget.layoutFindGroups();
+            mLayoutWidget.layoutWithGroup(groups);
+        }
     }
 
     @Override
