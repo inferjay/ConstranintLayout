@@ -61,10 +61,10 @@ public class LinearSystem {
     int mNumRows = 0;
     int mMaxRows = TABLE_SIZE;
 
-    private static Pools.Pool<ArrayRow> sArrayRowPool;
-    private static Pools.Pool<SolverVariable> sSolverVariablePool = new Pools.SimplePool<>(POOL_SIZE);
-    private static SolverVariable[] sPoolVariables = new SolverVariable[POOL_SIZE];
-    private static int sPoolVariablesCount = 0;
+    private Pools.Pool<ArrayRow> sArrayRowPool;
+    private Pools.Pool<SolverVariable> sSolverVariablePool = new Pools.SimplePool<>(POOL_SIZE);
+    private SolverVariable[] sPoolVariables = new SolverVariable[POOL_SIZE];
+    private int sPoolVariablesCount = 0;
 
     public LinearSystem() {
         mRows = new ArrayRow[TABLE_SIZE];
@@ -183,8 +183,6 @@ public class LinearSystem {
         ArrayRow row = sArrayRowPool.acquire();
         if (row == null) {
             row = new ArrayRow();
-        } else {
-            row.reset();
         }
         return row;
     }
@@ -278,13 +276,13 @@ public class LinearSystem {
         if (v == null) {
             return 0;
         }
-        return v.copmutedValue;
+        return v.computedValue;
     }
 
     public int getObjectVariableValue(Object anchor) {
         SolverVariable variable = ((ConstraintAnchor) anchor).getSolverVariable();
         if (variable != null) {
-            return (int) variable.copmutedValue;
+            return (int) variable.computedValue;
         }
         return 0;
     }
@@ -324,7 +322,7 @@ public class LinearSystem {
             SolverVariable variable = mIndexedVariables[i];
             if (variable.mType == SolverVariable.Type.ERROR
                 /* || variable.getType() == SolverVariable.Type.SLACK */) {
-                mGoal.addVariable(variable);
+                mGoal.variables.put(variable, 1.f);
             }
         }
         if (DEBUG) {
@@ -600,7 +598,7 @@ public class LinearSystem {
             if (variable.mType == SolverVariable.Type.UNRESTRICTED) {
                 continue; // C can be either positive or negative.
             }
-            if (!mRows[i].hasPositiveConstant()) {
+            if (mRows[i].constantValue < 0) {
                 infeasibleSystem = true;
                 break;
             }
@@ -639,7 +637,7 @@ public class LinearSystem {
                         // can be either positive or negative.
                         continue;
                     }
-                    if (!current.hasPositiveConstant()) {
+                    if (current.constantValue < 0) {
                         // let's examine this row, see if we can find a good pivot
                         for (int j = 1; j < mNumColumns; j++) {
                             SolverVariable candidate = mIndexedVariables[j];
@@ -709,7 +707,7 @@ public class LinearSystem {
             if (variable.mType == SolverVariable.Type.UNRESTRICTED) {
                 continue; // C can be either positive or negative.
             }
-            if (!mRows[i].hasPositiveConstant()) {
+            if (mRows[i].constantValue < 0) {
                 infeasibleSystem = true;
                 break;
             }
@@ -725,7 +723,7 @@ public class LinearSystem {
     private void computeValues() {
         for (int i = 0; i < mNumRows; i++) {
             ArrayRow row = mRows[i];
-            row.variable.copmutedValue = row.constantValue;
+            row.variable.computedValue = row.constantValue;
         }
     }
 

@@ -32,7 +32,7 @@ public class SolverVariable {
 
     public int id = -1;
     public int definitionId = -1;
-    public float copmutedValue;
+    public float computedValue;
 
     Type mType;
     Strength mStrength = Strength.WEAK;
@@ -128,7 +128,7 @@ public class SolverVariable {
         mStrength = Strength.WEAK;
         id = -1;
         definitionId = -1;
-        copmutedValue = 0;
+        computedValue = 0;
         mClientEquationsCount = 0;
     }
 

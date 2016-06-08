@@ -160,7 +160,9 @@ class ArrayBackedVariables {
     }
 
     public void clear() {
-        Arrays.fill(variables, null);
+        for (int i = 0, length = variables.length; i < length; i++) {
+            variables[i] = null;
+        }
         currentSize = 0;
     }
 

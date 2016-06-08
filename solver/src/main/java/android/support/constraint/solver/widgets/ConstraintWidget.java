@@ -49,6 +49,12 @@ public class ConstraintWidget implements Solvable {
     public final static int INVISIBLE = 4;
     public final static int GONE = 8;
 
+    int mDistToTop;
+    int mDistToLeft;
+    int mDistToRight;
+    int mDistToBottom;
+    boolean mVisited;
+
     /**
      * Define how the content of a widget should align, if the widget has children
      */
@@ -1048,6 +1054,21 @@ public class ConstraintWidget implements Solvable {
     }
 
     /**
+     * Immediate connection to an anchor without any checks.
+     *
+     * @param startType
+     * @param target
+     * @param endType
+     * @param margin
+     */
+    public void immediateConnect(ConstraintAnchor.Type startType, ConstraintWidget target,
+                                 ConstraintAnchor.Type endType, int margin) {
+        ConstraintAnchor startAnchor = getAnchor(startType);
+        ConstraintAnchor endAnchor = target.getAnchor(endType);
+        startAnchor.connect(endAnchor, margin, ConstraintAnchor.Strength.STRONG, ConstraintAnchor.USER_CREATOR, true);
+    }
+
+    /**
      * Connect the given anchors together (the from anchor should be owned by this widget)
      *
      * @param from   the anchor we are connecting from (of this widget)
@@ -1554,11 +1575,26 @@ public class ConstraintWidget implements Solvable {
      */
     @Override
     public void addToSolver(LinearSystem system, int group) {
-        SolverVariable left = system.createObjectVariable(mLeft);
-        SolverVariable right = system.createObjectVariable(mRight);
-        SolverVariable top = system.createObjectVariable(mTop);
-        SolverVariable bottom = system.createObjectVariable(mBottom);
-        SolverVariable baseline = system.createObjectVariable(mBaseline);
+        SolverVariable left = null;
+        SolverVariable right = null;
+        SolverVariable top = null;
+        SolverVariable bottom = null;
+        SolverVariable baseline = null;
+        if (group == ConstraintAnchor.ANY_GROUP || mLeft.mGroup == group) {
+            left = system.createObjectVariable(mLeft);
+        }
+        if (group == ConstraintAnchor.ANY_GROUP || mRight.mGroup == group) {
+            right = system.createObjectVariable(mRight);
+        }
+        if (group == ConstraintAnchor.ANY_GROUP || mTop.mGroup == group) {
+            top = system.createObjectVariable(mTop);
+        }
+        if (group == ConstraintAnchor.ANY_GROUP || mBottom.mGroup == group) {
+            bottom = system.createObjectVariable(mBottom);
+        }
+        if (group == ConstraintAnchor.ANY_GROUP || mBaseline.mGroup == group) {
+            baseline = system.createObjectVariable(mBaseline);
+        }
 
         if (mParent != null) {
 
@@ -1659,7 +1695,9 @@ public class ConstraintWidget implements Solvable {
                 useRatio = true;
                 // add an equation
                 ArrayRow row = system.createRow();
-                system.addConstraint(row.createRowDimensionRatio(right, left, bottom, top, mDimensionRatio));
+                if (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group)) {
+                    system.addConstraint(row.createRowDimensionRatio(right, left, bottom, top, mDimensionRatio));
+                }
             } else if (!horizontalDimensionLocked && verticalDimensionLocked) {
                 width = (int) (mDimensionRatio * mHeight);
                 horizontalDimensionLocked = true;
@@ -1671,7 +1709,7 @@ public class ConstraintWidget implements Solvable {
 
         boolean wrapContent = (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)
                 && (this instanceof ConstraintWidgetContainer);
-        if (group == ConstraintAnchor.ANY_GROUP || mLeft.mGroup == group || mRight.mGroup == group) {
+        if (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group)) {
             applyConstraints(system, wrapContent, horizontalDimensionLocked, mLeft, mRight,
                     mX, mX + width, width, mHorizontalBiasPercent, useRatio);
         }
@@ -1681,7 +1719,7 @@ public class ConstraintWidget implements Solvable {
 
         if (mBaselineDistance > 0) {
             ConstraintAnchor end = mBottom;
-            if (group == ConstraintAnchor.ANY_GROUP || mBottom.mGroup == group || mBaseline.mGroup == group) {
+            if (group == ConstraintAnchor.ANY_GROUP || (mBottom.mGroup == group && mBaseline.mGroup == group)) {
                 system.addConstraint(
                         EquationCreation.createRowEquals(system, bottom, baseline,
                                 height - getBaselineDistance(),
@@ -1691,12 +1729,12 @@ public class ConstraintWidget implements Solvable {
                 height = mBaselineDistance;
                 end = mBaseline;
             }
-            if (group == ConstraintAnchor.ANY_GROUP || mTop.mGroup == group || end.mGroup == group) {
+            if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && end.mGroup == group)) {
                 applyConstraints(system, wrapContent, verticalDimensionLocked,
                         mTop, end, mY, mY + height, height, mVerticalBiasPercent, useRatio);
             }
         } else {
-            if (group == ConstraintAnchor.ANY_GROUP || mTop.mGroup == group || mBottom.mGroup == group) {
+            if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && mBottom.mGroup == group)) {
                 applyConstraints(system, wrapContent, verticalDimensionLocked,
                         mTop, mBottom, mY, mY + height, height, mVerticalBiasPercent, useRatio);
             }

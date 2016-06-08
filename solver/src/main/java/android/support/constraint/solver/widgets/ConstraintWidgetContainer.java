@@ -26,11 +26,16 @@ import java.util.Arrays;
  */
 public class ConstraintWidgetContainer extends WidgetContainer {
 
+    private static final boolean USE_THREAD = false;
     protected LinearSystem mSystem = new LinearSystem();
+    protected LinearSystem mBackgroundSystem = null;
 
     private Snapshot mSnapshot = new Snapshot(this);
 
     static boolean ALLOW_ROOT_GROUP = true;
+
+    int mWrapWidth;
+    int mWrapHeight;
 
     /*-----------------------------------------------------------------------*/
     // Construction
@@ -77,6 +82,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     @Override
     public void reset() {
         mSystem.reset();
+        if (USE_THREAD && mBackgroundSystem != null) {
+            mBackgroundSystem.reset();
+        }
         mSnapshot.updateFrom(this);
         super.reset();
     }
@@ -167,12 +175,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     @Override
     public void updateFromSolver(LinearSystem system, int group) {
         super.updateFromSolver(system, group);
-        if (system == mSystem) {
-            final int count = mChildren.size();
-            for (int i = 0; i < count; i++) {
-                ConstraintWidget widget = mChildren.get(i);
-                widget.updateFromSolver(system, group);
-            }
+        final int count = mChildren.size();
+        for (int i = 0; i < count; i++) {
+            ConstraintWidget widget = mChildren.get(i);
+            widget.updateFromSolver(system, group);
         }
     }
 
@@ -265,6 +271,160 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         return 2;
     }
 
+    /**
+     * This recursively walks the tree of connected components
+     * calculating there distance to the left,right,top and bottom
+     * @param widget
+     */
+    public void findWrapRecursive(ConstraintWidget widget) {
+        int w = widget.getWrapWidth();
+
+        int distToRight = w;
+        int distToLeft = w;
+        ConstraintWidget leftWidget = null;
+        ConstraintWidget rightWidget = null;
+
+        widget.mVisited = true;
+        if (!(widget.mRight.isConnected() || (widget.mLeft.isConnected()))) {
+            distToLeft += widget.getX();
+        } else {
+            if (widget.mRight.mTarget != null) {
+                rightWidget = widget.mRight.mTarget.getOwner();
+                distToRight += widget.mRight.getMargin();
+                if (!rightWidget.isRoot() && !rightWidget.mVisited) {
+                    findWrapRecursive(rightWidget);
+                }
+            }
+            if (widget.mLeft.isConnected()) {
+                leftWidget = widget.mLeft.mTarget.getOwner();
+                distToLeft += widget.mLeft.getMargin();
+                if (!leftWidget.isRoot() && !leftWidget.mVisited) {
+                    findWrapRecursive(leftWidget);
+                }
+            }
+
+            if (widget.mRight.mTarget != null && !rightWidget.isRoot()) {
+                if (widget.mRight.mTarget.mType == ConstraintAnchor.Type.RIGHT) {
+                    distToRight += rightWidget.mDistToRight - rightWidget.getWrapWidth();
+                } else if (widget.mRight.mTarget.getType() == ConstraintAnchor.Type.LEFT) {
+                    distToRight += rightWidget.mDistToRight;
+                }
+            }
+
+            if (widget.mLeft.mTarget != null && !leftWidget.isRoot()) {
+                if (widget.mLeft.mTarget.getType() == ConstraintAnchor.Type.LEFT) {
+                    distToLeft += leftWidget.mDistToLeft - leftWidget.getWrapWidth();
+                } else if (widget.mLeft.mTarget.getType() == ConstraintAnchor.Type.RIGHT) {
+                    distToLeft += leftWidget.mDistToLeft;
+                }
+            }
+        }
+        widget.mDistToLeft = distToLeft;
+        widget.mDistToRight = distToRight;
+
+        // VERTICAL
+        int h = widget.getWrapHeight();
+        int distToTop = h;
+        int distToBottom = h;
+        ConstraintWidget topWidget = null;
+        if (!(widget.mBaseline.mTarget != null || widget.mTop.mTarget != null || widget.mBottom.mTarget != null)) {
+            distToTop += widget.getY();
+        } else {
+            if (widget.mBaseline.isConnected()) {
+                ConstraintWidget baseLineWidget = widget.mBaseline.mTarget.getOwner();
+                if (!baseLineWidget.mVisited) {
+                    findWrapRecursive(baseLineWidget);
+                }
+                if (baseLineWidget.mDistToBottom > distToBottom) {
+                    distToBottom = baseLineWidget.mDistToBottom;
+                }
+                if (baseLineWidget.mDistToTop > distToTop) {
+                    distToTop = baseLineWidget.mDistToTop;
+                }
+                widget.mDistToTop = distToTop;
+                widget.mDistToBottom = distToBottom;
+                return; // if baseline connected no need to look at top or bottom
+            }
+
+            if (widget.mTop.isConnected()) {
+                topWidget = widget.mTop.mTarget.getOwner();
+                distToTop += widget.mTop.getMargin();
+                if (!topWidget.isRoot() && !topWidget.mVisited) {
+                    findWrapRecursive(topWidget);
+                }
+            }
+
+            ConstraintWidget bottomWidget = null;
+            if (widget.mBottom.isConnected()) {
+                bottomWidget = widget.mBottom.mTarget.getOwner();
+                distToBottom += widget.mBottom.getMargin();
+                if (!bottomWidget.isRoot() && !bottomWidget.mVisited) {
+                    findWrapRecursive(bottomWidget);
+                }
+            }
+
+
+            // TODO add center connection logic
+
+            if (widget.mTop.mTarget != null && !topWidget.isRoot()) {
+                if (widget.mTop.mTarget.getType() == ConstraintAnchor.Type.TOP) {
+                    distToTop += topWidget.mDistToTop - topWidget.getWrapHeight();
+                } else if (widget.mTop.mTarget.getType() == ConstraintAnchor.Type.BOTTOM) {
+                    distToTop += topWidget.mDistToTop;
+                }
+            }
+            if (widget.mBottom.mTarget != null && !bottomWidget.isRoot()) {
+                if (widget.mBottom.mTarget.getType() == ConstraintAnchor.Type.BOTTOM) {
+                    distToBottom += bottomWidget.mDistToBottom - bottomWidget.getWrapHeight();
+                } else if (widget.mBottom.mTarget.getType() == ConstraintAnchor.Type.TOP) {
+                    distToBottom += bottomWidget.mDistToBottom;
+                }
+            }
+        }
+        widget.mDistToTop = distToTop;
+        widget.mDistToBottom = distToBottom;
+    }
+
+    /**
+     * calculates the wrapContent size.
+     *
+     * @param children
+     */
+    public void findWrapSize(ArrayList<ConstraintWidget> children) {
+        int maxTopDist = 0;
+        int maxLeftDist = 0;
+        int maxRightDist = 0;
+        int maxBottomDist = 0;
+
+        int maxConnectWidth = 0;
+        int maxConnectHeight = 0;
+        final int size = children.size();
+        for (int j = 0; j < size; j++) {
+            ConstraintWidget widget = children.get(j);
+            if (widget.isRoot()) {
+                continue;
+            }
+            if (!widget.mVisited) {
+                findWrapRecursive(widget);
+            }
+            int connectWidth = widget.mDistToLeft + widget.mDistToRight - widget.getWrapWidth();
+            int connectHeight = widget.mDistToTop + widget.mDistToBottom - widget.getWrapHeight();
+            maxLeftDist = Math.max(maxLeftDist, widget.mDistToLeft);
+            maxRightDist = Math.max(maxRightDist, widget.mDistToRight);
+            maxBottomDist = Math.max(maxBottomDist, widget.mDistToBottom);
+            maxTopDist = Math.max(maxTopDist, widget.mDistToTop);
+            maxConnectWidth = Math.max(maxConnectWidth, connectWidth);
+            maxConnectHeight = Math.max(maxConnectHeight, connectHeight);
+        }
+        int max = Math.max(maxLeftDist, maxRightDist);
+        mWrapWidth = Math.max(max, maxConnectWidth);
+        max = Math.max(maxTopDist, maxBottomDist);
+        mWrapHeight = Math.max(max, maxConnectHeight);
+
+        for (int j = 0; j < size; j++) {
+            children.get(j).mVisited = false;
+        }
+    }
     /**
      * Find groups
      */
@@ -462,22 +622,55 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             }
         }
 
-        for (int i = 0; i < numOfGroups; i++) {
-            // Now let's solve our system as usual
+        mLeft.mGroup = 0;
+        mRight.mGroup = 0;
+        mTop.mGroup = 1;
+        mBottom.mGroup = 1;
+        mSystem.reset();
+        if (USE_THREAD) {
+            if (mBackgroundSystem == null) {
+                mBackgroundSystem = new LinearSystem();
+            } else {
+                mBackgroundSystem.reset();
+            }
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        addToSolver(mBackgroundSystem, 1);
+                        mBackgroundSystem.minimize();
+                        updateFromSolver(mBackgroundSystem, 1);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            thread.start();
             try {
-                mSystem.reset();
-                getAnchor(ConstraintAnchor.Type.LEFT).mGroup = i;
-                getAnchor(ConstraintAnchor.Type.RIGHT).mGroup = i;
-                getAnchor(ConstraintAnchor.Type.TOP).mGroup = i;
-                getAnchor(ConstraintAnchor.Type.BOTTOM).mGroup = i;
-                addToSolver(mSystem, i);
+                addToSolver(mSystem, 0);
                 mSystem.minimize();
+                updateFromSolver(mSystem, 0);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            updateFromSolver(mSystem, i);
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            updateFromSolver(mSystem, ConstraintAnchor.APPLY_GROUP_RESULTS);
+        } else {
+            for (int i = 0; i < numOfGroups; i++) {
+                try {
+                    addToSolver(mSystem, i);
+                    mSystem.minimize();
+                    updateFromSolver(mSystem, i);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                updateFromSolver(mSystem, ConstraintAnchor.APPLY_GROUP_RESULTS);
+            }
         }
-        updateFromSolver(mSystem, ConstraintAnchor.APPLY_GROUP_RESULTS);
 
         int width = getWidth();
         int height = getHeight();

@@ -35,10 +35,6 @@ public class ArrayRow {
         }
     }
 
-    public final boolean hasPositiveConstant() {
-        return constantValue >= 0;
-    }
-
     public boolean hasAtLeastOneVariable() {
         int count = variables.size();
         for (int i = 0; i < count; i++) {
@@ -48,10 +44,6 @@ public class ArrayRow {
             }
         }
         return false;
-    }
-
-    public void addVariable(SolverVariable v) {
-        variables.put(v, 1.f);
     }
 
     public boolean hasKeyVariable() {

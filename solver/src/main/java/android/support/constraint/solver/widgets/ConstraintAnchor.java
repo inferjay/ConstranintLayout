@@ -59,7 +59,7 @@ public class ConstraintAnchor {
     public static final int AUTO_CONSTRAINT_CREATOR = 2;
 
     final ConstraintWidget mOwner;
-    private final Type mType;
+    final Type mType;
     ConstraintAnchor mTarget;
     private int mMargin;
     private Strength mStrength = Strength.NONE;

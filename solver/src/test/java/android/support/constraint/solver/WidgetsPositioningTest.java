@@ -148,7 +148,6 @@ public class WidgetsPositioningTest {
         layout.addToSolver(s);
         for (int i = 0; i < n; i++) {
             ConstraintWidget widget = widgets.get(i);
-//            System.out.println("[" + i + "] -> " + widget);
         }
         try {
             s.minimize();
@@ -156,13 +155,11 @@ public class WidgetsPositioningTest {
             e.printStackTrace();
         }
         layout.updateFromSolver(s);
-//        System.out.println("After minimize, layout " + layout);
-        runTestOnWidgets(widgets, new Runnable() {
+        Runnable check = new Runnable() {
             @Override
             public void run() {
                 for (int i = 0; i < n; i++) {
                     ConstraintWidget widget = widgets.get(i);
-//            System.out.println("[" +i + "] -> " + widget);
                     int left = widget.getLeft();
                     int top = widget.getTop();
                     int right = widget.getRight();
@@ -175,7 +172,16 @@ public class WidgetsPositioningTest {
                     assertEquals((float)left, pos, 1);
                 }
             }
-        });
+        };
+        runTestOnWidgets(widgets, check);
+        layout.layout();
+        check.run();
+        int groups = layout.layoutFindGroupsSimple();
+        layout.layoutWithGroup(groups);
+        check.run();
+        groups = layout.layoutFindGroups();
+        layout.layoutWithGroup(groups);
+        check.run();
     }
 
     @Test
