@@ -65,7 +65,7 @@ public class ConstraintAnchor {
     private Strength mStrength = Strength.NONE;
     private ConnectionType mConnectionType = ConnectionType.RELAXED;
     private int mConnectionCreator = USER_CREATOR;
-    private SolverVariable mSolverVariable = new SolverVariable(SolverVariable.Type.UNRESTRICTED);
+    SolverVariable mSolverVariable = new SolverVariable(SolverVariable.Type.UNRESTRICTED);
     int mGroup = ANY_GROUP;
 
     /**
@@ -389,7 +389,7 @@ public class ConstraintAnchor {
      */
     @Override
     public String toString() {
-        return mOwner.getDebugName() + ":" + mType.toString();
+        return mOwner.getDebugName() + ":" + mType.toString() + (mTarget != null ? " connected to " + mTarget : "");
     }
 
     /**

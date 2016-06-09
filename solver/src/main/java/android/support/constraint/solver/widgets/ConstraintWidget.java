@@ -15,6 +15,7 @@
  */
 package android.support.constraint.solver.widgets;
 
+import android.support.constraint.solver.ArrayRow;
 import android.support.constraint.solver.EquationCreation;
 import android.support.constraint.solver.LinearSystem;
 import android.support.constraint.solver.SolverVariable;
@@ -1553,7 +1554,13 @@ public class ConstraintWidget implements Solvable {
      */
     @Override
     public void addToSolver(LinearSystem system, int group) {
-        if (getParent() != null) {
+        SolverVariable left = system.createObjectVariable(mLeft);
+        SolverVariable right = system.createObjectVariable(mRight);
+        SolverVariable top = system.createObjectVariable(mTop);
+        SolverVariable bottom = system.createObjectVariable(mBottom);
+        SolverVariable baseline = system.createObjectVariable(mBaseline);
+
+        if (mParent != null) {
 
             // If the parent is set to wrap content, we need to:
             // - possibly add an extra constraint to ensure that the widget is contained into the parent
@@ -1562,70 +1569,59 @@ public class ConstraintWidget implements Solvable {
             //   bi-directional, and would result in an unstable system where the widget would sometimes
             //   not be contained in the parent)
 
-            if (getParent() instanceof ConstraintTableLayout) {
-                ConstraintAnchor leftAnchor = getAnchor(ConstraintAnchor.Type.LEFT);
-                leftAnchor.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
-                ConstraintAnchor rightAnchor = getAnchor(ConstraintAnchor.Type.RIGHT);
-                rightAnchor.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
-                ConstraintAnchor topAnchor = getAnchor(ConstraintAnchor.Type.TOP);
-                topAnchor.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
-                ConstraintAnchor bottomAnchor = getAnchor(ConstraintAnchor.Type.BOTTOM);
-                bottomAnchor.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
+            if (mParent instanceof ConstraintTableLayout) {
+                mLeft.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
+                mRight.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
+                mTop = getAnchor(ConstraintAnchor.Type.TOP);
+                mTop.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
+                mBottom.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
             } else {
-                if (getParent().getHorizontalDimensionBehaviour()
+                if (mParent.getHorizontalDimensionBehaviour()
                         == DimensionBehaviour.WRAP_CONTENT) {
-                    ConstraintAnchor leftAnchor = getAnchor(ConstraintAnchor.Type.LEFT);
-                    if (!leftAnchor.isConnected() ||
-                            leftAnchor.getTarget().getOwner() != getParent()) {
-                        system.addConstraint(EquationCreation.createRowGreaterThan(
-                                system, system.createObjectVariable(mLeft),
-                                system.createObjectVariable(getParent().mLeft),
-                                0, false
-                        ));
-                    } else if (leftAnchor.isConnected() &&
-                            leftAnchor.getTarget().getOwner() == getParent()) {
-                        leftAnchor.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
+                    if (mLeft.mTarget == null ||
+                            mLeft.mTarget.mOwner != mParent) {
+                        SolverVariable parentLeft = system.createObjectVariable(mParent.mLeft);
+                        ArrayRow row = system.createRow();
+                        row.createRowGreaterThan(left, parentLeft, system.createSlackVariable(), 0);
+                        system.addConstraint(row);
+                    } else if (mLeft.mTarget != null &&
+                            mLeft.mTarget.mOwner == mParent) {
+                        mLeft.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
                     }
 
-                    ConstraintAnchor rightAnchor = getAnchor(ConstraintAnchor.Type.RIGHT);
-                    if (!rightAnchor.isConnected() ||
-                            rightAnchor.getTarget().getOwner() != getParent()) {
-                        system.addConstraint(EquationCreation.createRowGreaterThan(
-                                system, system.createObjectVariable(getParent().mRight),
-                                system.createObjectVariable(mRight),
-                                0, false
-                        ));
-                    } else if (rightAnchor.isConnected() &&
-                            rightAnchor.getTarget().getOwner() == getParent()) {
-                        rightAnchor.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
+                    if (mRight.mTarget == null ||
+                            mRight.mTarget.mOwner != mParent) {
+                        SolverVariable parentRight = system.createObjectVariable(mParent.mRight);
+                        ArrayRow row = system.createRow();
+                        row.createRowGreaterThan(parentRight, right, system.createSlackVariable(), 0);
+                        system.addConstraint(row);
+                    } else if (mRight.mTarget != null &&
+                            mRight.mTarget.mOwner == mParent) {
+                        mRight.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
                     }
                 }
 
-                if (getParent().getVerticalDimensionBehaviour()
+                if (mParent.getVerticalDimensionBehaviour()
                         == DimensionBehaviour.WRAP_CONTENT) {
-                    ConstraintAnchor topAnchor = getAnchor(ConstraintAnchor.Type.TOP);
-                    if (!topAnchor.isConnected() ||
-                            topAnchor.getTarget().getOwner() != getParent()) {
-                        system.addConstraint(EquationCreation.createRowGreaterThan(
-                                system, system.createObjectVariable(mTop),
-                                system.createObjectVariable(getParent().mTop),
-                                0, false
-                        ));
-                    } else if (topAnchor.isConnected() &&
-                            topAnchor.getTarget().getOwner() == getParent()) {
-                        topAnchor.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
+                    if (mTop.mTarget == null ||
+                            mTop.mTarget.mOwner != mParent) {
+                        SolverVariable parentTop = system.createObjectVariable(mParent.mTop);
+                        ArrayRow row = system.createRow();
+                        row.createRowGreaterThan(top, parentTop, system.createSlackVariable(), 0);
+                        system.addConstraint(row);
+                    } else if (mTop.mTarget != null &&
+                            mTop.mTarget.mOwner == mParent) {
+                        mTop.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
                     }
-                    ConstraintAnchor bottomAnchor = getAnchor(ConstraintAnchor.Type.BOTTOM);
-                    if (!bottomAnchor.isConnected() ||
-                            bottomAnchor.getTarget().getOwner() != getParent()) {
-                        system.addConstraint(EquationCreation.createRowGreaterThan(
-                                system, system.createObjectVariable(getParent().mBottom),
-                                system.createObjectVariable(mBottom),
-                                0, false
-                        ));
-                    } else if (bottomAnchor.isConnected() &&
-                            bottomAnchor.getTarget().getOwner() == getParent()) {
-                        bottomAnchor.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
+                    if (mBottom.mTarget == null ||
+                            mBottom.mTarget.mOwner != mParent) {
+                        SolverVariable parentBottom = system.createObjectVariable(getParent().mBottom);
+                        ArrayRow row = system.createRow();
+                        row.createRowGreaterThan(parentBottom, bottom, system.createSlackVariable(), 0);
+                        system.addConstraint(row);
+                    } else if (mBottom.mTarget != null &&
+                            mBottom.mTarget.mOwner == mParent) {
+                        mBottom.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
                     }
                 }
             }
@@ -1644,14 +1640,14 @@ public class ConstraintWidget implements Solvable {
         boolean verticalDimensionLocked = mVerticalDimensionBehaviour != DimensionBehaviour.ANY;
 
         if (!horizontalDimensionLocked && mLeft != null && mRight != null
-            && (!mLeft.isConnected() || !mRight.isConnected())) {
+            && (mLeft.mTarget == null || mRight.mTarget == null)) {
             horizontalDimensionLocked = true;
         }
         if (!verticalDimensionLocked && mTop != null && mBottom != null) {
-           if (!(mTop.isConnected() && mBottom.isConnected())) {
+           if (!(mTop.mTarget != null && mBottom.mTarget != null)) {
                // if we are in any mode but either top or bottom aren't connected
                if (mBaselineDistance == 0
-                   || (mBaseline != null && !(mTop.isConnected() && mBaseline.isConnected()))) {
+                   || (mBaseline != null && !(mTop.mTarget != null && mBaseline.mTarget != null))) {
                    // if there are no baseline, or if the baseline is also not connected...
                    verticalDimensionLocked = true;
                }
@@ -1662,12 +1658,8 @@ public class ConstraintWidget implements Solvable {
             if (!horizontalDimensionLocked && !verticalDimensionLocked) {
                 useRatio = true;
                 // add an equation
-                SolverVariable left = system.createObjectVariable(mLeft);
-                SolverVariable right = system.createObjectVariable(mRight);
-                SolverVariable top = system.createObjectVariable(mTop);
-                SolverVariable bottom = system.createObjectVariable(mBottom);
-                system.addConstraint(EquationCreation.createRowDimensionRatio(system, right, left, bottom, top,
-                        mDimensionRatio, false));
+                ArrayRow row = system.createRow();
+                system.addConstraint(row.createRowDimensionRatio(right, left, bottom, top, mDimensionRatio));
             } else if (!horizontalDimensionLocked && verticalDimensionLocked) {
                 width = (int) (mDimensionRatio * mHeight);
                 horizontalDimensionLocked = true;
@@ -1688,8 +1680,6 @@ public class ConstraintWidget implements Solvable {
                 && (this instanceof ConstraintWidgetContainer);
 
         if (mBaselineDistance > 0) {
-            SolverVariable bottom = system.createObjectVariable(mBottom);
-            SolverVariable baseline = system.createObjectVariable(mBaseline);
             ConstraintAnchor end = mBottom;
             if (group == ConstraintAnchor.ANY_GROUP || mBottom.mGroup == group || mBaseline.mGroup == group) {
                 system.addConstraint(
@@ -1697,8 +1687,8 @@ public class ConstraintWidget implements Solvable {
                                 height - getBaselineDistance(),
                                 false));
             }
-            if (mBaseline.isConnected()) {
-                height = getBaselineDistance();
+            if (mBaseline.mTarget != null) {
+                height = mBaselineDistance;
                 end = mBaseline;
             }
             if (group == ConstraintAnchor.ANY_GROUP || mTop.mGroup == group || end.mGroup == group) {
@@ -1787,47 +1777,43 @@ public class ConstraintWidget implements Solvable {
                             EquationCreation.createRowEquals(system, end, begin, dimension, false));
                 }
 
-                int constraintStrength = 1;
                 if (beginAnchor.getStrength() != endAnchor.getStrength()) {
                     if (beginAnchor.getStrength() == ConstraintAnchor.Strength.STRONG) {
                         system.addConstraint(EquationCreation
                                 .createRowEquals(system, begin, beginTarget,
-                                        beginAnchor.getMargin(), false, constraintStrength));
+                                        beginAnchor.getMargin(), false));
                         system.addConstraint(EquationCreation
                                 .createRowLowerThan(system, end, endTarget,
-                                        -1 * endAnchor.getMargin(), false, constraintStrength));
+                                        -1 * endAnchor.getMargin(), false));
                     } else {
                         system.addConstraint(EquationCreation
                                 .createRowGreaterThan(system, begin, beginTarget,
-                                        beginAnchor.getMargin(), false, constraintStrength));
+                                        beginAnchor.getMargin(), false));
                         system.addConstraint(EquationCreation
                                 .createRowEquals(system, end, endTarget, -1 * endAnchor.getMargin(),
-                                        false, constraintStrength));
+                                        false));
                     }
                 } else {
                     if (beginTarget == endTarget) {
                         system.addConstraint(EquationCreation
                                 .createRowCentering(system, begin, beginTarget,
-                                        0, 0.5f, endTarget, end, 0, true,
-                                        constraintStrength));
+                                        0, 0.5f, endTarget, end, 0, true));
                     } else {
                         boolean useBidirectionalError = (beginAnchor.getConnectionType() !=
                                 ConstraintAnchor.ConnectionType.STRICT);
                         system.addConstraint(EquationCreation
                                 .createRowGreaterThan(system, begin, beginTarget,
-                                        beginAnchor.getMargin(), useBidirectionalError,
-                                        constraintStrength));
+                                        beginAnchor.getMargin(), useBidirectionalError));
                         useBidirectionalError = (endAnchor.getConnectionType() !=
                                 ConstraintAnchor.ConnectionType.STRICT);
                         system.addConstraint(EquationCreation
                                 .createRowLowerThan(system, end, endTarget,
                                         -1 * endAnchor.getMargin(),
-                                        useBidirectionalError, constraintStrength));
+                                        useBidirectionalError));
                         system.addConstraint(EquationCreation
                                 .createRowCentering(system, begin, beginTarget,
                                         beginAnchor.getMargin(),
-                                        bias, endTarget, end, endAnchor.getMargin(), false,
-                                        constraintStrength));
+                                        bias, endTarget, end, endAnchor.getMargin(), false));
                     }
                 }
             } else  if (useRatio) {
@@ -1839,7 +1825,7 @@ public class ConstraintWidget implements Solvable {
                                 true));
                 system.addConstraint(EquationCreation
                         .createRowCentering(system, begin, beginTarget,
-                                0, 0.5f, endTarget, end, 0, true, 1));
+                                0, 0.5f, endTarget, end, 0, true));
             } else {
                 system.addConstraint(EquationCreation
                         .createRowEquals(system, begin, beginTarget, beginAnchor.getMargin(),

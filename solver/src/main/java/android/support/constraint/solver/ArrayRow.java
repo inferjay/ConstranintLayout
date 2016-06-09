@@ -16,7 +16,7 @@
 
 package android.support.constraint.solver;
 
-class ArrayRow {
+public class ArrayRow {
     private static final boolean DEBUG = false;
 
     SolverVariable variable = null;
@@ -120,31 +120,18 @@ class ArrayRow {
         return variables.containsKey(v);
     }
 
-    public final float getVariable(SolverVariable v) {
-        return variables.get(v);
-    }
-
-    public void setVariable(SolverVariable v, float value) {
-        variables.put(v, value);
-    }
-
-    public void setConstant(float v) {
-        constantValue = v;
-    }
-
     public ArrayRow createRowEquals(SolverVariable variable, int value) {
         if (value < 0) {
-            this.constantValue = -1 * value;
-            setVariable(variable, 1);
+            constantValue = -1 * value;
+            variables.put(variable, 1);
         } else {
-            this.constantValue = value;
-            setVariable(variable, -1);
+            constantValue = value;
+            variables.put(variable, -1);
         }
         return this;
     }
 
-    public ArrayRow createRowEquals(SolverVariable variableA, SolverVariable variableB,
-                                    int margin, boolean withError, int errorStrength) {
+    public ArrayRow createRowEquals(SolverVariable variableA, SolverVariable variableB, int margin) {
         boolean inverse = false;
         if (margin != 0) {
             int m = margin;
@@ -155,23 +142,23 @@ class ArrayRow {
             constantValue = m;
         }
         if (!inverse) {
-            setVariable(variableA, -1);
-            setVariable(variableB, 1);
+            variables.put(variableA, -1);
+            variables.put(variableB, 1);
         } else {
-            setVariable(variableA, 1);
-            setVariable(variableB, -1);
+            variables.put(variableA, 1);
+            variables.put(variableB, -1);
         }
         return this;
     }
 
     public ArrayRow addSingleError(SolverVariable error, int sign) {
-        setVariable(error, sign);
+        variables.put(error, (float) sign);
         return this;
     }
 
     public ArrayRow createRowGreaterThan(SolverVariable variableA,
                                          SolverVariable variableB, SolverVariable slack,
-                                         int margin, boolean withError, int errorStrength) {
+                                         int margin) {
         boolean inverse = false;
         if (margin != 0) {
             int m = margin;
@@ -182,19 +169,19 @@ class ArrayRow {
             constantValue = m;
         }
         if (!inverse) {
-            setVariable(variableA, -1);
-            setVariable(variableB, 1);
-            setVariable(slack, 1);
+            variables.put(variableA, -1);
+            variables.put(variableB, 1);
+            variables.put(slack, 1);
         } else {
-            setVariable(variableA, 1);
-            setVariable(variableB, -1);
-            setVariable(slack, -1);
+            variables.put(variableA, 1);
+            variables.put(variableB, -1);
+            variables.put(slack, -1);
         }
         return this;
     }
 
     public ArrayRow createRowLowerThan(SolverVariable variableA, SolverVariable variableB,
-                                       SolverVariable slack, int margin, boolean withError, int errorStrength) {
+                                       SolverVariable slack, int margin) {
         boolean inverse = false;
         if (margin != 0) {
             int m = margin;
@@ -205,27 +192,27 @@ class ArrayRow {
             constantValue = m;
         }
         if (!inverse) {
-            setVariable(variableA, -1);
-            setVariable(variableB, 1);
-            setVariable(slack, -1);
+            variables.put(variableA, -1);
+            variables.put(variableB, 1);
+            variables.put(slack, -1);
         } else {
-            setVariable(variableA, 1);
-            setVariable(variableB, -1);
-            setVariable(slack, 1);
+            variables.put(variableA, 1);
+            variables.put(variableB, -1);
+            variables.put(slack, 1);
         }
         return this;
     }
 
     public ArrayRow createRowCentering(SolverVariable variableA, SolverVariable variableB, int marginA,
                                        float bias, SolverVariable variableC, SolverVariable variableD, int marginB,
-                                       boolean withError, int errorStrength) {
+                                       boolean withError) {
         if (variableB == variableC) {
             // centering on the same position
             // B - A == D - B
             // 0 = A + D - 2 * B
-            setVariable(variableA, 1);
-            setVariable(variableD, 1);
-            setVariable(variableB, -2);
+            variables.put(variableA, 1);
+            variables.put(variableD, 1);
+            variables.put(variableB, -2);
             return this;
         }
         if (bias == 0.5f) {
@@ -235,52 +222,59 @@ class ArrayRow {
             // with margin:
             // A - B - Ma = C - D - Mb
             // 0 = A - B - C + D - Ma + Mb
-            setVariable(variableA, 1);
-            setVariable(variableB, -1);
-            setVariable(variableC, -1);
-            setVariable(variableD, 1);
+            variables.put(variableA, 1);
+            variables.put(variableB, -1);
+            variables.put(variableC, -1);
+            variables.put(variableD, 1);
             if (marginA > 0 || marginB > 0) {
-                setConstant(- marginA + marginB);
+                constantValue = - marginA + marginB;
             }
         } else {
-            setVariable(variableA, 1 * (1 - bias));
-            setVariable(variableB, -1 * (1 - bias));
-            setVariable(variableC, -1 * bias);
-            setVariable(variableD, 1 * bias);
+            variables.put(variableA, 1 * (1 - bias));
+            variables.put(variableB, -1 * (1 - bias));
+            variables.put(variableC, -1 * bias);
+            variables.put(variableD, 1 * bias);
             if (marginA > 0 || marginB > 0) {
-                setConstant( - marginA * (1 - bias) + marginB * bias);
+                constantValue = - marginA * (1 - bias) + marginB * bias;
             }
         }
         return this;
     }
 
     public ArrayRow addError(SolverVariable error1, SolverVariable error2) {
-        setVariable(error1, 1);
-        setVariable(error2, -1);
+        variables.put(error1, 1);
+        variables.put(error2, -1);
         return this;
     }
 
     public ArrayRow createRowDimensionPercent(SolverVariable variableA,
                                               SolverVariable variableB, SolverVariable variableC, int percent) {
         float p = (percent / 100f);
-        setVariable(variableA, -1);
-        setVariable(variableB, (1 - p));
-        setVariable(variableC, p);
+        variables.put(variableA, -1);
+        variables.put(variableB, (1 - p));
+        variables.put(variableC, p);
         return this;
     }
 
+    /**
+     * Create a constraint to express A = B + (C - D) * ratio
+     * We use this for ratio, where for exemple Right = Left + (Bottom - Top) * percent
+     *
+     * @param variableA
+     * @param variableB
+     * @param variableC
+     * @param variableD
+     * @param ratio
+     * @return
+     */
     public ArrayRow createRowDimensionRatio(SolverVariable variableA, SolverVariable variableB,
                                             SolverVariable variableC, SolverVariable variableD, float ratio) {
         // A = B + (C - D) * ratio
-        setVariable(variableA, -1);
-        setVariable(variableB, 1);
-        setVariable(variableC, ratio);
-        setVariable(variableD, -ratio);
+        variables.put(variableA, -1);
+        variables.put(variableB, 1);
+        variables.put(variableC, ratio);
+        variables.put(variableD, -ratio);
         return this;
-    }
-
-    public void setUsed(boolean b) {
-        this.used = b;
     }
 
     public int sizeInBytes() {

@@ -139,7 +139,7 @@ public class LinearSystem {
         mGoal = null;
         mNumColumns = 1;
         for (int i = 0; i < mNumRows; i++) {
-            mRows[i].setUsed(false);
+            mRows[i].used = false;
         }
         releaseRows();
         mNumRows = 0;
@@ -179,11 +179,7 @@ public class LinearSystem {
         return variable;
     }
 
-    ArrayRow createRow() {
-        return createRow(1);
-    }
-
-    ArrayRow createRow(int sizeHint) {
+    public ArrayRow createRow() {
         ArrayRow row = sArrayRowPool.acquire();
         if (row == null) {
             row = new ArrayRow();
@@ -193,7 +189,7 @@ public class LinearSystem {
         return row;
     }
 
-    SolverVariable createSlackVariable() {
+    public SolverVariable createSlackVariable() {
         if (mNumColumns + 1 >= mMaxColumns) {
             increaseTableSize();
         }
@@ -205,15 +201,15 @@ public class LinearSystem {
         return variable;
     }
 
-    void addError(ArrayRow row, int strength) {
-        SolverVariable error1 = createErrorVariable(strength);
-        SolverVariable error2 = createErrorVariable(strength);
+    void addError(ArrayRow row) {
+        SolverVariable error1 = createErrorVariable();
+        SolverVariable error2 = createErrorVariable();
 
         row.addError(error1, error2);
     }
 
-    void addSingleError(ArrayRow row, int sign, int strength) {
-        SolverVariable error = createErrorVariable(strength);
+    void addSingleError(ArrayRow row, int sign) {
+        SolverVariable error = createErrorVariable();
         row.addSingleError(error, sign);
     }
 
@@ -235,17 +231,10 @@ public class LinearSystem {
     }
 
     private SolverVariable createErrorVariable() {
-        return createErrorVariable(1);
-    }
-
-    private SolverVariable createErrorVariable(int strength) {
         if (mNumColumns + 1 >= mMaxColumns) {
             increaseTableSize();
         }
         SolverVariable variable = acquireSolverVariable(SolverVariable.Type.ERROR);
-        if (strength == 2) {
-            variable.setStrength(SolverVariable.Strength.STRONG);
-        }
         mVariablesID++;
         mNumColumns++;
         variable.id = mVariablesID;
@@ -533,7 +522,7 @@ public class LinearSystem {
                         // the current row does contains the variable
                         // we want to pivot on
                         float C = current.constantValue;
-                        float a_j = current.getVariable(pivotCandidate);
+                        float a_j = current.variables.get(pivotCandidate);
                         if (a_j < 0) {
                             float value = (C * -1) / a_j;
                             if (pivotCandidate.mStrength ==
@@ -654,11 +643,11 @@ public class LinearSystem {
                         // let's examine this row, see if we can find a good pivot
                         for (int j = 1; j < mNumColumns; j++) {
                             SolverVariable candidate = mIndexedVariables[j];
-                            float a_j = current.getVariable(candidate);
+                            float a_j = current.variables.get(candidate);
                             if (a_j <= 0) {
                                 continue;
                             }
-                            float d_j = goal.getVariable(candidate);
+                            float d_j = goal.variables.get(candidate);
                             float value = d_j / a_j;
 
                             if (variable.mStrength == SolverVariable.Strength.STRONG) {
