@@ -430,7 +430,7 @@ public class ConstraintTableLayout extends ConstraintWidgetContainer {
                 Guideline guideline = new Guideline();
                 guideline.setOrientation(Guideline.VERTICAL);
                 guideline.setParent(this);
-                guideline.setRelativePercent((int) percent);
+                guideline.setGuidePercent((int) percent);
                 percent += increment;
                 slice.right = guideline;
                 mVerticalGuidelines.add(guideline);
@@ -459,7 +459,7 @@ public class ConstraintTableLayout extends ConstraintWidgetContainer {
                 Guideline guideline = new Guideline();
                 guideline.setOrientation(Guideline.HORIZONTAL);
                 guideline.setParent(this);
-                guideline.setRelativePercent((int) percent);
+                guideline.setGuidePercent((int) percent);
                 percent += increment;
                 slice.bottom = guideline;
                 mHorizontalGuidelines.add(guideline);

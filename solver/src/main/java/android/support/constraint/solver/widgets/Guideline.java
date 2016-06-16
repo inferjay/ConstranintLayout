@@ -140,7 +140,7 @@ public class Guideline extends ConstraintWidget {
         return mAnchors;
     }
 
-    public void setRelativePercent(int value) {
+    public void setGuidePercent(int value) {
         if (value > -1) {
             mRelativePercent = value;
             mRelativeBegin = -1;
@@ -148,7 +148,7 @@ public class Guideline extends ConstraintWidget {
         }
     }
 
-    public void setRelativeBegin(int value) {
+    public void setGuideBegin(int value) {
         if (value > -1) {
             mRelativePercent = -1;
             mRelativeBegin = value;
@@ -156,7 +156,7 @@ public class Guideline extends ConstraintWidget {
         }
     }
 
-    public void setRelativeEnd(int value) {
+    public void setGuideEnd(int value) {
         if (value > -1) {
             mRelativePercent = -1;
             mRelativeBegin = -1;
@@ -255,22 +255,22 @@ public class Guideline extends ConstraintWidget {
         if (mOrientation == VERTICAL) {
             int position = x - mOffsetX;
             if (mRelativeBegin != -1) {
-                setRelativeBegin(position);
+                setGuideBegin(position);
             } else if (mRelativeEnd != -1) {
-                setRelativeEnd(getParent().getWidth() - position);
+                setGuideEnd(getParent().getWidth() - position);
             } else if (mRelativePercent != -1) {
                 int percent = (int) ((position / (float) getParent().getWidth()) * 100);
-                setRelativePercent(percent);
+                setGuidePercent(percent);
             }
         } else {
             int position = y - mOffsetY;
             if (mRelativeBegin != -1) {
-                setRelativeBegin(position);
+                setGuideBegin(position);
             } else if (mRelativeEnd != -1) {
-                setRelativeEnd(getParent().getHeight() - position);
+                setGuideEnd(getParent().getHeight() - position);
             } else if (mRelativePercent != -1) {
                 int percent = (int) ((position / (float) getParent().getHeight()) * 100);
-                setRelativePercent(percent);
+                setGuidePercent(percent);
             }
         }
     }
@@ -280,7 +280,7 @@ public class Guideline extends ConstraintWidget {
         if (mOrientation == HORIZONTAL) {
             percent = (int) (Math.ceil((getY() / (float) getParent().getHeight()) * 100));
         }
-        setRelativePercent(percent);
+        setGuidePercent(percent);
     }
 
     void inferRelativeBeginPosition() {
@@ -288,7 +288,7 @@ public class Guideline extends ConstraintWidget {
         if (mOrientation == HORIZONTAL) {
             position = getY();
         }
-        setRelativeBegin(position);
+        setGuideBegin(position);
     }
 
     void inferRelativeEndPosition() {
@@ -296,7 +296,7 @@ public class Guideline extends ConstraintWidget {
         if (mOrientation == HORIZONTAL) {
             position = getParent().getHeight() - getY();
         }
-        setRelativeEnd(position);
+        setGuideEnd(position);
     }
 
     public void cyclePosition() {

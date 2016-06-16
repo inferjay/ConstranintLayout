@@ -15,8 +15,6 @@
  */
 package android.support.constraint.solver;
 
-import android.support.constraint.solver.LinearEquation;
-import android.support.constraint.solver.LinearSystem;
 import android.support.constraint.solver.widgets.Animator;
 import android.support.constraint.solver.widgets.ConstraintAnchor;
 import android.support.constraint.solver.widgets.ConstraintHorizontalLayout;
@@ -591,7 +589,7 @@ public class WidgetsPositioningTest {
         final ConstraintWidget A = new ConstraintWidget(100, 20);
         final Guideline guideline = new Guideline();
         guideline.setParent(root);
-        guideline.setRelativePercent(50);
+        guideline.setGuidePercent(50);
         root.setDebugSolverName(s, "root");
         A.setDebugSolverName(s, "A");
         guideline.setDebugSolverName(s, "guideline");
@@ -613,7 +611,7 @@ public class WidgetsPositioningTest {
         runTestOnWidgets(widgets, check);
         System.out.println("" + root + " " + A + " " + guideline);
 //        s.displayReadableRows();
-        guideline.setRelativePercent(0);
+        guideline.setGuidePercent(0);
         runTestOnWidgets(widgets, new Runnable() {
             @Override
             public void run() {
@@ -622,7 +620,7 @@ public class WidgetsPositioningTest {
                 assertEquals(A.getX(), 0);
             }
         });
-        guideline.setRelativeBegin(150);
+        guideline.setGuideBegin(150);
         runTestOnWidgets(widgets, new Runnable() {
             @Override
             public void run() {
@@ -632,7 +630,7 @@ public class WidgetsPositioningTest {
             }
         });
         System.out.println("" + root + " " + A + " " + guideline);
-        guideline.setRelativeEnd(150);
+        guideline.setGuideEnd(150);
         runTestOnWidgets(widgets, new Runnable() {
             @Override
             public void run() {
@@ -645,7 +643,7 @@ public class WidgetsPositioningTest {
         guideline.setOrientation(Guideline.VERTICAL);
         A.resetAnchors();
         A.connect(ConstraintAnchor.Type.TOP, guideline, ConstraintAnchor.Type.TOP);
-        guideline.setRelativeBegin(150);
+        guideline.setGuideBegin(150);
         runTestOnWidgets(widgets, new Runnable() {
             @Override
             public void run() {
