@@ -145,19 +145,19 @@ public class ConstraintLayout extends ViewGroup {
 
             final LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
             if ((widget instanceof Guideline)) {
-                if ((layoutParams.relativeBegin != LayoutParams.UNSET)
-                  || (layoutParams.relativeEnd != LayoutParams.UNSET)
-                  || (layoutParams.relativePercent != LayoutParams.UNSET)
+                if ((layoutParams.guideBegin != LayoutParams.UNSET)
+                  || (layoutParams.guideEnd != LayoutParams.UNSET)
+                  || (layoutParams.guidePercent != LayoutParams.UNSET)
                   || (layoutParams.orientation != LayoutParams.UNSET)) {
                     Guideline guideline = (Guideline) widget;
-                    if (layoutParams.relativeBegin != -1) {
-                        guideline.setRelativeBegin(layoutParams.relativeBegin);
+                    if (layoutParams.guideBegin != -1) {
+                        guideline.setGuideBegin(layoutParams.guideBegin);
                     }
-                    if (layoutParams.relativeEnd != -1) {
-                        guideline.setRelativeEnd(layoutParams.relativeEnd);
+                    if (layoutParams.guideEnd != -1) {
+                        guideline.setGuideEnd(layoutParams.guideEnd);
                     }
-                    if (layoutParams.relativePercent != -1) {
-                        guideline.setRelativePercent(layoutParams.relativePercent);
+                    if (layoutParams.guidePercent != -1) {
+                        guideline.setGuidePercent(layoutParams.guidePercent);
                     }
                     if (layoutParams.orientation == LayoutParams.VERTICAL) {
                         guideline.setOrientation(Guideline.VERTICAL);
@@ -586,9 +586,9 @@ public class ConstraintLayout extends ViewGroup {
         public static int HORIZONTAL = 0;
         public static int VERTICAL = 1;
 
-        public int relativeBegin = -1;
-        public int relativeEnd = -1;
-        public int relativePercent = -1;
+        public int guideBegin = -1;
+        public int guideEnd = -1;
+        public int guidePercent = -1;
 
         public int leftToLeft = UNSET;
         public int leftToRight = UNSET;
@@ -616,8 +616,6 @@ public class ConstraintLayout extends ViewGroup {
 
         // TODO: Hide those for now (for table layout)
         int orientation = UNSET;
-        int containerSkip = UNSET;
-
         // Internal use only
         boolean horizontalLock = true;
         boolean verticalLock = true;
@@ -664,12 +662,12 @@ public class ConstraintLayout extends ViewGroup {
                     editorAbsoluteX = a.getDimensionPixelOffset(attr, editorAbsoluteX);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_editor_absoluteY) {
                     editorAbsoluteY = a.getDimensionPixelOffset(attr, editorAbsoluteY);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_relativeBegin) {
-                    relativeBegin = a.getDimensionPixelOffset(attr, relativeBegin);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_relativeEnd) {
-                    relativeEnd = a.getDimensionPixelOffset(attr, relativeEnd);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_relativePercent) {
-                    relativePercent = a.getInt(attr, relativePercent);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintGuide_begin) {
+                    guideBegin = a.getDimensionPixelOffset(attr, guideBegin);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintGuide_end) {
+                    guideEnd = a.getDimensionPixelOffset(attr, guideEnd);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintGuide_Percent) {
+                    guidePercent = a.getInt(attr, guidePercent);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_android_orientation) {
                     orientation = a.getInt(attr, orientation);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintStart_toEndOf) {
@@ -680,8 +678,6 @@ public class ConstraintLayout extends ViewGroup {
                     endToStart = a.getResourceId(attr, endToStart);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintEnd_toEndOf) {
                     endToEnd = a.getResourceId(attr, endToEnd);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_containerItemSkip) {
-                    containerSkip = a.getInteger(attr, containerSkip);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_bias) {
                     horizontalBias = a.getFloat(attr, horizontalBias);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_bias) {

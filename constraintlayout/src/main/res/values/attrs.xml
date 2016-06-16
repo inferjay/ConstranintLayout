@@ -3,10 +3,9 @@
     <declare-styleable name="ConstraintLayout_Layout">
         <attr name="android:orientation" />
 
-        <attr name="relativeBegin" format="dimension" />
-        <attr name="relativeEnd" format="dimension" />
-        <attr name="relativePercent" format="integer" />
-        <attr name="containerItemSkip" format="integer" />
+        <attr name="layout_constraintGuide_begin" format="dimension" />
+        <attr name="layout_constraintGuide_end" format="dimension" />
+        <attr name="layout_constraintGuide_Percent" format="integer" />
 
         <attr name="layout_constraintLeft_toLeftOf" format="reference"/>
         <attr name="layout_constraintLeft_toRightOf" format="reference"/>
