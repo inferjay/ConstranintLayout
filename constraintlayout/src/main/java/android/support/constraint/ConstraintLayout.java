@@ -51,7 +51,7 @@ public class ConstraintLayout extends ViewGroup {
     static final boolean ALLOWS_EMBEDDED = false;
 
     private static final String TAG = "ConstraintLayout";
-    private static final boolean SIMPLE_LAYOUT = false;
+    private static final boolean SIMPLE_LAYOUT = true;
 
     private final ArrayList<ConstraintWidget> mSizeDependentsWidgets = new ArrayList<>(100);
 
