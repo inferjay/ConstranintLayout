@@ -1765,7 +1765,7 @@ public class ConstraintWidget implements Solvable {
             dimension = 0;
         }
         if (beginTarget == null && endTarget == null) {
-            system.addConstraint(EquationCreation.createRowEquals(system, begin, beginPosition));
+            system.addConstraint(system.createRow().createRowEquals(begin, beginPosition));
             if (wrapContent) {
                 system.addConstraint(EquationCreation.createRowEquals(system, end, begin, 0, true));
             } else {
@@ -1773,36 +1773,29 @@ public class ConstraintWidget implements Solvable {
                     system.addConstraint(
                             EquationCreation.createRowEquals(system, end, begin, dimension, false));
                 } else {
-                    system.addConstraint(
-                            EquationCreation.createRowEquals(system, end, endPosition));
+                    system.addConstraint(system.createRow().createRowEquals(end, endPosition));
                 }
             }
         } else if (beginTarget != null && endTarget == null) {
-            system.addConstraint(EquationCreation
-                    .createRowEquals(system, begin, beginTarget, beginAnchor.getMargin(), false));
+            system.addConstraint(system.createRow().createRowEquals(begin, beginTarget, beginAnchor.mMargin));
             if (wrapContent) {
                 system.addConstraint(EquationCreation.createRowEquals(system, end, begin, 0, true));
             } else {
                 if (dimensionLocked) {
-                    system.addConstraint(
-                            EquationCreation.createRowEquals(system, end, begin, dimension, false));
+                    system.addConstraint(system.createRow().createRowEquals(end, begin, dimension));
                 } else {
-                    system.addConstraint(
-                            EquationCreation.createRowEquals(system, end, endPosition));
+                    system.addConstraint(system.createRow().createRowEquals(end, endPosition));
                 }
             }
         } else if (beginTarget == null && endTarget != null) {
-            system.addConstraint(EquationCreation
-                    .createRowEquals(system, end, endTarget, -1 * endAnchor.getMargin(), false));
+            system.addConstraint(system.createRow().createRowEquals(end, endTarget, -1 * endAnchor.mMargin));
             if (wrapContent) {
                 system.addConstraint(EquationCreation.createRowEquals(system, end, begin, 0, true));
             } else {
                 if (dimensionLocked) {
-                    system.addConstraint(
-                            EquationCreation.createRowEquals(system, end, begin, dimension, false));
+                    system.addConstraint(system.createRow().createRowEquals(end, begin, dimension));
                 } else {
-                    system.addConstraint(
-                            EquationCreation.createRowEquals(system, begin, beginPosition));
+                    system.addConstraint(system.createRow().createRowEquals(begin, beginPosition));
                 }
             }
         } else { // both constraints set
@@ -1811,25 +1804,22 @@ public class ConstraintWidget implements Solvable {
                     system.addConstraint(
                             EquationCreation.createRowEquals(system, end, begin, 0, true));
                 } else {
-                    system.addConstraint(
-                            EquationCreation.createRowEquals(system, end, begin, dimension, false));
+                    system.addConstraint(system.createRow().createRowEquals(end, begin, dimension));
                 }
 
                 if (beginAnchor.getStrength() != endAnchor.getStrength()) {
                     if (beginAnchor.getStrength() == ConstraintAnchor.Strength.STRONG) {
-                        system.addConstraint(EquationCreation
-                                .createRowEquals(system, begin, beginTarget,
-                                        beginAnchor.getMargin(), false));
-                        system.addConstraint(EquationCreation
-                                .createRowLowerThan(system, end, endTarget,
-                                        -1 * endAnchor.getMargin(), false));
+                        system.addConstraint(system.createRow().createRowEquals(begin, beginTarget, beginAnchor.mMargin));
+                        SolverVariable slack = system.createSlackVariable();
+                        ArrayRow row = system.createRow();
+                        row.createRowLowerThan(end, endTarget, slack, -1 * endAnchor.mMargin);
+                        system.addConstraint(row);
                     } else {
-                        system.addConstraint(EquationCreation
-                                .createRowGreaterThan(system, begin, beginTarget,
-                                        beginAnchor.getMargin(), false));
-                        system.addConstraint(EquationCreation
-                                .createRowEquals(system, end, endTarget, -1 * endAnchor.getMargin(),
-                                        false));
+                        SolverVariable slack = system.createSlackVariable();
+                        ArrayRow row = system.createRow();
+                        row.createRowGreaterThan(begin, beginTarget, slack, beginAnchor.mMargin);
+                        system.addConstraint(row);
+                        system.addConstraint(system.createRow().createRowEquals(end, endTarget, -1 * endAnchor.mMargin));
                     }
                 } else {
                     if (beginTarget == endTarget) {
@@ -1865,12 +1855,8 @@ public class ConstraintWidget implements Solvable {
                         .createRowCentering(system, begin, beginTarget,
                                 0, 0.5f, endTarget, end, 0, true));
             } else {
-                system.addConstraint(EquationCreation
-                        .createRowEquals(system, begin, beginTarget, beginAnchor.getMargin(),
-                                false));
-                system.addConstraint(EquationCreation
-                        .createRowEquals(system, end, endTarget, -1 * endAnchor.getMargin(),
-                                false));
+                system.addConstraint(system.createRow().createRowEquals(begin, beginTarget, beginAnchor.mMargin));
+                system.addConstraint(system.createRow().createRowEquals(end, endTarget, -1 * endAnchor.mMargin));
             }
         }
     }

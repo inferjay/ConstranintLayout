@@ -385,20 +385,32 @@ public class LinearSystem {
         }
     }
 
+    SolverVariable[] tempVars = new SolverVariable[256];
+
     /**
      * Update the equation with the variables already defined in the system
      * @param row row to update
      */
     private void updateRowFromVariables(ArrayRow row) {
-        ArrayRow equation = (ArrayRow) row;
-        int numVariables = equation.variables.currentSize;
+        int numVariables = row.variables.size();
+        if (numVariables > tempVars.length) {
+            tempVars = new SolverVariable[tempVars.length * 2];
+        }
+        int added = 0;
         for (int i = 0; i < numVariables; i++) {
-            SolverVariable variable = equation.variables.variables[i];
-            if (variable != null) {
-                this.replaceVariable(row, variable);
+            SolverVariable variable = row.variables.getVariable(i);
+            if (variable != null && variable.definitionId != -1) {
+                tempVars[added] = variable;
+                added ++;
             }
         }
+        for (int i = 0; i < added; i++) {
+            int idx = tempVars[i].definitionId;
+            row.updateRowWithEquation(mRows[idx]);
+        }
     }
+
+    private ArrayRow[] tempClientsCopy = new ArrayRow[32];
 
     /**
      * Add the equation to the system
@@ -449,8 +461,12 @@ public class LinearSystem {
         row.variable.definitionId = mNumRows;
         mNumRows++;
 
-        ArrayRow[] clients = row.variable.mClientEquations;
         final int count = row.variable.mClientEquationsCount;
+        while (tempClientsCopy.length < count) {
+            tempClientsCopy = new ArrayRow[tempClientsCopy.length * 2];
+        }
+        ArrayRow[] clients = tempClientsCopy;
+        System.arraycopy(row.variable.mClientEquations, 0, clients, 0, count);
         for (int i = 0; i < count; i++) {
             ArrayRow client = clients[i];
             if (client == row) {
@@ -482,7 +498,7 @@ public class LinearSystem {
                 System.out.println("iteration on system " + tries);
             }
 
-            SolverVariable pivotCandidate = goal.findPivotCandidate();
+            SolverVariable pivotCandidate = goal.variables.getPivotCandidate();
             if (mAlreadyTestedCandidates.contains(pivotCandidate)) {
                 pivotCandidate = null;
             } else if (pivotCandidate != null) {

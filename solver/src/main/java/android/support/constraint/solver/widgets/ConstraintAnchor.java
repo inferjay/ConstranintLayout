@@ -61,7 +61,7 @@ public class ConstraintAnchor {
     final ConstraintWidget mOwner;
     final Type mType;
     ConstraintAnchor mTarget;
-    private int mMargin;
+    int mMargin;
     private Strength mStrength = Strength.NONE;
     private ConnectionType mConnectionType = ConnectionType.RELAXED;
     private int mConnectionCreator = USER_CREATOR;

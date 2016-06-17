@@ -31,7 +31,9 @@ public class ArrayRow {
         int count = variables.size();
         for (int i = 0; i < count; i++) {
             SolverVariable v = variables.getVariable(i);
-            v.addClientEquation(this);
+            if (v != null) {
+                v.addClientEquation(this);
+            }
         }
     }
 
@@ -54,6 +56,10 @@ public class ArrayRow {
         );
     }
 
+    public String toString() {
+        return toReadableString();
+    }
+
     public String toReadableString() {
         String s = "";
         if (variable == null) {
@@ -70,6 +76,9 @@ public class ArrayRow {
         int count = variables.size();
         for (int i = 0; i < count; i++) {
             SolverVariable v = variables.getVariable(i);
+            if (v == null) {
+                continue;
+            }
             float amount = variables.getVariableValue(i);
             String name = v.getName();
             if (!addedVariable) {
@@ -283,22 +292,13 @@ public class ArrayRow {
     }
 
     public boolean updateRowWithEquation(ArrayRow row) {
-        ArrayRow equation = (ArrayRow) row;
-        float amount = variables.get(equation.variable);
+        final float amount = variables.get(row.variable);
         // let's replace this with the new definition
         if (amount != 0) {
-            int count = equation.variables.size();
-            for (int i = 0; i < count; i++) {
-                int idx = equation.variables.indexes[i];
-                SolverVariable v = equation.variables.variables[idx];
-                float sourceAmount = equation.variables.values[idx];
-                float previousAmount;
-                previousAmount = variables.get(v);
-                float finalValue = previousAmount + (sourceAmount * amount);
-                variables.put(v, finalValue);
-            }
-            constantValue += equation.constantValue * amount;
-            variables.remove(equation.variable);
+            row.variables.updateArray(variables, amount);
+            constantValue += row.constantValue * amount;
+            variables.remove(row.variable);
+            row.variable.removeClientEquation(this);
             return true;
         }
         return false;
@@ -322,10 +322,13 @@ public class ArrayRow {
         SolverVariable unrestrictedCandidate = null;
         // let's find an adequate variable to pivot on
         int count = variables.size();
+        SolverVariable candidate = null;
         for (int i = 0; i < count; i++) {
-            int idx = variables.indexes[i];
-            SolverVariable candidateVariable = variables.variables[idx];
-            float variableAmount = variables.values[idx];
+            SolverVariable candidateVariable = variables.getVariable(i);
+            if (candidateVariable == null) {
+                continue;
+            }
+            float variableAmount = variables.getVariableValue(i);
             if (variableAmount != 0) {
                 if (variableAmount < 0) {
                     if (variableAmount > -epsilon) {
@@ -352,21 +355,29 @@ public class ArrayRow {
             if (candidateVariable.mType == SolverVariable.Type.UNRESTRICTED) {
                 // If there's an unrestricted variable, it's a candidate to pivot on.
                 if (variableAmount < 0) {
-                    // if it has a negative value, simply pivot immediately
-                    pivot(candidateVariable);
+                    // if it has a negative value, remember it
+                    if (candidate == null || candidate.id > candidateVariable.id) {
+                        candidate = candidateVariable;
+                    }
                     break;
                 } else if (unrestrictedCandidate == null) {
                     // otherwise, let's remember this candidate. If we don't find another
                     // negative unrestricted variable, this might be our best candidate.
-                    unrestrictedCandidate = candidateVariable;
+                    if (unrestrictedCandidate == null || unrestrictedCandidate.id > candidateVariable.id) {
+                        unrestrictedCandidate = candidateVariable;
+                    }
                 }
             } else if (variableAmount < 0) {
                 // The variable is restricted, but has a negative amount. If we don't already
                 // have candidate for restricted variable, we should remember it as a candidate.
-                if (restrictedCandidate == null) {
+                if (restrictedCandidate == null || restrictedCandidate.id > candidateVariable.id) {
                     restrictedCandidate = candidateVariable;
                 }
             }
+        }
+
+        if (candidate != null) {
+            pivot(candidate);
         }
 
         // we were not able to pivot on an unrestricted negative variable.
@@ -375,6 +386,7 @@ public class ArrayRow {
             // positive variable though, and we should pivot on it preferably.
             pivot(unrestrictedCandidate);
         }
+
         if (variable == null && restrictedCandidate != null) {
             // we were not able to pivot on an unrestricted variable, but we might
             // have restricted variable candidate for the pivot
@@ -410,21 +422,6 @@ public class ArrayRow {
             }
             variables.setVariable(i, value);
         }
-    }
-
-    public SolverVariable findPivotCandidate() {
-        SolverVariable candidate = variables.getPivotCandidate();
-        if (candidate != null) {
-            return candidate;
-        }
-        int count = variables.size();
-        for (int i = 0; i < count; i++) {
-            float amount = variables.getVariableValue(i);
-            if (amount < 0) {
-                return variables.getVariable(i);
-            }
-        }
-        return null;
     }
 
 }

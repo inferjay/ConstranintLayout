@@ -55,40 +55,35 @@ public class ConstraintHorizontalLayout extends ConstraintWidgetContainer {
      */
     @Override
     public void addToSolver(LinearSystem system, int group) {
-        super.addToSolver(system, group);
-        if (mChildren.size() == 0) {
-            return;
-        }
-        ConstraintWidget previous = this;
-        for (int i = 0, mChildrenSize = mChildren.size(); i < mChildrenSize; i++) {
-            final ConstraintWidget widget = mChildren.get(i);
+        if (mChildren.size() != 0) {
+            ConstraintWidget previous = this;
+            for (int i = 0, mChildrenSize = mChildren.size(); i < mChildrenSize; i++) {
+                final ConstraintWidget widget = mChildren.get(i);
+                if (previous != this) {
+                    widget.connect(ConstraintAnchor.Type.LEFT, previous, ConstraintAnchor.Type.RIGHT);
+                    previous.connect(ConstraintAnchor.Type.RIGHT, widget, ConstraintAnchor.Type.LEFT);
+                } else {
+                    ConstraintAnchor.Strength strength = ConstraintAnchor.Strength.STRONG;
+                    if (mAlignment == ContentAlignment.END) {
+                        strength = ConstraintAnchor.Strength.WEAK;
+                    }
+                    widget.connect(ConstraintAnchor.Type.LEFT, previous,
+                            ConstraintAnchor.Type.LEFT, 0, strength);
+                }
+                widget.connect(ConstraintAnchor.Type.TOP, this, ConstraintAnchor.Type.TOP);
+                widget.connect(ConstraintAnchor.Type.BOTTOM, this, ConstraintAnchor.Type.BOTTOM);
+                previous = widget;
+            }
             if (previous != this) {
-                widget.connect(ConstraintAnchor.Type.LEFT, previous, ConstraintAnchor.Type.RIGHT);
-                previous.connect(ConstraintAnchor.Type.RIGHT, widget, ConstraintAnchor.Type.LEFT);
-            } else {
                 ConstraintAnchor.Strength strength = ConstraintAnchor.Strength.STRONG;
-                if (mAlignment == ContentAlignment.END) {
+                if (mAlignment == ContentAlignment.BEGIN) {
                     strength = ConstraintAnchor.Strength.WEAK;
                 }
-                widget.connect(ConstraintAnchor.Type.LEFT, previous,
-                        ConstraintAnchor.Type.LEFT, 0, strength);
+                previous.connect(ConstraintAnchor.Type.RIGHT, this,
+                        ConstraintAnchor.Type.RIGHT, 0, strength);
             }
-            widget.connect(ConstraintAnchor.Type.TOP, this, ConstraintAnchor.Type.TOP);
-            widget.connect(ConstraintAnchor.Type.BOTTOM, this, ConstraintAnchor.Type.BOTTOM);
-            previous = widget;
         }
-        if (previous != this) {
-            ConstraintAnchor.Strength strength = ConstraintAnchor.Strength.STRONG;
-            if (mAlignment == ContentAlignment.BEGIN) {
-                strength = ConstraintAnchor.Strength.WEAK;
-            }
-            previous.connect(ConstraintAnchor.Type.RIGHT, this,
-                             ConstraintAnchor.Type.RIGHT, 0, strength);
-        }
-        for (int i = 0, mChildrenSize = mChildren.size(); i < mChildrenSize; i++) {
-            final ConstraintWidget widget = mChildren.get(i);
-            widget.addToSolver(system, group);
-        }
+        super.addToSolver(system, group);
     }
 
 }
