@@ -24,13 +24,14 @@ import java.util.Arrays;
 class ArrayBackedVariables {
     private static final boolean DEBUG = false;
 
-    SolverVariable[] variables = null;
-    float[] values = null;
-    int[] indexes = null;
-    int maxSize = 4;
-    int currentSize = 0;
-    int currentWriteSize = 0;
-    SolverVariable candidate = null;
+    private SolverVariable[] variables = null;
+    private float[] values = null;
+    private int[] indexes = null;
+    private final int threshold = 4;
+    private int maxSize = 4;
+    private int currentSize = 0;
+    private int currentWriteSize = 0;
+    private SolverVariable candidate = null;
 
     public SolverVariable getPivotCandidate() {
         if (candidate == null) {
@@ -70,6 +71,17 @@ class ArrayBackedVariables {
         return values[indexes[index]];
     }
 
+    public final void updateArray(ArrayBackedVariables target, float amount) {
+        for (int i = 0; i < currentSize; i++) {
+            final int idx = indexes[i];
+            SolverVariable v = variables[idx];
+            float value = values[idx];
+            float previousValue = target.get(v);
+            float finalValue = previousValue + (value * amount);
+            target.put(v, finalValue);
+        }
+    }
+
     public void setVariable(int index, float value) {
         int idx = indexes[index];
         values[idx] = value;
@@ -79,7 +91,7 @@ class ArrayBackedVariables {
     }
 
     public final float get(SolverVariable v) {
-        if (currentSize < 4) {
+        if (currentSize < threshold) {
             for (int i = 0; i < currentSize; i++) {
                 int idx = indexes[i];
                 if (variables[idx] == v) {
@@ -164,6 +176,7 @@ class ArrayBackedVariables {
             variables[i] = null;
         }
         currentSize = 0;
+        currentWriteSize = 0;
     }
 
     public boolean containsKey(SolverVariable variable) {

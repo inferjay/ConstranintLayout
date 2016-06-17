@@ -122,6 +122,19 @@ public class SolverVariable {
         mClientEquationsCount++;
     }
 
+    public void removeClientEquation(ArrayRow equation) {
+        if (equation.variables.get(this) != 0) {
+            return;
+        }
+        for (int i = 0; i < mClientEquationsCount; i++) {
+            if (mClientEquations[i] == equation) {
+                System.arraycopy(mClientEquations, i + 1, mClientEquations, i, (mClientEquationsCount - i - 1));
+                mClientEquationsCount--;
+                return;
+            }
+        }
+    }
+
     public void reset() {
         mName = null;
         mType = Type.UNKNOWN;
