@@ -26,6 +26,9 @@ public class SolverVariable {
 
     private static final boolean INTERNAL_DEBUG = false;
 
+    // Set to true if mClientEquations is a linked list
+    public static final boolean USE_LIST = false;
+
     static int uniqueId = 1;
 
     private String mName;
@@ -37,7 +40,20 @@ public class SolverVariable {
     Type mType;
     Strength mStrength = Strength.WEAK;
 
-    ArrayRow[] mClientEquations = new ArrayRow[32];
+    final class Link {
+        ArrayRow row;
+        Link next;
+    }
+
+    private final Cache mCache;
+
+    // if USE_LIST = true, set mClientEquations to be a linked list
+    // instead of an array.
+    //   Link mClientEquations = new Link();
+    // It seems that the array, at this point, is still faster than
+    // using the linked list, but we might want to switch to an array-based
+    // linked list and reevaluate.
+    ArrayRow[] mClientEquations = new ArrayRow[8];
     int mClientEquationsCount = 0;
 
     /**
@@ -97,12 +113,14 @@ public class SolverVariable {
      * @param name the variable name
      * @param type the type of the variable
      */
-    public SolverVariable(String name, Type type) {
+    public SolverVariable(Cache cache, String name, Type type) {
+        mCache = cache;
         mName = name;
         mType = type;
     }
 
-    public SolverVariable(Type type) {
+    public SolverVariable(Cache cache, Type type) {
+        mCache = cache;
         mType = type;
         if (INTERNAL_DEBUG) {
             mName = getUniqueName(type, Strength.UNKNOWN);
@@ -110,27 +128,60 @@ public class SolverVariable {
     }
 
     public void addClientEquation(ArrayRow equation) {
-        for (int i = 0; i < mClientEquationsCount; i++) {
-            if (mClientEquations[i] == equation) {
-                return;
+        if (USE_LIST) {
+            Link current = (Link) (Object) mClientEquations;
+            while (current.next != null) {
+                if (current.next.row == equation) {
+                    return;
+                }
+                current = current.next;
             }
+            Link newLink = mCache.linkedSolverVariablePool.acquire();
+            if (newLink == null) {
+                newLink = new Link();
+            }
+            newLink.row = equation;
+            newLink.next = null;
+            current.next = newLink;
+        } else {
+
+            for (int i = 0; i < mClientEquationsCount; i++) {
+                if (mClientEquations[i] == equation) {
+                    return;
+                }
+            }
+            if (mClientEquationsCount >= mClientEquations.length) {
+                mClientEquations = Arrays.copyOf(mClientEquations, mClientEquations.length * 2);
+            }
+            mClientEquations[mClientEquationsCount] = equation;
         }
-        if (mClientEquationsCount >= mClientEquations.length) {
-            mClientEquations = Arrays.copyOf(mClientEquations, mClientEquations.length * 2);
-        }
-        mClientEquations[mClientEquationsCount] = equation;
         mClientEquationsCount++;
     }
 
     public void removeClientEquation(ArrayRow equation) {
-        if (equation.variables.get(this) != 0) {
-            return;
-        }
-        for (int i = 0; i < mClientEquationsCount; i++) {
-            if (mClientEquations[i] == equation) {
-                System.arraycopy(mClientEquations, i + 1, mClientEquations, i, (mClientEquationsCount - i - 1));
-                mClientEquationsCount--;
+        if (INTERNAL_DEBUG) {
+            if (equation.variables.get(this) != 0) {
                 return;
+            }
+        }
+        if (USE_LIST) {
+            Link current = (Link) (Object) mClientEquations;
+            while (current.next != null) {
+                if (current.next.row == equation) {
+                    mCache.linkedSolverVariablePool.release(current.next);
+                    current.next = current.next.next;
+                    mClientEquationsCount--;
+                    return;
+                }
+                current = current.next;
+            }
+        } else {
+            for (int i = 0; i < mClientEquationsCount; i++) {
+                if (mClientEquations[i] == equation) {
+                    System.arraycopy(mClientEquations, i + 1, mClientEquations, i, (mClientEquationsCount - i - 1));
+                    mClientEquationsCount--;
+                    return;
+                }
             }
         }
     }
@@ -138,10 +189,18 @@ public class SolverVariable {
     public void reset() {
         mName = null;
         mType = Type.UNKNOWN;
-        mStrength = Strength.WEAK;
+        mStrength = Strength.STRONG;
         id = -1;
         definitionId = -1;
         computedValue = 0;
+        if (USE_LIST) {
+            Link current = (Link) (Object) mClientEquations;
+            while (current.next != null) {
+                mCache.linkedSolverVariablePool.release(current.next);
+                current = current.next;
+            }
+            ((Link) (Object) mClientEquations).next = null;
+        }
         mClientEquationsCount = 0;
     }
 

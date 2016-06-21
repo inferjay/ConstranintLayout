@@ -16,6 +16,8 @@
 
 package android.support.constraint.solver.widgets;
 
+import android.support.constraint.solver.Cache;
+
 import java.util.ArrayList;
 /**
  * A container of ConstraintWidget
@@ -272,12 +274,12 @@ public class WidgetContainer extends ConstraintWidget {
     }
 
     @Override
-    public void resetSolverVariables() {
-        super.resetSolverVariables();
+    public void resetSolverVariables(Cache cache) {
+        super.resetSolverVariables(cache);
         final int count = mChildren.size();
         for (int i = 0; i < count; i++) {
             ConstraintWidget widget = mChildren.get(i);
-            widget.resetSolverVariables();
+            widget.resetSolverVariables(cache);
         }
     }
 

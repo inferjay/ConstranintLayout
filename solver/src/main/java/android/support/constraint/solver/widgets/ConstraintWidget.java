@@ -15,10 +15,7 @@
  */
 package android.support.constraint.solver.widgets;
 
-import android.support.constraint.solver.ArrayRow;
-import android.support.constraint.solver.EquationCreation;
-import android.support.constraint.solver.LinearSystem;
-import android.support.constraint.solver.SolverVariable;
+import android.support.constraint.solver.*;
 
 import java.util.ArrayList;
 
@@ -96,8 +93,8 @@ public class ConstraintWidget implements Solvable {
     private int mSolverBottom = 0;
 
     // Origin of the widget
-    private int mX = 0;
-    private int mY = 0;
+    public int mX = 0;
+    public int mY = 0;
 
     // Current draw position in container's coordinate
     private int mDrawX = 0;
@@ -223,11 +220,15 @@ public class ConstraintWidget implements Solvable {
     /**
      * Reset the solver variables of the anchors
      */
-    public void resetSolverVariables() {
-        final int numAnchors = mAnchors.size();
-        for (int i = 0; i < numAnchors; i++) {
-            mAnchors.get(i).resetSolverVariable();
-        }
+    public void resetSolverVariables(Cache cache) {
+        mLeft.resetSolverVariable(cache);
+        mTop.resetSolverVariable(cache);
+        mRight.resetSolverVariable(cache);
+        mBottom.resetSolverVariable(cache);
+        mBaseline.resetSolverVariable(cache);
+        mCenter.resetSolverVariable(cache);
+        mCenterX.resetSolverVariable(cache);
+        mCenterY.resetSolverVariable(cache);
     }
 
     /**
@@ -1605,60 +1606,52 @@ public class ConstraintWidget implements Solvable {
             //   bi-directional, and would result in an unstable system where the widget would sometimes
             //   not be contained in the parent)
 
-            if (mParent instanceof ConstraintTableLayout) {
-                mLeft.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
-                mRight.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
-                mTop = getAnchor(ConstraintAnchor.Type.TOP);
-                mTop.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
-                mBottom.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
-            } else {
-                if (mParent.getHorizontalDimensionBehaviour()
-                        == DimensionBehaviour.WRAP_CONTENT) {
-                    if (mLeft.mTarget == null ||
-                            mLeft.mTarget.mOwner != mParent) {
-                        SolverVariable parentLeft = system.createObjectVariable(mParent.mLeft);
-                        ArrayRow row = system.createRow();
-                        row.createRowGreaterThan(left, parentLeft, system.createSlackVariable(), 0);
-                        system.addConstraint(row);
-                    } else if (mLeft.mTarget != null &&
-                            mLeft.mTarget.mOwner == mParent) {
-                        mLeft.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
-                    }
-
-                    if (mRight.mTarget == null ||
-                            mRight.mTarget.mOwner != mParent) {
-                        SolverVariable parentRight = system.createObjectVariable(mParent.mRight);
-                        ArrayRow row = system.createRow();
-                        row.createRowGreaterThan(parentRight, right, system.createSlackVariable(), 0);
-                        system.addConstraint(row);
-                    } else if (mRight.mTarget != null &&
-                            mRight.mTarget.mOwner == mParent) {
-                        mRight.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
-                    }
+            if (mParent.getHorizontalDimensionBehaviour()
+                    == DimensionBehaviour.WRAP_CONTENT) {
+                if (mLeft.mTarget == null ||
+                        mLeft.mTarget.mOwner != mParent) {
+                    SolverVariable parentLeft = system.createObjectVariable(mParent.mLeft);
+                    ArrayRow row = system.createRow();
+                    row.createRowGreaterThan(left, parentLeft, system.createSlackVariable(), 0);
+                    system.addConstraint(row);
+                } else if (mLeft.mTarget != null &&
+                        mLeft.mTarget.mOwner == mParent) {
+                    mLeft.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
                 }
 
-                if (mParent.getVerticalDimensionBehaviour()
-                        == DimensionBehaviour.WRAP_CONTENT) {
-                    if (mTop.mTarget == null ||
-                            mTop.mTarget.mOwner != mParent) {
-                        SolverVariable parentTop = system.createObjectVariable(mParent.mTop);
-                        ArrayRow row = system.createRow();
-                        row.createRowGreaterThan(top, parentTop, system.createSlackVariable(), 0);
-                        system.addConstraint(row);
-                    } else if (mTop.mTarget != null &&
-                            mTop.mTarget.mOwner == mParent) {
-                        mTop.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
-                    }
-                    if (mBottom.mTarget == null ||
-                            mBottom.mTarget.mOwner != mParent) {
-                        SolverVariable parentBottom = system.createObjectVariable(getParent().mBottom);
-                        ArrayRow row = system.createRow();
-                        row.createRowGreaterThan(parentBottom, bottom, system.createSlackVariable(), 0);
-                        system.addConstraint(row);
-                    } else if (mBottom.mTarget != null &&
-                            mBottom.mTarget.mOwner == mParent) {
-                        mBottom.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
-                    }
+                if (mRight.mTarget == null ||
+                        mRight.mTarget.mOwner != mParent) {
+                    SolverVariable parentRight = system.createObjectVariable(mParent.mRight);
+                    ArrayRow row = system.createRow();
+                    row.createRowGreaterThan(parentRight, right, system.createSlackVariable(), 0);
+                    system.addConstraint(row);
+                } else if (mRight.mTarget != null &&
+                        mRight.mTarget.mOwner == mParent) {
+                    mRight.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
+                }
+            }
+
+            if (mParent.getVerticalDimensionBehaviour()
+                    == DimensionBehaviour.WRAP_CONTENT) {
+                if (mTop.mTarget == null ||
+                        mTop.mTarget.mOwner != mParent) {
+                    SolverVariable parentTop = system.createObjectVariable(mParent.mTop);
+                    ArrayRow row = system.createRow();
+                    row.createRowGreaterThan(top, parentTop, system.createSlackVariable(), 0);
+                    system.addConstraint(row);
+                } else if (mTop.mTarget != null &&
+                        mTop.mTarget.mOwner == mParent) {
+                    mTop.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
+                }
+                if (mBottom.mTarget == null ||
+                        mBottom.mTarget.mOwner != mParent) {
+                    SolverVariable parentBottom = system.createObjectVariable(getParent().mBottom);
+                    ArrayRow row = system.createRow();
+                    row.createRowGreaterThan(parentBottom, bottom, system.createSlackVariable(), 0);
+                    system.addConstraint(row);
+                } else if (mBottom.mTarget != null &&
+                        mBottom.mTarget.mOwner == mParent) {
+                    mBottom.setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
                 }
             }
         }

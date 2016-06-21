@@ -15,6 +15,7 @@
  */
 package android.support.constraint.solver.widgets;
 
+import android.support.constraint.solver.Cache;
 import android.support.constraint.solver.SolverVariable;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class ConstraintAnchor {
     private Strength mStrength = Strength.NONE;
     private ConnectionType mConnectionType = ConnectionType.RELAXED;
     private int mConnectionCreator = USER_CREATOR;
-    SolverVariable mSolverVariable = new SolverVariable(SolverVariable.Type.UNRESTRICTED);
+    SolverVariable mSolverVariable;
     int mGroup = ANY_GROUP;
 
     /**
@@ -87,8 +88,12 @@ public class ConstraintAnchor {
     /**
      * Reset the solver variable
      */
-    public void resetSolverVariable() {
-        mSolverVariable.reset();
+    public void resetSolverVariable(Cache cache) {
+        if (mSolverVariable == null) {
+            mSolverVariable = new SolverVariable(cache, SolverVariable.Type.UNRESTRICTED);
+        } else {
+            mSolverVariable.reset();
+        }
     }
 
     /**
@@ -172,7 +177,7 @@ public class ConstraintAnchor {
     public void reset() {
         mTarget = null;
         mMargin = 0;
-        mStrength = Strength.NONE;
+        mStrength = Strength.STRONG;
         mConnectionCreator = USER_CREATOR;
         mConnectionType = ConnectionType.RELAXED;
     }

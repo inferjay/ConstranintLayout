@@ -17,8 +17,6 @@ package android.support.constraint.solver;
 
 import android.support.constraint.solver.widgets.Animator;
 import android.support.constraint.solver.widgets.ConstraintAnchor;
-import android.support.constraint.solver.widgets.ConstraintHorizontalLayout;
-import android.support.constraint.solver.widgets.ConstraintTableLayout;
 import android.support.constraint.solver.widgets.ConstraintWidget;
 import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
 import android.support.constraint.solver.widgets.Guideline;
@@ -46,15 +44,20 @@ public class WidgetsPositioningTest {
         final ConstraintWidget rootWidget = new ConstraintWidget(x, y, 600, 400);
         final ConstraintWidget centeredWidget = new ConstraintWidget(100, 20);
         ArrayList<ConstraintWidget> widgets = new ArrayList<ConstraintWidget>();
-        widgets.add(rootWidget);
+        centeredWidget.resetSolverVariables(s.getCache());
+        rootWidget.resetSolverVariables(s.getCache());
         widgets.add(centeredWidget);
+        widgets.add(rootWidget);
 
+        centeredWidget.setDebugName("A");
+        rootWidget.setDebugName("Root");
         centeredWidget.connect(ConstraintAnchor.Type.CENTER_X, rootWidget, ConstraintAnchor.Type.CENTER_X);
         centeredWidget.connect(ConstraintAnchor.Type.CENTER_Y, rootWidget, ConstraintAnchor.Type.CENTER_Y);
 
         runTestOnWidgets(widgets, new Runnable() {
             @Override
             public void run() {
+                System.out.println("\n*** rootWidget: " + rootWidget + " centeredWidget: " + centeredWidget);
                 int left = centeredWidget.getLeft();
                 int top = centeredWidget.getTop();
                 int right = centeredWidget.getRight();
@@ -128,103 +131,6 @@ public class WidgetsPositioningTest {
                 assertEquals(top, i * (h + margin));
                 assertEquals(bottom, i * (h + margin) + h);
             }
-        }
-    }
-
-    @Test
-    public void testHorizontalLayout() {
-        final ConstraintHorizontalLayout layout = new ConstraintHorizontalLayout(500, 400);
-        final int n = 5;
-        final int w = 100;
-        int h = 20;
-        final ArrayList<ConstraintWidget> widgets = new ArrayList<ConstraintWidget>();
-        for (int i = 0; i < n; i++) {
-            ConstraintWidget widget = new ConstraintWidget(w, h);
-            layout.add(widget);
-            widgets.add(widget);
-        }
-        layout.addToSolver(s);
-        for (int i = 0; i < n; i++) {
-            ConstraintWidget widget = widgets.get(i);
-        }
-        try {
-            s.minimize();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        layout.updateFromSolver(s);
-        Runnable check = new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < n; i++) {
-                    ConstraintWidget widget = widgets.get(i);
-                    int left = widget.getLeft();
-                    int top = widget.getTop();
-                    int right = widget.getRight();
-                    int bottom = widget.getBottom();
-                    float m = (layout.getWidth() - (n * w)) / (float) (n + 1);
-                    float pos = (float) (m + (i * w) + (i * m));
-                    if (pos < 0) {
-                        pos = 0;
-                    }
-                    assertEquals((float)left, pos, 1);
-                }
-            }
-        };
-        runTestOnWidgets(widgets, check);
-        layout.layout();
-        check.run();
-        int groups = layout.layoutFindGroupsSimple();
-        layout.layoutWithGroup(groups);
-        check.run();
-        groups = layout.layoutFindGroups();
-        layout.layoutWithGroup(groups);
-        check.run();
-    }
-
-    @Test
-    public void testWrapContent() {
-        int numTests = 200;
-        long[] numTestsResults = new long[numTests];
-        ConstraintHorizontalLayout layout = new ConstraintHorizontalLayout(20, 30, 400, 400);
-        int n = 10;
-        int w = 100;
-        int h = 20;
-        ArrayList<ConstraintWidget> widgets = new ArrayList<ConstraintWidget>();
-        for (int i = 0; i < n; i++) {
-            ConstraintWidget widget = new ConstraintWidget(w, h);
-            layout.add(widget);
-            widgets.add(widget);
-        }
-        layout.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
-        layout.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
-        for (int j = 0; j < numTests; j++) {
-            s.reset();
-            long startTime = System.currentTimeMillis();
-            layout.addToSolver(s);
-            try {
-                s.minimize();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            s.displaySystemInformations();
-            layout.updateFromSolver(s);
-            long endTime = System.currentTimeMillis();
-            assertEquals(layout.getWidth(), 100 * n, 1);
-            assertEquals(layout.getHeight(), 20);
-            numTestsResults[j] = endTime - startTime;
-            System.out.println("Test " + j + " run in " + numTestsResults[j] + " ms");
-        }
-        long total = 0;
-        for (int j = 0; j < numTests; j++) {
-            total += numTestsResults[j];
-        }
-        total /= numTests;
-        System.out.println("Test took in average " + total + " ms");
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 
@@ -385,82 +291,6 @@ public class WidgetsPositioningTest {
     }
 
     @Test
-    public void testTable2() {
-        final ConstraintWidget root = new ConstraintWidget(200, 100, 700, 600);
-        final ConstraintTableLayout table = new ConstraintTableLayout(768, 400);
-//        final ConstraintWidget A = new ConstraintWidget(50, 20);
-//        final ConstraintWidget B = new ConstraintWidget(140, 40);
-//        final ConstraintWidget C = new ConstraintWidget(80, 20);
-//        final ConstraintWidget D = new ConstraintWidget(80, 20);
-        final ConstraintWidget A = new ConstraintWidget(100, 40);
-        final ConstraintWidget B = new ConstraintWidget(280, 80);
-        final ConstraintWidget C = new ConstraintWidget(160, 40);
-        final ConstraintWidget D = new ConstraintWidget(160, 40);
-        // null(40, 180) - (100 x 40) null(130, 160) - (280 x 80) null(10, 580) - (160 x 40) null(190, 580) - (160 x 40)
-
-        table.setDebugSolverName(s, "table");
-        root.setDebugSolverName(s, "root");
-        A.setDebugSolverName(s, "A");
-        B.setDebugSolverName(s, "B");
-        C.setDebugSolverName(s, "C");
-        D.setDebugSolverName(s, "D");
-        table.add(A);
-        table.add(B);
-        table.add(C);
-        table.add(D);
-
-
-        table.setNumCols(3);
-        table.setTableDimensions();
-        table.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
-        table.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
-        table.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
-//        table.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
-        table.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
-        table.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM);
-
-        ArrayList<ConstraintWidget> widgets = new ArrayList<ConstraintWidget>();
-        widgets.add(table);
-        widgets.add(A);
-        widgets.add(B);
-        widgets.add(C);
-        widgets.add(D);
-        widgets.add(root);
-//        runTestOnUIWidgets(widgets);
-        runTestOnWidgets(widgets, new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("\nTable WxH: " + table.getWidth() + "x" + table.getHeight()
-                        + " A: " + A + " B: " + B
-                        + " C: " + C + " D: " + D
-                );
-                ArrayList<Guideline> v = table.getVerticalGuidelines();
-                for (Guideline g : v) {
-                    System.out.print(" " + g);
-                }
-                System.out.println();
-//                s.displayVariablesReadableRows();
-                assertEquals(A.getWidth(), 100, 1, "A");
-                assertEquals(B.getWidth(), 280, 1, "B");
-                assertEquals(C.getWidth(), 160, 1, "C");
-                assertEquals(D.getWidth(), 160, 1, "D");
-                assertEquals(A.getHeight(), 40, "A");
-                assertEquals(B.getHeight(), 80, "B");
-                assertEquals(C.getHeight(), 40, "C");
-                assertEquals(D.getHeight(), 40, "D");
-                A.setDimension(100, 40);
-                B.setDimension(280, 80);
-                C.setDimension(160, 40);
-                D.setDimension(160, 40);
-//                assertEquals(A.getDrawY(), 280, 2f, "A");
-//                assertEquals(B.getDrawY(), 260, 2f, "B");
-//                assertEquals(C.getDrawY(), 280, 2f, "C");
-//                assertEquals(D.getDrawY(), 480, 2f, "D");
-            }
-        });
-    }
-
-    @Test
     public void testWrapProblem() {
         final ConstraintWidgetContainer root = new ConstraintWidgetContainer(400, 400);
         final ConstraintWidget A = new ConstraintWidget(80, 300);
@@ -495,101 +325,15 @@ public class WidgetsPositioningTest {
         });
     }
 
-    //@Test
-    public void testTable() {
-        final ConstraintTableLayout table = new ConstraintTableLayout(400, 400);
-        final ConstraintWidget A = new ConstraintWidget(100, 20);
-        final ConstraintWidget B = new ConstraintWidget(120, 30);
-        final ConstraintWidget C = new ConstraintWidget(80, 10);
-
-        A.setDebugSolverName(s, "A");
-        B.setDebugSolverName(s, "B");
-        C.setDebugSolverName(s, "C");
-        table.add(A);
-        table.add(B);
-        table.add(C);
-
-        table.setTableDimensions();
-        table.setDebugSolverName(s, "Table");
-
-        ArrayList<ConstraintWidget> widgets = new ArrayList<ConstraintWidget>();
-        widgets.add(table);
-        widgets.add(A);
-        widgets.add(B);
-        widgets.add(C);
-        runTestOnWidgets(widgets, new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(A.getWidth(), 100);
-                assertEquals(B.getWidth(), 120);
-                assertEquals(C.getWidth(), 80);
-                assertEquals(A.getHeight(), 20);
-                assertEquals(B.getHeight(), 30);
-                assertEquals(C.getHeight(), 10);
-                assertEquals(A.getX(), table.getX() + 50);
-                assertEquals(B.getX(), table.getX() + 240);
-                assertEquals(C.getX(), table.getX() + 60);
-                assertEquals(A.getY(), table.getY() + 90);
-                assertEquals(B.getY(), table.getY() + 85);
-                assertEquals(C.getY(), table.getY() + 295);
-                s.displaySystemInformations();
-            }
-        });
-        table.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
-        runTestOnWidgets(widgets, new Runnable() {
-            @Override
-            public void run() {
-//                System.out.println("Run done - " + table.getWidth() + " B.right: " + B.getRight());
-//                s.displayVariablesReadableRows();
-                assertEquals(A.getWidth(), 100);
-                assertEquals(B.getWidth(), 120);
-                assertEquals(C.getWidth(), 80);
-                assertEquals(A.getHeight(), 20);
-                assertEquals(B.getHeight(), 30);
-                assertEquals(C.getHeight(), 10);
-                assertEquals(A.getX(), table.getX());
-                assertEquals(B.getX(), table.getX() + 100);
-                assertEquals(C.getX(), table.getX() + 10);
-                assertEquals(A.getY(), table.getY() + 90);
-                assertEquals(B.getY(), table.getY() + 85);
-                assertEquals(C.getY(), table.getY() + 295);
-                assertEquals(table.getWidth(), 220);
-                assertEquals(table.getHeight(), 400);
-                s.displaySystemInformations();
-            }
-        });
-        table.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
-        runTestOnWidgets(widgets, new Runnable() {
-            @Override
-            public void run() {
-//                System.out.println("Run done - " + table.getWidth() + " B.right: " + B.getRight());
-//                s.displayVariablesReadableRows();
-                assertEquals(A.getWidth(), 100);
-                assertEquals(B.getWidth(), 120);
-                assertEquals(C.getWidth(), 80);
-                assertEquals(A.getHeight(), 20);
-                assertEquals(B.getHeight(), 30);
-                assertEquals(C.getHeight(), 10);
-                assertEquals(A.getX(), table.getX());
-                assertEquals(B.getX(), table.getX() + 100);
-                assertEquals(C.getX(), table.getX() + 10);
-                assertEquals(A.getY(), table.getY() + 5);
-                assertEquals(B.getY(), table.getY() + 0);
-                assertEquals(C.getY(), table.getY() + 30);
-                assertEquals(table.getWidth(), 220);
-                assertEquals(table.getHeight(), 40);
-                s.displaySystemInformations();
-            }
-        });
-    }
-
-    //@Test
+    @Test
     public void testGuideline() {
-        final ConstraintWidget root = new ConstraintWidget(400, 400);
+        final ConstraintWidgetContainer root = new ConstraintWidgetContainer(400, 400);
         final ConstraintWidget A = new ConstraintWidget(100, 20);
         final Guideline guideline = new Guideline();
-        guideline.setParent(root);
+        root.add(guideline);
+        root.add(A);
         guideline.setGuidePercent(50);
+        guideline.setOrientation(Guideline.VERTICAL);
         root.setDebugSolverName(s, "root");
         A.setDebugSolverName(s, "A");
         guideline.setDebugSolverName(s, "guideline");
@@ -603,18 +347,19 @@ public class WidgetsPositioningTest {
         Runnable check = new Runnable() {
             @Override
             public void run() {
+                System.out.println("" + root + " " + A + " " + guideline);
                 assertEquals(A.getWidth(), 100);
                 assertEquals(A.getHeight(), 20);
                 assertEquals(A.getX(), 200);
             }
         };
         runTestOnWidgets(widgets, check);
-        System.out.println("" + root + " " + A + " " + guideline);
-//        s.displayReadableRows();
+////        s.displayReadableRows();
         guideline.setGuidePercent(0);
         runTestOnWidgets(widgets, new Runnable() {
             @Override
             public void run() {
+                System.out.println("" + root + " " + A + " " + guideline);
                 assertEquals(A.getWidth(), 100);
                 assertEquals(A.getHeight(), 20);
                 assertEquals(A.getX(), 0);
@@ -640,7 +385,7 @@ public class WidgetsPositioningTest {
             }
         });
         System.out.println("" + root + " " + A + " " + guideline);
-        guideline.setOrientation(Guideline.VERTICAL);
+        guideline.setOrientation(Guideline.HORIZONTAL);
         A.resetAnchors();
         A.connect(ConstraintAnchor.Type.TOP, guideline, ConstraintAnchor.Type.TOP);
         guideline.setGuideBegin(150);
@@ -673,6 +418,8 @@ public class WidgetsPositioningTest {
         ArrayList<ConstraintWidget> widgets = new ArrayList<ConstraintWidget>();
         widgets.add(B);
         widgets.add(A);
+        A.resetSolverVariables(s.getCache());
+        B.resetSolverVariables(s.getCache());
 
         A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT);
         B.connect(ConstraintAnchor.Type.RIGHT, A, ConstraintAnchor.Type.LEFT);
@@ -703,6 +450,10 @@ public class WidgetsPositioningTest {
         A.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, 10);
         B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM);
         B.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM);
+
+        root.resetSolverVariables(s.getCache());
+        A.resetSolverVariables(s.getCache());
+        B.resetSolverVariables(s.getCache());
 
         runTestOnWidgets(widgets, new Runnable() {
             @Override
@@ -737,6 +488,7 @@ public class WidgetsPositioningTest {
             if (widget.getDebugName() != null) {
                 widget.setDebugSolverName(s, widget.getDebugName());
             }
+            widget.resetSolverVariables(s.getCache());
             widget.addToSolver(s);
         }
         try {
@@ -769,6 +521,12 @@ public class WidgetsPositioningTest {
                 int index = list.get(i);
 //                System.out.print(" " + index);
                 ConstraintWidget widget = widgets.get(index);
+                widget.resetSolverVariables(s.getCache());
+            }
+            for (int i = 0; i < list.size(); i++) {
+                int index = list.get(i);
+//                System.out.print(" " + index);
+                ConstraintWidget widget = widgets.get(index);
                 if (widget.getDebugName() != null) {
                     widget.setDebugSolverName(s, widget.getDebugName());
                 }
@@ -785,13 +543,13 @@ public class WidgetsPositioningTest {
                 ConstraintWidget w = widgets.get(j);
                 w.updateFromSolver(s);
             }
-            try {
+//            try {
                 Animator.setAnimationEnabled(false);
                 check.run();
-            } catch (AssertionError e) {
-                System.out.println("Assertion error: " + e);
-                runTestOnUIWidgets(widgets);
-            }
+//            } catch (AssertionError e) {
+//                System.out.println("Assertion error: " + e);
+//                runTestOnUIWidgets(widgets);
+//            }
         }
     }
 
