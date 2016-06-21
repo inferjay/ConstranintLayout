@@ -27,10 +27,13 @@ import java.util.Arrays;
 public class ConstraintWidgetContainer extends WidgetContainer {
 
     private static final boolean USE_THREAD = false;
+    private static final boolean DEBUG = false;
+    private static final boolean USE_SNAPSHOT = false;
+
     protected LinearSystem mSystem = new LinearSystem();
     protected LinearSystem mBackgroundSystem = null;
 
-    private Snapshot mSnapshot = new Snapshot(this);
+    private Snapshot mSnapshot;
 
     static boolean ALLOW_ROOT_GROUP = true;
 
@@ -85,7 +88,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         if (USE_THREAD && mBackgroundSystem != null) {
             mBackgroundSystem.reset();
         }
-        mSnapshot.updateFrom(this);
+        if (USE_SNAPSHOT) {
+            if (mSnapshot == null) {
+                mSnapshot = new Snapshot(this);
+            }
+            mSnapshot.updateFrom(this);
+        }
         super.reset();
     }
 
@@ -187,15 +195,25 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      */
     @Override
     public void layout() {
-        mSnapshot.updateFrom(this);
-        // We clear ourselves of external anchors as
-        // well as repositioning us to (0, 0)
-        // before inserting us in the solver, so that our
-        // children's positions get computed relative to us.
-        setX(0);
-        setY(0);
-        resetAnchors();
-        resetSolverVariables();
+        int prex = mX;
+        int prey = mY;
+        if (USE_SNAPSHOT) {
+            if (mSnapshot == null) {
+                mSnapshot = new Snapshot(this);
+            }
+            mSnapshot.updateFrom(this);
+            // We clear ourselves of external anchors as
+            // well as repositioning us to (0, 0)
+            // before inserting us in the solver, so that our
+            // children's positions get computed relative to us.
+            setX(0);
+            setY(0);
+            resetAnchors();
+            resetSolverVariables(mSystem.getCache());
+        } else {
+            mX = 0;
+            mY = 0;
+        }
 
         // Before we solve our system, we should call layout() on any
         // of our children that is a container.
@@ -210,6 +228,15 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         // Now let's solve our system as usual
         try {
             mSystem.reset();
+            if (DEBUG) {
+                setDebugSolverName(mSystem, getDebugName());
+                for (int i = 0; i < count; i++) {
+                    ConstraintWidget widget = mChildren.get(i);
+                    if (widget.getDebugName() != null) {
+                        widget.setDebugSolverName(mSystem, widget.getDebugName());
+                    }
+                }
+            }
             addToSolver(mSystem, ConstraintAnchor.ANY_GROUP);
             mSystem.minimize();
         } catch (Exception e) {
@@ -217,12 +244,17 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         }
         updateFromSolver(mSystem, ConstraintAnchor.ANY_GROUP);
 
-        int width = getWidth();
-        int height = getHeight();
-        // Let's restore our state...
-        mSnapshot.applyTo(this);
-        setWidth(width);
-        setHeight(height);
+        if (USE_SNAPSHOT) {
+            int width = getWidth();
+            int height = getHeight();
+            // Let's restore our state...
+            mSnapshot.applyTo(this);
+            setWidth(width);
+            setHeight(height);
+        } else {
+            mX = prex;
+            mY = prey;
+        }
         if (this == getRootConstraintContainer()) {
             updateDrawPosition();
         }
@@ -602,16 +634,25 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      * Layout by groups
      */
     public void layoutWithGroup(int numOfGroups) {
-        mSnapshot.updateFrom(this);
-        // We clear ourselves of external anchors as
-        // well as repositioning us to (0, 0)
-        // before inserting us in the solver, so that our
-        // children's positions get computed relative to us.
-        setX(0);
-        setY(0);
-        resetAnchors();
-        resetSolverVariables();
-
+        int prex = mX;
+        int prey = mY;
+        if (USE_SNAPSHOT) {
+            if (mSnapshot == null) {
+                mSnapshot = new Snapshot(this);
+            }
+            mSnapshot.updateFrom(this);
+            // We clear ourselves of external anchors as
+            // well as repositioning us to (0, 0)
+            // before inserting us in the solver, so that our
+            // children's positions get computed relative to us.
+            mX = 0;
+            mY = 0;
+            resetAnchors();
+            resetSolverVariables(mSystem.getCache());
+        } else {
+            mX = 0;
+            mY = 0;
+        }
         // Before we solve our system, we should call layout() on any
         // of our children that is a container.
         final int count = mChildren.size();
@@ -672,12 +713,18 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             }
         }
 
-        int width = getWidth();
-        int height = getHeight();
-        // Let's restore our state...
-        mSnapshot.applyTo(this);
-        setWidth(width);
-        setHeight(height);
+        if (USE_SNAPSHOT) {
+            int width = getWidth();
+            int height = getHeight();
+            // Let's restore our state...
+            mSnapshot.applyTo(this);
+            setWidth(width);
+            setHeight(height);
+        } else {
+            mX = prex;
+            mY = prey;
+        }
+
         if (this == getRootConstraintContainer()) {
             updateDrawPosition();
         }
@@ -753,4 +800,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         return guidelines;
     }
 
+    public LinearSystem getSystem() {
+        return mSystem;
+    }
 }

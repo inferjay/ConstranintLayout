@@ -20,7 +20,6 @@ import android.support.constraint.solver.widgets.ConstraintAnchor;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 
 /**
  * Represents and solve a system of linear equations.
@@ -54,24 +53,21 @@ public class LinearSystem {
     private ArrayRow[] mRows = null;
 
     // Used in optimize()
-    private HashSet<SolverVariable> mAlreadyTestedCandidates = new HashSet<>();
+    private boolean[] mAlreadyTestedCandidates = new boolean[TABLE_SIZE];
 
     int mNumColumns = 1;
-    SolverVariable[] mIndexedVariables = new SolverVariable[TABLE_SIZE];
     int mNumRows = 0;
     int mMaxRows = TABLE_SIZE;
 
-    private Pools.Pool<ArrayRow> sArrayRowPool;
-    private Pools.Pool<SolverVariable> sSolverVariablePool = new Pools.SimplePool<>(POOL_SIZE);
-    private SolverVariable[] sPoolVariables = new SolverVariable[POOL_SIZE];
-    private int sPoolVariablesCount = 0;
+    final private Cache mCache;
+
+    private SolverVariable[] mPoolVariables = new SolverVariable[POOL_SIZE];
+    private int mPoolVariablesCount = 0;
 
     public LinearSystem() {
         mRows = new ArrayRow[TABLE_SIZE];
-        if (sArrayRowPool == null) {
-            sArrayRowPool = new Pools.SimplePool<>(POOL_SIZE);
-        }
         releaseRows();
+        mCache = new Cache();
     }
 
     /*--------------------------------------------------------------------------------------------*/
@@ -84,7 +80,7 @@ public class LinearSystem {
     void increaseTableSize() {
         TABLE_SIZE *= 2;
         mRows = Arrays.copyOf(mRows, TABLE_SIZE);
-        mIndexedVariables = Arrays.copyOf(mIndexedVariables, TABLE_SIZE);
+        mCache.mIndexedVariables = Arrays.copyOf(mCache.mIndexedVariables, TABLE_SIZE);
         mMaxColumns = TABLE_SIZE;
         mMaxRows = TABLE_SIZE;
         releaseGoal();
@@ -99,7 +95,7 @@ public class LinearSystem {
             ArrayRow row = (ArrayRow) mRows[i];
             if (row != null) {
                 row.reset();
-                sArrayRowPool.release(row);
+                mCache.arrayRowPool.release(row);
             }
             mRows[i] = null;
         }
@@ -111,7 +107,7 @@ public class LinearSystem {
     private void releaseGoal() {
         if (mGoal != null) {
             mGoal.reset();
-            sArrayRowPool.release((ArrayRow) mGoal);
+            mCache.arrayRowPool.release((ArrayRow) mGoal);
         }
     }
 
@@ -119,18 +115,16 @@ public class LinearSystem {
      * Reset the LinearSystem object so that it can be reused.
      */
     public void reset() {
-        for (int i = 0; i < mIndexedVariables.length; i++) {
-            SolverVariable variable = mIndexedVariables[i];
+        for (int i = 0; i < mCache.mIndexedVariables.length; i++) {
+            SolverVariable variable = mCache.mIndexedVariables[i];
             if (variable != null) {
                 variable.reset();
             }
         }
-        for (int i = 0; i < sPoolVariablesCount; i++) {
-            sSolverVariablePool.release(sPoolVariables[i]);
-        }
-        sPoolVariablesCount = 0;
+        mCache.solverVariablePool.releaseAll(mPoolVariables, mPoolVariablesCount);
+        mPoolVariablesCount = 0;
 
-        Arrays.fill(mIndexedVariables, null);
+        Arrays.fill(mCache.mIndexedVariables, null);
         if (mVariables != null) {
             mVariables.clear();
         }
@@ -143,7 +137,6 @@ public class LinearSystem {
         }
         releaseRows();
         mNumRows = 0;
-        mAlreadyTestedCandidates.clear();
     }
 
     /*--------------------------------------------------------------------------------------------*/
@@ -169,20 +162,25 @@ public class LinearSystem {
         SolverVariable variable = null;
         if (anchor instanceof ConstraintAnchor) {
             variable = ((ConstraintAnchor) anchor).getSolverVariable();
+            if (variable == null) {
+                ((ConstraintAnchor) anchor).resetSolverVariable(mCache);
+                variable = ((ConstraintAnchor) anchor).getSolverVariable();
+            }
             if (variable.id == -1) {
                 mVariablesID++;
                 mNumColumns++;
                 variable.id = mVariablesID;
-                mIndexedVariables[mVariablesID] = variable;
+                variable.mType = SolverVariable.Type.UNRESTRICTED;
+                mCache.mIndexedVariables[mVariablesID] = variable;
             }
         }
         return variable;
     }
 
     public ArrayRow createRow() {
-        ArrayRow row = sArrayRowPool.acquire();
+        ArrayRow row = mCache.arrayRowPool.acquire();
         if (row == null) {
-            row = new ArrayRow();
+            row = new ArrayRow(mCache);
         }
         return row;
     }
@@ -195,7 +193,7 @@ public class LinearSystem {
         mVariablesID++;
         mNumColumns++;
         variable.id = mVariablesID;
-        mIndexedVariables[mVariablesID] = variable;
+        mCache.mIndexedVariables[mVariablesID] = variable;
         return variable;
     }
 
@@ -224,7 +222,7 @@ public class LinearSystem {
             mVariables = new HashMap<>();
         }
         mVariables.put(name, variable);
-        mIndexedVariables[mVariablesID] = variable;
+        mCache.mIndexedVariables[mVariablesID] = variable;
         return variable;
     }
 
@@ -236,7 +234,7 @@ public class LinearSystem {
         mVariablesID++;
         mNumColumns++;
         variable.id = mVariablesID;
-        mIndexedVariables[mVariablesID] = variable;
+        mCache.mIndexedVariables[mVariablesID] = variable;
         return variable;
     }
 
@@ -245,15 +243,14 @@ public class LinearSystem {
      * @param type type of the SolverVariable
      * @return instance of SolverVariable
      */
-    private SolverVariable acquireSolverVariable(SolverVariable.Type type) {
-        SolverVariable variable = sSolverVariablePool.acquire();
+    private final SolverVariable acquireSolverVariable(SolverVariable.Type type) {
+        SolverVariable variable = mCache.solverVariablePool.acquire();
         if (variable == null) {
-            variable = new SolverVariable(type);
-        } else {
-            variable.setType(type);
-            sPoolVariables[sPoolVariablesCount] = variable;
-            sPoolVariablesCount++;
+            variable = new SolverVariable(mCache, type);
         }
+        variable.reset();
+        variable.setType(type);
+        mPoolVariables[mPoolVariablesCount++] = variable;
         return variable;
     }
 
@@ -319,7 +316,7 @@ public class LinearSystem {
             mGoal = createRow();
         }
         for (int i = 1; i < mNumColumns; i++) {
-            SolverVariable variable = mIndexedVariables[i];
+            SolverVariable variable = mCache.mIndexedVariables[i];
             if (variable.mType == SolverVariable.Type.ERROR
                 /* || variable.getType() == SolverVariable.Type.SLACK */) {
                 mGoal.variables.put(variable, 1.f);
@@ -347,10 +344,14 @@ public class LinearSystem {
     public void minimizeGoal(ArrayRow goal) throws Exception {
         // Update the equation with the variables already defined in the system
 
-        for (int i = 0; i < mNumRows; i++) {
-            goal.updateRowWithEquation(mRows[i]);
+        if (ArrayRow.USE_LINKED_VARIABLES) {
+            goal.variables.updateFromSystem(goal, mRows);
+        } else {
+            for (int i = 0; i < mNumRows; i++) {
+                goal.updateRowWithEquation(mRows[i]);
+            }
         }
-        boolean validGoal = goal.hasAtLeastOneVariable();
+        boolean validGoal = goal.hasAtLeastOnePositiveVariable();
 
         if (!validGoal) {
             computeValues();
@@ -392,21 +393,28 @@ public class LinearSystem {
      * @param row row to update
      */
     private void updateRowFromVariables(ArrayRow row) {
-        int numVariables = row.variables.size();
-        if (numVariables > tempVars.length) {
-            tempVars = new SolverVariable[tempVars.length * 2];
-        }
-        int added = 0;
-        for (int i = 0; i < numVariables; i++) {
-            SolverVariable variable = row.variables.getVariable(i);
-            if (variable != null && variable.definitionId != -1) {
-                tempVars[added] = variable;
-                added ++;
+        if (ArrayRow.USE_LINKED_VARIABLES) {
+            row.variables.updateFromSystem(row, mRows);
+            if (row.variables.currentSize == 0) {
+                row.isSimpleDefinition = true;
             }
-        }
-        for (int i = 0; i < added; i++) {
-            int idx = tempVars[i].definitionId;
-            row.updateRowWithEquation(mRows[idx]);
+        } else {
+            int numVariables = row.variables.currentSize;
+            if (numVariables > tempVars.length) {
+                tempVars = new SolverVariable[tempVars.length * 2];
+            }
+            int added = 0;
+            for (int i = 0; i < numVariables; i++) {
+                SolverVariable variable = row.variables.getVariable(i);
+                if (variable != null && variable.definitionId != -1) {
+                    tempVars[added] = variable;
+                    added++;
+                }
+            }
+            for (int i = 0; i < added; i++) {
+                int idx = tempVars[i].definitionId;
+                row.updateRowWithEquation(mRows[idx]);
+            }
         }
     }
 
@@ -454,7 +462,7 @@ public class LinearSystem {
         }
 
         if (mRows[mNumRows] != null) {
-            sArrayRowPool.release(mRows[mNumRows]);
+            mCache.arrayRowPool.release(mRows[mNumRows]);
         }
         row.updateClientEquations();
         mRows[mNumRows] = row;
@@ -462,18 +470,37 @@ public class LinearSystem {
         mNumRows++;
 
         final int count = row.variable.mClientEquationsCount;
-        while (tempClientsCopy.length < count) {
-            tempClientsCopy = new ArrayRow[tempClientsCopy.length * 2];
-        }
-        ArrayRow[] clients = tempClientsCopy;
-        System.arraycopy(row.variable.mClientEquations, 0, clients, 0, count);
-        for (int i = 0; i < count; i++) {
-            ArrayRow client = clients[i];
-            if (client == row) {
-                continue;
+        if (count > 0) {
+
+            while (tempClientsCopy.length < count) {
+                tempClientsCopy = new ArrayRow[tempClientsCopy.length * 2];
             }
-            client.updateRowWithEquation(row);
-            client.updateClientEquations();
+            ArrayRow[] clients = tempClientsCopy;
+            if (SolverVariable.USE_LIST) {
+                for (int i = 0; i < count; i++) {
+                    clients[i] = row.variable.mClientEquations[i];
+                }
+                SolverVariable.Link current = (SolverVariable.Link) (Object) row.variable.mClientEquations;
+                int n = 0;
+                while (current.next != null) {
+                    clients[n++] = current.next.row;
+                    current = current.next;
+                }
+            } else {
+                System.arraycopy(row.variable.mClientEquations, 0, clients, 0, count);
+            }
+            for (int i = 0; i < count; i++) {
+                ArrayRow client = clients[i];
+                if (client == row) {
+                    continue;
+                }
+                if (ArrayRow.USE_LINKED_VARIABLES) {
+                    client.variables.updateFromRow(client, row);
+                } else {
+                    client.updateRowWithEquation(row);
+                }
+                client.updateClientEquations();
+            }
         }
 
         if (DEBUG) {
@@ -490,7 +517,13 @@ public class LinearSystem {
     private int optimize(ArrayRow goal) {
         boolean done = false;
         int tries = 0;
-        mAlreadyTestedCandidates.clear();
+        if (mAlreadyTestedCandidates.length < mNumColumns) {
+            mAlreadyTestedCandidates = new boolean[mAlreadyTestedCandidates.length * 2];
+        }
+        for (int i = 0; i < mNumColumns; i++) {
+            mAlreadyTestedCandidates[i] = false;
+        }
+        int tested = 0;
 
         while (!done) {
             tries++;
@@ -499,12 +532,15 @@ public class LinearSystem {
             }
 
             SolverVariable pivotCandidate = goal.variables.getPivotCandidate();
-            if (mAlreadyTestedCandidates.contains(pivotCandidate)) {
-                pivotCandidate = null;
-            } else if (pivotCandidate != null) {
-                mAlreadyTestedCandidates.add(pivotCandidate);
-                if (mAlreadyTestedCandidates.size() == mNumColumns) {
-                    done = true;
+            if (pivotCandidate != null) {
+                if (mAlreadyTestedCandidates[pivotCandidate.id]) {
+                    pivotCandidate = null;
+                } else {
+                    mAlreadyTestedCandidates[pivotCandidate.id] = true;
+                    tested++;
+                    if (tested >= mNumColumns) {
+                        done = true;
+                    }
                 }
             }
 
@@ -656,7 +692,7 @@ public class LinearSystem {
                     if (current.constantValue < 0) {
                         // let's examine this row, see if we can find a good pivot
                         for (int j = 1; j < mNumColumns; j++) {
-                            SolverVariable candidate = mIndexedVariables[j];
+                            SolverVariable candidate = mCache.mIndexedVariables[j];
                             float a_j = current.variables.get(candidate);
                             if (a_j <= 0) {
                                 continue;
@@ -693,7 +729,7 @@ public class LinearSystem {
                     // We have a pivot!
                     ArrayRow pivotEquation = mRows[pivotRowIndex];
                     pivotEquation.variable.definitionId = -1;
-                    pivotEquation.pivot(mIndexedVariables[pivotColumnIndex]);
+                    pivotEquation.pivot(mCache.mIndexedVariables[pivotColumnIndex]);
                     pivotEquation.variable.definitionId = pivotRowIndex;
                     // let's update the system with the new pivoted equation
                     for (int i = 0; i < mNumRows; i++) {
@@ -839,13 +875,14 @@ public class LinearSystem {
                 + " rows: " + mNumRows + "/" + mMaxRows
                 + " cols: " + mNumColumns + "/" + mMaxColumns
                 + " " + count + " occupied cells, " + getDisplaySize(count)
+                + " " + LinkedVariables.sCreation + " created Link variables"
         );
     }
 
     private void displaySolverVariables() {
         String s = "Display Rows (" + mNumRows + "x" + mNumColumns + ") :\n\t | C | ";
         for (int i = 1; i <= mNumColumns; i++) {
-            SolverVariable v = mIndexedVariables[i];
+            SolverVariable v = mCache.mIndexedVariables[i];
             s += v;
             s += " | ";
         }
@@ -865,4 +902,7 @@ public class LinearSystem {
         return "" + (n * 4) + " bytes";
     }
 
+    public Cache getCache() {
+        return mCache;
+    }
 }

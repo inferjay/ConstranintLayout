@@ -18,6 +18,7 @@ package android.support.constraint.solver;
 
 public class ArrayRow {
     private static final boolean DEBUG = false;
+    static final boolean USE_LINKED_VARIABLES = true;
 
     SolverVariable variable = null;
     float variableValue = 0;
@@ -25,10 +26,24 @@ public class ArrayRow {
     boolean used = false;
     final float epsilon = 0.001f;
 
-    final ArrayBackedVariables variables = new ArrayBackedVariables();
+    final ArrayLinkedVariables variables;
+    // final LinkedVariables variables;
+    // final ArrayBackedVariables variables;
+
+    boolean isSimpleDefinition = false;
+
+    public ArrayRow(Cache cache) {
+        variables = new ArrayLinkedVariables(this, cache);
+        // variables = new LinkedVariables(this, cache);
+        // variables =  new ArrayBackedVariables(this, cache);
+    }
 
     public void updateClientEquations() {
-        int count = variables.size();
+        if (USE_LINKED_VARIABLES) {
+            variables.updateClientEquations(this);
+            return;
+        }
+        int count = variables.currentSize;
         for (int i = 0; i < count; i++) {
             SolverVariable v = variables.getVariable(i);
             if (v != null) {
@@ -37,8 +52,11 @@ public class ArrayRow {
         }
     }
 
-    public boolean hasAtLeastOneVariable() {
-        int count = variables.size();
+    public boolean hasAtLeastOnePositiveVariable() {
+        if (USE_LINKED_VARIABLES) {
+            return variables.hasAtLeastOnePositiveVariable();
+        }
+        int count = variables.currentSize;
         for (int i = 0; i < count; i++) {
             float value = variables.getVariableValue(i);
             if (value > 0) {
@@ -73,14 +91,14 @@ public class ArrayRow {
             s += constantValue;
             addedVariable = true;
         }
-        int count = variables.size();
+        int count = variables.currentSize;
         for (int i = 0; i < count; i++) {
             SolverVariable v = variables.getVariable(i);
             if (v == null) {
                 continue;
             }
             float amount = variables.getVariableValue(i);
-            String name = v.getName();
+            String name = v.toString();
             if (!addedVariable) {
                 if (amount < 0) {
                     s += "- ";
@@ -115,6 +133,7 @@ public class ArrayRow {
         variables.clear();
         variableValue = 0;
         constantValue = 0;
+        isSimpleDefinition = false;
     }
 
     public boolean hasVariable(SolverVariable v) {
@@ -291,14 +310,24 @@ public class ArrayRow {
         return size;
     }
 
-    public boolean updateRowWithEquation(ArrayRow row) {
-        final float amount = variables.get(row.variable);
+    public boolean updateRowWithEquation(ArrayRow definition) {
+        if (USE_LINKED_VARIABLES) {
+            variables.updateFromRow(this, definition);
+            return true;
+        }
+
+        final float amount = variables.get(definition.variable);
         // let's replace this with the new definition
         if (amount != 0) {
-            row.variables.updateArray(variables, amount);
-            constantValue += row.constantValue * amount;
-            variables.remove(row.variable);
-            row.variable.removeClientEquation(this);
+            if (!definition.isSimpleDefinition) {
+                definition.variables.updateArray(variables, amount);
+            }
+            constantValue += definition.constantValue * amount;
+            variables.remove(definition.variable);
+            definition.variable.removeClientEquation(this);
+            if (variables.currentSize == 0) {
+                isSimpleDefinition = true;
+            }
             return true;
         }
         return false;
@@ -309,7 +338,11 @@ public class ArrayRow {
         if (constantValue < 0) {
             // If not, simply multiply the equation by -1
             constantValue *= -1;
-            int count = variables.size();
+            if (USE_LINKED_VARIABLES) {
+                variables.invert();
+                return;
+            }
+            int count = variables.currentSize;
             for (int i = 0; i < count; i++) {
                 float previousAmount = variables.getVariableValue(i);
                 variables.setVariable(i, previousAmount * -1);
@@ -318,10 +351,20 @@ public class ArrayRow {
     }
 
     public void pickRowVariable() {
+        if (USE_LINKED_VARIABLES) {
+            SolverVariable pivotCandidate = variables.pickPivotCandidate();
+            if (pivotCandidate != null) {
+                pivot(pivotCandidate);
+            }
+            if (variables.currentSize == 0) {
+                isSimpleDefinition = true;
+            }
+            return;
+        }
         SolverVariable restrictedCandidate = null;
         SolverVariable unrestrictedCandidate = null;
         // let's find an adequate variable to pivot on
-        int count = variables.size();
+        int count = variables.currentSize;
         SolverVariable candidate = null;
         for (int i = 0; i < count; i++) {
             SolverVariable candidateVariable = variables.getVariable(i);
@@ -392,6 +435,10 @@ public class ArrayRow {
             // have restricted variable candidate for the pivot
             pivot(restrictedCandidate);
         }
+
+        if (variables.currentSize == 0) {
+            isSimpleDefinition = true;
+        }
     }
 
     public void pivot(SolverVariable v) {
@@ -401,13 +448,29 @@ public class ArrayRow {
             variable = null;
         }
 
+        if (USE_LINKED_VARIABLES) {
+            float amount = variables.remove(v) * -1;
+            variable = v;
+            variableValue = 1;
+            if (amount == 1) {
+                return;
+            }
+            constantValue = constantValue / amount;
+            variables.divideByAmount(amount);
+            return;
+        }
+
         // now grab the amount of the pivot, and divide the columns by it
         float amount = variables.get(v) * -1;
         variables.remove(v);
         variable = v;
         variableValue = 1;
+        if (amount == 1) {
+            return;
+        }
         constantValue = constantValue / amount;
-        int count = variables.size();
+        int count = variables.currentSize;
+
         for (int i = 0; i < count; i++) {
             float previousAmount = variables.getVariableValue(i);
             float value = previousAmount / amount;

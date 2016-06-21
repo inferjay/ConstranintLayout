@@ -27,11 +27,17 @@ class ArrayBackedVariables {
     private SolverVariable[] variables = null;
     private float[] values = null;
     private int[] indexes = null;
-    private final int threshold = 4;
+    private final int threshold = 16;
     private int maxSize = 4;
     private int currentSize = 0;
     private int currentWriteSize = 0;
     private SolverVariable candidate = null;
+
+    public ArrayBackedVariables(ArrayRow arrayRow, Cache cache) {
+        variables = new SolverVariable[maxSize];
+        values = new float[maxSize];
+        indexes = new int[maxSize];
+    }
 
     public SolverVariable getPivotCandidate() {
         if (candidate == null) {
@@ -44,12 +50,6 @@ class ArrayBackedVariables {
             }
         }
         return candidate;
-    }
-
-    public ArrayBackedVariables() {
-        variables = new SolverVariable[maxSize];
-        values = new float[maxSize];
-        indexes = new int[maxSize];
     }
 
     void increaseSize() {
@@ -72,13 +72,14 @@ class ArrayBackedVariables {
     }
 
     public final void updateArray(ArrayBackedVariables target, float amount) {
+        if (amount == 0) {
+            return;
+        }
         for (int i = 0; i < currentSize; i++) {
             final int idx = indexes[i];
             SolverVariable v = variables[idx];
             float value = values[idx];
-            float previousValue = target.get(v);
-            float finalValue = previousValue + (value * amount);
-            target.put(v, finalValue);
+            target.add(v, (value * amount));
         }
     }
 
@@ -171,6 +172,62 @@ class ArrayBackedVariables {
         }
     }
 
+    public void add(SolverVariable variable, float value) {
+        if (value == 0) {
+            return;
+        }
+        while (true) {
+            int firstEmptyIndex = -1;
+            for (int i = 0; i < currentWriteSize; i++) {
+                if (variables[i] == variable) {
+                    values[i] += value;
+                    if (value < 0) {
+                        candidate = variable;
+                    }
+                    if (values[i] == 0) {
+                        remove(variable);
+                    }
+                    return;
+                }
+                if (firstEmptyIndex == -1 && variables[i] == null) {
+                    firstEmptyIndex = i;
+                }
+            }
+            if (firstEmptyIndex == -1 && currentWriteSize < maxSize) {
+                firstEmptyIndex = currentWriteSize;
+            }
+            if (firstEmptyIndex != -1) {
+                variables[firstEmptyIndex] = variable;
+                values[firstEmptyIndex] = value;
+                // insert the position...
+                boolean inserted = false;
+                for (int j = 0; j < currentSize; j++) {
+                    int index = indexes[j];
+                    if (variables[index].id > variable.id) {
+                        // this is our insertion point
+                        System.arraycopy(indexes, j, indexes, j + 1, (currentSize - j));
+                        indexes[j] = firstEmptyIndex;
+                        inserted = true;
+                        break;
+                    }
+                }
+                if (!inserted) {
+                    indexes[currentSize] = firstEmptyIndex;
+                }
+                currentSize++;
+                if (firstEmptyIndex + 1 > currentWriteSize) {
+                    currentWriteSize = firstEmptyIndex + 1;
+                }
+                if (value < 0) {
+                    candidate = variable;
+                }
+                return;
+            } else {
+                increaseSize();
+            }
+        }
+    }
+
     public void clear() {
         for (int i = 0, length = variables.length; i < length; i++) {
             variables[i] = null;
@@ -204,7 +261,7 @@ class ArrayBackedVariables {
         return false;
     }
 
-    public void remove(SolverVariable variable) {
+    public float remove(SolverVariable variable) {
         if (DEBUG) {
             System.out.print("BEFORE REMOVE " + variable + " -> ");
             display();
@@ -215,6 +272,7 @@ class ArrayBackedVariables {
         for (int i = 0; i < currentWriteSize; i++) {
             int idx = indexes[i];
             if (variables[idx] == variable) {
+                float amount = values[idx];
                 variables[idx] = null;
                 System.arraycopy(indexes, i + 1, indexes, i, (currentWriteSize - i - 1));
                 currentSize--;
@@ -222,9 +280,10 @@ class ArrayBackedVariables {
                     System.out.print("AFTER REMOVE ");
                     display();
                 }
-                return;
+                return amount;
             }
         }
+        return 0;
     }
 
     public int sizeInBytes() {
@@ -275,4 +334,33 @@ class ArrayBackedVariables {
         System.out.println("}");
     }
 
+    public void updateFromRow(ArrayRow arrayRow, ArrayRow definition) {
+        // TODO -- only used when ArrayRow.USE_LINKED_VARIABLES is set to true
+    }
+
+    public SolverVariable pickPivotCandidate() {
+        // TODO -- only used when ArrayRow.USE_LINKED_VARIABLES is set to true
+        return null;
+    }
+
+    public void updateFromSystem(ArrayRow goal, ArrayRow[] mRows) {
+        // TODO -- only used when ArrayRow.USE_LINKED_VARIABLES is set to true
+    }
+
+    public void divideByAmount(float amount) {
+        // TODO -- only used when ArrayRow.USE_LINKED_VARIABLES is set to true
+    }
+
+    public void updateClientEquations(ArrayRow arrayRow) {
+        // TODO -- only used when ArrayRow.USE_LINKED_VARIABLES is set to true
+    }
+
+    public boolean hasAtLeastOnePositiveVariable() {
+        // TODO -- only used when ArrayRow.USE_LINKED_VARIABLES is set to true
+        return false;
+    }
+
+    public void invert() {
+        // TODO -- only used when ArrayRow.USE_LINKED_VARIABLES is set to true
+    }
 }

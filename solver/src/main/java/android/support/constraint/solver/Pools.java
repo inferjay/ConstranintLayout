@@ -39,6 +39,8 @@ package android.support.constraint.solver;
  * </pre>
  */
 final class Pools {
+    private static final boolean DEBUG = false;
+
     /**
      * Interface for managing a pool of objects.
      *
@@ -60,6 +62,14 @@ final class Pools {
          * @throws IllegalStateException If the instance is already in the pool.
          */
         boolean release(T instance);
+
+        /**
+         * Try releasing all instances at the same time
+         *
+         * @param variables
+         * @param count
+         */
+        void releaseAll(T[] variables, int count);
     }
 
     private Pools() {
@@ -105,8 +115,10 @@ final class Pools {
 
         @Override
         public boolean release(T instance) {
-            if (isInPool(instance)) {
-                throw new IllegalStateException("Already in the pool!");
+            if (DEBUG) {
+                if (isInPool(instance)) {
+                    throw new IllegalStateException("Already in the pool!");
+                }
             }
             if (mPoolSize < mPool.length) {
                 mPool[mPoolSize] = instance;
@@ -114,6 +126,22 @@ final class Pools {
                 return true;
             }
             return false;
+        }
+
+        @Override
+        public void releaseAll(T[] variables, int count) {
+            for (int i = 0; i < count; i++) {
+                T instance = variables[i];
+                if (DEBUG) {
+                    if (isInPool(instance)) {
+                        throw new IllegalStateException("Already in the pool!");
+                    }
+                }
+                if (mPoolSize < mPool.length) {
+                    mPool[mPoolSize] = instance;
+                    mPoolSize++;
+                }
+            }
         }
 
         private boolean isInPool(T instance) {
