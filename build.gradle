@@ -85,7 +85,7 @@ subprojects { Project project ->
         def content = "Maven.GroupId=$deployer.pom.groupId\n" +
             "Maven.ArtifactId=$deployer.pom.artifactId\n" +
             "Maven.Version=$deployer.pom.version\n" +
-            "Pkg.Desc=$deployer.pom.groupId:$deployer.pom.artifactId:$deployer.pom.version\n" +
+            "Pkg.Desc=$project.ext.pomDesc $deployer.pom.version\n" +
             "Pkg.Revision=1\n" +
             "Extra.VendorId=android\n" +
             "Extra.VendorDisplay=Android\n" +
