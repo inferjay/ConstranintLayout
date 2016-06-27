@@ -81,6 +81,7 @@ public class LinearSystem {
         TABLE_SIZE *= 2;
         mRows = Arrays.copyOf(mRows, TABLE_SIZE);
         mCache.mIndexedVariables = Arrays.copyOf(mCache.mIndexedVariables, TABLE_SIZE);
+        mAlreadyTestedCandidates = new boolean[TABLE_SIZE];
         mMaxColumns = TABLE_SIZE;
         mMaxRows = TABLE_SIZE;
         releaseGoal();
@@ -517,9 +518,6 @@ public class LinearSystem {
     private int optimize(ArrayRow goal) {
         boolean done = false;
         int tries = 0;
-        if (mAlreadyTestedCandidates.length < mNumColumns) {
-            mAlreadyTestedCandidates = new boolean[mAlreadyTestedCandidates.length * 2];
-        }
         for (int i = 0; i < mNumColumns; i++) {
             mAlreadyTestedCandidates[i] = false;
         }
