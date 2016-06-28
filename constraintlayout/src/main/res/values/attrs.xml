@@ -1,53 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="ConstraintLayout_Layout">
-        <attr name="android:orientation" />
+        <attr name="android:orientation"/>
 
-        <attr name="layout_constraintGuide_begin" format="dimension" />
-        <attr name="layout_constraintGuide_end" format="dimension" />
-        <attr name="layout_constraintGuide_Percent" format="integer" />
-
+        <!-- The space from the beginning edge of the parent to this guideline. -->
+        <attr name="layout_constraintGuide_begin" format="dimension"/>
+        <!-- The space from the ending edge of the parent to this  guideline. -->
+        <attr name="layout_constraintGuide_end" format="dimension"/>
+        <!-- The percent of total space from the beginning of the parent to this guideline. (e.g. 50 = middle)-->
+        <attr name="layout_constraintGuide_Percent" format="integer"/>
+        <!-- Constrains the left edge of this view to the left edge of the given view ID. -->
         <attr name="layout_constraintLeft_toLeftOf" format="reference"/>
+        <!-- Constrains the left edge of this view to the right edge of the given view ID. -->
         <attr name="layout_constraintLeft_toRightOf" format="reference"/>
+        <!-- Constrains the right edge of this view to the left edge of the given view ID. -->
         <attr name="layout_constraintRight_toLeftOf" format="reference"/>
+        <!-- Constrains the right edge of this view to the right edge of the given view ID. -->
         <attr name="layout_constraintRight_toRightOf" format="reference"/>
+        <!-- Constrains the top edge of this view to the top edge of the given view ID. -->
         <attr name="layout_constraintTop_toTopOf" format="reference"/>
+        <!-- Constrains the top edge of this view to the bottom edge of the given view ID. -->
         <attr name="layout_constraintTop_toBottomOf" format="reference"/>
+        <!-- Constrains the bottom edge of this view to the top edge of the given view ID. -->
         <attr name="layout_constraintBottom_toTopOf" format="reference"/>
+        <!-- Constrains the bottom edge of this view to the bottom edge of the given view ID. -->
         <attr name="layout_constraintBottom_toBottomOf" format="reference"/>
+        <!-- Constrains the baseline of this view to the baseline of the given view ID. -->
         <attr name="layout_constraintBaseline_toBaselineOf" format="reference"/>
+
+        <!-- Constrains the horizontal center this view to the center of the given view ID. -->
         <attr name="layout_constraintCenterX_toCenterX" format="reference"/>
+        <!-- Constrains the vertical center this view to the center of the given view ID. -->
         <attr name="layout_constraintCenterY_toCenterY" format="reference"/>
 
+        <!-- Constrains the start edge of this view to the end edge of the given view ID. -->
         <attr name="layout_constraintStart_toEndOf" format="reference"/>
+        <!-- Constrains the start edge of this view to the start edge of the given view ID. -->
         <attr name="layout_constraintStart_toStartOf" format="reference"/>
+        <!-- Constrains the end edge of this view to the start edge of the given view ID. -->
         <attr name="layout_constraintEnd_toStartOf" format="reference"/>
+        <!-- Constrains the end edge of this view to the end edge of the given view ID. -->
         <attr name="layout_constraintEnd_toEndOf" format="reference"/>
 
+        <!-- Fraction of excess space to distribute on the left when constrained on left & right edges (e.g. .5 = middle)-->
         <attr name="layout_constraintHorizontal_bias" format="float"/>
+        <!-- Fraction of excess space to distribute on the top when constrained on top & bottom edges (e.g. .5 = middle)-->
         <attr name="layout_constraintVertical_bias" format="float"/>
 
+        <!-- Used at design time to define who created the constraint -->
         <attr name="layout_constraintLeft_creator" format="integer"/>
+        <!-- Used at design time to define who created the constraint -->
         <attr name="layout_constraintTop_creator" format="integer"/>
+        <!-- Used at design time to define who created the constraint -->
         <attr name="layout_constraintRight_creator" format="integer"/>
+        <!-- Used at design time to define who created the constraint -->
         <attr name="layout_constraintBottom_creator" format="integer"/>
+        <!-- Used at design time to define who created the constraint -->
         <attr name="layout_constraintBaseline_creator" format="integer"/>
-
+        <!-- The ratio between the width and height of the view.
+        Note it only works if one of the dimensions is set to 0dp.-->
         <attr name="layout_constraintDimensionRatio" format="string"/>
 
+        <!-- Used at design time to define to position the view -->
         <attr name="layout_editor_absoluteX" format="dimension"/>
+        <!-- Used at design time to define to position the view -->
         <attr name="layout_editor_absoluteY" format="dimension"/>
-
-        <!-- Used by TableConstraintLayout -->
-        <!-- TODO: Hide these for now -->
-        <!--<attr name="table_numRows" format="integer"/>-->
-        <!--<attr name="table_numColumns" format="integer"/>-->
-        <!--<attr name="table_columnsAlignment" format="string"/>-->
-        <!--<attr name="table_padding" format="dimension"/>-->
 
     </declare-styleable>
 
     <declare-styleable name="LinearConstraintLayout">
-        <attr name="android:orientation" />
+        <attr name="android:orientation"/>
     </declare-styleable>
 </resources>
