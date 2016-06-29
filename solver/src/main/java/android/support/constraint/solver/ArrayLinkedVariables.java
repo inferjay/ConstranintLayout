@@ -574,11 +574,9 @@ public class ArrayLinkedVariables {
             int counter = 0;
             while (current != NONE && counter < currentSize) {
                 if (mArrayValues[current] < 0) {
-                    SolverVariable variable = mCache.mIndexedVariables[mArrayIndices[current]];
-                    if (candidate == null || variable.id < candidate.id) {
-                        candidate = variable;
-                        return candidate;
-                    }
+                    // We can return the first negative candidate as in ArrayLinkedVariables
+                    // they are already sorted by id
+                    return mCache.mIndexedVariables[mArrayIndices[current]];
                 }
                 current = mArrayNextIndices[current]; counter++;
             }
