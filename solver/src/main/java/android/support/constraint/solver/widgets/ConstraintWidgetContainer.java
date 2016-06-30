@@ -28,7 +28,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
 
     private static final boolean USE_THREAD = false;
     private static final boolean DEBUG = false;
-    private static final boolean USE_SNAPSHOT = false;
+    private static final boolean USE_SNAPSHOT = true;
 
     protected LinearSystem mSystem = new LinearSystem();
     protected LinearSystem mBackgroundSystem = null;
@@ -39,6 +39,11 @@ public class ConstraintWidgetContainer extends WidgetContainer {
 
     int mWrapWidth;
     int mWrapHeight;
+
+    int mPaddingLeft;
+    int mPaddingTop;
+    int mPaddingRight;
+    int mPaddingBottom;
 
     /*-----------------------------------------------------------------------*/
     // Construction
@@ -88,12 +93,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         if (USE_THREAD && mBackgroundSystem != null) {
             mBackgroundSystem.reset();
         }
-        if (USE_SNAPSHOT) {
-            if (mSnapshot == null) {
-                mSnapshot = new Snapshot(this);
-            }
-            mSnapshot.updateFrom(this);
-        }
+        mPaddingLeft = 0;
+        mPaddingRight = 0;
+        mPaddingTop = 0;
+        mPaddingBottom = 0;
         super.reset();
     }
 
@@ -189,13 +192,30 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     }
 
     /**
+     * Set the padding on this container. It will apply to the position of the children.
+     *
+     * @param left   left padding
+     * @param top    top padding
+     * @param right  right padding
+     * @param bottom bottom padding
+     */
+    public void setPadding(int left, int top, int right, int bottom) {
+        mPaddingLeft = left;
+        mPaddingTop = top;
+        mPaddingRight = right;
+        mPaddingBottom = bottom;
+    }
+
+    /**
      * Layout the tree of widgets
      */
     @Override
     public void layout() {
         int prex = mX;
         int prey = mY;
-        if (USE_SNAPSHOT) {
+        int prew = getWidth();
+        int preh = getHeight();
+        if (mParent != null && USE_SNAPSHOT) {
             if (mSnapshot == null) {
                 mSnapshot = new Snapshot(this);
             }
@@ -204,8 +224,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             // well as repositioning us to (0, 0)
             // before inserting us in the solver, so that our
             // children's positions get computed relative to us.
-            setX(0);
-            setY(0);
+            setX(mPaddingLeft);
+            setY(mPaddingTop);
             resetAnchors();
             resetSolverVariables(mSystem.getCache());
         } else {
@@ -242,17 +262,20 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         }
         updateChildrenFromSolver(mSystem, ConstraintAnchor.ANY_GROUP);
 
-        if (USE_SNAPSHOT) {
+        if (mParent != null && USE_SNAPSHOT) {
             int width = getWidth();
             int height = getHeight();
             // Let's restore our state...
             mSnapshot.applyTo(this);
-            setWidth(width);
-            setHeight(height);
+            setWidth(width + mPaddingLeft + mPaddingRight);
+            setHeight(height + mPaddingTop + mPaddingBottom);
         } else {
             mX = prex;
             mY = prey;
+            setWidth(prew);
+            setHeight(preh);
         }
+        resetSolverVariables(mSystem.getCache());
         if (this == getRootConstraintContainer()) {
             updateDrawPosition();
         }
@@ -634,7 +657,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     public void layoutWithGroup(int numOfGroups) {
         int prex = mX;
         int prey = mY;
-        if (USE_SNAPSHOT) {
+        if (mParent != null && USE_SNAPSHOT) {
             if (mSnapshot == null) {
                 mSnapshot = new Snapshot(this);
             }
@@ -711,7 +734,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             }
         }
 
-        if (USE_SNAPSHOT) {
+        if (mParent != null && USE_SNAPSHOT) {
             int width = getWidth();
             int height = getHeight();
             // Let's restore our state...

@@ -80,7 +80,7 @@ public class ConstraintWidget implements Solvable {
     protected ArrayList<ConstraintAnchor> mAnchors = new ArrayList<>();
 
     // Parent of this widget
-    private ConstraintWidget mParent = null;
+    ConstraintWidget mParent = null;
 
     // Dimensions of the widget
     private int mWidth = 0;
