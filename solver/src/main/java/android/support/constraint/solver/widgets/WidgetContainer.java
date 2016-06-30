@@ -252,7 +252,9 @@ public class WidgetContainer extends ConstraintWidget {
         for (int i = 0; i < count; i++) {
             ConstraintWidget widget = mChildren.get(i);
             widget.setOffset(getDrawX(), getDrawY());
-            widget.updateDrawPosition();
+            if (!(widget instanceof ConstraintWidgetContainer)) {
+                widget.updateDrawPosition();
+            }
         }
     }
 

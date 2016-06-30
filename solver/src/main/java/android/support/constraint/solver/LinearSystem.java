@@ -395,9 +395,11 @@ public class LinearSystem {
      */
     private void updateRowFromVariables(ArrayRow row) {
         if (ArrayRow.USE_LINKED_VARIABLES) {
-            row.variables.updateFromSystem(row, mRows);
-            if (row.variables.currentSize == 0) {
-                row.isSimpleDefinition = true;
+            if (mNumRows > 0) {
+                row.variables.updateFromSystem(row, mRows);
+                if (row.variables.currentSize == 0) {
+                    row.isSimpleDefinition = true;
+                }
             }
         } else {
             int numVariables = row.variables.currentSize;

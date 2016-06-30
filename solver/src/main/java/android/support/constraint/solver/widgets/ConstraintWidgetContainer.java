@@ -28,7 +28,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
 
     private static final boolean USE_THREAD = false;
     private static final boolean DEBUG = false;
-    private static final boolean USE_SNAPSHOT = false;
+    private static final boolean USE_SNAPSHOT = true;
 
     protected LinearSystem mSystem = new LinearSystem();
     protected LinearSystem mBackgroundSystem = null;
@@ -87,12 +87,6 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         mSystem.reset();
         if (USE_THREAD && mBackgroundSystem != null) {
             mBackgroundSystem.reset();
-        }
-        if (USE_SNAPSHOT) {
-            if (mSnapshot == null) {
-                mSnapshot = new Snapshot(this);
-            }
-            mSnapshot.updateFrom(this);
         }
         super.reset();
     }
@@ -197,7 +191,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     public void layout() {
         int prex = mX;
         int prey = mY;
-        if (USE_SNAPSHOT) {
+        if (mParent != null && USE_SNAPSHOT) {
             if (mSnapshot == null) {
                 mSnapshot = new Snapshot(this);
             }
@@ -244,7 +238,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         }
         updateFromSolver(mSystem, ConstraintAnchor.ANY_GROUP);
 
-        if (USE_SNAPSHOT) {
+        if (mParent != null && USE_SNAPSHOT) {
             int width = getWidth();
             int height = getHeight();
             // Let's restore our state...
@@ -255,6 +249,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             mX = prex;
             mY = prey;
         }
+        resetSolverVariables(mSystem.getCache());
         if (this == getRootConstraintContainer()) {
             updateDrawPosition();
         }
@@ -636,7 +631,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     public void layoutWithGroup(int numOfGroups) {
         int prex = mX;
         int prey = mY;
-        if (USE_SNAPSHOT) {
+        if (mParent != null && USE_SNAPSHOT) {
             if (mSnapshot == null) {
                 mSnapshot = new Snapshot(this);
             }
@@ -713,7 +708,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             }
         }
 
-        if (USE_SNAPSHOT) {
+        if (mParent != null && USE_SNAPSHOT) {
             int width = getWidth();
             int height = getHeight();
             // Let's restore our state...
