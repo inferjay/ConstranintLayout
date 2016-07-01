@@ -415,8 +415,8 @@ public class ConstraintLayout extends ViewGroup {
                 || previousPaddingTop != paddingTop
                 || previousWidthMeasureSpec != widthMeasureSpec
                 || previousHeightMeasureSpec != heightMeasureSpec) {
-            mLayoutWidget.mX = paddingLeft;
-            mLayoutWidget.mY = paddingTop;
+            mLayoutWidget.setX(paddingLeft);
+            mLayoutWidget.setY(paddingTop);
             setSelfDimensionBehaviour(widthMeasureSpec, heightMeasureSpec);
         }
         previousPaddingLeft = paddingLeft;
