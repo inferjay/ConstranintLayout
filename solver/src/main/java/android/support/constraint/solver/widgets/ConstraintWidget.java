@@ -93,8 +93,8 @@ public class ConstraintWidget implements Solvable {
     private int mSolverBottom = 0;
 
     // Origin of the widget
-    public int mX = 0;
-    public int mY = 0;
+    protected int mX = 0;
+    protected int mY = 0;
 
     // Current draw position in container's coordinate
     private int mDrawX = 0;
