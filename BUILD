@@ -6,13 +6,14 @@ java_library(
   srcs = glob([
       "solver/src/main/java/**/*.java",
     ]),
-  resource_strip_prefix="tools/sherpa/sherpa-solver.resources",
+  resource_strip_prefix = "tools/sherpa/sherpa-solver.resources",
   resources = [
       "//tools/sherpa:sherpa-solver.res",
     ],
   deps = [
       "@local_jdk//:langtools-neverlink",
     ],
+  javacopts = ["-extra_checks:off"],
   visibility = ["//visibility:public"],
 )
 
@@ -35,5 +36,4 @@ fileset(
   deps = [
       "@local_jdk//:langtools-neverlink",
     ],
-   visibility = ["//visibility:public"],
 )
