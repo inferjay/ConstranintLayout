@@ -10,37 +10,65 @@
         <!-- The percent of total space from the beginning of the parent to this guideline. (e.g. 50 = middle)-->
         <attr name="layout_constraintGuide_Percent" format="integer"/>
         <!-- Constrains the left edge of this view to the left edge of the given view ID. -->
-        <attr name="layout_constraintLeft_toLeftOf" format="reference"/>
+        <attr name="layout_constraintLeft_toLeftOf" format="reference|enum">
+            <enum name="parent" value="0"/>
+        </attr>
         <!-- Constrains the left edge of this view to the right edge of the given view ID. -->
-        <attr name="layout_constraintLeft_toRightOf" format="reference"/>
+        <attr name="layout_constraintLeft_toRightOf" format="reference|enum">
+            <enum name="parent" value="0"/>
+        </attr>
         <!-- Constrains the right edge of this view to the left edge of the given view ID. -->
-        <attr name="layout_constraintRight_toLeftOf" format="reference"/>
+        <attr name="layout_constraintRight_toLeftOf" format="reference|enum">
+            <enum name="parent" value="0"/>
+        </attr>
         <!-- Constrains the right edge of this view to the right edge of the given view ID. -->
-        <attr name="layout_constraintRight_toRightOf" format="reference"/>
+        <attr name="layout_constraintRight_toRightOf" format="reference|enum">
+            <enum name="parent" value="0"/>
+        </attr>
         <!-- Constrains the top edge of this view to the top edge of the given view ID. -->
-        <attr name="layout_constraintTop_toTopOf" format="reference"/>
+        <attr name="layout_constraintTop_toTopOf" format="reference|enum">
+            <enum name="parent" value="0"/>
+        </attr>
         <!-- Constrains the top edge of this view to the bottom edge of the given view ID. -->
-        <attr name="layout_constraintTop_toBottomOf" format="reference"/>
+        <attr name="layout_constraintTop_toBottomOf" format="reference|enum">
+            <enum name="parent" value="0"/>
+        </attr>
         <!-- Constrains the bottom edge of this view to the top edge of the given view ID. -->
-        <attr name="layout_constraintBottom_toTopOf" format="reference"/>
+        <attr name="layout_constraintBottom_toTopOf" format="reference|enum">
+            <enum name="parent" value="0"/>
+        </attr>
         <!-- Constrains the bottom edge of this view to the bottom edge of the given view ID. -->
-        <attr name="layout_constraintBottom_toBottomOf" format="reference"/>
+        <attr name="layout_constraintBottom_toBottomOf" format="reference|enum">
+            <enum name="parent" value="0"/>
+        </attr>
         <!-- Constrains the baseline of this view to the baseline of the given view ID. -->
-        <attr name="layout_constraintBaseline_toBaselineOf" format="reference"/>
-
+        <attr name="layout_constraintBaseline_toBaselineOf" format="reference|enum">
+            <enum name="parent" value="0"/>
+        </attr>
         <!-- Constrains the horizontal center this view to the center of the given view ID. -->
-        <attr name="layout_constraintCenterX_toCenterX" format="reference"/>
+        <attr name="layout_constraintCenterX_toCenterX" format="reference|enum">
+            <enum name="parent" value="0"/>
+        </attr>
         <!-- Constrains the vertical center this view to the center of the given view ID. -->
-        <attr name="layout_constraintCenterY_toCenterY" format="reference"/>
-
+        <attr name="layout_constraintCenterY_toCenterY" format="reference|enum">
+            <enum name="parent" value="0"/>
+        </attr>
         <!-- Constrains the start edge of this view to the end edge of the given view ID. -->
-        <attr name="layout_constraintStart_toEndOf" format="reference"/>
+        <attr name="layout_constraintStart_toEndOf" format="reference|enum">
+            <enum name="parent" value="0"/>
+        </attr>
         <!-- Constrains the start edge of this view to the start edge of the given view ID. -->
-        <attr name="layout_constraintStart_toStartOf" format="reference"/>
+        <attr name="layout_constraintStart_toStartOf" format="reference|enum">
+            <enum name="parent" value="0"/>
+        </attr>
         <!-- Constrains the end edge of this view to the start edge of the given view ID. -->
-        <attr name="layout_constraintEnd_toStartOf" format="reference"/>
+        <attr name="layout_constraintEnd_toStartOf" format="reference|enum">
+            <enum name="parent" value="0"/>
+        </attr>
         <!-- Constrains the end edge of this view to the end edge of the given view ID. -->
-        <attr name="layout_constraintEnd_toEndOf" format="reference"/>
+        <attr name="layout_constraintEnd_toEndOf" format="reference|enum">
+            <enum name="parent" value="0"/>
+        </attr>
 
         <!-- Fraction of excess space to distribute on the left when constrained on left & right edges (e.g. .5 = middle)-->
         <attr name="layout_constraintHorizontal_bias" format="float"/>

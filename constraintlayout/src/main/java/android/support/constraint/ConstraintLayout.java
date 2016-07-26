@@ -182,15 +182,13 @@ public class ConstraintLayout extends ViewGroup {
 
                 // Left constraint
                 if (layoutParams.leftToLeft != LayoutParams.UNSET) {
-                    View view = mChildrenByIds.get(layoutParams.leftToLeft);
-                    ConstraintWidget target = getViewWidget(view);
+                    ConstraintWidget target = getTargetWidget(layoutParams.leftToLeft);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.LEFT, target,
                                 ConstraintAnchor.Type.LEFT, layoutParams.leftMargin);
                     }
                 } else if (layoutParams.leftToRight != LayoutParams.UNSET) {
-                    View view = mChildrenByIds.get(layoutParams.leftToRight);
-                    ConstraintWidget target = getViewWidget(view);
+                    ConstraintWidget target = getTargetWidget(layoutParams.leftToRight);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.LEFT, target,
                                 ConstraintAnchor.Type.RIGHT, layoutParams.leftMargin);
@@ -199,15 +197,13 @@ public class ConstraintLayout extends ViewGroup {
 
                 // Right constraint
                 if (layoutParams.rightToLeft != LayoutParams.UNSET) {
-                    View view = mChildrenByIds.get(layoutParams.rightToLeft);
-                    ConstraintWidget target = getViewWidget(view);
+                    ConstraintWidget target = getTargetWidget(layoutParams.rightToLeft);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.RIGHT, target,
                                 ConstraintAnchor.Type.LEFT, layoutParams.rightMargin);
                     }
                 } else if (layoutParams.rightToRight != LayoutParams.UNSET) {
-                    View view = mChildrenByIds.get(layoutParams.rightToRight);
-                    ConstraintWidget target = getViewWidget(view);
+                    ConstraintWidget target = getTargetWidget(layoutParams.rightToRight);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.RIGHT, target,
                                 ConstraintAnchor.Type.RIGHT, layoutParams.rightMargin);
@@ -216,15 +212,13 @@ public class ConstraintLayout extends ViewGroup {
 
                 // Top constraint
                 if (layoutParams.topToTop != LayoutParams.UNSET) {
-                    View view = mChildrenByIds.get(layoutParams.topToTop);
-                    ConstraintWidget target = getViewWidget(view);
+                    ConstraintWidget target = getTargetWidget(layoutParams.topToTop);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.TOP, target,
                                 ConstraintAnchor.Type.TOP, layoutParams.topMargin);
                     }
                 } else if (layoutParams.topToBottom != LayoutParams.UNSET) {
-                    View view = mChildrenByIds.get(layoutParams.topToBottom);
-                    ConstraintWidget target = getViewWidget(view);
+                    ConstraintWidget target = getTargetWidget(layoutParams.topToBottom);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.TOP, target,
                                 ConstraintAnchor.Type.BOTTOM, layoutParams.topMargin);
@@ -233,15 +227,13 @@ public class ConstraintLayout extends ViewGroup {
 
                 // Bottom constraint
                 if (layoutParams.bottomToTop != LayoutParams.UNSET) {
-                    View view = mChildrenByIds.get(layoutParams.bottomToTop);
-                    ConstraintWidget target = getViewWidget(view);
+                    ConstraintWidget target = getTargetWidget(layoutParams.bottomToTop);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.BOTTOM, target,
                                 ConstraintAnchor.Type.TOP, layoutParams.bottomMargin);
                     }
                 } else if (layoutParams.bottomToBottom != LayoutParams.UNSET) {
-                    View view = mChildrenByIds.get(layoutParams.bottomToBottom);
-                    ConstraintWidget target = getViewWidget(view);
+                    ConstraintWidget target = getTargetWidget(layoutParams.bottomToBottom);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.BOTTOM, target,
                                 ConstraintAnchor.Type.BOTTOM, layoutParams.bottomMargin);
@@ -251,7 +243,7 @@ public class ConstraintLayout extends ViewGroup {
                 // Baseline constraint
                 if (layoutParams.baselineToBaseline != LayoutParams.UNSET) {
                     View view = mChildrenByIds.get(layoutParams.baselineToBaseline);
-                    ConstraintWidget target = getViewWidget(view);
+                    ConstraintWidget target = getTargetWidget(layoutParams.baselineToBaseline);
                     if (target != null) {
                         LayoutParams targetParams = (LayoutParams) view.getLayoutParams();
                         layoutParams.needsBaseline = true;
@@ -269,8 +261,7 @@ public class ConstraintLayout extends ViewGroup {
 
                 // Horizontal Center constraint
                 if (layoutParams.centerXToCenterX != LayoutParams.UNSET) {
-                    View view = mChildrenByIds.get(layoutParams.centerXToCenterX);
-                    ConstraintWidget target = getViewWidget(view);
+                    ConstraintWidget target = getTargetWidget(layoutParams.centerXToCenterX);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.LEFT, target,
                                 ConstraintAnchor.Type.LEFT, layoutParams.leftMargin);
@@ -281,8 +272,7 @@ public class ConstraintLayout extends ViewGroup {
 
                 // Vertical Center constraint
                 if (layoutParams.centerYToCenterY != LayoutParams.UNSET) {
-                    View view = mChildrenByIds.get(layoutParams.centerYToCenterY);
-                    ConstraintWidget target = getViewWidget(view);
+                    ConstraintWidget target = getTargetWidget(layoutParams.centerYToCenterY);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.TOP, target,
                                 ConstraintAnchor.Type.TOP, layoutParams.topMargin);
@@ -329,6 +319,18 @@ public class ConstraintLayout extends ViewGroup {
                 }
 
             }
+        }
+    }
+
+    private final ConstraintWidget getTargetWidget(int id) {
+        if (id == LayoutParams.PARENT_ID) {
+            return mLayoutWidget;
+        } else {
+            View view = mChildrenByIds.get(id);
+            if (view == this) {
+                return mLayoutWidget;
+            }
+            return view == null ? null : ((LayoutParams) view.getLayoutParams()).widget;
         }
     }
 
@@ -586,6 +588,7 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     public static class LayoutParams extends ViewGroup.MarginLayoutParams {
+        public static final int PARENT_ID = 0;
         public static int UNSET = -1;
 
         public static int HORIZONTAL = 0;
@@ -638,26 +641,59 @@ public class ConstraintLayout extends ViewGroup {
                 int attr = a.getIndex(i);
                 if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_toLeftOf) {
                     leftToLeft = a.getResourceId(attr, leftToLeft);
+                    if (leftToLeft == UNSET) {
+                        leftToLeft = a.getInt(attr, UNSET);
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_toRightOf) {
                     leftToRight = a.getResourceId(attr, leftToRight);
+                    if (leftToRight == UNSET) {
+                        leftToRight = a.getInt(attr, UNSET);
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_toLeftOf) {
                     rightToLeft = a.getResourceId(attr, rightToLeft);
+                    if (rightToLeft == UNSET) {
+                        rightToLeft = a.getInt(attr, UNSET);
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_toRightOf) {
                     rightToRight = a.getResourceId(attr, rightToRight);
+                    if (rightToRight == UNSET) {
+                        rightToRight = a.getInt(attr, UNSET);
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_toTopOf) {
                     topToTop = a.getResourceId(attr, topToTop);
+                    if (topToTop == UNSET) {
+                        topToTop = a.getInt(attr, UNSET);
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_toBottomOf) {
                     topToBottom = a.getResourceId(attr, topToBottom);
+                    if (topToBottom == UNSET) {
+                        topToBottom = a.getInt(attr, UNSET);
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBottom_toTopOf) {
                     bottomToTop = a.getResourceId(attr, bottomToTop);
+                    if (bottomToTop == UNSET) {
+                        bottomToTop = a.getInt(attr, UNSET);
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBottom_toBottomOf) {
                     bottomToBottom = a.getResourceId(attr, bottomToBottom);
+                    if (bottomToBottom == UNSET) {
+                        bottomToBottom = a.getInt(attr, UNSET);
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBaseline_toBaselineOf) {
                     baselineToBaseline = a.getResourceId(attr, baselineToBaseline);
+                    if (baselineToBaseline == UNSET) {
+                        baselineToBaseline = a.getInt(attr, UNSET);
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintCenterX_toCenterX) {
                     centerXToCenterX = a.getResourceId(attr, centerXToCenterX);
+                    if (centerXToCenterX == UNSET) {
+                        centerXToCenterX = a.getInt(attr, UNSET);
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintCenterY_toCenterY) {
                     centerYToCenterY = a.getResourceId(attr, centerYToCenterY);
+                    if (centerYToCenterY == UNSET) {
+                        centerYToCenterY = a.getInt(attr, UNSET);
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_editor_absoluteX) {
                     editorAbsoluteX = a.getDimensionPixelOffset(attr, editorAbsoluteX);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_editor_absoluteY) {
@@ -672,12 +708,24 @@ public class ConstraintLayout extends ViewGroup {
                     orientation = a.getInt(attr, orientation);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintStart_toEndOf) {
                     startToEnd = a.getResourceId(attr, startToEnd);
+                    if (startToEnd == UNSET) {
+                        startToEnd = a.getInt(attr, UNSET);
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintStart_toStartOf) {
                     startToStart = a.getResourceId(attr, startToStart);
+                    if (startToStart == UNSET) {
+                        startToStart = a.getInt(attr, UNSET);
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintEnd_toStartOf) {
                     endToStart = a.getResourceId(attr, endToStart);
+                    if (endToStart == UNSET) {
+                        endToStart = a.getInt(attr, UNSET);
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintEnd_toEndOf) {
                     endToEnd = a.getResourceId(attr, endToEnd);
+                    if (endToEnd == UNSET) {
+                        endToEnd = a.getInt(attr, UNSET);
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_bias) {
                     horizontalBias = a.getFloat(attr, horizontalBias);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_bias) {
