@@ -97,12 +97,14 @@ public class ConstraintLayout extends ViewGroup {
         mChildrenByIds.put(view.getId(), view);
         container.add(widget);
         widget.setParent(container);
+        updateHierarchy();
     }
 
     @Override
     public void onViewRemoved(View view) {
         mChildrenByIds.remove(view.getId());
         mLayoutWidget.remove(getViewWidget(view));
+        updateHierarchy();
     }
 
     private void updateHierarchy() {
