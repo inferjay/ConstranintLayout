@@ -138,6 +138,7 @@ public class ConstraintLayout extends ViewGroup {
             widget.reset();
             widget.setParent(mLayoutWidget);
             widget.setVisibility(child.getVisibility());
+            widget.setCompanionWidget(child);
 
             if (!layoutParams.verticalLock || !layoutParams.horizontalLock) {
                 mSizeDependentsWidgets.add(widget);
