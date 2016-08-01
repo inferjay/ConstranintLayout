@@ -147,9 +147,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      *
      * @param system the solver we want to add the widget to
      */
-    @Override
-    public void addToSolver(LinearSystem system, int group) {
-        super.addToSolver(system, group);
+    public void addChildrenToSolver(LinearSystem system, int group) {
+        addToSolver(system, group);
         final int count = mChildren.size();
         for (int i = 0; i < count; i++) {
             ConstraintWidget widget = mChildren.get(i);
@@ -180,9 +179,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      *
      * @param system the solver we get the values from.
      */
-    @Override
-    public void updateFromSolver(LinearSystem system, int group) {
-        super.updateFromSolver(system, group);
+    public void updateChildrenFromSolver(LinearSystem system, int group) {
+        updateFromSolver(system, group);
         final int count = mChildren.size();
         for (int i = 0; i < count; i++) {
             ConstraintWidget widget = mChildren.get(i);
@@ -237,12 +235,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                     }
                 }
             }
-            addToSolver(mSystem, ConstraintAnchor.ANY_GROUP);
+            addChildrenToSolver(mSystem, ConstraintAnchor.ANY_GROUP);
             mSystem.minimize();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        updateFromSolver(mSystem, ConstraintAnchor.ANY_GROUP);
+        updateChildrenFromSolver(mSystem, ConstraintAnchor.ANY_GROUP);
 
         if (USE_SNAPSHOT) {
             int width = getWidth();
