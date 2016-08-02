@@ -82,7 +82,26 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     @Override
+    public void addView(View child, int index, ViewGroup.LayoutParams params) {
+        super.addView(child, index, params);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            onViewAdded(child);
+        }
+    }
+
+    @Override
+    public void removeView(View view) {
+        super.removeView(view);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            onViewRemoved(view);
+        }
+    }
+
+    @Override
     public void onViewAdded(View view) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            super.onViewAdded(view);
+        }
         ConstraintWidget widget = getViewWidget(view);
         if (view instanceof android.support.constraint.Guideline) {
             if (!(widget instanceof Guideline)) {
@@ -102,6 +121,9 @@ public class ConstraintLayout extends ViewGroup {
 
     @Override
     public void onViewRemoved(View view) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            super.onViewRemoved(view);
+        }
         mChildrenByIds.remove(view.getId());
         mLayoutWidget.remove(getViewWidget(view));
         updateHierarchy();
