@@ -332,7 +332,7 @@ public class WidgetsPositioningTest {
         final Guideline guideline = new Guideline();
         root.add(guideline);
         root.add(A);
-        guideline.setGuidePercent(50);
+        guideline.setGuidePercent(0.50f);
         guideline.setOrientation(Guideline.VERTICAL);
         root.setDebugSolverName(s, "root");
         A.setDebugSolverName(s, "A");
