@@ -649,8 +649,8 @@ public class ConstraintLayout extends ViewGroup {
         public int editorAbsoluteX = UNSET;
         public int editorAbsoluteY = UNSET;
 
-        // TODO: Hide those for now (for table layout)
-        int orientation = UNSET;
+        public int orientation = UNSET;
+
         // Internal use only
         boolean horizontalLock = true;
         boolean verticalLock = true;
