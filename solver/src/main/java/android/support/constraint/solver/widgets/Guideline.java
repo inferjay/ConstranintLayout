@@ -30,7 +30,7 @@ public class Guideline extends ConstraintWidget {
     public static final int RELATIVE_END = 2;
     public static final int RELATIVE_UNKNWON = -1;
 
-    protected int mRelativePercent = -1;
+    protected float mRelativePercent = -1;
     protected int mRelativeBegin = -1;
     protected int mRelativeEnd = -1;
 
@@ -141,6 +141,10 @@ public class Guideline extends ConstraintWidget {
     }
 
     public void setGuidePercent(int value) {
+        setGuidePercent(value / 100f);
+    }
+
+    public void setGuidePercent(float value) {
         if (value > -1) {
             mRelativePercent = value;
             mRelativeBegin = -1;
@@ -164,7 +168,7 @@ public class Guideline extends ConstraintWidget {
         }
     }
 
-    public int getRelativePercent() {
+    public float getRelativePercent() {
         return mRelativePercent;
     }
 
@@ -259,7 +263,7 @@ public class Guideline extends ConstraintWidget {
             } else if (mRelativeEnd != -1) {
                 setGuideEnd(getParent().getWidth() - position);
             } else if (mRelativePercent != -1) {
-                int percent = (int) ((position / (float) getParent().getWidth()) * 100);
+                float percent = (position / (float) getParent().getWidth());
                 setGuidePercent(percent);
             }
         } else {
@@ -269,16 +273,16 @@ public class Guideline extends ConstraintWidget {
             } else if (mRelativeEnd != -1) {
                 setGuideEnd(getParent().getHeight() - position);
             } else if (mRelativePercent != -1) {
-                int percent = (int) ((position / (float) getParent().getHeight()) * 100);
+                float percent = (position / (float) getParent().getHeight());
                 setGuidePercent(percent);
             }
         }
     }
 
     void inferRelativePercentPosition() {
-        int percent = (int) (Math.ceil((getX() / (float) getParent().getWidth()) * 100));
+        float percent = (getX() / (float) getParent().getWidth());
         if (mOrientation == HORIZONTAL) {
-            percent = (int) (Math.ceil((getY() / (float) getParent().getHeight()) * 100));
+            percent = (getY() / (float) getParent().getHeight());
         }
         setGuidePercent(percent);
     }

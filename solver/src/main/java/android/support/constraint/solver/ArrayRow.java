@@ -268,11 +268,10 @@ public class ArrayRow {
     }
 
     public ArrayRow createRowDimensionPercent(SolverVariable variableA,
-                                              SolverVariable variableB, SolverVariable variableC, int percent) {
-        float p = (percent / 100f);
+                                              SolverVariable variableB, SolverVariable variableC, float percent) {
         variables.put(variableA, -1);
-        variables.put(variableB, (1 - p));
-        variables.put(variableC, p);
+        variables.put(variableB, (1 - percent));
+        variables.put(variableC, percent);
         return this;
     }
 

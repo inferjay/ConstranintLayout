@@ -623,7 +623,7 @@ public class ConstraintLayout extends ViewGroup {
         public boolean isGuideline = false;
         public int guideBegin = UNSET;
         public int guideEnd = UNSET;
-        public int guidePercent = UNSET;
+        public float guidePercent = UNSET;
 
         public int leftToLeft = UNSET;
         public int leftToRight = UNSET;
@@ -737,7 +737,12 @@ public class ConstraintLayout extends ViewGroup {
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintGuide_end) {
                     guideEnd = a.getDimensionPixelOffset(attr, guideEnd);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintGuide_Percent) {
-                    guidePercent = a.getInt(attr, guidePercent);
+                    guidePercent = a.getInteger(attr, UNSET);
+                    if (guidePercent > UNSET) {
+                        guidePercent /= 100f;
+                    }
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintGuide_percent) {
+                    guidePercent = a.getFloat(attr, guidePercent);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_android_orientation) {
                     orientation = a.getInt(attr, orientation);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintStart_toEndOf) {
