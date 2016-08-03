@@ -655,6 +655,11 @@ public class ConstraintLayout extends ViewGroup {
         boolean horizontalLock = true;
         boolean verticalLock = true;
 
+        int originalLeftToLeft = UNSET;
+        int originalLeftToRight = UNSET;
+        int originalRightToLeft = UNSET;
+        int originalRightToRight = UNSET;
+
         ConstraintWidget widget = new ConstraintWidget();
 
         public LayoutParams(Context c, AttributeSet attrs) {
@@ -669,21 +674,25 @@ public class ConstraintLayout extends ViewGroup {
                     if (leftToLeft == UNSET) {
                         leftToLeft = a.getInt(attr, UNSET);
                     }
+                    originalLeftToLeft = leftToLeft;
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_toRightOf) {
                     leftToRight = a.getResourceId(attr, leftToRight);
                     if (leftToRight == UNSET) {
                         leftToRight = a.getInt(attr, UNSET);
                     }
+                    originalLeftToRight = leftToRight;
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_toLeftOf) {
                     rightToLeft = a.getResourceId(attr, rightToLeft);
                     if (rightToLeft == UNSET) {
                         rightToLeft = a.getInt(attr, UNSET);
                     }
+                    originalRightToLeft = rightToLeft;
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_toRightOf) {
                     rightToRight = a.getResourceId(attr, rightToRight);
                     if (rightToRight == UNSET) {
                         rightToRight = a.getInt(attr, UNSET);
                     }
+                    originalRightToRight = rightToRight;
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_toTopOf) {
                     topToTop = a.getResourceId(attr, topToTop);
                     if (topToTop == UNSET) {
@@ -828,6 +837,11 @@ public class ConstraintLayout extends ViewGroup {
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
         public void resolveLayoutDirection(int layoutDirection) {
             super.resolveLayoutDirection(layoutDirection);
+
+            rightToLeft = originalRightToLeft;
+            rightToRight = originalRightToRight;
+            leftToRight = originalLeftToRight;
+            leftToLeft = originalLeftToLeft;
 
             boolean isRtl = (View.LAYOUT_DIRECTION_RTL == getLayoutDirection());
             if (isRtl) {
