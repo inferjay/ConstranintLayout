@@ -38,6 +38,20 @@ public class WidgetsPositioningTest {
     }
 
     @Test
+    public void testCreateManyVariables() {
+        final ConstraintWidgetContainer rootWidget = new ConstraintWidgetContainer(0, 0, 600, 400);
+        ConstraintWidget previous = new ConstraintWidget(0, 0, 100, 20);
+        rootWidget.add(previous);
+        for (int i = 0; i < 100; i++) {
+            ConstraintWidget w = new ConstraintWidget(0, 0, 100, 20);
+            w.connect(ConstraintAnchor.Type.LEFT, previous, ConstraintAnchor.Type.RIGHT, 20);
+            w.connect(ConstraintAnchor.Type.RIGHT, rootWidget, ConstraintAnchor.Type.RIGHT, 20);
+            rootWidget.add(w);
+        }
+        rootWidget.layout();
+    }
+
+    @Test
     public void testWidgetCenterPositioning() {
         final int x = 20;
         final int y = 30;

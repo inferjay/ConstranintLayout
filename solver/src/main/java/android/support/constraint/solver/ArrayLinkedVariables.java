@@ -174,6 +174,8 @@ public class ArrayLinkedVariables {
         if (availableIndice >= mArrayIndices.length) {
             availableIndice = mArrayIndices.length;
             ROW_SIZE *= 2;
+            mDidFillOnce = false;
+            mLast = availableIndice - 1;
             mArrayValues = Arrays.copyOf(mArrayValues, ROW_SIZE);
             mArrayIndices = Arrays.copyOf(mArrayIndices, ROW_SIZE);
             mArrayNextIndices = Arrays.copyOf(mArrayNextIndices, ROW_SIZE);
@@ -282,6 +284,8 @@ public class ArrayLinkedVariables {
         if (availableIndice >= mArrayIndices.length) {
             availableIndice = mArrayIndices.length;
             ROW_SIZE *= 2;
+            mDidFillOnce = false;
+            mLast = availableIndice - 1;
             mArrayValues = Arrays.copyOf(mArrayValues, ROW_SIZE);
             mArrayIndices = Arrays.copyOf(mArrayIndices, ROW_SIZE);
             mArrayNextIndices = Arrays.copyOf(mArrayNextIndices, ROW_SIZE);
