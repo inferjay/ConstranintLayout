@@ -7,8 +7,10 @@
         <attr name="layout_constraintGuide_begin" format="dimension"/>
         <!-- The space from the ending edge of the parent to this  guideline. -->
         <attr name="layout_constraintGuide_end" format="dimension"/>
-        <!-- The percent of total space from the beginning of the parent to this guideline. (e.g. 50 = middle)-->
+        <!-- DEPRECATED The percent of total space from the beginning of the parent to this guideline. (e.g. 50 = middle)-->
         <attr name="layout_constraintGuide_Percent" format="integer"/>
+        <!-- The percent of total space from the beginning of the parent to this guideline. (e.g. 0.50 = middle)-->
+        <attr name="layout_constraintGuide_percent" format="float"/>
         <!-- Constrains the left edge of this view to the left edge of the given view ID. -->
         <attr name="layout_constraintLeft_toLeftOf" format="reference|enum">
             <enum name="parent" value="0"/>

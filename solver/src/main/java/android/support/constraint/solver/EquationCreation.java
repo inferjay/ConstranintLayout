@@ -70,7 +70,7 @@ public class EquationCreation {
      */
     public static ArrayRow createRowDimensionPercent(LinearSystem linearSystem,
                                                      SolverVariable variableA,
-                                                     SolverVariable variableB, SolverVariable variableC, int percent, boolean withError) {
+                                                     SolverVariable variableB, SolverVariable variableC, float percent, boolean withError) {
         ArrayRow row = linearSystem.createRow();
         if (withError) {
             linearSystem.addError(row);
