@@ -280,7 +280,7 @@ public class LinearSystem {
     public int getObjectVariableValue(Object anchor) {
         SolverVariable variable = ((ConstraintAnchor) anchor).getSolverVariable();
         if (variable != null) {
-            return (int) variable.computedValue;
+            return (int) (variable.computedValue + 0.5f);
         }
         return 0;
     }
