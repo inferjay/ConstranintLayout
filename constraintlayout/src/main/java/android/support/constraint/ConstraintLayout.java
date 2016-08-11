@@ -431,11 +431,6 @@ public class ConstraintLayout extends ViewGroup {
             updateHierarchy();
         }
 
-        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-
         int paddingLeft = getPaddingLeft();
         int paddingTop = getPaddingTop();
 
@@ -514,25 +509,6 @@ public class ConstraintLayout extends ViewGroup {
         int androidLayoutWidth = mLayoutWidget.getWidth() + widthPadding;
         int androidLayoutHeight = mLayoutWidget.getHeight() + heightPadding;
 
-        if (widthMode == MeasureSpec.AT_MOST
-                && androidLayoutWidth > widthSize) {
-            androidLayoutWidth = widthSize;
-        } else if (widthMode == MeasureSpec.UNSPECIFIED) {
-            int desiredWidth = getLayoutParams().width;
-            if (androidLayoutWidth < desiredWidth) {
-                androidLayoutWidth = desiredWidth;
-            }
-        }
-        if (heightMode == MeasureSpec.AT_MOST
-                && androidLayoutHeight > heightSize) {
-            androidLayoutHeight = heightSize;
-        } else if (heightMode == MeasureSpec.UNSPECIFIED) {
-            int desiredHeight = getLayoutParams().height;
-            if (androidLayoutHeight < desiredHeight) {
-                androidLayoutHeight = desiredHeight;
-            }
-        }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             int resolvedWidthSize = resolveSizeAndState(androidLayoutWidth, widthMeasureSpec, childState);
             int resolvedHeightSize = resolveSizeAndState(androidLayoutHeight, heightMeasureSpec,
@@ -552,22 +528,52 @@ public class ConstraintLayout extends ViewGroup {
         int heightPadding = getPaddingTop() + getPaddingBottom();
         int widthPadding = getPaddingLeft() + getPaddingRight();
 
+        ConstraintWidget.DimensionBehaviour widthBehaviour = ConstraintWidget.DimensionBehaviour.FIXED;
+        ConstraintWidget.DimensionBehaviour heightBehaviour = ConstraintWidget.DimensionBehaviour.FIXED;
+        int desiredWidth = 0;
+        int desiredHeight = 0;
+
         // TODO: investigate measure too small (check MeasureSpec)
-        if (widthMode == MeasureSpec.AT_MOST || widthMode == MeasureSpec.UNSPECIFIED) {
-            mLayoutWidget.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
-            mLayoutWidget.setWidth(0);
-        } else {
-            mLayoutWidget.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
-            mLayoutWidget.setWidth(widthSize - widthPadding);
+        ViewGroup.LayoutParams params = getLayoutParams();
+        switch (widthMode) {
+            case MeasureSpec.AT_MOST: {
+                widthBehaviour = ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
+            }
+            break;
+            case MeasureSpec.UNSPECIFIED: {
+                if (params.width > 0) {
+                    desiredWidth = params.width;
+                } else {
+                    widthBehaviour = ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
+                }
+            }
+            break;
+            case MeasureSpec.EXACTLY: {
+                desiredWidth = widthSize - widthPadding;
+            }
+        }
+        switch (heightMode) {
+            case MeasureSpec.AT_MOST: {
+                heightBehaviour = ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
+            }
+            break;
+            case MeasureSpec.UNSPECIFIED: {
+                if (params.height > 0) {
+                    desiredHeight = params.height;
+                } else {
+                    heightBehaviour = ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
+                }
+            }
+            break;
+            case MeasureSpec.EXACTLY: {
+                desiredHeight = heightSize - heightPadding;
+            }
         }
 
-        if (heightMode == MeasureSpec.AT_MOST || heightMode == MeasureSpec.UNSPECIFIED) {
-            mLayoutWidget.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
-            mLayoutWidget.setHeight(0);
-        } else {
-            mLayoutWidget.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
-            mLayoutWidget.setHeight(heightSize - heightPadding);
-        }
+        mLayoutWidget.setHorizontalDimensionBehaviour(widthBehaviour);
+        mLayoutWidget.setWidth(desiredWidth);
+        mLayoutWidget.setVerticalDimensionBehaviour(heightBehaviour);
+        mLayoutWidget.setHeight(desiredHeight);
     }
 
     /**
