@@ -191,8 +191,6 @@ public class ConstraintLayout extends ViewGroup {
                     || (layoutParams.bottomToTop != LayoutParams.UNSET)
                     || (layoutParams.bottomToBottom != LayoutParams.UNSET)
                     || (layoutParams.baselineToBaseline != LayoutParams.UNSET)
-                    || (layoutParams.centerXToCenterX != LayoutParams.UNSET)
-                    || (layoutParams.centerYToCenterY != LayoutParams.UNSET)
                     || (layoutParams.editorAbsoluteX != LayoutParams.UNSET)
                     || (layoutParams.editorAbsoluteY != LayoutParams.UNSET)) {
 
@@ -284,27 +282,6 @@ public class ConstraintLayout extends ViewGroup {
                     }
                 }
 
-                // Horizontal Center constraint
-                if (layoutParams.centerXToCenterX != LayoutParams.UNSET) {
-                    ConstraintWidget target = getTargetWidget(layoutParams.centerXToCenterX);
-                    if (target != null) {
-                        widget.immediateConnect(ConstraintAnchor.Type.LEFT, target,
-                                ConstraintAnchor.Type.LEFT, layoutParams.leftMargin);
-                        widget.immediateConnect(ConstraintAnchor.Type.RIGHT, target,
-                                ConstraintAnchor.Type.RIGHT, layoutParams.rightMargin);
-                    }
-                }
-
-                // Vertical Center constraint
-                if (layoutParams.centerYToCenterY != LayoutParams.UNSET) {
-                    ConstraintWidget target = getTargetWidget(layoutParams.centerYToCenterY);
-                    if (target != null) {
-                        widget.immediateConnect(ConstraintAnchor.Type.TOP, target,
-                                ConstraintAnchor.Type.TOP, layoutParams.topMargin);
-                        widget.immediateConnect(ConstraintAnchor.Type.BOTTOM, target,
-                                ConstraintAnchor.Type.BOTTOM, layoutParams.bottomMargin);
-                    }
-                }
                 if (layoutParams.horizontalBias >= 0 && layoutParams.horizontalBias != 0.5f) {
                     widget.setHorizontalBiasPercent(layoutParams.horizontalBias);
                 }
@@ -664,8 +641,6 @@ public class ConstraintLayout extends ViewGroup {
         public int bottomToTop = UNSET;
         public int bottomToBottom = UNSET;
         public int baselineToBaseline = UNSET;
-        public int centerXToCenterX = UNSET;
-        public int centerYToCenterY = UNSET;
 
         public int startToEnd = UNSET;
         public int startToStart = UNSET;
@@ -748,16 +723,6 @@ public class ConstraintLayout extends ViewGroup {
                     if (baselineToBaseline == UNSET) {
                         baselineToBaseline = a.getInt(attr, UNSET);
                     }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintCenterX_toCenterX) {
-                    centerXToCenterX = a.getResourceId(attr, centerXToCenterX);
-                    if (centerXToCenterX == UNSET) {
-                        centerXToCenterX = a.getInt(attr, UNSET);
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintCenterY_toCenterY) {
-                    centerYToCenterY = a.getResourceId(attr, centerYToCenterY);
-                    if (centerYToCenterY == UNSET) {
-                        centerYToCenterY = a.getInt(attr, UNSET);
-                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_editor_absoluteX) {
                     editorAbsoluteX = a.getDimensionPixelOffset(attr, editorAbsoluteX);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_editor_absoluteY) {
@@ -766,11 +731,6 @@ public class ConstraintLayout extends ViewGroup {
                     guideBegin = a.getDimensionPixelOffset(attr, guideBegin);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintGuide_end) {
                     guideEnd = a.getDimensionPixelOffset(attr, guideEnd);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintGuide_Percent) {
-                    guidePercent = a.getInteger(attr, UNSET);
-                    if (guidePercent > UNSET) {
-                        guidePercent /= 100f;
-                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintGuide_percent) {
                     guidePercent = a.getFloat(attr, guidePercent);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_android_orientation) {
