@@ -431,6 +431,11 @@ public class ConstraintLayout extends ViewGroup {
             updateHierarchy();
         }
 
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
         int paddingLeft = getPaddingLeft();
         int paddingTop = getPaddingTop();
 
@@ -506,14 +511,33 @@ public class ConstraintLayout extends ViewGroup {
             solveLinearSystem(); // second pass
         }
 
-        final int androidLayoutWidth = mLayoutWidget.getWidth() + widthPadding;
-        final int androidLayoutHeight = mLayoutWidget.getHeight() + heightPadding;
+        int androidLayoutWidth = mLayoutWidget.getWidth() + widthPadding;
+        int androidLayoutHeight = mLayoutWidget.getHeight() + heightPadding;
+
+        if (widthMode == MeasureSpec.AT_MOST
+                && androidLayoutWidth > widthSize) {
+            androidLayoutWidth = widthSize;
+        } else if (widthMode == MeasureSpec.UNSPECIFIED) {
+            int desiredWidth = getLayoutParams().width;
+            if (androidLayoutWidth < desiredWidth) {
+                androidLayoutWidth = desiredWidth;
+            }
+        }
+        if (heightMode == MeasureSpec.AT_MOST
+                && androidLayoutHeight > heightSize) {
+            androidLayoutHeight = heightSize;
+        } else if (heightMode == MeasureSpec.UNSPECIFIED) {
+            int desiredHeight = getLayoutParams().height;
+            if (androidLayoutHeight < desiredHeight) {
+                androidLayoutHeight = desiredHeight;
+            }
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            int widthSize = resolveSizeAndState(androidLayoutWidth, widthMeasureSpec, childState);
-            int heightSize = resolveSizeAndState(androidLayoutHeight, heightMeasureSpec,
+            int resolvedWidthSize = resolveSizeAndState(androidLayoutWidth, widthMeasureSpec, childState);
+            int resolvedHeightSize = resolveSizeAndState(androidLayoutHeight, heightMeasureSpec,
                     childState << MEASURED_HEIGHT_STATE_SHIFT);
-            setMeasuredDimension(widthSize & MEASURED_SIZE_MASK, heightSize & MEASURED_SIZE_MASK);
+            setMeasuredDimension(resolvedWidthSize & MEASURED_SIZE_MASK, resolvedHeightSize & MEASURED_SIZE_MASK);
         } else {
             setMeasuredDimension(androidLayoutWidth, androidLayoutHeight);
         }
