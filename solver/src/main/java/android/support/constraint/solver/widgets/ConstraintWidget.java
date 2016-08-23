@@ -42,9 +42,12 @@ public class ConstraintWidget implements Solvable {
 
     private Animator mAnimator = new Animator(this);
 
-    public final static int VISIBLE = 0;
-    public final static int INVISIBLE = 4;
-    public final static int GONE = 8;
+    public static final int HORIZONTAL = 0;
+    public static final int VERTICAL = 1;
+
+    public static final int VISIBLE = 0;
+    public static final int INVISIBLE = 4;
+    public static final int GONE = 8;
 
     int mDistToTop;
     int mDistToLeft;
@@ -86,6 +89,7 @@ public class ConstraintWidget implements Solvable {
     private int mWidth = 0;
     private int mHeight = 0;
     private float mDimensionRatio = 0;
+    private int mDimensionRatioSide = VERTICAL;
 
     private int mSolverLeft = 0;
     private int mSolverTop = 0;
@@ -155,6 +159,7 @@ public class ConstraintWidget implements Solvable {
         mWidth = 0;
         mHeight = 0;
         mDimensionRatio = 0.0f;
+        mDimensionRatioSide = VERTICAL;
         mX = 0;
         mY = 0;
         mDrawX = 0;
@@ -904,12 +909,66 @@ public class ConstraintWidget implements Solvable {
     }
 
     /**
+     * Set the ratio of the widget from a given string of format [H|V],[float|x:y] or [float|x:y]
+     * @param ratio
+     */
+    public void setDimensionRatio(String ratio) {
+        if (ratio == null || ratio.length() == 0) {
+            mDimensionRatio = 0;
+            return;
+        }
+        int dimensionRatioSide = VERTICAL;
+        float dimensionRatio = 0;
+        int len = ratio.length();
+        int commaIndex = ratio.indexOf(',');
+        if (commaIndex > 0 && commaIndex < len - 1) {
+            String dimension = ratio.substring(0, commaIndex);
+            if (dimension.equalsIgnoreCase("H")) {
+                dimensionRatioSide = HORIZONTAL;
+            }
+            commaIndex++;
+        } else {
+            commaIndex = 0;
+        }
+        int colonIndex = ratio.indexOf(':');
+        if (colonIndex >= 0 && colonIndex < len - 1) {
+            String nominator = ratio.substring(commaIndex, colonIndex);
+            String denominator = ratio.substring(colonIndex + 1);
+            if (nominator.length() > 0 && denominator.length() > 0) {
+                try {
+                    float nominatorValue = Float.parseFloat(nominator);
+                    float denominatorValue = Float.parseFloat(denominator);
+                    if (nominatorValue > 0 && denominatorValue > 0) {
+                        dimensionRatio = Math.abs(nominatorValue / denominatorValue);
+                    }
+                } catch (NumberFormatException e) {
+                    // ignore
+                }
+            } else {
+                String r = ratio.substring(commaIndex + 1);
+                if (r.length() > 0) {
+                    try {
+                        dimensionRatio = Float.parseFloat(r);
+                    } catch (NumberFormatException e) {
+                        // Ignore
+                    }
+                }
+            }
+            if (dimensionRatio > 0) {
+                mDimensionRatio = dimensionRatio;
+                mDimensionRatioSide = dimensionRatioSide;
+            }
+        }
+    }
+
+    /**
      * Set the ratio of the widget
      * The ratio will be applied if at least one of the dimension (width or height) is set to a behaviour
      * of DimensionBehaviour.ANY -- the dimension's value will be set to the other dimension * ratio.
      */
-    public void setDimensionRatio(float ratio) {
+    public void setDimensionRatio(float ratio, int dimensionRatioSide) {
         mDimensionRatio = ratio;
+        mDimensionRatioSide = dimensionRatioSide;
     }
 
     /**
@@ -919,6 +978,12 @@ public class ConstraintWidget implements Solvable {
     public float getDimensionRatio() {
         return mDimensionRatio;
     }
+
+    /**
+     * Return the current side on which ratio will be applied
+     * @return HORIZONTAL or VERTICAL
+     */
+    public int getDimensionRatioSide() { return mDimensionRatioSide; }
 
     /**
      * Set the horizontal bias percent to apply when we have two opposite constraints of
@@ -1711,11 +1776,6 @@ public class ConstraintWidget implements Solvable {
         if (mDimensionRatio > 0) {
             if (!horizontalDimensionLocked && !verticalDimensionLocked) {
                 useRatio = true;
-                // add an equation
-                ArrayRow row = system.createRow();
-                if (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group)) {
-                    system.addConstraint(row.createRowDimensionRatio(right, left, bottom, top, mDimensionRatio));
-                }
             } else if (!horizontalDimensionLocked && verticalDimensionLocked) {
                 width = (int) (mDimensionRatio * mHeight);
                 horizontalDimensionLocked = true;
@@ -1725,13 +1785,15 @@ public class ConstraintWidget implements Solvable {
             }
         }
 
+        // Horizontal resolution
         boolean wrapContent = (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)
                 && (this instanceof ConstraintWidgetContainer);
         if (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group)) {
             applyConstraints(system, wrapContent, horizontalDimensionLocked, mLeft, mRight,
-                    mX, mX + width, width, mHorizontalBiasPercent, useRatio);
+                    mX, mX + width, width, mHorizontalBiasPercent, useRatio && mDimensionRatioSide == HORIZONTAL);
         }
 
+        // Vertical Resolution
         wrapContent = (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)
                 && (this instanceof ConstraintWidgetContainer);
 
@@ -1749,12 +1811,23 @@ public class ConstraintWidget implements Solvable {
             }
             if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && end.mGroup == group)) {
                 applyConstraints(system, wrapContent, verticalDimensionLocked,
-                        mTop, end, mY, mY + height, height, mVerticalBiasPercent, useRatio);
+                        mTop, end, mY, mY + height, height, mVerticalBiasPercent, useRatio && mDimensionRatioSide == VERTICAL);
             }
         } else {
             if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && mBottom.mGroup == group)) {
                 applyConstraints(system, wrapContent, verticalDimensionLocked,
-                        mTop, mBottom, mY, mY + height, height, mVerticalBiasPercent, useRatio);
+                        mTop, mBottom, mY, mY + height, height, mVerticalBiasPercent, useRatio && mDimensionRatioSide == VERTICAL);
+            }
+        }
+
+        if (useRatio) {
+            ArrayRow row = system.createRow();
+            if (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group)) {
+                if (mDimensionRatioSide == HORIZONTAL) {
+                    system.addConstraint(row.createRowDimensionRatio(right, left, bottom, top, mDimensionRatio));
+                } else {
+                    system.addConstraint(row.createRowDimensionRatio(bottom, top, right, left, mDimensionRatio));
+                }
             }
         }
     }
@@ -1866,14 +1939,14 @@ public class ConstraintWidget implements Solvable {
                 }
             } else  if (useRatio) {
                 system.addConstraint(EquationCreation
-                        .createRowEquals(system, begin, beginTarget, beginAnchorMargin,
+                        .createRowGreaterThan(system, begin, beginTarget, beginAnchorMargin,
                                 true));
                 system.addConstraint(EquationCreation
-                        .createRowEquals(system, end, endTarget, -1 * endAnchorMargin,
+                        .createRowLowerThan(system, end, endTarget, -1 * endAnchorMargin,
                                 true));
                 system.addConstraint(EquationCreation
                         .createRowCentering(system, begin, beginTarget,
-                                0, 0.5f, endTarget, end, 0, true));
+                          beginAnchorMargin, bias, endTarget, end, endAnchorMargin, true));
             } else {
                 system.addConstraint(system.createRow().createRowEquals(begin, beginTarget, beginAnchorMargin));
                 system.addConstraint(system.createRow().createRowEquals(end, endTarget, -1 * endAnchorMargin));

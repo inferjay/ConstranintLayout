@@ -38,6 +38,93 @@ public class WidgetsPositioningTest {
     }
 
     @Test
+    public void testDimensionRatio() {
+        final ConstraintWidget A = new ConstraintWidget(0, 0, 600, 600);
+        final ConstraintWidget B = new ConstraintWidget(100, 100);
+        ArrayList<ConstraintWidget> widgets = new ArrayList<ConstraintWidget>();
+        widgets.add(A);
+        widgets.add(B);
+        final int margin = 10;
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.LEFT, margin);
+        B.connect(ConstraintAnchor.Type.RIGHT, A, ConstraintAnchor.Type.RIGHT, margin);
+        B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.TOP, margin);
+        B.connect(ConstraintAnchor.Type.BOTTOM, A, ConstraintAnchor.Type.BOTTOM, margin);
+        B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.ANY);
+        B.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.ANY);
+        A.setDebugName("A");
+        B.setDebugName("B");
+        final float ratio = 0.3f;
+        // First, let's check vertical ratio
+        B.setDimensionRatio(ratio, ConstraintWidget.VERTICAL);
+        runTestOnWidgets(widgets, new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("a) A: " + A + " B: " + B);
+                assertEquals(B.getWidth(), A.getWidth() - 2 * margin);
+                assertEquals(B.getHeight(), (int) (ratio * B.getWidth()));
+                assertEquals(B.getTop() - A.getTop(), (int) ((A.getHeight() - B.getHeight()) / 2));
+                assertEquals(A.getBottom() - B.getBottom(), (int) ((A.getHeight() - B.getHeight()) / 2));
+            }
+        });
+        B.setVerticalBiasPercent(1);
+        runTestOnWidgets(widgets, new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("b) A: " + A + " B: " + B);
+                assertEquals(B.getWidth(), A.getWidth() - 2 * margin);
+                assertEquals(B.getHeight(), (int) (ratio * B.getWidth()));
+                assertEquals(B.getTop(), A.getHeight() - B.getHeight() - margin);
+                assertEquals(A.getBottom(), B.getBottom() + margin);
+            }
+        });
+        B.setVerticalBiasPercent(0);
+        runTestOnWidgets(widgets, new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("c) A: " + A + " B: " + B);
+                assertEquals(B.getWidth(), A.getWidth() - 2 * margin);
+                assertEquals(B.getHeight(), (int) (ratio * B.getWidth()));
+                assertEquals(B.getTop(), A.getTop() + margin);
+                assertEquals(B.getBottom(), A.getTop() + B.getHeight() + margin);
+            }
+        });
+        // Then, let's check horizontal ratio
+        B.setDimensionRatio(ratio, ConstraintWidget.HORIZONTAL);
+        runTestOnWidgets(widgets, new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("d) A: " + A + " B: " + B);
+                assertEquals(B.getHeight(), A.getHeight() - 2 * margin);
+                assertEquals(B.getWidth(), (int) (ratio * B.getHeight()));
+                assertEquals(B.getLeft() - A.getLeft(), (int) ((A.getWidth() - B.getWidth()) / 2));
+                assertEquals(A.getRight() - B.getRight(), (int) ((A.getWidth() - B.getWidth()) / 2));
+            }
+        });
+        B.setHorizontalBiasPercent(1);
+        runTestOnWidgets(widgets, new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("e) A: " + A + " B: " + B);
+                assertEquals(B.getHeight(), A.getHeight() - 2 * margin);
+                assertEquals(B.getWidth(), (int) (ratio * B.getHeight()));
+                assertEquals(B.getRight(), A.getRight() - margin);
+                assertEquals(B.getLeft(), A.getRight() - B.getWidth() - margin);
+            }
+        });
+        B.setHorizontalBiasPercent(0);
+        runTestOnWidgets(widgets, new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("f) A: " + A + " B: " + B);
+                assertEquals(B.getHeight(), A.getHeight() - 2 * margin);
+                assertEquals(B.getWidth(), (int) (ratio * B.getHeight()));
+                assertEquals(B.getRight(), A.getLeft() + margin + B.getWidth());
+                assertEquals(B.getLeft(), A.getLeft() + margin);
+            }
+        });
+    }
+
+    @Test
     public void testCreateManyVariables() {
         final ConstraintWidgetContainer rootWidget = new ConstraintWidgetContainer(0, 0, 600, 400);
         ConstraintWidget previous = new ConstraintWidget(0, 0, 100, 20);
