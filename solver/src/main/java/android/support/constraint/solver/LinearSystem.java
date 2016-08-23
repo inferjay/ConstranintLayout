@@ -95,7 +95,6 @@ public class LinearSystem {
         for (int i = 0; i < mRows.length; i++) {
             ArrayRow row = (ArrayRow) mRows[i];
             if (row != null) {
-                row.reset();
                 mCache.arrayRowPool.release(row);
             }
             mRows[i] = null;
@@ -107,7 +106,6 @@ public class LinearSystem {
      */
     private void releaseGoal() {
         if (mGoal != null) {
-            mGoal.reset();
             mCache.arrayRowPool.release((ArrayRow) mGoal);
         }
     }
@@ -167,7 +165,12 @@ public class LinearSystem {
                 ((ConstraintAnchor) anchor).resetSolverVariable(mCache);
                 variable = ((ConstraintAnchor) anchor).getSolverVariable();
             }
-            if (variable.id == -1) {
+            if (variable.id == -1
+                || variable.id > mVariablesID
+                || mCache.mIndexedVariables[variable.id] == null) {
+                if (variable.id != -1) {
+                    variable.reset();
+                }
                 mVariablesID++;
                 mNumColumns++;
                 variable.id = mVariablesID;
@@ -182,6 +185,8 @@ public class LinearSystem {
         ArrayRow row = mCache.arrayRowPool.acquire();
         if (row == null) {
             row = new ArrayRow(mCache);
+        } else {
+            row.reset();
         }
         return row;
     }
