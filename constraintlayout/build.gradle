@@ -1,14 +1,15 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
+def latestSdkVersion = 24
 
 android {
-    compileSdkVersion 24
+    compileSdkVersion latestSdkVersion
     buildToolsVersion "24"
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 24
+        targetSdkVersion latestSdkVersion
     }
 
     lintOptions {
@@ -30,6 +31,8 @@ archivesBaseName = 'constraint-layout'
 
 project.ext.pomName = 'Android ConstraintLayout'
 project.ext.pomDesc = 'ConstraintLayout for Android'
+
+
 
 task publishLocal(type: Upload) {
     configuration = configurations.archives
@@ -63,4 +66,41 @@ task publishLocal(type: Upload) {
             }
         }
     }
+}
+
+configurations {
+    doclava
+}
+dependencies {
+    doclava project(':doclava')
+}
+
+// Call upon the DocLava tool to generate API reference
+task makeJavadocs(type: Javadoc, dependsOn: project.configurations.doclava) {
+
+    def docDir = "javadoc-offline"
+    def templatesDir = "templates-sdk/"
+    options.addStringOption("templatedir", "${rootDir}/../../${templatesDir}")
+    if (project.hasProperty("online")) {
+        docDir = "javadoc-online"
+        options.addStringOption("yaml", "_book.yaml")
+        options.addStringOption("toroot", "/")
+        options.addStringOption("hdf", "android.whichdoc online")
+        options.addBooleanOption("devsite", true)
+        options.addBooleanOption("constraintSupportRef", true)
+    }
+
+    title = null
+    destinationDir = new File(buildDir, docDir)
+    source = 'src/main/java'
+    classpath = files("${rootDir}/../../prebuilts/sdk/${latestSdkVersion}/android.jar")
+    options.addStringOption "resourcesdir", "${rootDir}/constraintlayout/resources/"
+    options.addStringOption "federate Android", "http://developer.android.com"
+    options.addStringOption "federationapi Android",
+                "${rootDir}/../../prebuilts/sdk/api/${latestSdkVersion}.txt"
+    options.encoding = "UTF-8"
+    options.doclet = "com.google.doclava.Doclava"
+    options.docletpath = configurations.doclava.files.asType(List)
+    exclude '**/BuildConfig.java'
+    exclude '**/R.java'
 }

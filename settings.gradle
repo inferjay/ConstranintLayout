@@ -1,1 +1,5 @@
 include 'solver', 'constraintlayout'
+
+File externalRoot = new File(rootDir, '../../external')
+include ':doclava'
+project(':doclava').projectDir = new File(externalRoot, 'doclava')
