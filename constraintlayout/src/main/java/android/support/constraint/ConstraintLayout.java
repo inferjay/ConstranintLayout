@@ -298,7 +298,7 @@ public class ConstraintLayout extends ViewGroup {
                 if (layoutParams.baselineToBaseline != UNSET) {
                     View view = mChildrenByIds.get(layoutParams.baselineToBaseline);
                     ConstraintWidget target = getTargetWidget(layoutParams.baselineToBaseline);
-                    if (target != null) {
+                    if (target != null && view != null && view.getLayoutParams() instanceof LayoutParams) {
                         LayoutParams targetParams = (LayoutParams) view.getLayoutParams();
                         layoutParams.needsBaseline = true;
                         targetParams.needsBaseline = true;
