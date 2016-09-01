@@ -210,6 +210,8 @@ public class ConstraintLayout extends ViewGroup {
                 int resolvedLeftToRight = layoutParams.resolvedLeftToRight;
                 int resolvedRightToLeft = layoutParams.resolvedRightToLeft;
                 int resolvedRightToRight = layoutParams.resolvedRightToRight;
+                int resolveGoneLeftMargin = layoutParams.resolveGoneLeftMargin;
+                int resolveGoneRightMargin = layoutParams.resolveGoneRightMargin;
 
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
                     // Pre JB MR1, left/right should take precedence, unless they are
@@ -218,6 +220,8 @@ public class ConstraintLayout extends ViewGroup {
                     resolvedLeftToRight = layoutParams.leftToRight;
                     resolvedRightToLeft = layoutParams.rightToLeft;
                     resolvedRightToRight = layoutParams.rightToRight;
+                    resolveGoneLeftMargin = layoutParams.goneLeftMargin;
+                    resolveGoneRightMargin = layoutParams.goneRightMargin;
                     if (resolvedLeftToLeft == UNSET && resolvedLeftToRight == UNSET) {
                         if (layoutParams.startToStart != UNSET) {
                             resolvedLeftToLeft = layoutParams.startToStart;
@@ -239,13 +243,15 @@ public class ConstraintLayout extends ViewGroup {
                     ConstraintWidget target = getTargetWidget(resolvedLeftToLeft);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.LEFT, target,
-                                ConstraintAnchor.Type.LEFT, layoutParams.leftMargin);
+                                ConstraintAnchor.Type.LEFT, layoutParams.leftMargin,
+                                resolveGoneLeftMargin);
                     }
                 } else if (resolvedLeftToRight != UNSET) {
                     ConstraintWidget target = getTargetWidget(resolvedLeftToRight);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.LEFT, target,
-                                ConstraintAnchor.Type.RIGHT, layoutParams.leftMargin);
+                                ConstraintAnchor.Type.RIGHT, layoutParams.leftMargin,
+                                resolveGoneLeftMargin);
                     }
                 }
 
@@ -254,13 +260,15 @@ public class ConstraintLayout extends ViewGroup {
                     ConstraintWidget target = getTargetWidget(resolvedRightToLeft);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.RIGHT, target,
-                                ConstraintAnchor.Type.LEFT, layoutParams.rightMargin);
+                                ConstraintAnchor.Type.LEFT, layoutParams.rightMargin,
+                                resolveGoneRightMargin);
                     }
                 } else if (resolvedRightToRight != UNSET) {
                     ConstraintWidget target = getTargetWidget(resolvedRightToRight);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.RIGHT, target,
-                                ConstraintAnchor.Type.RIGHT, layoutParams.rightMargin);
+                                ConstraintAnchor.Type.RIGHT, layoutParams.rightMargin,
+                                resolveGoneRightMargin);
                     }
                 }
 
@@ -269,13 +277,15 @@ public class ConstraintLayout extends ViewGroup {
                     ConstraintWidget target = getTargetWidget(layoutParams.topToTop);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.TOP, target,
-                                ConstraintAnchor.Type.TOP, layoutParams.topMargin);
+                                ConstraintAnchor.Type.TOP, layoutParams.topMargin,
+                                layoutParams.goneTopMargin);
                     }
                 } else if (layoutParams.topToBottom != UNSET) {
                     ConstraintWidget target = getTargetWidget(layoutParams.topToBottom);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.TOP, target,
-                                ConstraintAnchor.Type.BOTTOM, layoutParams.topMargin);
+                                ConstraintAnchor.Type.BOTTOM, layoutParams.topMargin,
+                                layoutParams.goneTopMargin);
                     }
                 }
 
@@ -284,13 +294,15 @@ public class ConstraintLayout extends ViewGroup {
                     ConstraintWidget target = getTargetWidget(layoutParams.bottomToTop);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.BOTTOM, target,
-                                ConstraintAnchor.Type.TOP, layoutParams.bottomMargin);
+                                ConstraintAnchor.Type.TOP, layoutParams.bottomMargin,
+                                layoutParams.goneBottomMargin);
                     }
                 } else if (layoutParams.bottomToBottom != UNSET) {
                     ConstraintWidget target = getTargetWidget(layoutParams.bottomToBottom);
                     if (target != null) {
                         widget.immediateConnect(ConstraintAnchor.Type.BOTTOM, target,
-                                ConstraintAnchor.Type.BOTTOM, layoutParams.bottomMargin);
+                                ConstraintAnchor.Type.BOTTOM, layoutParams.bottomMargin,
+                                layoutParams.goneBottomMargin);
                     }
                 }
 
@@ -305,7 +317,7 @@ public class ConstraintLayout extends ViewGroup {
                         ConstraintAnchor baseline = widget.getAnchor(ConstraintAnchor.Type.BASELINE);
                         ConstraintAnchor targetBaseline =
                                 target.getAnchor(ConstraintAnchor.Type.BASELINE);
-                        baseline.connect(targetBaseline, 0, ConstraintAnchor.Strength.STRONG,
+                        baseline.connect(targetBaseline, 0, -1, ConstraintAnchor.Strength.STRONG,
                                 ConstraintAnchor.USER_CREATOR, true);
 
                         widget.getAnchor(ConstraintAnchor.Type.TOP).reset();
@@ -350,7 +362,6 @@ public class ConstraintLayout extends ViewGroup {
                 if (layoutParams.dimensionRatio > 0) {
                     widget.setDimensionRatio(layoutParams.dimensionRatio);
                 }
-
             }
         }
     }
@@ -678,6 +689,13 @@ public class ConstraintLayout extends ViewGroup {
         public int endToStart = UNSET;
         public int endToEnd = UNSET;
 
+        public int goneLeftMargin = UNSET;
+        public int goneTopMargin = UNSET;
+        public int goneRightMargin = UNSET;
+        public int goneBottomMargin = UNSET;
+        public int goneStartMargin = UNSET;
+        public int goneEndMargin = UNSET;
+
         public float horizontalBias = 0.5f;
         public float verticalBias = 0.5f;
         public float dimensionRatio = 0f;
@@ -695,6 +713,8 @@ public class ConstraintLayout extends ViewGroup {
         int resolvedLeftToRight = UNSET;
         int resolvedRightToLeft = UNSET;
         int resolvedRightToRight = UNSET;
+        int resolveGoneLeftMargin = UNSET;
+        int resolveGoneRightMargin = UNSET;
 
         ConstraintWidget widget = new ConstraintWidget();
 
@@ -782,6 +802,18 @@ public class ConstraintLayout extends ViewGroup {
                     if (endToEnd == UNSET) {
                         endToEnd = a.getInt(attr, UNSET);
                     }
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_goneMarginLeft) {
+                    goneLeftMargin = a.getDimensionPixelSize(attr, goneLeftMargin);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_goneMarginTop) {
+                    goneTopMargin = a.getDimensionPixelSize(attr, goneTopMargin);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_goneMarginRight) {
+                    goneRightMargin = a.getDimensionPixelSize(attr, goneRightMargin);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_goneMarginBottom) {
+                    goneBottomMargin = a.getDimensionPixelSize(attr, goneBottomMargin);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_goneMarginStart) {
+                    goneStartMargin = a.getDimensionPixelSize(attr, goneStartMargin);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_goneMarginEnd) {
+                    goneEndMargin = a.getDimensionPixelSize(attr, goneEndMargin);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_bias) {
                     horizontalBias = a.getFloat(attr, horizontalBias);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_bias) {
@@ -865,6 +897,11 @@ public class ConstraintLayout extends ViewGroup {
             resolvedLeftToLeft = UNSET;
             resolvedLeftToRight = UNSET;
 
+            resolveGoneLeftMargin = UNSET;
+            resolveGoneRightMargin = UNSET;
+            resolveGoneLeftMargin = goneLeftMargin;
+            resolveGoneRightMargin = goneRightMargin;
+
             boolean isRtl = (View.LAYOUT_DIRECTION_RTL == getLayoutDirection());
             // Post JB MR1, if start/end are defined, they take precedence over left/right
             if (isRtl) {
@@ -879,6 +916,12 @@ public class ConstraintLayout extends ViewGroup {
                 if (endToEnd != UNSET) {
                     resolvedLeftToLeft = endToEnd;
                 }
+                if (goneStartMargin != UNSET) {
+                    resolveGoneRightMargin = goneStartMargin;
+                }
+                if (goneEndMargin != UNSET) {
+                    resolveGoneLeftMargin = goneEndMargin;
+                }
             } else {
                 if (startToEnd != UNSET) {
                     resolvedLeftToRight = startToEnd;
@@ -891,6 +934,12 @@ public class ConstraintLayout extends ViewGroup {
                 }
                 if (endToEnd != UNSET) {
                     resolvedRightToRight = endToEnd;
+                }
+                if (goneStartMargin != UNSET) {
+                    resolveGoneLeftMargin = goneStartMargin;
+                }
+                if (goneEndMargin != UNSET) {
+                    resolveGoneRightMargin = goneEndMargin;
                 }
             }
             // if no constraint is defined via RTL attributes, use left/right if present
