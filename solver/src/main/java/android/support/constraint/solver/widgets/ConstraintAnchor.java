@@ -59,14 +59,10 @@ public class ConstraintAnchor {
     public static final int SCOUT_CREATOR = 1;
     public static final int AUTO_CONSTRAINT_CREATOR = 2;
 
-    private static final int UNSET_GONE_MARGIN = -1;
-
     final ConstraintWidget mOwner;
     final Type mType;
     ConstraintAnchor mTarget;
-    int mMargin = 0;
-    int mGoneMargin = UNSET_GONE_MARGIN;
-
+    int mMargin;
     private Strength mStrength = Strength.NONE;
     private ConnectionType mConnectionType = ConnectionType.RELAXED;
     private int mConnectionCreator = USER_CREATOR;
@@ -136,10 +132,6 @@ public class ConstraintAnchor {
         if (mOwner.getVisibility() == ConstraintWidget.GONE) {
             return 0;
         }
-        if (mGoneMargin > UNSET_GONE_MARGIN && mTarget != null
-                && mTarget.mOwner.getVisibility() == ConstraintWidget.GONE) {
-            return mGoneMargin;
-        }
         return mMargin;
     }
 
@@ -185,7 +177,6 @@ public class ConstraintAnchor {
     public void reset() {
         mTarget = null;
         mMargin = 0;
-        mGoneMargin = UNSET_GONE_MARGIN;
         mStrength = Strength.STRONG;
         mConnectionCreator = USER_CREATOR;
         mConnectionType = ConnectionType.RELAXED;
@@ -201,26 +192,23 @@ public class ConstraintAnchor {
      */
     public boolean connect(ConstraintAnchor toAnchor, int margin, Strength strength,
             int creator) {
-        return connect(toAnchor, margin, -1, strength, creator, false);
+        return connect(toAnchor, margin, strength, creator, false);
     }
 
     /**
      * Connects this anchor to another one.
-     *
      * @param toAnchor
      * @param margin
-     * @param goneMargin
      * @param strength
      * @param creator
      * @param forceConnection
      * @return true if the connection succeeds.
      */
-    public boolean connect(ConstraintAnchor toAnchor, int margin, int goneMargin,
-                           Strength strength, int creator, boolean forceConnection) {
+    public boolean connect(ConstraintAnchor toAnchor, int margin, Strength strength,
+            int creator, boolean forceConnection) {
         if (toAnchor == null) {
             mTarget = null;
             mMargin = 0;
-            mGoneMargin = UNSET_GONE_MARGIN;
             mStrength = Strength.NONE;
             mConnectionCreator = AUTO_CONSTRAINT_CREATOR;
             return true;
@@ -247,7 +235,7 @@ public class ConstraintAnchor {
      * @return true if the connection succeeds.
      */
     public boolean connect(ConstraintAnchor toAnchor, int margin, int creator) {
-        return connect(toAnchor, margin, UNSET_GONE_MARGIN, Strength.STRONG, creator, false);
+        return connect(toAnchor, margin, Strength.STRONG, creator, false);
     }
 
     /**
@@ -257,7 +245,7 @@ public class ConstraintAnchor {
      * @return true if the connection succeeds.
      */
     public boolean connect(ConstraintAnchor toAnchor, int margin) {
-        return connect(toAnchor, margin, UNSET_GONE_MARGIN, Strength.STRONG, USER_CREATOR, false);
+        return connect(toAnchor, margin, Strength.STRONG, USER_CREATOR, false);
     }
 
     /**
@@ -380,16 +368,6 @@ public class ConstraintAnchor {
     public void setMargin(int margin) {
         if (isConnected()) {
             mMargin = margin;
-        }
-    }
-
-    /**
-     * Set the gone margin of the connection (if there's one)
-     * @param margin the new margin of the connection
-     */
-    public void setGoneMargin(int margin) {
-        if (isConnected()) {
-            mGoneMargin = margin;
         }
     }
 

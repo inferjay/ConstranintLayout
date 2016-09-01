@@ -769,29 +769,6 @@ public class ConstraintWidget implements Solvable {
     }
 
     /**
-     * Set the margin to be used when connected to a widget with a visibility of GONE
-     *
-     * @param type the anchor to set the margin on
-     * @param goneMargin the margin value to use
-     */
-    public void setGoneMargin(ConstraintAnchor.Type type, int goneMargin) {
-        switch (type) {
-            case LEFT: {
-                mLeft.mGoneMargin = goneMargin;
-            } break;
-            case TOP: {
-                mTop.mGoneMargin = goneMargin;
-            } break;
-            case RIGHT: {
-                mRight.mGoneMargin = goneMargin;
-            } break;
-            case BOTTOM: {
-                mBottom.mGoneMargin = goneMargin;
-            } break;
-        }
-    }
-
-    /**
      * Update the draw position to match the true position.
      * If animating is on, the transition between the old
      * position and new position will be animated...
@@ -1084,14 +1061,12 @@ public class ConstraintWidget implements Solvable {
      * @param target
      * @param endType
      * @param margin
-     * @param goneMargin
      */
     public void immediateConnect(ConstraintAnchor.Type startType, ConstraintWidget target,
-                                 ConstraintAnchor.Type endType, int margin, int goneMargin) {
+                                 ConstraintAnchor.Type endType, int margin) {
         ConstraintAnchor startAnchor = getAnchor(startType);
         ConstraintAnchor endAnchor = target.getAnchor(endType);
-        startAnchor.connect(endAnchor, margin, goneMargin, ConstraintAnchor.Strength.STRONG,
-                ConstraintAnchor.USER_CREATOR, true);
+        startAnchor.connect(endAnchor, margin, ConstraintAnchor.Strength.STRONG, ConstraintAnchor.USER_CREATOR, true);
     }
 
     /**
@@ -1779,8 +1754,6 @@ public class ConstraintWidget implements Solvable {
         SolverVariable beginTarget = system.createObjectVariable(beginAnchor.getTarget());
         SolverVariable endTarget = system.createObjectVariable(endAnchor.getTarget());
 
-        int beginAnchorMargin = beginAnchor.getMargin();
-        int endAnchorMargin = endAnchor.getMargin();
         if (mVisibility == ConstraintWidget.GONE) {
             dimension = 0;
         }
@@ -1797,7 +1770,7 @@ public class ConstraintWidget implements Solvable {
                 }
             }
         } else if (beginTarget != null && endTarget == null) {
-            system.addConstraint(system.createRow().createRowEquals(begin, beginTarget, beginAnchorMargin));
+            system.addConstraint(system.createRow().createRowEquals(begin, beginTarget, beginAnchor.mMargin));
             if (wrapContent) {
                 system.addConstraint(EquationCreation.createRowEquals(system, end, begin, 0, true));
             } else {
@@ -1808,7 +1781,7 @@ public class ConstraintWidget implements Solvable {
                 }
             }
         } else if (beginTarget == null && endTarget != null) {
-            system.addConstraint(system.createRow().createRowEquals(end, endTarget, -1 * endAnchorMargin));
+            system.addConstraint(system.createRow().createRowEquals(end, endTarget, -1 * endAnchor.mMargin));
             if (wrapContent) {
                 system.addConstraint(EquationCreation.createRowEquals(system, end, begin, 0, true));
             } else {
@@ -1829,17 +1802,17 @@ public class ConstraintWidget implements Solvable {
 
                 if (beginAnchor.getStrength() != endAnchor.getStrength()) {
                     if (beginAnchor.getStrength() == ConstraintAnchor.Strength.STRONG) {
-                        system.addConstraint(system.createRow().createRowEquals(begin, beginTarget, beginAnchorMargin));
+                        system.addConstraint(system.createRow().createRowEquals(begin, beginTarget, beginAnchor.mMargin));
                         SolverVariable slack = system.createSlackVariable();
                         ArrayRow row = system.createRow();
-                        row.createRowLowerThan(end, endTarget, slack, -1 * endAnchorMargin);
+                        row.createRowLowerThan(end, endTarget, slack, -1 * endAnchor.mMargin);
                         system.addConstraint(row);
                     } else {
                         SolverVariable slack = system.createSlackVariable();
                         ArrayRow row = system.createRow();
-                        row.createRowGreaterThan(begin, beginTarget, slack, beginAnchorMargin);
+                        row.createRowGreaterThan(begin, beginTarget, slack, beginAnchor.mMargin);
                         system.addConstraint(row);
-                        system.addConstraint(system.createRow().createRowEquals(end, endTarget, -1 * endAnchorMargin));
+                        system.addConstraint(system.createRow().createRowEquals(end, endTarget, -1 * endAnchor.mMargin));
                     }
                 } else {
                     if (beginTarget == endTarget) {
@@ -1851,32 +1824,32 @@ public class ConstraintWidget implements Solvable {
                                 ConstraintAnchor.ConnectionType.STRICT);
                         system.addConstraint(EquationCreation
                                 .createRowGreaterThan(system, begin, beginTarget,
-                                  beginAnchorMargin, useBidirectionalError));
+                                        beginAnchor.getMargin(), useBidirectionalError));
                         useBidirectionalError = (endAnchor.getConnectionType() !=
                                 ConstraintAnchor.ConnectionType.STRICT);
                         system.addConstraint(EquationCreation
                                 .createRowLowerThan(system, end, endTarget,
-                                        -1 * endAnchorMargin,
+                                        -1 * endAnchor.getMargin(),
                                         useBidirectionalError));
                         system.addConstraint(EquationCreation
                                 .createRowCentering(system, begin, beginTarget,
-                                        beginAnchorMargin,
-                                        bias, endTarget, end, endAnchorMargin, false));
+                                        beginAnchor.getMargin(),
+                                        bias, endTarget, end, endAnchor.getMargin(), false));
                     }
                 }
             } else  if (useRatio) {
                 system.addConstraint(EquationCreation
-                        .createRowEquals(system, begin, beginTarget, beginAnchorMargin,
+                        .createRowEquals(system, begin, beginTarget, beginAnchor.getMargin(),
                                 true));
                 system.addConstraint(EquationCreation
-                        .createRowEquals(system, end, endTarget, -1 * endAnchorMargin,
+                        .createRowEquals(system, end, endTarget, -1 * endAnchor.getMargin(),
                                 true));
                 system.addConstraint(EquationCreation
                         .createRowCentering(system, begin, beginTarget,
                                 0, 0.5f, endTarget, end, 0, true));
             } else {
-                system.addConstraint(system.createRow().createRowEquals(begin, beginTarget, beginAnchorMargin));
-                system.addConstraint(system.createRow().createRowEquals(end, endTarget, -1 * endAnchorMargin));
+                system.addConstraint(system.createRow().createRowEquals(begin, beginTarget, beginAnchor.mMargin));
+                system.addConstraint(system.createRow().createRowEquals(end, endTarget, -1 * endAnchor.mMargin));
             }
         }
     }
