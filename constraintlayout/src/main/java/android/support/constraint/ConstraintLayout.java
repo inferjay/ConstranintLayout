@@ -613,6 +613,9 @@ public class ConstraintLayout extends ViewGroup {
         final int widgetsCount = getChildCount();
         for (int i = 0; i < widgetsCount; i++) {
             final View child = getChildAt(i);
+            if (child.getVisibility() == GONE) {
+                continue;
+            }
             LayoutParams params = (LayoutParams) child.getLayoutParams();
             ConstraintWidget widget = params.widget;
 
@@ -663,10 +666,18 @@ public class ConstraintLayout extends ViewGroup {
 
     public static class LayoutParams extends ViewGroup.MarginLayoutParams {
         public static final int PARENT_ID = 0;
-        public static int UNSET = -1;
+        public static final int UNSET = -1;
 
-        public static int HORIZONTAL = 0;
-        public static int VERTICAL = 1;
+        public static final int HORIZONTAL = 0;
+        public static final int VERTICAL = 1;
+
+        public static final int LEFT = 1;
+        public static final int RIGHT = 2;
+        public static final int TOP = 3;
+        public static final int BOTTOM = 4;
+        public static final int BASELINE = 5;
+        public static final int START = 6;
+        public static final int END =  7;
 
         public boolean needsBaseline = false;
         public boolean isGuideline = false;
@@ -852,7 +863,13 @@ public class ConstraintLayout extends ViewGroup {
                     Log.w(TAG, "Unknown attribute 0x" + Integer.toHexString(attr));
                 }
             }
+            validate();
+        }
 
+        public void validate() {
+            isGuideline = false;
+            horizontalLock = true;
+            verticalLock = true;
             if (width == 0) {
                 horizontalLock = false;
             }
