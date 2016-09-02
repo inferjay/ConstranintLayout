@@ -23,6 +23,7 @@ android {
 
 dependencies {
     compile project(':solver')
+    compile 'com.android.support:support-annotations:24.1.1'
 }
 
 archivesBaseName = 'constraint-layout'
