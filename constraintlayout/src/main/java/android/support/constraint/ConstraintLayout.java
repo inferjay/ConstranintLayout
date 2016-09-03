@@ -36,15 +36,243 @@ import java.util.ArrayList;
 import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
 
 /**
- * A Layout where the positions of the children is described as constraints in relation to each
- * other or to the parent.
+ * A {@code ConstraintLayout} is a {@link android.view.ViewGroup} which allows you
+ * to position and size widgets in a flexible way.
+ *<p>
+ *     <b>Note:</b> {@code ConstraintLayout} is available as a support library that you can use
+ *     on Android systems starting with API level 9 (Gingerbread).
+ *     As such, we are planning in enriching its API and capabilities over time.
+ *     This documentation will reflects the changes.
+ *</p>
  * <p>
- * <p>
- * Note that you cannot have a circular dependency in constraints
+ * There are currently various types of constraints that you can use:
+ * <ul>
+ *     <li>
+ *         <a href="#RelativePositioning">Relative positioning</a>
+ *     </li>
+ *     <li>
+ *         <a href="#Margins">Margins</a>
+ *     </li>
+ *     <li>
+ *         <a href="#CenteringPositioning">Centering positioning</a>
+ *     </li>
+ *     <li>
+ *         <a href="#VisibilityBehavior">Visibility behavior</a>
+ *     </li>
+ *     <li>
+ *         <a href="#DimensionConstraints">Dimension constraints</a>
+ *     </li>
+ *     <li>
+ *         <a href="#VirtualHelpers">Virtual Helpers objects</a>
+ *     </li>
+ * </ul>
  * </p>
+ *
+ * <p>
+ * Note that you cannot have a circular dependency in constraints.
+ * </p>
+ * <p>
  * Also see {@link ConstraintLayout.LayoutParams
  * ConstraintLayout.LayoutParams} for layout attributes
  * </p>
+ *
+ * <div class="special reference">
+ * <h3>Developer Guide</h3>
+ *
+ * <h4 id="RelativePositioning"> Relative positioning </h4>
+ * <p>
+ *     Relative positioning is one of the basic building block of creating layouts in ConstraintLayout.
+ *     Those constraints allow you to position a given widget relative to another one. You can constrain
+ *     a widget on the horizontal and vertical axis:
+ *     <ul>
+ *         <li>Horizontal Axis: Left, Right, Start and End sides</li>
+ *         <li>Vertical Axis: top, bottom sides and text baseline</li>
+ *     </ul>
+ *     <p>
+ *     The general concept is to constrain a given side of a widget to another side of any other widget.
+ *     <p>
+ *     For example, in order to position button B to the right of button A (Fig. 1):
+ *     <br><div align="center">
+ *       <img width="300px" src="{@docRoot}/doc-files/relative-positioning.png">
+ *           <br><b><i>Fig. 1 - Relative Positioning Example</i></b>
+ *     </div>
+ *     </p>
+ *     <p>
+ *         you would need to do:
+ *     </p>
+ *     <pre>{@code
+ *         <Button android:id="@+id/buttonA" ... />
+ *         <Button android:id="@+id/buttonB" ...
+ *                 app:layout_constraintLeft_toRightOf="@+id/buttonA" />
+ *         }
+ *     </pre>
+ *     This tells the system that we want the left side of button B to be constrained to the right side of button A.
+ *     Such a position constraint means that the system will try to have both sides share the same location.
+ *     <br><div align="center" >
+ *       <img width="350px" src="{@docRoot}/doc-files/relative-positioning-constraints.png">
+ *           <br><b><i>Fig. 2 - Relative Positioning Constraints</i></b>
+ *     </div>
+ *
+ *     <p>Here is the list of available constraints (Fig. 2):</p>
+ *     <ul>
+ *         <li>{@code layout_constraintLeft_toLeftOf}</li>
+ *         <li>{@code layout_constraintLeft_toRightOf}</li>
+ *         <li>{@code layout_constraintRight_toLeftOf}</li>
+ *         <li>{@code layout_constraintRight_toRightOf}</li>
+ *         <li>{@code layout_constraintTop_toTopOf}</li>
+ *         <li>{@code layout_constraintTop_toBottomOf}</li>
+ *         <li>{@code layout_constraintBottom_toTopOf}</li>
+ *         <li>{@code layout_constraintBottom_toBottomOf}</li>
+ *         <li>{@code layout_constraintBaseline_toBaselineOf}</li>
+ *         <li>{@code layout_constraintStart_toEndOf}</li>
+ *         <li>{@code layout_constraintStart_toStartOf}</li>
+ *         <li>{@code layout_constraintEnd_toStartOf}</li>
+ *         <li>{@code layout_constraintEnd_toEndOf}</li>
+ *     </ul>
+ *     <p>
+ *     They all takes a reference {@code id} to another widget, or the {@code parent} (which will reference the parent container, i.e. the ConstraintLayout):
+ *     <pre>{@code
+ *         <Button android:id="@+id/buttonB" ...
+ *                 app:layout_constraintLeft_toLeftOf="parent" />
+ *         }
+ *     </pre>
+ *
+ *     </p>
+ *
+ * <h4 id="Margins"> Margins </h4>
+ * <p>
+ *     <div align="center" >
+ *       <img width="325px" src="{@docRoot}/doc-files/relative-positioning-margin.png">
+ *           <br><b><i>Fig. 3 - Relative Positioning Margins</i></b>
+ *     </div>
+ *      <p>If side margins are set, they will be applied to the corresponding constraints (if they exist) (Fig. 3), enforcing
+ *      the margin as a space between the target and the source side. The usual layout margins attributes can be used to this effect:
+ *      <ul>
+ *          <li>{@code android:layout_marginStart}</li>
+ *          <li>{@code android:layout_marginEnd}</li>
+ *          <li>{@code android:layout_marginLeft}</li>
+ *          <li>{@code android:layout_marginTop}</li>
+ *          <li>{@code android:layout_marginRight}</li>
+ *          <li>{@code android:layout_marginBottom}</li>
+ *      </ul>
+ *      <p>Note that a margin can only be positive or equals to zero, and takes a {@link Dimension}.</p>
+ * <h4 id="GoneMargin"> Margins when connected to a GONE widget</h4>
+ *      <p>When a position constraint target's visibility is {@code View.GONE}, you can also indicates a different
+ *      margin value to be used using the following attributes:</p>
+ *      <ul>
+ *          <li>{@code layout_goneMarginStart}</li>
+ *          <li>{@code layout_goneMarginEnd}</li>
+ *          <li>{@code layout_goneMarginLeft}</li>
+ *          <li>{@code layout_goneMarginTop}</li>
+ *          <li>{@code layout_goneMarginRight}</li>
+ *          <li>{@code layout_goneMarginBottom}</li>
+ *      </ul>
+ * </p>
+
+ * </p>
+ * <h4 id="CenteringPositioning"> Centering positioning and bias</h4>
+ * <p>
+ *     A useful aspect of {@code ConstraintLayout} is in how it deals with "impossible" constrains. For example, if
+ *     we have something like:
+ *     <pre>{@code
+ *         <android.support.constraint.ConstraintLayout ...>
+ *             <Button android:id="@+id/button" ...
+ *                 app:layout_constraintLeft_toLeftOf="parent"
+ *                 app:layout_constraintRight_toRightOf="parent/>
+ *         </>
+ *         }
+ *     </pre>
+ * </p>
+ * <p>
+ *     Unless the {@code ConstraintLayout} happens to have the exact same size as the {@code Button}, both constraints
+ *     cannot be satisfied at the same time (both sides cannot be where we want them to be).
+ *     <p><div align="center" >
+ *       <img width="325px" src="{@docRoot}/doc-files/centering-positioning.png">
+ *           <br><b><i>Fig. 4 - Centering Positioning</i></b>
+ *     </div>
+ *     <p>
+ *     What happens in this case is that the constraints act like opposite forces
+ *     pulling the widget apart equally (Fig. 4); such that the widget will end up being centered in the parent container.
+ *     This will apply similarly for vertical constraints.
+ * </p>
+ * <h5 id="Bias">Bias</h5>
+ *     <p>
+ *        The default when encountering such opposite constraints is to center the widget; but you can tweak
+ *        the positioning to favor one side over another using the bias attributes:
+ *        <ul>
+ *            <li>{@code layout_constraintHorizontal_bias}</li>
+ *            <li>{@code layout_constraintVertical_bias}</li>
+ *        </ul>
+ *     <p><div align="center" >
+ *       <img width="325px" src="{@docRoot}/doc-files/centering-positioning-bias.png">
+ *           <br><b><i>Fig. 5 - Centering Positioning with Bias</i></b>
+ *     </div>
+ *     <p>
+ *        For example the following will make the left side with a 30% bias instead of the default 50%, such that the left side will be
+ *        shorter, with the widget leaning more toward the left side (Fig. 5):
+ *        </p>
+ *     <pre>{@code
+ *         <android.support.constraint.ConstraintLayout ...>
+ *             <Button android:id="@+id/button" ...
+ *                 app:layout_constraintHorizontal_bias="0.3"
+ *                 app:layout_constraintLeft_toLeftOf="parent"
+ *                 app:layout_constraintRight_toRightOf="parent/>
+ *         </>
+ *         }
+ *     </pre>
+ *     Using bias, you can craft User Interfaces that will better adapt to screen sizes changes.
+ *     </p>
+ * </p>
+ *
+ * <h4 id="VisibilityBehavior"> Visibility behavior </h4>
+ * <p>
+ *     {@code ConstraintLayout} has a specific handling of widgets being marked as {@code View.GONE}.
+ *     <p>{@code GONE} widgets, as usual, are not going to be displayed and are not part of the layout itself (i.e. their actual dimensions
+ *      will not be changed if marked as {@code GONE}).
+ *
+ *     <p>But in terms of the layout computations, {@code GONE} widgets are still part of it, with an important distinction:
+ *     <ul>
+ *         <li> For the layout pass, their dimension will be considered as if zero (basically, they will be resolved to a point)</li>
+ *         <li> If they have constraints to other widgets they will still be respected, but any margins will be as if equals to zero</li>
+ *     </ul>
+ *
+ *     <p><div align="center" >
+ *       <img width="350px" src="{@docRoot}/doc-files/visibility-behavior.png">
+ *           <br><b><i>Fig. 6 - Visibility Behavior</i></b>
+ *     </div>
+ *     <p>This specific behavior allows to build layout where you can temporarily mark widgets as being {@code GONE},
+ *     without breaking the layout (Fig. 6), which can be particularly useful when doing simple layout animations.
+ *     <p><b>Note: </b>The margin used will be the margin that B had defined when connecting to A (see Fig. 6 for an example).
+ *     In some cases, this might not be the margin you want (e.g. A had a 100dp margin to the side of its container,
+ *     B only a 16dp to A, marking
+ *     A as gone, B will have a margin of 16dp to the container).
+ *     For this reason, you can specify an alternate
+ *     margin value to be used when the connection is to a widget being marked as gone (see <a href="#GoneMargin">the section above about the gone margin attributes</a>).
+ * </p>
+ *
+ * <h4 id="DimensionConstraints"> Dimensions constraints </h4>
+ * <p>
+ *     The dimension of the widgets can be specified by setting the {@code android:layout_width} and
+ *     {@code android:layout_height} attributes in 3 different ways:
+ *     <ul>
+ *         <li>Using a specific dimension (either a literal value such as {@code 123dp} or a {@code Dimension} reference)</li>
+ *         <li>Using {@code WRAP_CONTENT}, which will ask the widget to compute its own size</li>
+ *         <li>Using {@code 0dp}, which is the equivalent of "{@code MATCH_CONSTRAINTS}"</li>
+ *     </ul>
+ *     <p><div align="center" >
+ *       <img width="325px" src="{@docRoot}/doc-files/dimension-match-constraints.png">
+ *           <br><b><i>Fig. 7 - Dimension Constraints</i></b>
+ *     </div>
+ *     The first two works in a similar fashion as other layouts. The last one will resize the widget in such a way as
+ *     matching the constraints that are set (see Fig. 7, (a) is wrap_content, (b) is 0dp). If margins are set, they will be taken in account
+ *     in the computation (Fig. 7, (c) with 0dp).
+ * </p>
+ * <h4 id="VirtualHelpers"> Virtual Helper objects </h4>
+ * <p>In addition to the intrinsic capabilities detailed previously, you can also use special helper objects
+ * in {@code ConstraintLayout} to help you with your layout. Currently, the {@see Guideline} object allows you to create
+ * Horizontal and Vertical guidelines which are positioned relative to the {@code ConstraintLayout} container. Widgets can
+ * then be positioned by constraining them to such guidelines.</p>
+ * </div>
  */
 public class ConstraintLayout extends ViewGroup {
     // For now, disallow embedded (single-layer resolution) situations.
@@ -385,7 +613,7 @@ public class ConstraintLayout extends ViewGroup {
         return view == null ? null : ((LayoutParams) view.getLayoutParams()).widget;
     }
 
-    void internalMeasureChildren(int parentWidthSpec, int parentHeightSpec) {
+    private void internalMeasureChildren(int parentWidthSpec, int parentHeightSpec) {
         int heightPadding = getPaddingTop() + getPaddingBottom();
         int widthPadding = getPaddingLeft() + getPaddingRight();
 
@@ -538,7 +766,7 @@ public class ConstraintLayout extends ViewGroup {
         }
     }
 
-    void setSelfDimensionBehaviour(int widthMeasureSpec, int heightMeasureSpec) {
+    private void setSelfDimensionBehaviour(int widthMeasureSpec, int heightMeasureSpec) {
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
