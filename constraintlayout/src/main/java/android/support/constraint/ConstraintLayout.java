@@ -893,6 +893,8 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     public static class LayoutParams extends ViewGroup.MarginLayoutParams {
+        public static final int MATCH_CONSTRAINT = 0;
+
         public static final int PARENT_ID = 0;
         public static final int UNSET = -1;
 

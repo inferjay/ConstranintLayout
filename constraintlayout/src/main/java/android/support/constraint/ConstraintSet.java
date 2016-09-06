@@ -1,0 +1,658 @@
+/*
+* Copyright (C) 2016 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+package android.support.constraint;
+
+import android.content.Context;
+import android.os.Build;
+import android.support.annotation.Dimension;
+import android.support.annotation.IdRes;
+import android.support.annotation.IntDef;
+import android.view.LayoutInflater;
+import android.view.View;
+
+import java.lang.annotation.Retention;
+import java.util.HashMap;
+import java.util.HashSet;
+
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+/**
+ * This defines and interface to a set of constraints. It allows you to programmatically
+ * create and save constraints.
+ */
+public class ConstraintSet {
+
+    public static final int MATCH_CONSTRAINT = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT;
+    public static final int WRAP_CONTENT = ConstraintLayout.LayoutParams.WRAP_CONTENT;
+    public static final int PARENT_ID = ConstraintLayout.LayoutParams.PARENT_ID;
+
+    @Retention(SOURCE)
+    @IntDef({HORIZONTAL_GUIDELINE, VERTICAL_GUIDELINE})
+    public @interface GuideLineOrientation {
+    }
+
+    public static final int HORIZONTAL_GUIDELINE = 0;
+    public static final int VERTICAL_GUIDELINE = 1;
+
+    @Retention(SOURCE)
+    @IntDef({VISIBLE, INVISIBLE, GONE})
+    public @interface Visibility {
+    }
+
+    public static final int VISIBLE = View.VISIBLE;
+    public static final int INVISIBLE = View.INVISIBLE;
+    public static final int GONE = View.GONE;
+
+    @Retention(SOURCE)
+    @IntDef({LEFT, RIGHT, TOP, BOTTOM, BASELINE, START, END})
+    public @interface AnchorType {
+    }
+
+    public static final int LEFT = ConstraintLayout.LayoutParams.LEFT;
+    public static final int RIGHT = ConstraintLayout.LayoutParams.RIGHT;;
+    public static final int TOP = ConstraintLayout.LayoutParams.TOP;;
+    public static final int BOTTOM = ConstraintLayout.LayoutParams.BOTTOM;;
+    public static final int BASELINE = ConstraintLayout.LayoutParams.BASELINE;;
+    public static final int START = ConstraintLayout.LayoutParams.START;;
+    public static final int END = ConstraintLayout.LayoutParams.END;;
+
+    HashMap<Integer, Constraint> mConstraints = new HashMap<Integer, Constraint>();
+
+    private static class Constraint {
+        boolean mIsGuideline = false;
+        public int mWidth;
+        public int mHeight;
+        int mViewId;
+        static final int UNSET = ConstraintLayout.LayoutParams.UNSET;
+        public int guideBegin = UNSET;
+        public int guideEnd = UNSET;
+        public float guidePercent = UNSET;
+
+        public int leftToLeft = UNSET;
+        public int leftToRight = UNSET;
+        public int rightToLeft = UNSET;
+        public int rightToRight = UNSET;
+        public int topToTop = UNSET;
+        public int topToBottom = UNSET;
+        public int bottomToTop = UNSET;
+        public int bottomToBottom = UNSET;
+        public int baselineToBaseline = UNSET;
+
+        public int startToEnd = UNSET;
+        public int startToStart = UNSET;
+        public int endToStart = UNSET;
+        public int endToEnd = UNSET;
+
+        public float horizontalBias = 0.5f;
+        public float verticalBias = 0.5f;
+        public float dimensionRatio = 0f;
+
+        public int editorAbsoluteX = UNSET;
+        public int editorAbsoluteY = UNSET;
+
+        public int orientation = UNSET;
+        public int leftMargin;
+        public int rightMargin;
+        public int topMargin;
+        public int bottomMargin;
+        public int endMargin;
+        public int startMargin;
+        public int visibility;
+
+        private void fillFrom(int viewId, ConstraintLayout.LayoutParams param) {
+            mViewId = viewId;
+            leftToLeft = param.leftToLeft;
+            leftToRight = param.leftToRight;
+            rightToLeft = param.rightToLeft;
+            rightToRight = param.rightToRight;
+            topToTop = param.topToTop;
+            topToBottom = param.topToBottom;
+            bottomToTop = param.bottomToTop;
+            bottomToBottom = param.bottomToBottom;
+            baselineToBaseline = param.baselineToBaseline;
+            startToEnd = param.startToEnd;
+            startToStart = param.startToStart;
+            endToStart = param.endToStart;
+            endToEnd = param.endToEnd;
+
+            horizontalBias = param.horizontalBias;
+            verticalBias = param.verticalBias;
+            dimensionRatio = param.dimensionRatio;
+            editorAbsoluteX = param.editorAbsoluteX;
+            editorAbsoluteY = param.editorAbsoluteY;
+            orientation = param.orientation;
+            guidePercent = param.guidePercent;
+            guideBegin = param.guideBegin;
+            guideEnd = param.guideEnd;
+            mWidth =  param.width;
+            mHeight = param.height;
+            leftMargin = param.leftMargin;
+            rightMargin = param.rightMargin;
+            topMargin = param.topMargin;
+            bottomMargin = param.bottomMargin;
+            endMargin = param.getMarginEnd();
+            startMargin = param.getMarginStart();
+        }
+
+        public void applyTo(ConstraintLayout.LayoutParams param) {
+            param.leftToLeft = leftToLeft;
+            param.leftToRight = leftToRight;
+            param.rightToLeft = rightToLeft;
+            param.rightToRight = rightToRight;
+
+            param.topToTop = topToTop;
+            param.topToBottom = topToBottom;
+            param.bottomToTop = bottomToTop;
+            param.bottomToBottom = bottomToBottom;
+
+            param.baselineToBaseline = baselineToBaseline;
+
+            param.startToEnd = startToEnd;
+            param.startToStart = startToStart;
+            param.endToStart = endToStart;
+            param.endToEnd = endToEnd;
+
+            param.leftMargin = leftMargin;
+            param.rightMargin = rightMargin;
+            param.topMargin = topMargin;
+            param.bottomMargin = bottomMargin;
+
+            param.horizontalBias = horizontalBias;
+            param.verticalBias = verticalBias;
+
+            param.dimensionRatio = dimensionRatio;
+            param.editorAbsoluteX = editorAbsoluteX;
+            param.editorAbsoluteY = editorAbsoluteY;
+
+            param.orientation = orientation;
+            param.guidePercent = guidePercent;
+            param.guideBegin = guideBegin;
+            param.guideEnd = guideEnd;
+            param.width = mWidth;
+            param.height = mHeight;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                param.setMarginStart(startMargin);
+                param.setMarginEnd(endMargin);
+            }
+
+            param.validate();
+        }
+    }
+
+    /**
+     * Copy the constraints from a layout
+     *
+     * @param context            the context for the layout inflation
+     * @param constraintLayoutId the id of the layout file
+     */
+    public void clone(Context context, int constraintLayoutId) {
+        clone((ConstraintLayout) LayoutInflater.from(context).inflate(constraintLayoutId, null));
+    }
+
+    /**
+     * Copy the parameters of a mConstraintLayout
+     *
+     * @param constraintLayout
+     */
+    public void clone(ConstraintLayout constraintLayout) {
+        int count = constraintLayout.getChildCount();
+        mConstraints.clear();
+        for (int i = 0; i < count; i++) {
+            View view = constraintLayout.getChildAt(i);
+            ConstraintLayout.LayoutParams param = (ConstraintLayout.LayoutParams) view.getLayoutParams();
+
+            int id = view.getId();
+            if (!mConstraints.containsKey(id)) {
+                mConstraints.put(id, new Constraint());
+            }
+            Constraint constraint = mConstraints.get(id);
+            constraint.fillFrom(id, param);
+            constraint.visibility = view.getVisibility();
+        }
+    }
+
+
+    /**
+     * Apply the constraints to a ConstraintLayout
+     * @param constraintLayout to be modified
+     */
+    public void applyTo(ConstraintLayout constraintLayout) {
+        int count = constraintLayout.getChildCount();
+        HashSet<Integer> used = new HashSet<Integer>(mConstraints.keySet());
+
+        for (int i = 0; i < count; i++) {
+            View view = constraintLayout.getChildAt(i);
+            int id = view.getId();
+            if (mConstraints.containsKey(id)) {
+                used.remove(id);
+                Constraint constraint = mConstraints.get(id);
+                ConstraintLayout.LayoutParams param = (ConstraintLayout.LayoutParams) view.getLayoutParams();
+                constraint.applyTo(param);
+                view.setLayoutParams(param);
+                view.setVisibility(constraint.visibility);
+            }
+        }
+        for (Integer id : used) {
+            Constraint constraint = mConstraints.get(id);
+            if (constraint.mIsGuideline) {
+                Guideline g = new Guideline(constraintLayout.getContext());
+                ConstraintLayout.LayoutParams param = constraintLayout.generateDefaultLayoutParams();
+                constraint.applyTo(param);
+                constraintLayout.addView(g, param);
+            }
+        }
+    }
+
+    /**
+     * Center widget about the other two widgets
+     *
+     * @param centerID     ID of the widget to be centered
+     * @param firstID      ID of the first widget to connect the left or top of the widget to
+     * @param firstSide    the side of the widget to connect to
+     * @param firstMargin  the connection margin
+     * @param secondId     the ID of the second widget to connect to right or top of the widget to
+     * @param secondSide   the side of the widget to connect to
+     * @param secondMargin the connection margin
+     * @param bias         the ratio between two connections
+     */
+    public void center(@IdRes int centerID,
+                       @IdRes int firstID, @AnchorType int firstSide, @Dimension int firstMargin,
+                       @IdRes int secondId, @AnchorType int secondSide, @Dimension int secondMargin,
+                       float bias) {
+        // Error checking
+
+        if (firstMargin < 0) {
+            throw new IllegalArgumentException("margin must be > 0");
+        }
+        if (secondMargin < 0) {
+            throw new IllegalArgumentException("margin must be > 0");
+        }
+        if (bias <= 0 || bias > 1) {
+            throw new IllegalArgumentException("bias must be between 0 and 1 inclusive");
+        }
+
+        if (firstSide == LEFT || firstSide == RIGHT) {
+            connect(centerID, LEFT, firstID, firstSide, firstMargin);
+            connect(centerID, RIGHT, secondId, secondSide, secondMargin);
+            Constraint constraint = mConstraints.get(centerID);
+            constraint.horizontalBias = bias;
+        } else {
+            connect(centerID, TOP, firstID, firstSide, firstMargin);
+            connect(centerID, BOTTOM, secondId, secondSide, secondMargin);
+            Constraint constraint = mConstraints.get(centerID);
+            constraint.verticalBias = bias;
+        }
+    }
+
+    private void centerHorizontally(@IdRes int centerID, @IdRes int leftId, int leftSide, int leftMargin, @IdRes int rightId, int rightSide, int rightMargin, float bias) {
+        connect(centerID, LEFT, leftId, leftSide, leftMargin);
+        connect(centerID, RIGHT, rightId, rightSide, rightMargin);
+        Constraint constraint = mConstraints.get(centerID);
+        constraint.horizontalBias = bias;
+    }
+
+    private void centerVertically(@IdRes int centerID, @IdRes int topId, int topSide, int topMargin, @IdRes int bottomId, int bottomSide, int bottomMargin, float bias) {
+        connect(centerID, TOP, topId, topSide, topMargin);
+        connect(centerID, BOTTOM, bottomId, bottomSide, bottomMargin);
+        Constraint constraint = mConstraints.get(centerID);
+        constraint.verticalBias = bias;
+    }
+
+    /**
+     * Create a constraint
+     *
+     * @param startID   the ID of the widget to be constrained
+     * @param startSide the side of the widget to constrain
+     * @param endID     the id of the widget to constrain to
+     * @param endSide   the side of widget to constrain to
+     * @param margin    the margin to constrain (margin must be postive)
+     */
+    public void connect(@IdRes int startID, @AnchorType int startSide, @IdRes int endID, @AnchorType int endSide, @Dimension int margin) {
+        if (!mConstraints.containsKey(startID)) {
+            mConstraints.put(startID, new Constraint());
+        }
+        Constraint constraint = mConstraints.get(startID);
+        switch (startSide) {
+            case LEFT:
+                if (endSide == LEFT) {
+                    constraint.leftToLeft = endID;
+                    constraint.leftToRight = Constraint.UNSET;
+                } else if (endSide == RIGHT) {
+                    constraint.leftToRight = endID;
+                    constraint.leftToLeft = Constraint.UNSET;
+
+                } else {
+                    throw new IllegalArgumentException("Left to " + sideToString(endSide) + " undefined");
+                }
+                constraint.leftMargin = margin;
+                break;
+            case RIGHT:
+                if (endSide == LEFT) {
+                    constraint.rightToLeft = endID;
+                    constraint.rightToRight = Constraint.UNSET;
+
+                } else if (endSide == RIGHT) {
+                    constraint.rightToRight = endID;
+                    constraint.rightToLeft = Constraint.UNSET;
+
+                } else {
+                    throw new IllegalArgumentException("right to " + sideToString(endSide) + " undefined");
+                }
+                constraint.rightMargin = margin;
+                break;
+            case TOP:
+                if (endSide == TOP) {
+                    constraint.topToTop = endID;
+                    constraint.topToBottom = Constraint.UNSET;
+                    constraint.baselineToBaseline = Constraint.UNSET;
+                } else if (endSide == BOTTOM) {
+                    constraint.topToBottom = endID;
+                    constraint.topToTop = Constraint.UNSET;
+                    constraint.baselineToBaseline = Constraint.UNSET;
+
+                } else {
+                    throw new IllegalArgumentException("right to " + sideToString(endSide) + " undefined");
+                }
+                constraint.topMargin = margin;
+                break;
+            case BOTTOM:
+                if (endSide == BOTTOM) {
+                    constraint.bottomToBottom = endID;
+                    constraint.bottomToTop = Constraint.UNSET;
+                    constraint.baselineToBaseline = Constraint.UNSET;
+                    ;
+                } else if (endSide == TOP) {
+                    constraint.bottomToTop = endID;
+                    constraint.bottomToBottom = Constraint.UNSET;
+                    constraint.baselineToBaseline = Constraint.UNSET;
+                    ;
+                } else {
+                    throw new IllegalArgumentException("right to " + sideToString(endSide) + " undefined");
+                }
+                constraint.bottomMargin = margin;
+                break;
+            case BASELINE:
+                if (endSide == BASELINE) {
+                    constraint.baselineToBaseline = endID;
+                    constraint.bottomToBottom = Constraint.UNSET;
+                    constraint.bottomToTop = Constraint.UNSET;
+                    constraint.topToTop = Constraint.UNSET;
+                    constraint.topToBottom = Constraint.UNSET;
+                } else {
+                    throw new IllegalArgumentException("right to " + sideToString(endSide) + " undefined");
+                }
+                break;
+            case START:
+                if (endSide == START) {
+                    constraint.startToStart = endID;
+                    constraint.startToEnd = Constraint.UNSET;
+                } else if (endSide == END) {
+                    constraint.startToEnd = endID;
+                    constraint.startToStart = Constraint.UNSET;
+                } else {
+                    throw new IllegalArgumentException("right to " + sideToString(endSide) + " undefined");
+                }
+                constraint.startMargin = margin;
+                break;
+            case END:
+                if (endSide == END) {
+                    constraint.endToEnd = endID;
+                    constraint.endToStart = Constraint.UNSET;
+                } else if (endSide == START) {
+                    constraint.endToStart = endID;
+                    constraint.endToEnd = Constraint.UNSET;
+                } else {
+                    throw new IllegalArgumentException("right to " + sideToString(endSide) + " undefined");
+                }
+                constraint.endMargin = margin;
+                break;
+            default:
+                throw new IllegalArgumentException(sideToString(startSide) + " to " + sideToString(endSide) + " unknown");
+        }
+    }
+
+    /**
+     * @param viewId ID of view to center Horizontally
+     * @param toView ID of view to center on (or in)
+     */
+    public void centerHorizontally(@IdRes int viewId, @IdRes int toView) {
+        center(viewId, toView, ConstraintSet.LEFT, 0, toView, ConstraintSet.RIGHT, 0, .5f);
+    }
+
+    /**
+     * @param viewId ID of view to center Horizontally
+     * @param toView ID of view to center on (or in)
+     */
+    public void centerVertically(@IdRes int viewId, @IdRes int toView) {
+        center(viewId, toView, ConstraintSet.TOP, 0, toView, ConstraintSet.BOTTOM, 0, .5f);
+    }
+
+    /**
+     * Remove all constraints from this view
+     *
+     * @param viewId ID of view to remove all connections to
+     */
+    public void clear(@IdRes int viewId) {
+        mConstraints.remove(viewId);
+    }
+
+    /**
+     * Remove a constraint from this view
+     *
+     * @param viewId ID of view to center on (or in)
+     * @param anchor the Anchor to remove constraint from
+     */
+    public void clear(@IdRes int viewId, @AnchorType int anchor) {
+        if (mConstraints.containsKey(viewId)) {
+            Constraint constraint = mConstraints.get(viewId);
+            switch (anchor) {
+                case LEFT:
+                    constraint.leftToRight = Constraint.UNSET;
+                    constraint.leftToLeft = Constraint.UNSET;
+                    constraint.leftMargin = 0;
+                    break;
+                case RIGHT:
+                    constraint.leftToRight = Constraint.UNSET;
+                    constraint.leftToLeft = Constraint.UNSET;
+                    constraint.rightMargin = 0;
+                    break;
+                case TOP:
+                    constraint.topToBottom = Constraint.UNSET;
+                    constraint.topToTop = Constraint.UNSET;
+                    constraint.topMargin = 0;
+                    break;
+                case BOTTOM:
+                    constraint.bottomToTop = Constraint.UNSET;
+                    constraint.bottomToBottom = Constraint.UNSET;
+                    constraint.bottomMargin = 0;
+                    break;
+                case BASELINE:
+
+                    constraint.baselineToBaseline = Constraint.UNSET;
+                    break;
+                case START:
+                    constraint.startToEnd = Constraint.UNSET;
+                    constraint.startToStart = Constraint.UNSET;
+                    constraint.startMargin = 0;
+                    break;
+                case END:
+                    constraint.endToStart = Constraint.UNSET;
+                    constraint.endToEnd = Constraint.UNSET;
+                    constraint.endMargin = 0;
+                    break;
+                default:
+                    throw new IllegalArgumentException("unknown constraint");
+            }
+        }
+    }
+
+    /**
+     * sets the margin
+     *
+     * @param viewId ID of view to adjust the margin on
+     * @param anchor The side to adjust the margin on
+     * @param value  The new value for the margin
+     */
+    public void setMargin(@IdRes int viewId, @AnchorType int anchor, @Dimension int value) {
+        Constraint constraint = get(viewId);
+        switch (anchor) {
+            case LEFT:
+                constraint.leftMargin = value;
+                break;
+            case RIGHT:
+                constraint.rightMargin = value;
+                break;
+            case TOP:
+                constraint.topMargin = value;
+                break;
+            case BOTTOM:
+                constraint.bottomMargin = value;
+                break;
+            case BASELINE:
+                throw new IllegalArgumentException("baseline does not support margins");
+            case START:
+                constraint.startMargin = value;
+                break;
+            case END:
+                constraint.endMargin = value;
+                break;
+            default:
+                throw new IllegalArgumentException("unknown constraint");
+        }
+    }
+
+    /**
+     * Adjust the horizontal bias of the view (used with views constrained on left and right)
+     *
+     * @param viewId ID of view to adjust the horizontal
+     * @param bias   the new bias 0.5 is in the middle
+     */
+    public void setHorizontalBias(int viewId, float bias) {
+        get(viewId).horizontalBias = bias;
+    }
+
+    /**
+     * Adjust the vertical bias of the view (used with views constrained on left and right)
+     *
+     * @param viewId ID of view to adjust the vertical
+     * @param bias   the new bias 0.5 is in the middle
+     */
+    public void setVerticalBias(int viewId, float bias) {
+        get(viewId).verticalBias = bias;
+    }
+
+    /**
+     * Adjust the visibility of a vew
+     *
+     * @param viewId     ID of view to adjust the vertical
+     * @param visibility the visibility
+     */
+    public void setVisibility(@IdRes int viewId, @Visibility int visibility) {
+        get(viewId).visibility = visibility;
+    }
+
+    /**
+     * @param viewId ID of view to adjust it height
+     * @param height the height of the constraint
+     */
+    public void constrainHeight(@IdRes int viewId, @Dimension int height) {
+        get(viewId).mHeight = height;
+    }
+
+    /**
+     * @param viewId ID of view to adjust it height
+     * @param width  the width of the view
+     */
+    public void constrainWidth(@IdRes int viewId, @Dimension int width) {
+        get(viewId).mWidth = width;
+    }
+
+    /**
+     * @param guidelineID ID of guideline to create
+     * @param orientation the Orientation of the guideline
+     */
+    public void create(@IdRes int guidelineID, @GuideLineOrientation int orientation) {
+        Constraint constraint = get(guidelineID);
+        constraint.mIsGuideline = true;
+        constraint.orientation = orientation;
+    }
+
+    /**
+     * Set the guidline's distance form the top or left edge
+     *
+     * @param guidelineID ID of the guideline
+     * @param margin
+     */
+    public void setGuidelineBegin(@IdRes int guidelineID, @Dimension int margin) {
+        get(guidelineID).guideBegin = margin;
+        get(guidelineID).guideEnd = Constraint.UNSET;
+        get(guidelineID).guidePercent = 0.5f;
+
+    }
+
+    /**
+     * Set a guidelines distance to end
+     *
+     * @param guidelineID ID of the guideline
+     * @param margin      the margin to the right/bottom side of container
+     */
+    public void setGuidelineEnd(@IdRes int guidelineID, @Dimension int margin) {
+        get(guidelineID).guideEnd = margin;
+        get(guidelineID).guideBegin = Constraint.UNSET;
+        get(guidelineID).guidePercent = 0.5f;
+    }
+
+    /**
+     * sets a Guidelines percent
+     *
+     * @param guidelineID ID of the guideline
+     * @param ratio       the ratio between the gap on the left and right 0.0 is top/left 0.5 is middle
+     */
+    public void setGuidelinePercent(@IdRes int guidelineID, float ratio) {
+        get(guidelineID).guidePercent = ratio;
+        get(guidelineID).guideEnd = Constraint.UNSET;
+        get(guidelineID).guideBegin = Constraint.UNSET;
+    }
+
+    private Constraint get(@IdRes int id) {
+        if (!mConstraints.containsKey(id)) {
+            mConstraints.put(id, new Constraint());
+        }
+        return mConstraints.get(id);
+    }
+
+    private String sideToString(@AnchorType int side) {
+        switch (side) {
+            case LEFT:
+                return "left";
+            case RIGHT:
+                return "right";
+            case TOP:
+                return "top";
+            case BOTTOM:
+                return "bottom";
+            case BASELINE:
+                return "baseline";
+            case START:
+                return "start";
+            case END:
+                return "end";
+        }
+        return "undefined";
+    }
+
+}
