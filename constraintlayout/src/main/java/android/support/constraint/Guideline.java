@@ -21,6 +21,9 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
 
+/**
+ * Utility class representing a Guideline helper object for {@link ConstraintLayout}.
+ */
 public class Guideline extends View {
     public Guideline(Context context) {
         super(context);
@@ -42,14 +45,23 @@ public class Guideline extends View {
         super.setVisibility(View.GONE);
     }
 
+    /**
+     * {@hide
+     */
     @Override
     public void setVisibility(int visibility) {
     }
 
+    /**
+     * {@hide
+     */
     @Override
     public void draw(Canvas canvas) {
     }
 
+    /**
+     * {@hide
+     */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         setMeasuredDimension(0, 0);

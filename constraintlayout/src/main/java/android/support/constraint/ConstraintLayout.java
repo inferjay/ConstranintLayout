@@ -94,7 +94,7 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  *     <p>
  *     For example, in order to position button B to the right of button A (Fig. 1):
  *     <br><div align="center">
- *       <img width="300px" src="{@docRoot}/doc-files/relative-positioning.png">
+ *       <img width="300px" src="{@docRoot}/resources/images/relative-positioning.png">
  *           <br><b><i>Fig. 1 - Relative Positioning Example</i></b>
  *     </div>
  *     </p>
@@ -110,7 +110,7 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  *     This tells the system that we want the left side of button B to be constrained to the right side of button A.
  *     Such a position constraint means that the system will try to have both sides share the same location.
  *     <br><div align="center" >
- *       <img width="350px" src="{@docRoot}/doc-files/relative-positioning-constraints.png">
+ *       <img width="350px" src="{@docRoot}/resources/images/relative-positioning-constraints.png">
  *           <br><b><i>Fig. 2 - Relative Positioning Constraints</i></b>
  *     </div>
  *
@@ -143,7 +143,7 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  * <h4 id="Margins"> Margins </h4>
  * <p>
  *     <div align="center" >
- *       <img width="325px" src="{@docRoot}/doc-files/relative-positioning-margin.png">
+ *       <img width="325px" src="{@docRoot}/resources/images/relative-positioning-margin.png">
  *           <br><b><i>Fig. 3 - Relative Positioning Margins</i></b>
  *     </div>
  *      <p>If side margins are set, they will be applied to the corresponding constraints (if they exist) (Fig. 3), enforcing
@@ -156,7 +156,7 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  *          <li>{@code android:layout_marginRight}</li>
  *          <li>{@code android:layout_marginBottom}</li>
  *      </ul>
- *      <p>Note that a margin can only be positive or equals to zero, and takes a {@link Dimension}.</p>
+ *      <p>Note that a margin can only be positive or equals to zero, and takes a {@code Dimension}.</p>
  * <h4 id="GoneMargin"> Margins when connected to a GONE widget</h4>
  *      <p>When a position constraint target's visibility is {@code View.GONE}, you can also indicates a different
  *      margin value to be used using the following attributes:</p>
@@ -188,7 +188,7 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  *     Unless the {@code ConstraintLayout} happens to have the exact same size as the {@code Button}, both constraints
  *     cannot be satisfied at the same time (both sides cannot be where we want them to be).
  *     <p><div align="center" >
- *       <img width="325px" src="{@docRoot}/doc-files/centering-positioning.png">
+ *       <img width="325px" src="{@docRoot}/resources/images/centering-positioning.png">
  *           <br><b><i>Fig. 4 - Centering Positioning</i></b>
  *     </div>
  *     <p>
@@ -205,7 +205,7 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  *            <li>{@code layout_constraintVertical_bias}</li>
  *        </ul>
  *     <p><div align="center" >
- *       <img width="325px" src="{@docRoot}/doc-files/centering-positioning-bias.png">
+ *       <img width="325px" src="{@docRoot}/resources/images/centering-positioning-bias.png">
  *           <br><b><i>Fig. 5 - Centering Positioning with Bias</i></b>
  *     </div>
  *     <p>
@@ -238,7 +238,7 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  *     </ul>
  *
  *     <p><div align="center" >
- *       <img width="350px" src="{@docRoot}/doc-files/visibility-behavior.png">
+ *       <img width="350px" src="{@docRoot}/resources/images/visibility-behavior.png">
  *           <br><b><i>Fig. 6 - Visibility Behavior</i></b>
  *     </div>
  *     <p>This specific behavior allows to build layout where you can temporarily mark widgets as being {@code GONE},
@@ -258,10 +258,10 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  *     <ul>
  *         <li>Using a specific dimension (either a literal value such as {@code 123dp} or a {@code Dimension} reference)</li>
  *         <li>Using {@code WRAP_CONTENT}, which will ask the widget to compute its own size</li>
- *         <li>Using {@code 0dp}, which is the equivalent of "{@code MATCH_CONSTRAINTS}"</li>
+ *         <li>Using {@code 0dp}, which is the equivalent of "{@code MATCH_CONSTRAINT}"</li>
  *     </ul>
  *     <p><div align="center" >
- *       <img width="325px" src="{@docRoot}/doc-files/dimension-match-constraints.png">
+ *       <img width="325px" src="{@docRoot}/resources/images/dimension-match-constraints.png">
  *           <br><b><i>Fig. 7 - Dimension Constraints</i></b>
  *     </div>
  *     The first two works in a similar fashion as other layouts. The last one will resize the widget in such a way as
@@ -310,7 +310,7 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  * </p>
  * <h4 id="VirtualHelpers"> Virtual Helper objects </h4>
  * <p>In addition to the intrinsic capabilities detailed previously, you can also use special helper objects
- * in {@code ConstraintLayout} to help you with your layout. Currently, the {@see Guideline} object allows you to create
+ * in {@code ConstraintLayout} to help you with your layout. Currently, the {@code Guideline}{@see Guideline} object allows you to create
  * Horizontal and Vertical guidelines which are positioned relative to the {@code ConstraintLayout} container. Widgets can
  * then be positioned by constraining them to such guidelines.</p>
  * </div>
@@ -356,6 +356,9 @@ public class ConstraintLayout extends ViewGroup {
         mChildrenByIds.put(getId(), this);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void addView(View child, int index, ViewGroup.LayoutParams params) {
         super.addView(child, index, params);
@@ -364,6 +367,9 @@ public class ConstraintLayout extends ViewGroup {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void removeView(View view) {
         super.removeView(view);
@@ -372,6 +378,9 @@ public class ConstraintLayout extends ViewGroup {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onViewAdded(View view) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
@@ -394,6 +403,9 @@ public class ConstraintLayout extends ViewGroup {
         updateHierarchy();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onViewRemoved(View view) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
@@ -710,6 +722,9 @@ public class ConstraintLayout extends ViewGroup {
     int previousWidthMeasureSpec = -1;
     int previousHeightMeasureSpec = -1;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (mDirtyHierarchy) {
@@ -864,6 +879,9 @@ public class ConstraintLayout extends ViewGroup {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         final int widgetsCount = getChildCount();
@@ -900,26 +918,42 @@ public class ConstraintLayout extends ViewGroup {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public LayoutParams generateLayoutParams(AttributeSet attrs) {
         return new LayoutParams(getContext(), attrs);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected LayoutParams generateDefaultLayoutParams() {
         return new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
         return new LayoutParams(p);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
         return p instanceof LayoutParams;
     }
 
+    /**
+     *  This class contains the different attributes specifying how a view want to be laid out inside
+     *  a {@link ConstraintLayout}. For building up constraints at run time, using {@link ConstraintSet} is recommended.
+     */
     public static class LayoutParams extends ViewGroup.MarginLayoutParams {
         public static final int MATCH_CONSTRAINT = 0;
 
@@ -1181,6 +1215,9 @@ public class ConstraintLayout extends ViewGroup {
             super(source);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         protected void setBaseAttributes(TypedArray a, int widthAttr, int heightAttr) {
             try {
@@ -1191,6 +1228,9 @@ public class ConstraintLayout extends ViewGroup {
             }
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
         public void resolveLayoutDirection(int layoutDirection) {
@@ -1264,6 +1304,9 @@ public class ConstraintLayout extends ViewGroup {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void requestLayout() {
         super.requestLayout();

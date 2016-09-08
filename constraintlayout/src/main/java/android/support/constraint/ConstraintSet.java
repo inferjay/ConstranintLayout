@@ -25,31 +25,115 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 /**
- * This defines and interface to a set of constraints. It allows you to programmatically
- * create and save constraints.
+ * This class allows you to define programmatically a set of constraints to be used with {@link ConstraintLayout}.
+ * It lets you create and save constraints, and apply them to an existing ConstraintLayout. ConstraintsSet can be created in various ways:
+ * <ul>
+ * <li>
+ * Manually <br> {@code c = new ConstraintSet(); c.connect(....);}
+ * </li>
+ * <li>
+ * from a R.layout.* object <br> {@code c.clone(context, R.layout.layout1);}
+ * </li>
+ * <li>
+ * from a ConstraintLayout <br> {@code c.clone(clayout);}
+ * </li>
+ * </ul><p>
+ * Example code:<br>
+ * {@sample resources/examples/MainActivity.java
+ *          Example}
  */
 public class ConstraintSet {
 
+    /**
+     * Dimension will be controlled by constraints
+     */
     public static final int MATCH_CONSTRAINT = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT;
+
+    /**
+     * Dimension will set by the view's content
+     */
     public static final int WRAP_CONTENT = ConstraintLayout.LayoutParams.WRAP_CONTENT;
+
+    /**
+     * References the id of the parent.
+     * Used in:
+     * <ul>
+     *     <li>{@link #connect(int, int, int, int, int)}</li>
+     *     <li>{@link #center(int, int, int, int, int, int, int, float)}</li>
+     *   </ul>
+     */
     public static final int PARENT_ID = ConstraintLayout.LayoutParams.PARENT_ID;
 
+    /**
+     * Used to create a horizontal create guidelines.
+     */
     public static final int HORIZONTAL_GUIDELINE = 0;
+
+    /**
+     * Used to create a vertical create guidelines.
+     * see {@link #create(int, int)}
+     */
     public static final int VERTICAL_GUIDELINE = 1;
 
+    /**
+     * This view is visible.
+     * Use with {@link #setVisibility} and <a href="#attr_android:visibility">{@code
+     * android:visibility}.
+     */
     public static final int VISIBLE = View.VISIBLE;
+
+    /**
+     * This view is invisible, but it still takes up space for layout purposes.
+     * Use with {@link #setVisibility} and <a href="#attr_android:visibility">{@code
+     * android:visibility}.
+     */
     public static final int INVISIBLE = View.INVISIBLE;
+
+    /**
+     * This view is gone, and will not take any space for layout
+     * purposes. Use with {@link #setVisibility} and <a href="#attr_android:visibility">{@code
+     * android:visibility}.
+     */
     public static final int GONE = View.GONE;
 
+    /**
+     * The left side of a view.
+     */
     public static final int LEFT = ConstraintLayout.LayoutParams.LEFT;
+
+    /**
+     * The right side of a view.
+     */
     public static final int RIGHT = ConstraintLayout.LayoutParams.RIGHT;;
+
+    /**
+     * The top of a view.
+     */
     public static final int TOP = ConstraintLayout.LayoutParams.TOP;;
+
+    /**
+     * The bottom side of a view.
+     */
     public static final int BOTTOM = ConstraintLayout.LayoutParams.BOTTOM;;
+
+    /**
+     * The baseline of the text in a view.
+     */
     public static final int BASELINE = ConstraintLayout.LayoutParams.BASELINE;;
-    public static final int START = ConstraintLayout.LayoutParams.START;;
+
+    /**
+     * The left side of a view in left to right languages.
+     * In right to left languages it corresponds to the right side of the view
+     */
+    public static final int START = ConstraintLayout.LayoutParams.START;
+
+    /**
+     * The right side of a view in right to left languages.
+     * In right to left languages it corresponds to the left side of the view
+     */
     public static final int END = ConstraintLayout.LayoutParams.END;;
 
-    HashMap<Integer, Constraint> mConstraints = new HashMap<Integer, Constraint>();
+    private HashMap<Integer, Constraint> mConstraints = new HashMap<Integer, Constraint>();
 
     private static class Constraint {
         boolean mIsGuideline = false;
@@ -173,7 +257,7 @@ public class ConstraintSet {
     }
 
     /**
-     * Copy the constraints from a layout
+     * Copy the constraints from a layout.
      *
      * @param context            the context for the layout inflation
      * @param constraintLayoutId the id of the layout file
@@ -183,9 +267,9 @@ public class ConstraintSet {
     }
 
     /**
-     * Copy the parameters of a mConstraintLayout
+     * Copy the layout parameters of a ConstraintLayout.
      *
-     * @param constraintLayout
+     * @param constraintLayout The ConstraintLayout to be copied
      */
     public void clone(ConstraintLayout constraintLayout) {
         int count = constraintLayout.getChildCount();
@@ -204,9 +288,9 @@ public class ConstraintSet {
         }
     }
 
-
     /**
-     * Apply the constraints to a ConstraintLayout
+     * Apply the constraints to a ConstraintLayout.
+     *
      * @param constraintLayout to be modified
      */
     public void applyTo(ConstraintLayout constraintLayout) {
@@ -237,7 +321,7 @@ public class ConstraintSet {
     }
 
     /**
-     * Center widget about the other two widgets
+     * Center widget between the other two widgets.
      *
      * @param centerID     ID of the widget to be centered
      * @param firstID      ID of the first widget to connect the left or top of the widget to
@@ -292,7 +376,7 @@ public class ConstraintSet {
     }
 
     /**
-     * Create a constraint
+     * Create a constraint between two widgets.
      *
      * @param startID   the ID of the widget to be constrained
      * @param startSide the side of the widget to constrain
@@ -405,6 +489,8 @@ public class ConstraintSet {
     }
 
     /**
+     * Centers the view horizontally relative to toView's position.
+     *
      * @param viewId ID of view to center Horizontally
      * @param toView ID of view to center on (or in)
      */
@@ -413,6 +499,8 @@ public class ConstraintSet {
     }
 
     /**
+     * Centers the view vertically relative to toView's position.
+     *
      * @param viewId ID of view to center Horizontally
      * @param toView ID of view to center on (or in)
      */
@@ -421,7 +509,7 @@ public class ConstraintSet {
     }
 
     /**
-     * Remove all constraints from this view
+     * Remove all constraints from this view.
      *
      * @param viewId ID of view to remove all connections to
      */
@@ -430,7 +518,7 @@ public class ConstraintSet {
     }
 
     /**
-     * Remove a constraint from this view
+     * Remove a constraint from this view.
      *
      * @param viewId ID of view to center on (or in)
      * @param anchor the Anchor to remove constraint from
@@ -480,7 +568,7 @@ public class ConstraintSet {
     }
 
     /**
-     * sets the margin
+     * Sets the margin.
      *
      * @param viewId ID of view to adjust the margin on
      * @param anchor The side to adjust the margin on
@@ -515,7 +603,7 @@ public class ConstraintSet {
     }
 
     /**
-     * Adjust the horizontal bias of the view (used with views constrained on left and right)
+     * Adjust the horizontal bias of the view (used with views constrained on left and right).
      *
      * @param viewId ID of view to adjust the horizontal
      * @param bias   the new bias 0.5 is in the middle
@@ -525,7 +613,7 @@ public class ConstraintSet {
     }
 
     /**
-     * Adjust the vertical bias of the view (used with views constrained on left and right)
+     * Adjust the vertical bias of the view (used with views constrained on left and right).
      *
      * @param viewId ID of view to adjust the vertical
      * @param bias   the new bias 0.5 is in the middle
@@ -535,7 +623,7 @@ public class ConstraintSet {
     }
 
     /**
-     * Adjust the visibility of a vew
+     * Adjust the visibility of a view.
      *
      * @param viewId     ID of view to adjust the vertical
      * @param visibility the visibility
@@ -545,6 +633,8 @@ public class ConstraintSet {
     }
 
     /**
+     * Sets the height of the view. It can be a dimension, {@link #WRAP_CONTENT} or {@link #MATCH_CONSTRAINT}.
+     *
      * @param viewId ID of view to adjust it height
      * @param height the height of the constraint
      */
@@ -553,6 +643,8 @@ public class ConstraintSet {
     }
 
     /**
+     * Sets the width of the view. It can be a dimension, {@link #WRAP_CONTENT} or {@link #MATCH_CONSTRAINT}.
+     *
      * @param viewId ID of view to adjust it height
      * @param width  the width of the view
      */
@@ -561,6 +653,8 @@ public class ConstraintSet {
     }
 
     /**
+     * Creates a ConstraintLayout virtual object. Currently only horizontal or vertical GuideLines.
+     *
      * @param guidelineID ID of guideline to create
      * @param orientation the Orientation of the guideline
      */
@@ -571,10 +665,10 @@ public class ConstraintSet {
     }
 
     /**
-     * Set the guidline's distance form the top or left edge
+     * Set the guideline's distance form the top or left edge.
      *
      * @param guidelineID ID of the guideline
-     * @param margin
+     * @param margin the distance to the top or left edge
      */
     public void setGuidelineBegin(int guidelineID, int margin) {
         get(guidelineID).guideBegin = margin;
@@ -584,7 +678,7 @@ public class ConstraintSet {
     }
 
     /**
-     * Set a guidelines distance to end
+     * Set a guideline's distance to end.
      *
      * @param guidelineID ID of the guideline
      * @param margin      the margin to the right/bottom side of container
@@ -596,7 +690,7 @@ public class ConstraintSet {
     }
 
     /**
-     * sets a Guidelines percent
+     * Set a Guideline's percent.
      *
      * @param guidelineID ID of the guideline
      * @param ratio       the ratio between the gap on the left and right 0.0 is top/left 0.5 is middle
@@ -633,5 +727,4 @@ public class ConstraintSet {
         }
         return "undefined";
     }
-
 }
