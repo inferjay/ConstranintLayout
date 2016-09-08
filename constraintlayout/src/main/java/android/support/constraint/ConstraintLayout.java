@@ -33,6 +33,7 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
+import static android.support.constraint.ConstraintLayout.LayoutParams.MATCH_CONSTRAINT;
 import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
 
 /**
@@ -267,6 +268,46 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  *     matching the constraints that are set (see Fig. 7, (a) is wrap_content, (b) is 0dp). If margins are set, they will be taken in account
  *     in the computation (Fig. 7, (c) with 0dp).
  * </p>
+ * <h5>Ratio</h5>
+ * <p>
+ *     You can also define one dimension of a widget as a ratio of the other one. In order to do that, you
+ *     need to have the constrained dimension be set to {@code 0dp} (i.e., {@code MATCH_CONSTRAINT}), and set the
+ *     attribute {@code layout_constraintDimentionRatio} to a given ratio.
+ *     For example:
+ *     <pre>
+ *         {@code
+ *           <Button android:layout_width="wrap_content"
+ *                   android:layout_height="0dp"
+ *                   app:layout_constraintDimensionRatio="1:1" />
+ *         }
+ *     </pre>
+ *     will set the height of the button to be the same as its width.
+ * </p>
+ * <p> The ratio can be expressed either as:
+ * <ul>
+ *     <li>a float value, representing a ratio between width and height</li>
+ *     <li>a ratio in the form "width:height"</li>
+ * </ul>
+ * </p>
+ * <p>
+ *     You can also use use ratio if both dimensions are set to {@code MATCH_CONSTRAINT} (0dp), for example
+ *     if one dimension is constrained by two targets (e.g. width is set to 0dp with connections to its parent).
+ *     In that case, you need to indicate which side should be constrained, by adding the letter
+ *     {@code W} (for constraining the width) or {@code H} (for constraining the height) in front of the ratio, separated
+ *     by a comma:
+ *     <pre>
+ *         {@code
+ *           <Button android:layout_width="0dp"
+ *                   android:layout_height="0dp"
+ *                   app:layout_constraintDimensionRatio="H,16:9"
+ *                   app:layout_constraintBottom_toBottomOf="parent"
+ *                   app:layout_constraintTop_toTopOf="parent"/>
+ *         }
+ *     </pre>
+ *     will set the height of the button following a 16:9 ratio, while the width of the button will match the constraints
+ *     to parent.
+ *
+ * </p>
  * <h4 id="VirtualHelpers"> Virtual Helper objects </h4>
  * <p>In addition to the intrinsic capabilities detailed previously, you can also use special helper objects
  * in {@code ConstraintLayout} to help you with your layout. Currently, the {@see Guideline} object allows you to create
@@ -423,15 +464,6 @@ public class ConstraintLayout extends ViewGroup {
                     || (layoutParams.baselineToBaseline != UNSET)
                     || (layoutParams.editorAbsoluteX != UNSET)
                     || (layoutParams.editorAbsoluteY != UNSET)) {
-
-                // Process match_Parent converting it to 0dp
-                if (layoutParams.width == LayoutParams.MATCH_PARENT) {
-                    layoutParams.horizontalLock = false;
-                }
-                // Process match_Parent converting it to 0dp
-                if (layoutParams.height == LayoutParams.MATCH_PARENT) {
-                    layoutParams.verticalLock = false;
-                }
 
                 // Get the left/right constraints resolved for RTL
                 int resolvedLeftToLeft = layoutParams.resolvedLeftToLeft;
@@ -632,28 +664,31 @@ public class ConstraintLayout extends ViewGroup {
             int width = params.width;
             int height = params.height;
 
-            final int childWidthMeasureSpec;
-            final int childHeightMeasureSpec;
+            // Don't need to measure widgets that are MATCH_CONSTRAINT on both dimensions
+            if (params.horizontalLock || params.verticalLock) {
+                final int childWidthMeasureSpec;
+                final int childHeightMeasureSpec;
 
-            if (width == 0) {
-                childWidthMeasureSpec = getChildMeasureSpec(parentWidthSpec,
-                        widthPadding, LayoutParams.WRAP_CONTENT);
-            } else {
-                childWidthMeasureSpec = getChildMeasureSpec(parentWidthSpec,
-                        widthPadding, width);
+                if (width == MATCH_CONSTRAINT) {
+                    childWidthMeasureSpec = getChildMeasureSpec(parentWidthSpec,
+                            widthPadding, LayoutParams.WRAP_CONTENT);
+                } else {
+                    childWidthMeasureSpec = getChildMeasureSpec(parentWidthSpec,
+                            widthPadding, width);
+                }
+                if (height == MATCH_CONSTRAINT) {
+                    childHeightMeasureSpec = getChildMeasureSpec(parentHeightSpec,
+                            heightPadding, LayoutParams.WRAP_CONTENT);
+                } else {
+                    childHeightMeasureSpec = getChildMeasureSpec(parentHeightSpec,
+                            heightPadding, height);
+                }
+                child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+
+                width = child.getMeasuredWidth();
+                height = child.getMeasuredHeight();
             }
 
-            if (height == 0) {
-                childHeightMeasureSpec = getChildMeasureSpec(parentHeightSpec,
-                        heightPadding, LayoutParams.WRAP_CONTENT);
-            } else {
-                childHeightMeasureSpec = getChildMeasureSpec(parentHeightSpec,
-                        heightPadding, height);
-            }
-            child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-
-            width = child.getMeasuredWidth();
-            height = child.getMeasuredHeight();
             widget.setWidth(width);
             widget.setHeight(height);
 
@@ -726,31 +761,20 @@ public class ConstraintLayout extends ViewGroup {
                 if (child == null) {
                     continue;
                 }
+                if (child.getVisibility() == View.GONE) {
+                    continue;
+                }
 
                 int widthSpec = MeasureSpec.makeMeasureSpec(widget.getWidth(), MeasureSpec.EXACTLY);
                 int heightSpec = MeasureSpec.makeMeasureSpec(widget.getHeight(), MeasureSpec.EXACTLY);
 
-                final ViewGroup.LayoutParams lp = child.getLayoutParams();
-                if (lp.width == LayoutParams.WRAP_CONTENT) {
-                    widthSpec = getChildMeasureSpec(widthMeasureSpec, widthPadding, lp.width);
-                }
-                if (lp.height == LayoutParams.WRAP_CONTENT) {
-                    heightSpec = getChildMeasureSpec(heightMeasureSpec, heightPadding, lp.height);
-                }
-
                 // we need to re-measure the child...
                 child.measure(widthSpec, heightSpec);
-
-                int width = child.getMeasuredWidth();
-                int height = child.getMeasuredHeight();
-                widget.setWidth(width);
-                widget.setHeight(height);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                     childState = combineMeasuredStates(childState, child.getMeasuredState());
                 }
             }
-            solveLinearSystem(); // second pass
         }
 
         int androidLayoutWidth = mLayoutWidget.getWidth() + widthPadding;
@@ -1063,13 +1087,16 @@ public class ConstraintLayout extends ViewGroup {
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintDimensionRatio) {
                     String ratio = a.getString(attr);
                     dimensionRatio = 0;
+                    dimensionRatioSide = UNSET;
                     if (ratio != null) {
                         int len = ratio.length();
                         int commaIndex = ratio.indexOf(',');
                         if (commaIndex > 0 && commaIndex < len - 1) {
                             String dimension = ratio.substring(0, commaIndex);
-                            if (dimension.equalsIgnoreCase("H")) {
+                            if (dimension.equalsIgnoreCase("W")) {
                                 dimensionRatioSide = HORIZONTAL;
+                            } else if (dimension.equalsIgnoreCase("H")) {
+                                dimensionRatioSide = VERTICAL;
                             }
                             commaIndex++;
                         } else {
@@ -1084,14 +1111,18 @@ public class ConstraintLayout extends ViewGroup {
                                     float nominatorValue = Float.parseFloat(nominator);
                                     float denominatorValue = Float.parseFloat(denominator);
                                     if (nominatorValue > 0 && denominatorValue > 0) {
-                                        dimensionRatio = Math.abs(nominatorValue / denominatorValue);
+                                        if (dimensionRatioSide == VERTICAL) {
+                                            dimensionRatio = Math.abs(denominatorValue / nominatorValue);
+                                        } else {
+                                            dimensionRatio = Math.abs(nominatorValue / denominatorValue);
+                                        }
                                     }
                                 } catch (NumberFormatException e) {
                                     // Ignore
                                 }
                             }
                         } else {
-                            String r = ratio.substring(commaIndex + 1);
+                            String r = ratio.substring(commaIndex);
                             if (r.length() > 0) {
                                 try {
                                     dimensionRatio = Float.parseFloat(r);
@@ -1122,10 +1153,10 @@ public class ConstraintLayout extends ViewGroup {
             isGuideline = false;
             horizontalLock = true;
             verticalLock = true;
-            if (width == 0) {
+            if (width == MATCH_CONSTRAINT || width == MATCH_PARENT) {
                 horizontalLock = false;
             }
-            if (height == 0) {
+            if (height == MATCH_CONSTRAINT || height == MATCH_PARENT) {
                 verticalLock = false;
             }
             if (guidePercent != UNSET || guideBegin != UNSET || guideEnd != UNSET) {

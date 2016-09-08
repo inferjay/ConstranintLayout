@@ -42,6 +42,7 @@ public class ConstraintWidget implements Solvable {
 
     private Animator mAnimator = new Animator(this);
 
+    public static final int UNKNOWN = -1;
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
 
@@ -89,7 +90,7 @@ public class ConstraintWidget implements Solvable {
     private int mWidth = 0;
     private int mHeight = 0;
     private float mDimensionRatio = 0;
-    private int mDimensionRatioSide = VERTICAL;
+    private int mDimensionRatioSide = UNKNOWN;
 
     private int mSolverLeft = 0;
     private int mSolverTop = 0;
@@ -159,7 +160,7 @@ public class ConstraintWidget implements Solvable {
         mWidth = 0;
         mHeight = 0;
         mDimensionRatio = 0.0f;
-        mDimensionRatioSide = VERTICAL;
+        mDimensionRatioSide = UNKNOWN;
         mX = 0;
         mY = 0;
         mDrawX = 0;
@@ -917,20 +918,23 @@ public class ConstraintWidget implements Solvable {
             mDimensionRatio = 0;
             return;
         }
-        int dimensionRatioSide = VERTICAL;
+        int dimensionRatioSide = UNKNOWN;
         float dimensionRatio = 0;
         int len = ratio.length();
         int commaIndex = ratio.indexOf(',');
         if (commaIndex > 0 && commaIndex < len - 1) {
             String dimension = ratio.substring(0, commaIndex);
-            if (dimension.equalsIgnoreCase("H")) {
+            if (dimension.equalsIgnoreCase("W")) {
                 dimensionRatioSide = HORIZONTAL;
+            } else if (dimension.equalsIgnoreCase("H")) {
+                dimensionRatioSide = VERTICAL;
             }
             commaIndex++;
         } else {
             commaIndex = 0;
         }
         int colonIndex = ratio.indexOf(':');
+
         if (colonIndex >= 0 && colonIndex < len - 1) {
             String nominator = ratio.substring(commaIndex, colonIndex);
             String denominator = ratio.substring(colonIndex + 1);
@@ -939,25 +943,30 @@ public class ConstraintWidget implements Solvable {
                     float nominatorValue = Float.parseFloat(nominator);
                     float denominatorValue = Float.parseFloat(denominator);
                     if (nominatorValue > 0 && denominatorValue > 0) {
-                        dimensionRatio = Math.abs(nominatorValue / denominatorValue);
+                        if (dimensionRatioSide == VERTICAL) {
+                            dimensionRatio = Math.abs(denominatorValue / nominatorValue);
+                        } else {
+                            dimensionRatio = Math.abs(nominatorValue / denominatorValue);
+                        }
                     }
                 } catch (NumberFormatException e) {
-                    // ignore
-                }
-            } else {
-                String r = ratio.substring(commaIndex + 1);
-                if (r.length() > 0) {
-                    try {
-                        dimensionRatio = Float.parseFloat(r);
-                    } catch (NumberFormatException e) {
-                        // Ignore
-                    }
+                    // Ignore
                 }
             }
-            if (dimensionRatio > 0) {
-                mDimensionRatio = dimensionRatio;
-                mDimensionRatioSide = dimensionRatioSide;
+        } else {
+            String r = ratio.substring(commaIndex);
+            if (r.length() > 0) {
+                try {
+                    dimensionRatio = Float.parseFloat(r);
+                } catch (NumberFormatException e) {
+                    // Ignore
+                }
             }
+        }
+
+        if (dimensionRatio > 0) {
+            mDimensionRatio = dimensionRatio;
+            mDimensionRatioSide = dimensionRatioSide;
         }
     }
 
@@ -981,7 +990,7 @@ public class ConstraintWidget implements Solvable {
 
     /**
      * Return the current side on which ratio will be applied
-     * @return HORIZONTAL or VERTICAL
+     * @return HORIZONTAL, VERTICAL, or UNKNOWN
      */
     public int getDimensionRatioSide() { return mDimensionRatioSide; }
 
@@ -1773,14 +1782,32 @@ public class ConstraintWidget implements Solvable {
            }
         }
         boolean useRatio = false;
+        int dimensionRatioSide = mDimensionRatioSide;
+        float dimensionRatio = mDimensionRatio;
         if (mDimensionRatio > 0) {
-            if (!horizontalDimensionLocked && !verticalDimensionLocked) {
+            if (mHorizontalDimensionBehaviour == DimensionBehaviour.ANY
+              && mVerticalDimensionBehaviour == DimensionBehaviour.ANY) {
                 useRatio = true;
-            } else if (!horizontalDimensionLocked && verticalDimensionLocked) {
-                width = (int) (mDimensionRatio * mHeight);
+                if (horizontalDimensionLocked && !verticalDimensionLocked) {
+                    dimensionRatioSide = HORIZONTAL;
+                } else if (!horizontalDimensionLocked && verticalDimensionLocked) {
+                    dimensionRatioSide = VERTICAL;
+                    if (mDimensionRatioSide == UNKNOWN) {
+                        // need to reverse the ratio as the parsing is done in horizontal mode
+                        dimensionRatio = 1 / dimensionRatio;
+                    }
+                }
+            } else if (mHorizontalDimensionBehaviour == DimensionBehaviour.ANY) {
+                dimensionRatioSide = HORIZONTAL;
+                width = (int) (dimensionRatio * mHeight);
                 horizontalDimensionLocked = true;
-            } else if (horizontalDimensionLocked && !verticalDimensionLocked) {
-                height = (int) (mDimensionRatio * mWidth);
+            } else if (mVerticalDimensionBehaviour == DimensionBehaviour.ANY){
+                dimensionRatioSide = VERTICAL;
+                if (mDimensionRatioSide == UNKNOWN) {
+                    // need to reverse the ratio as the parsing is done in horizontal mode
+                    dimensionRatio = 1 / dimensionRatio;
+                }
+                height = (int) (dimensionRatio * mWidth);
                 verticalDimensionLocked = true;
             }
         }
@@ -1790,7 +1817,7 @@ public class ConstraintWidget implements Solvable {
                 && (this instanceof ConstraintWidgetContainer);
         if (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group)) {
             applyConstraints(system, wrapContent, horizontalDimensionLocked, mLeft, mRight,
-                    mX, mX + width, width, mHorizontalBiasPercent, useRatio && mDimensionRatioSide == HORIZONTAL);
+                    mX, mX + width, width, mHorizontalBiasPercent, useRatio && dimensionRatioSide == HORIZONTAL);
         }
 
         // Vertical Resolution
@@ -1811,22 +1838,22 @@ public class ConstraintWidget implements Solvable {
             }
             if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && end.mGroup == group)) {
                 applyConstraints(system, wrapContent, verticalDimensionLocked,
-                        mTop, end, mY, mY + height, height, mVerticalBiasPercent, useRatio && mDimensionRatioSide == VERTICAL);
+                        mTop, end, mY, mY + height, height, mVerticalBiasPercent, useRatio && dimensionRatioSide == VERTICAL);
             }
         } else {
             if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && mBottom.mGroup == group)) {
                 applyConstraints(system, wrapContent, verticalDimensionLocked,
-                        mTop, mBottom, mY, mY + height, height, mVerticalBiasPercent, useRatio && mDimensionRatioSide == VERTICAL);
+                        mTop, mBottom, mY, mY + height, height, mVerticalBiasPercent, useRatio && dimensionRatioSide == VERTICAL);
             }
         }
 
         if (useRatio) {
             ArrayRow row = system.createRow();
             if (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group)) {
-                if (mDimensionRatioSide == HORIZONTAL) {
-                    system.addConstraint(row.createRowDimensionRatio(right, left, bottom, top, mDimensionRatio));
+                if (dimensionRatioSide == HORIZONTAL) {
+                    system.addConstraint(row.createRowDimensionRatio(right, left, bottom, top, dimensionRatio));
                 } else {
-                    system.addConstraint(row.createRowDimensionRatio(bottom, top, right, left, mDimensionRatio));
+                    system.addConstraint(row.createRowDimensionRatio(bottom, top, right, left, dimensionRatio));
                 }
             }
         }
@@ -1859,21 +1886,23 @@ public class ConstraintWidget implements Solvable {
         }
         if (beginTarget == null && endTarget == null) {
             system.addConstraint(system.createRow().createRowEquals(begin, beginPosition));
-            if (wrapContent) {
-                system.addConstraint(EquationCreation.createRowEquals(system, end, begin, 0, true));
-            } else {
-                if (dimensionLocked) {
-                    system.addConstraint(
-                            EquationCreation.createRowEquals(system, end, begin, dimension, false));
+            if (!useRatio) {
+                if (wrapContent) {
+                    system.addConstraint(EquationCreation.createRowEquals(system, end, begin, 0, true));
                 } else {
-                    system.addConstraint(system.createRow().createRowEquals(end, endPosition));
+                    if (dimensionLocked) {
+                        system.addConstraint(
+                                EquationCreation.createRowEquals(system, end, begin, dimension, false));
+                    } else {
+                        system.addConstraint(system.createRow().createRowEquals(end, endPosition));
+                    }
                 }
             }
         } else if (beginTarget != null && endTarget == null) {
             system.addConstraint(system.createRow().createRowEquals(begin, beginTarget, beginAnchorMargin));
             if (wrapContent) {
                 system.addConstraint(EquationCreation.createRowEquals(system, end, begin, 0, true));
-            } else {
+            } else if (!useRatio) {
                 if (dimensionLocked) {
                     system.addConstraint(system.createRow().createRowEquals(end, begin, dimension));
                 } else {
@@ -1884,7 +1913,7 @@ public class ConstraintWidget implements Solvable {
             system.addConstraint(system.createRow().createRowEquals(end, endTarget, -1 * endAnchorMargin));
             if (wrapContent) {
                 system.addConstraint(EquationCreation.createRowEquals(system, end, begin, 0, true));
-            } else {
+            } else if (!useRatio) {
                 if (dimensionLocked) {
                     system.addConstraint(system.createRow().createRowEquals(end, begin, dimension));
                 } else {
