@@ -392,6 +392,7 @@ public class ConstraintLayout extends ViewGroup {
                 LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
                 layoutParams.widget = new Guideline();
                 layoutParams.isGuideline = true;
+                ((Guideline) layoutParams.widget).setOrientation(layoutParams.orientation);
                 widget = layoutParams.widget;
             }
         }
@@ -400,7 +401,7 @@ public class ConstraintLayout extends ViewGroup {
         mChildrenByIds.put(view.getId(), view);
         container.add(widget);
         widget.setParent(container);
-        updateHierarchy();
+        mDirtyHierarchy = true;
     }
 
     /**
@@ -413,7 +414,7 @@ public class ConstraintLayout extends ViewGroup {
         }
         mChildrenByIds.remove(view.getId());
         mLayoutWidget.remove(getViewWidget(view));
-        updateHierarchy();
+        mDirtyHierarchy = true;
     }
 
     private void updateHierarchy() {
@@ -433,7 +434,7 @@ public class ConstraintLayout extends ViewGroup {
         }
     }
 
-    void setChildrenConstraints() {
+    private void setChildrenConstraints() {
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
@@ -463,11 +464,6 @@ public class ConstraintLayout extends ViewGroup {
                 }
                 if (layoutParams.guidePercent != -1) {
                     guideline.setGuidePercent(layoutParams.guidePercent);
-                }
-                if (layoutParams.orientation == LayoutParams.VERTICAL) {
-                    guideline.setOrientation(Guideline.VERTICAL);
-                } else {
-                    guideline.setOrientation(Guideline.HORIZONTAL);
                 }
             } else if ((layoutParams.resolvedLeftToLeft != UNSET)
                     || (layoutParams.resolvedLeftToRight != UNSET)
@@ -887,10 +883,10 @@ public class ConstraintLayout extends ViewGroup {
         final int widgetsCount = getChildCount();
         for (int i = 0; i < widgetsCount; i++) {
             final View child = getChildAt(i);
-            if (child.getVisibility() == GONE) {
+            LayoutParams params = (LayoutParams) child.getLayoutParams();
+            if (child.getVisibility() == GONE && !params.isGuideline) {
                 continue;
             }
-            LayoutParams params = (LayoutParams) child.getLayoutParams();
             ConstraintWidget widget = params.widget;
 
             int l = widget.getDrawX();
@@ -1204,6 +1200,7 @@ public class ConstraintLayout extends ViewGroup {
                 if (!(widget instanceof Guideline)) {
                     widget = new Guideline();
                 }
+                ((Guideline) widget).setOrientation(orientation);
             }
         }
 
