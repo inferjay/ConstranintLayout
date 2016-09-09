@@ -326,7 +326,11 @@ public class ConstraintLayout extends ViewGroup {
     private static final boolean SIMPLE_LAYOUT = true;
 
     SparseArray<View> mChildrenByIds = new SparseArray<>();
-    private final ArrayList<ConstraintWidget> mSizeDependentsWidgets = new ArrayList<>(100);
+
+    // This array will keep a list of the widget with one or two dimensions that are
+    // set to MATCH_CONSTRAINT (i.e. they depend on the solver result, not from
+    // WRAP_CONTENT or a fixed dimension)
+    private final ArrayList<ConstraintWidget> mVariableDimensionsWidgets = new ArrayList<>(100);
 
     ConstraintWidgetContainer mLayoutWidget = new ConstraintWidgetContainer();
 
@@ -412,7 +416,7 @@ public class ConstraintLayout extends ViewGroup {
             }
         }
         if (recompute) {
-            mSizeDependentsWidgets.clear();
+            mVariableDimensionsWidgets.clear();
             setChildrenConstraints();
         }
     }
@@ -433,8 +437,8 @@ public class ConstraintLayout extends ViewGroup {
             widget.setVisibility(child.getVisibility());
             widget.setCompanionWidget(child);
 
-            if (!layoutParams.verticalLock || !layoutParams.horizontalLock) {
-                mSizeDependentsWidgets.add(widget);
+            if (!layoutParams.verticalDimensionFixed || !layoutParams.horizontalDimensionFixed) {
+                mVariableDimensionsWidgets.add(widget);
             }
 
             if (layoutParams.isGuideline) {
@@ -593,8 +597,8 @@ public class ConstraintLayout extends ViewGroup {
                 }
 
                 // FIXME: need to agree on the correct magic value for this rather than simply using zero.
-                if (!layoutParams.horizontalLock) {
-                    widget.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.ANY);
+                if (!layoutParams.horizontalDimensionFixed) {
+                    widget.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
                     widget.setWidth(0);
                     if (layoutParams.width == LayoutParams.MATCH_PARENT) {
                         widget.setWidth(mLayoutWidget.getWidth());
@@ -603,8 +607,8 @@ public class ConstraintLayout extends ViewGroup {
                     widget.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
                     widget.setWidth(layoutParams.width);
                 }
-                if (!layoutParams.verticalLock) {
-                    widget.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.ANY);
+                if (!layoutParams.verticalDimensionFixed) {
+                    widget.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
                     widget.setHeight(0);
                     if (layoutParams.height == LayoutParams.MATCH_PARENT) {
                         widget.setWidth(mLayoutWidget.getHeight());
@@ -619,7 +623,7 @@ public class ConstraintLayout extends ViewGroup {
                     widget.setOrigin(layoutParams.editorAbsoluteX, layoutParams.editorAbsoluteY);
                 }
 
-                if (layoutParams.dimensionRatio > 0) {
+                if (layoutParams.dimensionRatio != Float.NaN) {
                     widget.setDimensionRatio(layoutParams.dimensionRatio, layoutParams.dimensionRatioSide);
                 }
             }
@@ -665,7 +669,7 @@ public class ConstraintLayout extends ViewGroup {
             int height = params.height;
 
             // Don't need to measure widgets that are MATCH_CONSTRAINT on both dimensions
-            if (params.horizontalLock || params.verticalLock) {
+            if (params.horizontalDimensionFixed || params.verticalDimensionFixed) {
                 final int childWidthMeasureSpec;
                 final int childHeightMeasureSpec;
 
@@ -746,14 +750,14 @@ public class ConstraintLayout extends ViewGroup {
         int childState = 0;
 
         // let's update the size dependent widgets if any...
-        final int sizeDependentWidgetsCount = mSizeDependentsWidgets.size();
+        final int sizeDependentWidgetsCount = mVariableDimensionsWidgets.size();
 
         int heightPadding = paddingTop + getPaddingBottom();
         int widthPadding = paddingLeft + getPaddingRight();
 
         if (sizeDependentWidgetsCount > 0) {
             for (int i = 0; i < sizeDependentWidgetsCount; i++) {
-                ConstraintWidget widget = mSizeDependentsWidgets.get(i);
+                ConstraintWidget widget = mVariableDimensionsWidgets.get(i);
                 if (widget instanceof Guideline) {
                     continue;
                 }
@@ -963,7 +967,7 @@ public class ConstraintLayout extends ViewGroup {
 
         public float horizontalBias = 0.5f;
         public float verticalBias = 0.5f;
-        public float dimensionRatio = 0f;
+        public float dimensionRatio = Float.NaN;
         public int dimensionRatioSide = VERTICAL;
 
         public int editorAbsoluteX = UNSET;
@@ -972,8 +976,8 @@ public class ConstraintLayout extends ViewGroup {
         public int orientation = UNSET;
 
         // Internal use only
-        boolean horizontalLock = true;
-        boolean verticalLock = true;
+        boolean horizontalDimensionFixed = true;
+        boolean verticalDimensionFixed = true;
 
         int resolvedLeftToLeft = UNSET;
         int resolvedLeftToRight = UNSET;
@@ -1086,7 +1090,7 @@ public class ConstraintLayout extends ViewGroup {
                     verticalBias = a.getFloat(attr, verticalBias);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintDimensionRatio) {
                     String ratio = a.getString(attr);
-                    dimensionRatio = 0;
+                    dimensionRatio = Float.NaN;
                     dimensionRatioSide = UNSET;
                     if (ratio != null) {
                         int len = ratio.length();
@@ -1151,18 +1155,18 @@ public class ConstraintLayout extends ViewGroup {
 
         public void validate() {
             isGuideline = false;
-            horizontalLock = true;
-            verticalLock = true;
+            horizontalDimensionFixed = true;
+            verticalDimensionFixed = true;
             if (width == MATCH_CONSTRAINT || width == MATCH_PARENT) {
-                horizontalLock = false;
+                horizontalDimensionFixed = false;
             }
             if (height == MATCH_CONSTRAINT || height == MATCH_PARENT) {
-                verticalLock = false;
+                verticalDimensionFixed = false;
             }
             if (guidePercent != UNSET || guideBegin != UNSET || guideEnd != UNSET) {
                 isGuideline = true;
-                horizontalLock = true;
-                verticalLock = true;
+                horizontalDimensionFixed = true;
+                verticalDimensionFixed = true;
                 if (!(widget instanceof Guideline)) {
                     widget = new Guideline();
                 }

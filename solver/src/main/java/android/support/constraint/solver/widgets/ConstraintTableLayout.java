@@ -505,7 +505,7 @@ public class ConstraintTableLayout extends ConstraintWidgetContainer {
 //            target.getAnchor(ConstraintAnchor.Type.RIGHT).setConnectionType(ConstraintAnchor.ConnectionType.STRICT);
             switch (verticalSlice.alignment) {
                 case ALIGN_FULL: {
-                    target.setHorizontalDimensionBehaviour(DimensionBehaviour.ANY);
+                    target.setHorizontalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
                 }
                 break;
                 case ALIGN_LEFT: {

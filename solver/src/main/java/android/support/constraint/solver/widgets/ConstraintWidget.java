@@ -67,7 +67,7 @@ public class ConstraintWidget implements Solvable {
      * Define how the widget will resize
      */
     public enum DimensionBehaviour {
-        FIXED, WRAP_CONTENT, ANY
+        FIXED, WRAP_CONTENT, MATCH_CONSTRAINT
     }
 
     // The anchors available on the widget
@@ -89,7 +89,7 @@ public class ConstraintWidget implements Solvable {
     // Dimensions of the widget
     private int mWidth = 0;
     private int mHeight = 0;
-    private float mDimensionRatio = 0;
+    private float mDimensionRatio = Float.NaN;
     private int mDimensionRatioSide = UNKNOWN;
 
     private int mSolverLeft = 0;
@@ -159,7 +159,7 @@ public class ConstraintWidget implements Solvable {
         mParent = null;
         mWidth = 0;
         mHeight = 0;
-        mDimensionRatio = 0.0f;
+        mDimensionRatio = Float.NaN;
         mDimensionRatioSide = UNKNOWN;
         mX = 0;
         mY = 0;
@@ -915,7 +915,7 @@ public class ConstraintWidget implements Solvable {
      */
     public void setDimensionRatio(String ratio) {
         if (ratio == null || ratio.length() == 0) {
-            mDimensionRatio = 0;
+            mDimensionRatio = Float.NaN;
             return;
         }
         int dimensionRatioSide = UNKNOWN;
@@ -973,7 +973,7 @@ public class ConstraintWidget implements Solvable {
     /**
      * Set the ratio of the widget
      * The ratio will be applied if at least one of the dimension (width or height) is set to a behaviour
-     * of DimensionBehaviour.ANY -- the dimension's value will be set to the other dimension * ratio.
+     * of DimensionBehaviour.MATCH_CONSTRAINT -- the dimension's value will be set to the other dimension * ratio.
      */
     public void setDimensionRatio(float ratio, int dimensionRatioSide) {
         mDimensionRatio = ratio;
@@ -1432,14 +1432,14 @@ public class ConstraintWidget implements Solvable {
         if (this instanceof ConstraintWidgetContainer) {
             return;
         }
-        if (getHorizontalDimensionBehaviour() == ConstraintWidget.DimensionBehaviour.ANY) {
+        if (getHorizontalDimensionBehaviour() == ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT) {
             if (getWidth() == getWrapWidth()) {
                 setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
             } else if (getWidth() > getMinWidth()) {
                 setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
             }
         }
-        if (getVerticalDimensionBehaviour() == ConstraintWidget.DimensionBehaviour.ANY) {
+        if (getVerticalDimensionBehaviour() == ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT) {
             if (getHeight() == getWrapHeight()) {
                 setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
             } else if (getHeight() > getMinHeight()) {
@@ -1764,51 +1764,55 @@ public class ConstraintWidget implements Solvable {
             height = mMinHeight;
         }
 
-        boolean horizontalDimensionLocked = mHorizontalDimensionBehaviour != DimensionBehaviour.ANY;
-        boolean verticalDimensionLocked = mVerticalDimensionBehaviour != DimensionBehaviour.ANY;
+        // Dimensions can be either fixed (a given value) or dependent on the solver if set to MATCH_CONSTRAINT
+        boolean horizontalDimensionFixed = mHorizontalDimensionBehaviour != DimensionBehaviour.MATCH_CONSTRAINT;
+        boolean verticalDimensionFixed = mVerticalDimensionBehaviour != DimensionBehaviour.MATCH_CONSTRAINT;
 
-        if (!horizontalDimensionLocked && mLeft != null && mRight != null
+        if (!horizontalDimensionFixed && mLeft != null && mRight != null
             && (mLeft.mTarget == null || mRight.mTarget == null)) {
-            horizontalDimensionLocked = true;
+            horizontalDimensionFixed = true;
         }
-        if (!verticalDimensionLocked && mTop != null && mBottom != null) {
+        if (!verticalDimensionFixed && mTop != null && mBottom != null) {
            if (!(mTop.mTarget != null && mBottom.mTarget != null)) {
                // if we are in any mode but either top or bottom aren't connected
                if (mBaselineDistance == 0
                    || (mBaseline != null && !(mTop.mTarget != null && mBaseline.mTarget != null))) {
                    // if there are no baseline, or if the baseline is also not connected...
-                   verticalDimensionLocked = true;
+                   verticalDimensionFixed = true;
                }
            }
         }
+
+        // We evaluate the dimension ratio here as the connections can change.
+        // TODO: have a validation pass after connection instead
         boolean useRatio = false;
         int dimensionRatioSide = mDimensionRatioSide;
         float dimensionRatio = mDimensionRatio;
-        if (mDimensionRatio > 0) {
-            if (mHorizontalDimensionBehaviour == DimensionBehaviour.ANY
-              && mVerticalDimensionBehaviour == DimensionBehaviour.ANY) {
+        if (mDimensionRatio != Float.NaN) {
+            if (mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
+              && mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                 useRatio = true;
-                if (horizontalDimensionLocked && !verticalDimensionLocked) {
+                if (horizontalDimensionFixed && !verticalDimensionFixed) {
                     dimensionRatioSide = HORIZONTAL;
-                } else if (!horizontalDimensionLocked && verticalDimensionLocked) {
+                } else if (!horizontalDimensionFixed && verticalDimensionFixed) {
                     dimensionRatioSide = VERTICAL;
                     if (mDimensionRatioSide == UNKNOWN) {
                         // need to reverse the ratio as the parsing is done in horizontal mode
                         dimensionRatio = 1 / dimensionRatio;
                     }
                 }
-            } else if (mHorizontalDimensionBehaviour == DimensionBehaviour.ANY) {
+            } else if (mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                 dimensionRatioSide = HORIZONTAL;
                 width = (int) (dimensionRatio * mHeight);
-                horizontalDimensionLocked = true;
-            } else if (mVerticalDimensionBehaviour == DimensionBehaviour.ANY){
+                horizontalDimensionFixed = true;
+            } else if (mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT){
                 dimensionRatioSide = VERTICAL;
                 if (mDimensionRatioSide == UNKNOWN) {
                     // need to reverse the ratio as the parsing is done in horizontal mode
                     dimensionRatio = 1 / dimensionRatio;
                 }
                 height = (int) (dimensionRatio * mWidth);
-                verticalDimensionLocked = true;
+                verticalDimensionFixed = true;
             }
         }
 
@@ -1816,7 +1820,7 @@ public class ConstraintWidget implements Solvable {
         boolean wrapContent = (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)
                 && (this instanceof ConstraintWidgetContainer);
         if (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group)) {
-            applyConstraints(system, wrapContent, horizontalDimensionLocked, mLeft, mRight,
+            applyConstraints(system, wrapContent, horizontalDimensionFixed, mLeft, mRight,
                     mX, mX + width, width, mHorizontalBiasPercent, useRatio && dimensionRatioSide == HORIZONTAL);
         }
 
@@ -1837,12 +1841,12 @@ public class ConstraintWidget implements Solvable {
                 end = mBaseline;
             }
             if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && end.mGroup == group)) {
-                applyConstraints(system, wrapContent, verticalDimensionLocked,
+                applyConstraints(system, wrapContent, verticalDimensionFixed,
                         mTop, end, mY, mY + height, height, mVerticalBiasPercent, useRatio && dimensionRatioSide == VERTICAL);
             }
         } else {
             if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && mBottom.mGroup == group)) {
-                applyConstraints(system, wrapContent, verticalDimensionLocked,
+                applyConstraints(system, wrapContent, verticalDimensionFixed,
                         mTop, mBottom, mY, mY + height, height, mVerticalBiasPercent, useRatio && dimensionRatioSide == VERTICAL);
             }
         }
@@ -1864,14 +1868,14 @@ public class ConstraintWidget implements Solvable {
      *
      * @param system          the linear system we are adding constraints to
      * @param wrapContent     is the widget trying to wrap its content (i.e. its size will depends on its content)
-     * @param dimensionLocked is the widget dimensions locked or can they change
+     * @param dimensionFixed is the widget dimensions fixed or can they change
      * @param beginAnchor     the first anchor
      * @param endAnchor       the second anchor
      * @param beginPosition   the original position of the anchor
      * @param endPosition     the original position of the anchor
      * @param dimension       the dimension
      */
-    private void applyConstraints(LinearSystem system, boolean wrapContent, boolean dimensionLocked,
+    private void applyConstraints(LinearSystem system, boolean wrapContent, boolean dimensionFixed,
             ConstraintAnchor beginAnchor, ConstraintAnchor endAnchor,
             int beginPosition, int endPosition, int dimension, float bias, boolean useRatio) {
         SolverVariable begin = system.createObjectVariable(beginAnchor);
@@ -1890,7 +1894,7 @@ public class ConstraintWidget implements Solvable {
                 if (wrapContent) {
                     system.addConstraint(EquationCreation.createRowEquals(system, end, begin, 0, true));
                 } else {
-                    if (dimensionLocked) {
+                    if (dimensionFixed) {
                         system.addConstraint(
                                 EquationCreation.createRowEquals(system, end, begin, dimension, false));
                     } else {
@@ -1903,7 +1907,7 @@ public class ConstraintWidget implements Solvable {
             if (wrapContent) {
                 system.addConstraint(EquationCreation.createRowEquals(system, end, begin, 0, true));
             } else if (!useRatio) {
-                if (dimensionLocked) {
+                if (dimensionFixed) {
                     system.addConstraint(system.createRow().createRowEquals(end, begin, dimension));
                 } else {
                     system.addConstraint(system.createRow().createRowEquals(end, endPosition));
@@ -1914,14 +1918,14 @@ public class ConstraintWidget implements Solvable {
             if (wrapContent) {
                 system.addConstraint(EquationCreation.createRowEquals(system, end, begin, 0, true));
             } else if (!useRatio) {
-                if (dimensionLocked) {
+                if (dimensionFixed) {
                     system.addConstraint(system.createRow().createRowEquals(end, begin, dimension));
                 } else {
                     system.addConstraint(system.createRow().createRowEquals(begin, beginPosition));
                 }
             }
         } else { // both constraints set
-            if (dimensionLocked) {
+            if (dimensionFixed) {
                 if (wrapContent) {
                     system.addConstraint(
                             EquationCreation.createRowEquals(system, end, begin, 0, true));

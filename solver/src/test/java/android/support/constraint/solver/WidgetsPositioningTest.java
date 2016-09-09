@@ -49,8 +49,8 @@ public class WidgetsPositioningTest {
         B.connect(ConstraintAnchor.Type.RIGHT, A, ConstraintAnchor.Type.RIGHT, margin);
         B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.TOP, margin);
         B.connect(ConstraintAnchor.Type.BOTTOM, A, ConstraintAnchor.Type.BOTTOM, margin);
-        B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.ANY);
-        B.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.ANY);
+        B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        B.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
         A.setDebugName("A");
         B.setDebugName("B");
         final float ratio = 0.3f;
@@ -285,8 +285,8 @@ public class WidgetsPositioningTest {
         widgets.add(B);
         widgets.add(C);
 
-        C.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.ANY);
-        C.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.ANY);
+        C.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        C.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
         C.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT);
         C.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT);
         C.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM);
