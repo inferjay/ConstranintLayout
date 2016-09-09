@@ -89,7 +89,7 @@ public class ConstraintWidget implements Solvable {
     // Dimensions of the widget
     private int mWidth = 0;
     private int mHeight = 0;
-    private float mDimensionRatio = Float.NaN;
+    private float mDimensionRatio = 0;
     private int mDimensionRatioSide = UNKNOWN;
 
     private int mSolverLeft = 0;
@@ -159,7 +159,7 @@ public class ConstraintWidget implements Solvable {
         mParent = null;
         mWidth = 0;
         mHeight = 0;
-        mDimensionRatio = Float.NaN;
+        mDimensionRatio = 0;
         mDimensionRatioSide = UNKNOWN;
         mX = 0;
         mY = 0;
@@ -915,7 +915,7 @@ public class ConstraintWidget implements Solvable {
      */
     public void setDimensionRatio(String ratio) {
         if (ratio == null || ratio.length() == 0) {
-            mDimensionRatio = Float.NaN;
+            mDimensionRatio = 0;
             return;
         }
         int dimensionRatioSide = UNKNOWN;
@@ -1788,7 +1788,7 @@ public class ConstraintWidget implements Solvable {
         boolean useRatio = false;
         int dimensionRatioSide = mDimensionRatioSide;
         float dimensionRatio = mDimensionRatio;
-        if (mDimensionRatio != Float.NaN) {
+        if (mDimensionRatio > 0) {
             if (mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
               && mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                 useRatio = true;

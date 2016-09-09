@@ -635,7 +635,7 @@ public class ConstraintLayout extends ViewGroup {
                     widget.setOrigin(layoutParams.editorAbsoluteX, layoutParams.editorAbsoluteY);
                 }
 
-                if (layoutParams.dimensionRatio != Float.NaN) {
+                if (layoutParams.dimensionRatio > 0) {
                     widget.setDimensionRatio(layoutParams.dimensionRatio, layoutParams.dimensionRatioSide);
                 }
             }
@@ -1001,7 +1001,7 @@ public class ConstraintLayout extends ViewGroup {
 
         public float horizontalBias = 0.5f;
         public float verticalBias = 0.5f;
-        public float dimensionRatio = Float.NaN;
+        public float dimensionRatio = 0;
         public int dimensionRatioSide = VERTICAL;
 
         public int editorAbsoluteX = UNSET;
@@ -1124,7 +1124,7 @@ public class ConstraintLayout extends ViewGroup {
                     verticalBias = a.getFloat(attr, verticalBias);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintDimensionRatio) {
                     String ratio = a.getString(attr);
-                    dimensionRatio = Float.NaN;
+                    dimensionRatio = 0;
                     dimensionRatioSide = UNSET;
                     if (ratio != null) {
                         int len = ratio.length();
