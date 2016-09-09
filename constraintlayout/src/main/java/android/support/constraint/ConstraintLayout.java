@@ -94,7 +94,7 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  *     <p>
  *     For example, in order to position button B to the right of button A (Fig. 1):
  *     <br><div align="center">
- *       <img width="300px" src="{@docRoot}/resources/images/relative-positioning.png">
+ *       <img width="300px" src="resources/images/relative-positioning.png">
  *           <br><b><i>Fig. 1 - Relative Positioning Example</i></b>
  *     </div>
  *     </p>
@@ -110,7 +110,7 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  *     This tells the system that we want the left side of button B to be constrained to the right side of button A.
  *     Such a position constraint means that the system will try to have both sides share the same location.
  *     <br><div align="center" >
- *       <img width="350px" src="{@docRoot}/resources/images/relative-positioning-constraints.png">
+ *       <img width="350px" src="resources/images/relative-positioning-constraints.png">
  *           <br><b><i>Fig. 2 - Relative Positioning Constraints</i></b>
  *     </div>
  *
@@ -143,7 +143,7 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  * <h4 id="Margins"> Margins </h4>
  * <p>
  *     <div align="center" >
- *       <img width="325px" src="{@docRoot}/resources/images/relative-positioning-margin.png">
+ *       <img width="325px" src="resources/images/relative-positioning-margin.png">
  *           <br><b><i>Fig. 3 - Relative Positioning Margins</i></b>
  *     </div>
  *      <p>If side margins are set, they will be applied to the corresponding constraints (if they exist) (Fig. 3), enforcing
@@ -188,7 +188,7 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  *     Unless the {@code ConstraintLayout} happens to have the exact same size as the {@code Button}, both constraints
  *     cannot be satisfied at the same time (both sides cannot be where we want them to be).
  *     <p><div align="center" >
- *       <img width="325px" src="{@docRoot}/resources/images/centering-positioning.png">
+ *       <img width="325px" src="resources/images/centering-positioning.png">
  *           <br><b><i>Fig. 4 - Centering Positioning</i></b>
  *     </div>
  *     <p>
@@ -205,7 +205,7 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  *            <li>{@code layout_constraintVertical_bias}</li>
  *        </ul>
  *     <p><div align="center" >
- *       <img width="325px" src="{@docRoot}/resources/images/centering-positioning-bias.png">
+ *       <img width="325px" src="resources/images/centering-positioning-bias.png">
  *           <br><b><i>Fig. 5 - Centering Positioning with Bias</i></b>
  *     </div>
  *     <p>
@@ -238,7 +238,7 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  *     </ul>
  *
  *     <p><div align="center" >
- *       <img width="350px" src="{@docRoot}/resources/images/visibility-behavior.png">
+ *       <img width="350px" src="resources/images/visibility-behavior.png">
  *           <br><b><i>Fig. 6 - Visibility Behavior</i></b>
  *     </div>
  *     <p>This specific behavior allows to build layout where you can temporarily mark widgets as being {@code GONE},
@@ -261,7 +261,7 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  *         <li>Using {@code 0dp}, which is the equivalent of "{@code MATCH_CONSTRAINT}"</li>
  *     </ul>
  *     <p><div align="center" >
- *       <img width="325px" src="{@docRoot}/resources/images/dimension-match-constraints.png">
+ *       <img width="325px" src="resources/images/dimension-match-constraints.png">
  *           <br><b><i>Fig. 7 - Dimension Constraints</i></b>
  *     </div>
  *     The first two works in a similar fashion as other layouts. The last one will resize the widget in such a way as
