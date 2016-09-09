@@ -18,17 +18,11 @@ package android.support.constraint;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.Dimension;
-import android.support.annotation.IdRes;
-import android.support.annotation.IntDef;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import java.lang.annotation.Retention;
 import java.util.HashMap;
 import java.util.HashSet;
-
-import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
  * This defines and interface to a set of constraints. It allows you to programmatically
@@ -40,27 +34,12 @@ public class ConstraintSet {
     public static final int WRAP_CONTENT = ConstraintLayout.LayoutParams.WRAP_CONTENT;
     public static final int PARENT_ID = ConstraintLayout.LayoutParams.PARENT_ID;
 
-    @Retention(SOURCE)
-    @IntDef({HORIZONTAL_GUIDELINE, VERTICAL_GUIDELINE})
-    public @interface GuideLineOrientation {
-    }
-
     public static final int HORIZONTAL_GUIDELINE = 0;
     public static final int VERTICAL_GUIDELINE = 1;
-
-    @Retention(SOURCE)
-    @IntDef({VISIBLE, INVISIBLE, GONE})
-    public @interface Visibility {
-    }
 
     public static final int VISIBLE = View.VISIBLE;
     public static final int INVISIBLE = View.INVISIBLE;
     public static final int GONE = View.GONE;
-
-    @Retention(SOURCE)
-    @IntDef({LEFT, RIGHT, TOP, BOTTOM, BASELINE, START, END})
-    public @interface AnchorType {
-    }
 
     public static final int LEFT = ConstraintLayout.LayoutParams.LEFT;
     public static final int RIGHT = ConstraintLayout.LayoutParams.RIGHT;;
@@ -269,9 +248,9 @@ public class ConstraintSet {
      * @param secondMargin the connection margin
      * @param bias         the ratio between two connections
      */
-    public void center(@IdRes int centerID,
-                       @IdRes int firstID, @AnchorType int firstSide, @Dimension int firstMargin,
-                       @IdRes int secondId, @AnchorType int secondSide, @Dimension int secondMargin,
+    public void center(int centerID,
+                       int firstID, int firstSide, int firstMargin,
+                       int secondId, int secondSide, int secondMargin,
                        float bias) {
         // Error checking
 
@@ -298,14 +277,14 @@ public class ConstraintSet {
         }
     }
 
-    private void centerHorizontally(@IdRes int centerID, @IdRes int leftId, int leftSide, int leftMargin, @IdRes int rightId, int rightSide, int rightMargin, float bias) {
+    private void centerHorizontally(int centerID, int leftId, int leftSide, int leftMargin, int rightId, int rightSide, int rightMargin, float bias) {
         connect(centerID, LEFT, leftId, leftSide, leftMargin);
         connect(centerID, RIGHT, rightId, rightSide, rightMargin);
         Constraint constraint = mConstraints.get(centerID);
         constraint.horizontalBias = bias;
     }
 
-    private void centerVertically(@IdRes int centerID, @IdRes int topId, int topSide, int topMargin, @IdRes int bottomId, int bottomSide, int bottomMargin, float bias) {
+    private void centerVertically(int centerID, int topId, int topSide, int topMargin, int bottomId, int bottomSide, int bottomMargin, float bias) {
         connect(centerID, TOP, topId, topSide, topMargin);
         connect(centerID, BOTTOM, bottomId, bottomSide, bottomMargin);
         Constraint constraint = mConstraints.get(centerID);
@@ -321,7 +300,7 @@ public class ConstraintSet {
      * @param endSide   the side of widget to constrain to
      * @param margin    the margin to constrain (margin must be postive)
      */
-    public void connect(@IdRes int startID, @AnchorType int startSide, @IdRes int endID, @AnchorType int endSide, @Dimension int margin) {
+    public void connect(int startID, int startSide, int endID, int endSide, int margin) {
         if (!mConstraints.containsKey(startID)) {
             mConstraints.put(startID, new Constraint());
         }
@@ -429,7 +408,7 @@ public class ConstraintSet {
      * @param viewId ID of view to center Horizontally
      * @param toView ID of view to center on (or in)
      */
-    public void centerHorizontally(@IdRes int viewId, @IdRes int toView) {
+    public void centerHorizontally(int viewId, int toView) {
         center(viewId, toView, ConstraintSet.LEFT, 0, toView, ConstraintSet.RIGHT, 0, .5f);
     }
 
@@ -437,7 +416,7 @@ public class ConstraintSet {
      * @param viewId ID of view to center Horizontally
      * @param toView ID of view to center on (or in)
      */
-    public void centerVertically(@IdRes int viewId, @IdRes int toView) {
+    public void centerVertically(int viewId, int toView) {
         center(viewId, toView, ConstraintSet.TOP, 0, toView, ConstraintSet.BOTTOM, 0, .5f);
     }
 
@@ -446,7 +425,7 @@ public class ConstraintSet {
      *
      * @param viewId ID of view to remove all connections to
      */
-    public void clear(@IdRes int viewId) {
+    public void clear(int viewId) {
         mConstraints.remove(viewId);
     }
 
@@ -456,7 +435,7 @@ public class ConstraintSet {
      * @param viewId ID of view to center on (or in)
      * @param anchor the Anchor to remove constraint from
      */
-    public void clear(@IdRes int viewId, @AnchorType int anchor) {
+    public void clear(int viewId, int anchor) {
         if (mConstraints.containsKey(viewId)) {
             Constraint constraint = mConstraints.get(viewId);
             switch (anchor) {
@@ -507,7 +486,7 @@ public class ConstraintSet {
      * @param anchor The side to adjust the margin on
      * @param value  The new value for the margin
      */
-    public void setMargin(@IdRes int viewId, @AnchorType int anchor, @Dimension int value) {
+    public void setMargin(int viewId, int anchor, int value) {
         Constraint constraint = get(viewId);
         switch (anchor) {
             case LEFT:
@@ -561,7 +540,7 @@ public class ConstraintSet {
      * @param viewId     ID of view to adjust the vertical
      * @param visibility the visibility
      */
-    public void setVisibility(@IdRes int viewId, @Visibility int visibility) {
+    public void setVisibility(int viewId, int visibility) {
         get(viewId).visibility = visibility;
     }
 
@@ -569,7 +548,7 @@ public class ConstraintSet {
      * @param viewId ID of view to adjust it height
      * @param height the height of the constraint
      */
-    public void constrainHeight(@IdRes int viewId, @Dimension int height) {
+    public void constrainHeight(int viewId, int height) {
         get(viewId).mHeight = height;
     }
 
@@ -577,7 +556,7 @@ public class ConstraintSet {
      * @param viewId ID of view to adjust it height
      * @param width  the width of the view
      */
-    public void constrainWidth(@IdRes int viewId, @Dimension int width) {
+    public void constrainWidth(int viewId, int width) {
         get(viewId).mWidth = width;
     }
 
@@ -585,7 +564,7 @@ public class ConstraintSet {
      * @param guidelineID ID of guideline to create
      * @param orientation the Orientation of the guideline
      */
-    public void create(@IdRes int guidelineID, @GuideLineOrientation int orientation) {
+    public void create(int guidelineID, int orientation) {
         Constraint constraint = get(guidelineID);
         constraint.mIsGuideline = true;
         constraint.orientation = orientation;
@@ -597,7 +576,7 @@ public class ConstraintSet {
      * @param guidelineID ID of the guideline
      * @param margin
      */
-    public void setGuidelineBegin(@IdRes int guidelineID, @Dimension int margin) {
+    public void setGuidelineBegin(int guidelineID, int margin) {
         get(guidelineID).guideBegin = margin;
         get(guidelineID).guideEnd = Constraint.UNSET;
         get(guidelineID).guidePercent = 0.5f;
@@ -610,7 +589,7 @@ public class ConstraintSet {
      * @param guidelineID ID of the guideline
      * @param margin      the margin to the right/bottom side of container
      */
-    public void setGuidelineEnd(@IdRes int guidelineID, @Dimension int margin) {
+    public void setGuidelineEnd(int guidelineID, int margin) {
         get(guidelineID).guideEnd = margin;
         get(guidelineID).guideBegin = Constraint.UNSET;
         get(guidelineID).guidePercent = 0.5f;
@@ -622,20 +601,20 @@ public class ConstraintSet {
      * @param guidelineID ID of the guideline
      * @param ratio       the ratio between the gap on the left and right 0.0 is top/left 0.5 is middle
      */
-    public void setGuidelinePercent(@IdRes int guidelineID, float ratio) {
+    public void setGuidelinePercent(int guidelineID, float ratio) {
         get(guidelineID).guidePercent = ratio;
         get(guidelineID).guideEnd = Constraint.UNSET;
         get(guidelineID).guideBegin = Constraint.UNSET;
     }
 
-    private Constraint get(@IdRes int id) {
+    private Constraint get(int id) {
         if (!mConstraints.containsKey(id)) {
             mConstraints.put(id, new Constraint());
         }
         return mConstraints.get(id);
     }
 
-    private String sideToString(@AnchorType int side) {
+    private String sideToString(int side) {
         switch (side) {
             case LEFT:
                 return "left";
