@@ -290,7 +290,7 @@ import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
  * </ul>
  * </p>
  * <p>
- *     You can also use use ratio if both dimensions are set to {@code MATCH_CONSTRAINT} (0dp), for example
+ *     You can also use ratio if both dimensions are set to {@code MATCH_CONSTRAINT} (0dp), for example
  *     if one dimension is constrained by two targets (e.g. width is set to 0dp with connections to its parent).
  *     In that case, you need to indicate which side should be constrained, by adding the letter
  *     {@code W} (for constraining the width) or {@code H} (for constraining the height) in front of the ratio, separated

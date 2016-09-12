@@ -39,7 +39,7 @@ import java.util.HashSet;
  * </li>
  * </ul><p>
  * Example code:<br>
- * {@sample resources/examples/MainActivity.java
+ * {@sample resources/examples/ExampleConstraintSet.java
  *          Example}
  */
 public class ConstraintSet {
