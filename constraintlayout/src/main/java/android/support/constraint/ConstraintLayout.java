@@ -887,6 +887,7 @@ public class ConstraintLayout extends ViewGroup {
             if (child.getVisibility() == GONE && !params.isGuideline) {
                 continue;
             }
+
             ConstraintWidget widget = params.widget;
 
             int l = widget.getDrawX();
@@ -951,56 +952,208 @@ public class ConstraintLayout extends ViewGroup {
      *  a {@link ConstraintLayout}. For building up constraints at run time, using {@link ConstraintSet} is recommended.
      */
     public static class LayoutParams extends ViewGroup.MarginLayoutParams {
+        /**
+         * Dimension will be controlled by constraints.
+         */
         public static final int MATCH_CONSTRAINT = 0;
 
+        /**
+         * References the id of the parent.
+         */
         public static final int PARENT_ID = 0;
+
+        /**
+         * Defines an id that is not set.
+         */
         public static final int UNSET = -1;
 
+        /**
+         * The horizontal orientation.
+         */
         public static final int HORIZONTAL = ConstraintWidget.HORIZONTAL;
+
+        /**
+         * The vertical orientation.
+         */
         public static final int VERTICAL = ConstraintWidget.VERTICAL;
 
+        /**
+         * The left side of a view.
+         */
         public static final int LEFT = 1;
+
+        /**
+         * The right side of a view.
+         */
         public static final int RIGHT = 2;
+
+        /**
+         * The top of a view.
+         */
         public static final int TOP = 3;
+
+        /**
+         * The bottom side of a view.
+         */
         public static final int BOTTOM = 4;
+
+        /**
+         * The baseline of the text in a view.
+         */
         public static final int BASELINE = 5;
+
+        /**
+         * The left side of a view in left to right languages.
+         * In right to left languages it corresponds to the right side of the view
+         */
         public static final int START = 6;
+
+        /**
+         * The right side of a view in right to left languages.
+         * In right to left languages it corresponds to the left side of the view
+         */
         public static final int END =  7;
 
-        public boolean needsBaseline = false;
-        public boolean isGuideline = false;
+        /**
+         * The distance of child (guideline) to the top or left edge of its parent.
+         */
         public int guideBegin = UNSET;
+
+        /**
+         * The distance of child (guideline) to the top or left edge of its parent.
+         */
         public int guideEnd = UNSET;
+
+        /**
+         * The ratio of the distance to the parent's sides
+         */
         public float guidePercent = UNSET;
 
+        /**
+         * Constrains the left side of a child to the left side of a target child (contains the target child id).
+         */
         public int leftToLeft = UNSET;
-        public int leftToRight = UNSET;
+
+        /**
+         * Constrains the left side of a child to the right side of a target child (contains the target child id).
+         */
+       public int leftToRight = UNSET;
+
+        /**
+         * Constrains the right side of a child to the left side of a target child (contains the target child id).
+         */
         public int rightToLeft = UNSET;
+
+        /**
+         * Constrains the right side of a child to the right side of a target child (contains the target child id).
+         */
         public int rightToRight = UNSET;
+
+        /**
+         * Constrains the top side of a child to the top side of a target child (contains the target child id).
+         */
         public int topToTop = UNSET;
+
+        /**
+         * Constrains the top side of a child to the bottom side of a target child (contains the target child id).
+         */
         public int topToBottom = UNSET;
+
+        /**
+         * Constrains the bottom side of a child to the top side of a target child (contains the target child id).
+         */
         public int bottomToTop = UNSET;
+
+        /**
+         * Constrains the bottom side of a child to the bottom side of a target child (contains the target child id).
+         */
         public int bottomToBottom = UNSET;
+
+        /**
+         * Constrains the baseline of a child to the baseline of a target child (contains the target child id).
+         */
         public int baselineToBaseline = UNSET;
 
+        /**
+         * Constrains the start side of a child to the end side of a target child (contains the target child id).
+         */
         public int startToEnd = UNSET;
+
+        /**
+         * Constrains the start side of a child to the start side of a target child (contains the target child id).
+         */
         public int startToStart = UNSET;
+
+        /**
+         * Constrains the end side of a child to the start side of a target child (contains the target child id).
+         */
         public int endToStart = UNSET;
+
+        /**
+         * Constrains the end side of a child to the end side of a target child (contains the target child id).
+         */
         public int endToEnd = UNSET;
 
+        /**
+         * The left margin to use when the target is gone.
+         */
         public int goneLeftMargin = UNSET;
+
+        /**
+         * The top margin to use when the target is gone.
+         */
         public int goneTopMargin = UNSET;
+
+        /**
+         * The right margin to use when the target is gone
+         */
         public int goneRightMargin = UNSET;
+
+        /**
+         * The bottom margin to use when the target is gone.
+         */
         public int goneBottomMargin = UNSET;
+
+        /**
+         * The start margin to use when the target is gone.
+         */
         public int goneStartMargin = UNSET;
+
+        /**
+         * The end margin to use when the target is gone.
+         */
         public int goneEndMargin = UNSET;
 
+        /**
+         * The ratio between two connections when the left and right (or start and end) sides are constrained.
+         */
         public float horizontalBias = 0.5f;
+
+        /**
+         * The ratio between two connections when the top and bottom sides are constrained.
+         */
         public float verticalBias = 0.5f;
+
+        /**
+         * The ratio between the width and height of the child.
+         */
         public float dimensionRatio = 0;
+
+        /**
+         * The child's side to constrain using dimensRatio.
+         */
         public int dimensionRatioSide = VERTICAL;
 
+        /**
+         * The design time location of the left side of the child.
+         * Used at design time for a horizontally unconstrained child.
+         */
         public int editorAbsoluteX = UNSET;
+
+        /**
+         * The design time location of the right side of the child.
+         *  Used at design time for a vertically unconstrained child.
+         */
         public int editorAbsoluteY = UNSET;
 
         public int orientation = UNSET;
@@ -1008,6 +1161,9 @@ public class ConstraintLayout extends ViewGroup {
         // Internal use only
         boolean horizontalDimensionFixed = true;
         boolean verticalDimensionFixed = true;
+
+        boolean needsBaseline = false;
+        boolean isGuideline = false;
 
         int resolvedLeftToLeft = UNSET;
         int resolvedLeftToRight = UNSET;
