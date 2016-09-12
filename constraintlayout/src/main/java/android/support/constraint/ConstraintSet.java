@@ -681,7 +681,7 @@ public class ConstraintSet {
      * Set a guideline's distance to end.
      *
      * @param guidelineID ID of the guideline
-     * @param margin      the margin to the right/bottom side of container
+     * @param margin      the margin to the right or bottom side of container
      */
     public void setGuidelineEnd(int guidelineID, int margin) {
         get(guidelineID).guideEnd = margin;
