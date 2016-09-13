@@ -234,6 +234,7 @@ public class ConstraintAnchor {
         } else {
             mMargin = 0;
         }
+        mGoneMargin = goneMargin;
         mStrength = strength;
         mConnectionCreator = creator;
         return true;
