@@ -1788,7 +1788,7 @@ public class ConstraintWidget implements Solvable {
         boolean useRatio = false;
         int dimensionRatioSide = mDimensionRatioSide;
         float dimensionRatio = mDimensionRatio;
-        if (mDimensionRatio > 0) {
+        if (mDimensionRatio > 0 && mVisibility != GONE) {
             if (mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
               && mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                 useRatio = true;
