@@ -35,6 +35,7 @@ import java.util.ArrayList;
 
 import static android.support.constraint.ConstraintLayout.LayoutParams.MATCH_CONSTRAINT;
 import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 /**
  * A {@code ConstraintLayout} is a {@link android.view.ViewGroup} which allows you
@@ -770,6 +771,7 @@ public class ConstraintLayout extends ViewGroup {
         int widthPadding = paddingLeft + getPaddingRight();
 
         if (sizeDependentWidgetsCount > 0) {
+            boolean needSolverPass = false;
             for (int i = 0; i < sizeDependentWidgetsCount; i++) {
                 ConstraintWidget widget = mVariableDimensionsWidgets.get(i);
                 if (widget instanceof Guideline) {
@@ -786,12 +788,32 @@ public class ConstraintLayout extends ViewGroup {
                 int widthSpec = MeasureSpec.makeMeasureSpec(widget.getWidth(), MeasureSpec.EXACTLY);
                 int heightSpec = MeasureSpec.makeMeasureSpec(widget.getHeight(), MeasureSpec.EXACTLY);
 
+                ConstraintLayout.LayoutParams params = (LayoutParams) child.getLayoutParams();
+                if (params.width == WRAP_CONTENT) {
+                    widthSpec = MeasureSpec.makeMeasureSpec(widget.getWidth(), MeasureSpec.UNSPECIFIED);
+                } else if (params.height == WRAP_CONTENT) {
+                    heightSpec = MeasureSpec.makeMeasureSpec(widget.getHeight(), MeasureSpec.UNSPECIFIED);
+                }
+
                 // we need to re-measure the child...
                 child.measure(widthSpec, heightSpec);
+
+                int measuredWidth = child.getMeasuredWidth();
+                int measureHeight = child.getMeasuredHeight();
+                if (measuredWidth != widget.getWidth()) {
+                    widget.setWidth(measuredWidth);
+                    needSolverPass = true;
+                } else if (measureHeight != widget.getHeight()) {
+                    widget.setHeight(measureHeight);
+                    needSolverPass = true;
+                }
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                     childState = combineMeasuredStates(childState, child.getMeasuredState());
                 }
+            }
+            if (needSolverPass) {
+                solveLinearSystem();
             }
         }
 
