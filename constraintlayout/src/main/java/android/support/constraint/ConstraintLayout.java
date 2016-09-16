@@ -484,6 +484,7 @@ public class ConstraintLayout extends ViewGroup {
                 int resolvedRightToRight = layoutParams.resolvedRightToRight;
                 int resolveGoneLeftMargin = layoutParams.resolveGoneLeftMargin;
                 int resolveGoneRightMargin = layoutParams.resolveGoneRightMargin;
+                float resolvedHorizontalBias = layoutParams.resolvedHorizontalBias;
 
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
                     // Pre JB MR1, left/right should take precedence, unless they are
@@ -494,6 +495,8 @@ public class ConstraintLayout extends ViewGroup {
                     resolvedRightToRight = layoutParams.rightToRight;
                     resolveGoneLeftMargin = layoutParams.goneLeftMargin;
                     resolveGoneRightMargin = layoutParams.goneRightMargin;
+                    resolvedHorizontalBias = layoutParams.horizontalBias;
+
                     if (resolvedLeftToLeft == UNSET && resolvedLeftToRight == UNSET) {
                         if (layoutParams.startToStart != UNSET) {
                             resolvedLeftToLeft = layoutParams.startToStart;
@@ -597,8 +600,8 @@ public class ConstraintLayout extends ViewGroup {
                     }
                 }
 
-                if (layoutParams.horizontalBias >= 0 && layoutParams.horizontalBias != 0.5f) {
-                    widget.setHorizontalBiasPercent(layoutParams.horizontalBias);
+                if (resolvedHorizontalBias >= 0 && resolvedHorizontalBias != 0.5f) {
+                    widget.setHorizontalBiasPercent(resolvedHorizontalBias);
                 }
                 if (layoutParams.verticalBias >= 0 && layoutParams.verticalBias != 0.5f) {
                     widget.setVerticalBiasPercent(layoutParams.verticalBias);
@@ -1171,6 +1174,7 @@ public class ConstraintLayout extends ViewGroup {
         int resolvedRightToRight = UNSET;
         int resolveGoneLeftMargin = UNSET;
         int resolveGoneRightMargin = UNSET;
+        float resolvedHorizontalBias = 0.5f;
 
         ConstraintWidget widget = new ConstraintWidget();
 
@@ -1398,6 +1402,7 @@ public class ConstraintLayout extends ViewGroup {
             resolveGoneRightMargin = UNSET;
             resolveGoneLeftMargin = goneLeftMargin;
             resolveGoneRightMargin = goneRightMargin;
+            resolvedHorizontalBias = horizontalBias;
 
             boolean isRtl = (View.LAYOUT_DIRECTION_RTL == getLayoutDirection());
             // Post JB MR1, if start/end are defined, they take precedence over left/right
@@ -1419,6 +1424,7 @@ public class ConstraintLayout extends ViewGroup {
                 if (goneEndMargin != UNSET) {
                     resolveGoneLeftMargin = goneEndMargin;
                 }
+                resolvedHorizontalBias = 1 - horizontalBias;
             } else {
                 if (startToEnd != UNSET) {
                     resolvedLeftToRight = startToEnd;
