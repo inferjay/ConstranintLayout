@@ -1,108 +1,191 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- The space from the beginning edge of the parent to this guideline. -->
+    <attr name="layout_constraintGuide_begin" format="dimension"/>
+    <!-- The space from the ending edge of the parent to this  guideline. -->
+    <attr name="layout_constraintGuide_end" format="dimension"/>
+    <!-- The percent of total space from the beginning of the parent to this guideline. (e.g. 0.50 = middle)-->
+    <attr name="layout_constraintGuide_percent" format="float"/>
+    <!-- Constrains the left edge of this view to the left edge of the given view ID. -->
+
+    <attr name="layout_constraintLeft_toLeftOf" format="reference|enum">
+        <enum name="parent" value="0"/>
+    </attr>
+    <!-- Constrains the left edge of this view to the right edge of the given view ID. -->
+    <attr name="layout_constraintLeft_toRightOf" format="reference|enum">
+        <enum name="parent" value="0"/>
+    </attr>
+    <!-- Constrains the right edge of this view to the left edge of the given view ID. -->
+    <attr name="layout_constraintRight_toLeftOf" format="reference|enum">
+        <enum name="parent" value="0"/>
+    </attr>
+    <!-- Constrains the right edge of this view to the right edge of the given view ID. -->
+    <attr name="layout_constraintRight_toRightOf" format="reference|enum">
+        <enum name="parent" value="0"/>
+    </attr>
+    <!-- Constrains the top edge of this view to the top edge of the given view ID. -->
+    <attr name="layout_constraintTop_toTopOf" format="reference|enum">
+        <enum name="parent" value="0"/>
+    </attr>
+    <!-- Constrains the top edge of this view to the bottom edge of the given view ID. -->
+    <attr name="layout_constraintTop_toBottomOf" format="reference|enum">
+        <enum name="parent" value="0"/>
+    </attr>
+    <!-- Constrains the bottom edge of this view to the top edge of the given view ID. -->
+    <attr name="layout_constraintBottom_toTopOf" format="reference|enum">
+        <enum name="parent" value="0"/>
+    </attr>
+    <!-- Constrains the bottom edge of this view to the bottom edge of the given view ID. -->
+    <attr name="layout_constraintBottom_toBottomOf" format="reference|enum">
+        <enum name="parent" value="0"/>
+    </attr>
+    <!-- Constrains the baseline of this view to the baseline of the given view ID. -->
+    <attr name="layout_constraintBaseline_toBaselineOf" format="reference|enum">
+        <enum name="parent" value="0"/>
+    </attr>
+    <!-- Constrains the start edge of this view to the end edge of the given view ID. -->
+    <attr name="layout_constraintStart_toEndOf" format="reference|enum">
+        <enum name="parent" value="0"/>
+    </attr>
+    <!-- Constrains the start edge of this view to the start edge of the given view ID. -->
+    <attr name="layout_constraintStart_toStartOf" format="reference|enum">
+        <enum name="parent" value="0"/>
+    </attr>
+    <!-- Constrains the end edge of this view to the start edge of the given view ID. -->
+    <attr name="layout_constraintEnd_toStartOf" format="reference|enum">
+        <enum name="parent" value="0"/>
+    </attr>
+    <!-- Constrains the end edge of this view to the end edge of the given view ID. -->
+    <attr name="layout_constraintEnd_toEndOf" format="reference|enum">
+        <enum name="parent" value="0"/>
+    </attr>
+
+    <!-- the left margin value to be used when connected to an object that is GONE -->
+    <attr name="layout_goneMarginLeft" format="dimension"/>
+    <!-- the top margin value to be used when connected to an object that is GONE -->
+    <attr name="layout_goneMarginTop" format="dimension"/>
+    <!-- the right margin value to be used when connected to an object that is GONE -->
+    <attr name="layout_goneMarginRight" format="dimension"/>
+    <!-- the bottom margin value to be used when connected to an object that is GONE -->
+    <attr name="layout_goneMarginBottom" format="dimension"/>
+    <!-- the start margin value to be used when connected to an object that is GONE -->
+    <attr name="layout_goneMarginStart" format="dimension"/>
+    <!-- the end margin value to be used when connected to an object that is GONE -->
+    <attr name="layout_goneMarginEnd" format="dimension"/>
+
+    <!-- Fraction of excess space to distribute on the left when constrained on left & right edges (e.g. .5 = middle)-->
+    <attr name="layout_constraintHorizontal_bias" format="float"/>
+    <!-- Fraction of excess space to distribute on the top when constrained on top & bottom edges (e.g. .5 = middle)-->
+    <attr name="layout_constraintVertical_bias" format="float"/>
+
+    <!-- Used at design time to define who created the constraint -->
+    <attr name="layout_constraintLeft_creator" format="integer"/>
+    <!-- Used at design time to define who created the constraint -->
+    <attr name="layout_constraintTop_creator" format="integer"/>
+    <!-- Used at design time to define who created the constraint -->
+    <attr name="layout_constraintRight_creator" format="integer"/>
+    <!-- Used at design time to define who created the constraint -->
+    <attr name="layout_constraintBottom_creator" format="integer"/>
+    <!-- Used at design time to define who created the constraint -->
+    <attr name="layout_constraintBaseline_creator" format="integer"/>
+    <!-- The ratio between the width and height of the view.
+    Note it only works if one of the dimensions is set to 0dp.-->
+    <attr name="layout_constraintDimensionRatio" format="string"/>
+
+    <!-- Used at design time to define to position the view -->
+    <attr name="layout_editor_absoluteX" format="dimension"/>
+    <!-- Used at design time to define to position the view -->
+    <attr name="layout_editor_absoluteY" format="dimension"/>
+
+
     <declare-styleable name="ConstraintLayout_Layout">
         <attr name="android:orientation"/>
 
-        <!-- The space from the beginning edge of the parent to this guideline. -->
-        <attr name="layout_constraintGuide_begin" format="dimension"/>
-        <!-- The space from the ending edge of the parent to this  guideline. -->
-        <attr name="layout_constraintGuide_end" format="dimension"/>
-        <!-- The percent of total space from the beginning of the parent to this guideline. (e.g. 0.50 = middle)-->
-        <attr name="layout_constraintGuide_percent" format="float"/>
-        <!-- Constrains the left edge of this view to the left edge of the given view ID. -->
+        <attr name="layout_constraintGuide_begin"/>
+        <attr name="layout_constraintGuide_end"/>
+        <attr name="layout_constraintGuide_percent"/>
+        <attr name="layout_constraintLeft_toLeftOf"/>
+        <attr name="layout_constraintLeft_toRightOf"/>
+        <attr name="layout_constraintRight_toLeftOf"/>
+        <attr name="layout_constraintRight_toRightOf" />
+        <attr name="layout_constraintTop_toTopOf"/>
+        <attr name="layout_constraintTop_toBottomOf"/>
+        <attr name="layout_constraintBottom_toTopOf"/>
+        <attr name="layout_constraintBottom_toBottomOf" />
+        <attr name="layout_constraintBaseline_toBaselineOf"/>
+        <attr name="layout_constraintStart_toEndOf"/>
+        <attr name="layout_constraintStart_toStartOf"/>
+        <attr name="layout_constraintEnd_toStartOf" />
+        <attr name="layout_constraintEnd_toEndOf"/>
+        <attr name="layout_goneMarginLeft"/>
+        <attr name="layout_goneMarginTop" />
+        <attr name="layout_goneMarginRight"/>
+        <attr name="layout_goneMarginBottom"/>
+        <attr name="layout_goneMarginStart" />
+        <attr name="layout_goneMarginEnd" />
+        <attr name="layout_constraintHorizontal_bias"/>
+        <attr name="layout_constraintVertical_bias" />
+        <attr name="layout_constraintLeft_creator"/>
+        <attr name="layout_constraintTop_creator" />
+        <attr name="layout_constraintRight_creator"/>
+        <attr name="layout_constraintBottom_creator" />
+        <attr name="layout_constraintBaseline_creator"/>
+        <attr name="layout_constraintDimensionRatio" />
+        <attr name="layout_editor_absoluteX" />
+        <attr name="layout_editor_absoluteY"/>
+    </declare-styleable>
 
-        <attr name="layout_constraintLeft_toLeftOf" format="reference|enum">
-            <enum name="parent" value="0"/>
-        </attr>
-        <!-- Constrains the left edge of this view to the right edge of the given view ID. -->
-        <attr name="layout_constraintLeft_toRightOf" format="reference|enum">
-            <enum name="parent" value="0"/>
-        </attr>
-        <!-- Constrains the right edge of this view to the left edge of the given view ID. -->
-        <attr name="layout_constraintRight_toLeftOf" format="reference|enum">
-            <enum name="parent" value="0"/>
-        </attr>
-        <!-- Constrains the right edge of this view to the right edge of the given view ID. -->
-        <attr name="layout_constraintRight_toRightOf" format="reference|enum">
-            <enum name="parent" value="0"/>
-        </attr>
-        <!-- Constrains the top edge of this view to the top edge of the given view ID. -->
-        <attr name="layout_constraintTop_toTopOf" format="reference|enum">
-            <enum name="parent" value="0"/>
-        </attr>
-        <!-- Constrains the top edge of this view to the bottom edge of the given view ID. -->
-        <attr name="layout_constraintTop_toBottomOf" format="reference|enum">
-            <enum name="parent" value="0"/>
-        </attr>
-        <!-- Constrains the bottom edge of this view to the top edge of the given view ID. -->
-        <attr name="layout_constraintBottom_toTopOf" format="reference|enum">
-            <enum name="parent" value="0"/>
-        </attr>
-        <!-- Constrains the bottom edge of this view to the bottom edge of the given view ID. -->
-        <attr name="layout_constraintBottom_toBottomOf" format="reference|enum">
-            <enum name="parent" value="0"/>
-        </attr>
-        <!-- Constrains the baseline of this view to the baseline of the given view ID. -->
-        <attr name="layout_constraintBaseline_toBaselineOf" format="reference|enum">
-            <enum name="parent" value="0"/>
-        </attr>
-        <!-- Constrains the start edge of this view to the end edge of the given view ID. -->
-        <attr name="layout_constraintStart_toEndOf" format="reference|enum">
-            <enum name="parent" value="0"/>
-        </attr>
-        <!-- Constrains the start edge of this view to the start edge of the given view ID. -->
-        <attr name="layout_constraintStart_toStartOf" format="reference|enum">
-            <enum name="parent" value="0"/>
-        </attr>
-        <!-- Constrains the end edge of this view to the start edge of the given view ID. -->
-        <attr name="layout_constraintEnd_toStartOf" format="reference|enum">
-            <enum name="parent" value="0"/>
-        </attr>
-        <!-- Constrains the end edge of this view to the end edge of the given view ID. -->
-        <attr name="layout_constraintEnd_toEndOf" format="reference|enum">
-            <enum name="parent" value="0"/>
-        </attr>
+    <declare-styleable name="ConstraintSet">
+        <attr name="android:orientation"/>
+        <attr name="android:id"/>
+        <attr name="android:visibility"/>
+        <attr name="android:layout_width"/>
+        <attr name="android:layout_height"/>
+        <attr name="android:layout_marginStart"/>
+        <attr name="android:layout_marginBottom"/>
+        <attr name="android:layout_marginTop"/>
+        <attr name="android:layout_marginEnd"/>
+        <attr name="android:layout_marginLeft"/>
+        <attr name="android:layout_marginRight"/>
 
-        <!-- the left margin value to be used when connected to an object that is GONE -->
-        <attr name="layout_goneMarginLeft" format="dimension"/>
-        <!-- the top margin value to be used when connected to an object that is GONE -->
-        <attr name="layout_goneMarginTop" format="dimension"/>
-        <!-- the right margin value to be used when connected to an object that is GONE -->
-        <attr name="layout_goneMarginRight" format="dimension"/>
-        <!-- the bottom margin value to be used when connected to an object that is GONE -->
-        <attr name="layout_goneMarginBottom" format="dimension"/>
-        <!-- the start margin value to be used when connected to an object that is GONE -->
-        <attr name="layout_goneMarginStart" format="dimension"/>
-        <!-- the end margin value to be used when connected to an object that is GONE -->
-        <attr name="layout_goneMarginEnd" format="dimension"/>
+        <attr name="layout_constraintGuide_begin"/>
+        <attr name="layout_constraintGuide_end"/>
+        <attr name="layout_constraintGuide_percent"/>
+        <attr name="layout_constraintLeft_toLeftOf"/>
+        <attr name="layout_constraintLeft_toRightOf"/>
+        <attr name="layout_constraintRight_toLeftOf"/>
+        <attr name="layout_constraintRight_toRightOf" />
+        <attr name="layout_constraintTop_toTopOf"/>
+        <attr name="layout_constraintTop_toBottomOf"/>
+        <attr name="layout_constraintBottom_toTopOf"/>
+        <attr name="layout_constraintBottom_toBottomOf" />
+        <attr name="layout_constraintBaseline_toBaselineOf"/>
+        <attr name="layout_constraintStart_toEndOf"/>
+        <attr name="layout_constraintStart_toStartOf"/>
+        <attr name="layout_constraintEnd_toStartOf" />
+        <attr name="layout_constraintEnd_toEndOf"/>
+        <attr name="layout_goneMarginLeft"/>
+        <attr name="layout_goneMarginTop" />
+        <attr name="layout_goneMarginRight"/>
+        <attr name="layout_goneMarginBottom"/>
+        <attr name="layout_goneMarginStart" />
+        <attr name="layout_goneMarginEnd" />
+        <attr name="layout_constraintHorizontal_bias"/>
+        <attr name="layout_constraintVertical_bias" />
+        <attr name="layout_constraintLeft_creator"/>
+        <attr name="layout_constraintTop_creator" />
+        <attr name="layout_constraintRight_creator"/>
+        <attr name="layout_constraintBottom_creator" />
+        <attr name="layout_constraintBaseline_creator"/>
+        <attr name="layout_constraintDimensionRatio" />
+        <attr name="layout_editor_absoluteX" />
+        <attr name="layout_editor_absoluteY"/>
 
-        <!-- Fraction of excess space to distribute on the left when constrained on left & right edges (e.g. .5 = middle)-->
-        <attr name="layout_constraintHorizontal_bias" format="float"/>
-        <!-- Fraction of excess space to distribute on the top when constrained on top & bottom edges (e.g. .5 = middle)-->
-        <attr name="layout_constraintVertical_bias" format="float"/>
-
-        <!-- Used at design time to define who created the constraint -->
-        <attr name="layout_constraintLeft_creator" format="integer"/>
-        <!-- Used at design time to define who created the constraint -->
-        <attr name="layout_constraintTop_creator" format="integer"/>
-        <!-- Used at design time to define who created the constraint -->
-        <attr name="layout_constraintRight_creator" format="integer"/>
-        <!-- Used at design time to define who created the constraint -->
-        <attr name="layout_constraintBottom_creator" format="integer"/>
-        <!-- Used at design time to define who created the constraint -->
-        <attr name="layout_constraintBaseline_creator" format="integer"/>
-        <!-- The ratio between the width and height of the view.
-        Note it only works if one of the dimensions is set to 0dp.-->
-        <attr name="layout_constraintDimensionRatio" format="string"/>
-
-        <!-- Used at design time to define to position the view -->
-        <attr name="layout_editor_absoluteX" format="dimension"/>
-        <!-- Used at design time to define to position the view -->
-        <attr name="layout_editor_absoluteY" format="dimension"/>
 
     </declare-styleable>
 
     <declare-styleable name="LinearConstraintLayout">
         <attr name="android:orientation"/>
+
     </declare-styleable>
 </resources>

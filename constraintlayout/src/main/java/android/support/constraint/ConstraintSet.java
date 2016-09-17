@@ -17,10 +17,18 @@
 package android.support.constraint;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
 import android.os.Build;
+import android.util.*;
 import android.view.LayoutInflater;
 import android.view.View;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -40,9 +48,10 @@ import java.util.HashSet;
  * </ul><p>
  * Example code:<br>
  * {@sample resources/examples/ExampleConstraintSet.java
- *          Example}
+ * Example}
  */
 public class ConstraintSet {
+    private static final String TAG = "ConstraintSet";
 
     /**
      * Dimension will be controlled by constraints
@@ -58,11 +67,21 @@ public class ConstraintSet {
      * References the id of the parent.
      * Used in:
      * <ul>
-     *     <li>{@link #connect(int, int, int, int, int)}</li>
-     *     <li>{@link #center(int, int, int, int, int, int, int, float)}</li>
-     *   </ul>
+     * <li>{@link #connect(int, int, int, int, int)}</li>
+     * <li>{@link #center(int, int, int, int, int, int, int, float)}</li>
+     * </ul>
      */
     public static final int PARENT_ID = ConstraintLayout.LayoutParams.PARENT_ID;
+
+    /**
+     * The horizontal orientation.
+     */
+    public static final int HORIZONTAL = ConstraintLayout.LayoutParams.HORIZONTAL;
+
+    /**
+     * The vertical orientation.
+     */
+    public static final int VERTICAL = ConstraintLayout.LayoutParams.VERTICAL;
 
     /**
      * Used to create a horizontal create guidelines.
@@ -104,22 +123,25 @@ public class ConstraintSet {
     /**
      * The right side of a view.
      */
-    public static final int RIGHT = ConstraintLayout.LayoutParams.RIGHT;;
+    public static final int RIGHT = ConstraintLayout.LayoutParams.RIGHT;
 
     /**
      * The top of a view.
      */
-    public static final int TOP = ConstraintLayout.LayoutParams.TOP;;
+    public static final int TOP = ConstraintLayout.LayoutParams.TOP;
+    ;
 
     /**
      * The bottom side of a view.
      */
-    public static final int BOTTOM = ConstraintLayout.LayoutParams.BOTTOM;;
+    public static final int BOTTOM = ConstraintLayout.LayoutParams.BOTTOM;
+    ;
 
     /**
      * The baseline of the text in a view.
      */
-    public static final int BASELINE = ConstraintLayout.LayoutParams.BASELINE;;
+    public static final int BASELINE = ConstraintLayout.LayoutParams.BASELINE;
+    ;
 
     /**
      * The left side of a view in left to right languages.
@@ -131,9 +153,100 @@ public class ConstraintSet {
      * The right side of a view in right to left languages.
      * In right to left languages it corresponds to the left side of the view
      */
-    public static final int END = ConstraintLayout.LayoutParams.END;;
+    public static final int END = ConstraintLayout.LayoutParams.END;
+    private static final boolean DEBUG = false;
 
     private HashMap<Integer, Constraint> mConstraints = new HashMap<Integer, Constraint>();
+
+    private static SparseIntArray mapToConstant = new SparseIntArray();
+    private static final int BASELINE_TO_BASELINE = 1;
+    private static final int BOTTOM_MARGIN = 2;
+    private static final int BOTTOM_TO_BOTTOM = 3;
+    private static final int BOTTOM_TO_TOP = 4;
+    private static final int DIMENSION_RATIO = 5;
+    private static final int EDITOR_ABSOLUTE_X = 6;
+    private static final int EDITOR_ABSOLUTE_Y = 7;
+    private static final int END_MARGIN = 8;
+    private static final int END_TO_END = 9;
+    private static final int END_TO_START = 10;
+    private static final int GONE_BOTTOM_MARGIN = 11;
+    private static final int GONE_END_MARGIN = 12;
+    private static final int GONE_LEFT_MARGIN = 13;
+    private static final int GONE_RIGHT_MARGIN = 14;
+    private static final int GONE_START_MARGIN = 15;
+    private static final int GONE_TOP_MARGIN = 16;
+    private static final int GUIDE_BEGIN = 17;
+    private static final int GUIDE_END = 18;
+    private static final int GUIDE_PERCENT = 19;
+    private static final int HORIZONTAL_BIAS = 20;
+    private static final int LAYOUT_HEIGHT = 21;
+    private static final int LAYOUT_VISIBILITY = 22;
+    private static final int LAYOUT_WIDTH = 23;
+    private static final int LEFT_MARGIN = 24;
+    private static final int LEFT_TO_LEFT = 25;
+    private static final int LEFT_TO_RIGHT = 26;
+    private static final int ORIENTATION = 27;
+    private static final int RIGHT_MARGIN = 28;
+    private static final int RIGHT_TO_LEFT = 29;
+    private static final int RIGHT_TO_RIGHT = 30;
+    private static final int START_MARGIN = 31;
+    private static final int START_TO_END = 32;
+    private static final int START_TO_START = 33;
+    private static final int TOP_MARGIN = 34;
+    private static final int TOP_TO_BOTTOM = 35;
+    private static final int TOP_TO_TOP = 36;
+    private static final int VERTICAL_BIAS = 37;
+    private static final int VIEW_ID = 38;
+    private static final int UNUSED = 39;
+
+    static {
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintLeft_toLeftOf, LEFT_TO_LEFT);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintLeft_toRightOf, LEFT_TO_RIGHT);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintRight_toLeftOf, RIGHT_TO_LEFT);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintRight_toRightOf, RIGHT_TO_RIGHT);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintTop_toTopOf, TOP_TO_TOP);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintTop_toBottomOf, TOP_TO_BOTTOM);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintBottom_toTopOf, BOTTOM_TO_TOP);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintBottom_toBottomOf, BOTTOM_TO_BOTTOM);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintBaseline_toBaselineOf, BASELINE_TO_BASELINE);
+
+        mapToConstant.append(R.styleable.ConstraintSet_layout_editor_absoluteX, EDITOR_ABSOLUTE_X);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_editor_absoluteY, EDITOR_ABSOLUTE_Y);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintGuide_begin, GUIDE_BEGIN);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintGuide_end, GUIDE_END);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintGuide_percent, GUIDE_PERCENT);
+        mapToConstant.append(R.styleable.ConstraintSet_android_orientation, ORIENTATION);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintStart_toEndOf, START_TO_END);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintStart_toStartOf, START_TO_START);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintEnd_toStartOf, END_TO_START);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintEnd_toEndOf, END_TO_END);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_goneMarginLeft, GONE_LEFT_MARGIN);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_goneMarginTop, GONE_TOP_MARGIN);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_goneMarginRight, GONE_RIGHT_MARGIN);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_goneMarginBottom, GONE_BOTTOM_MARGIN);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_goneMarginStart, GONE_START_MARGIN);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_goneMarginEnd, GONE_END_MARGIN);
+
+
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintHorizontal_bias, HORIZONTAL_BIAS);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintVertical_bias, VERTICAL_BIAS);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintDimensionRatio, DIMENSION_RATIO);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintLeft_creator, UNUSED);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintTop_creator, UNUSED);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintRight_creator, UNUSED);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintBottom_creator, UNUSED);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintBaseline_creator, UNUSED);
+        mapToConstant.append(R.styleable.ConstraintSet_android_layout_marginLeft, LEFT_MARGIN);
+        mapToConstant.append(R.styleable.ConstraintSet_android_layout_marginRight, RIGHT_MARGIN);
+        mapToConstant.append(R.styleable.ConstraintSet_android_layout_marginStart, START_MARGIN);
+        mapToConstant.append(R.styleable.ConstraintSet_android_layout_marginEnd, END_MARGIN);
+        mapToConstant.append(R.styleable.ConstraintSet_android_layout_marginTop, TOP_MARGIN);
+        mapToConstant.append(R.styleable.ConstraintSet_android_layout_marginBottom, BOTTOM_MARGIN);
+        mapToConstant.append(R.styleable.ConstraintSet_android_layout_width, LAYOUT_WIDTH);
+        mapToConstant.append(R.styleable.ConstraintSet_android_layout_height, LAYOUT_HEIGHT);
+        mapToConstant.append(R.styleable.ConstraintSet_android_visibility, LAYOUT_VISIBILITY);
+        mapToConstant.append(R.styleable.ConstraintSet_android_id, VIEW_ID);
+    }
 
     private static class Constraint {
         boolean mIsGuideline = false;
@@ -175,6 +288,13 @@ public class ConstraintSet {
         public int endMargin;
         public int startMargin;
         public int visibility;
+        public int goneLeftMargin;
+        public int goneTopMargin;
+        public int goneRightMargin;
+        public int goneBottomMargin;
+        public int goneEndMargin;
+        public int goneStartMargin;
+        public int dimensionRatioSide;
 
         private void fillFrom(int viewId, ConstraintLayout.LayoutParams param) {
             mViewId = viewId;
@@ -201,7 +321,7 @@ public class ConstraintSet {
             guidePercent = param.guidePercent;
             guideBegin = param.guideBegin;
             guideEnd = param.guideEnd;
-            mWidth =  param.width;
+            mWidth = param.width;
             mHeight = param.height;
             leftMargin = param.leftMargin;
             rightMargin = param.rightMargin;
@@ -313,6 +433,7 @@ public class ConstraintSet {
             Constraint constraint = mConstraints.get(id);
             if (constraint.mIsGuideline) {
                 Guideline g = new Guideline(constraintLayout.getContext());
+                g.setId(id);
                 ConstraintLayout.LayoutParams param = constraintLayout.generateDefaultLayoutParams();
                 constraint.applyTo(param);
                 constraintLayout.addView(g, param);
@@ -668,7 +789,7 @@ public class ConstraintSet {
      * Set the guideline's distance form the top or left edge.
      *
      * @param guidelineID ID of the guideline
-     * @param margin the distance to the top or left edge
+     * @param margin      the distance to the top or left edge
      */
     public void setGuidelineBegin(int guidelineID, int margin) {
         get(guidelineID).guideBegin = margin;
@@ -727,4 +848,270 @@ public class ConstraintSet {
         }
         return "undefined";
     }
+
+    /**
+     * Load a constraint set from a constraintSet.xml file
+     *
+     * @param context    the context for the inflation
+     * @param resourceId id of xml file in res/xml/
+     */
+    public void load(Context context, int resourceId) {
+        Resources res = context.getResources();
+        XmlPullParser parser = res.getXml(resourceId);
+        String document = null;
+        String tagName = null;
+        try {
+
+            for (int eventType = parser.getEventType();
+                 eventType != XmlResourceParser.END_DOCUMENT;
+                 eventType = parser.next()) {
+                switch (eventType) {
+                    case XmlResourceParser.START_DOCUMENT:
+                        document = parser.getName();
+                        break;
+                    case XmlResourceParser.START_TAG:
+                        tagName = parser.getName();
+                        Constraint constraint = fillFromAttributeList(context, Xml.asAttributeSet(parser));
+                        if (tagName.equalsIgnoreCase("Guideline")) {
+                            constraint.mIsGuideline = true;
+                        }
+                        mConstraints.put(constraint.mViewId, constraint);
+                        break;
+                    case XmlResourceParser.END_TAG:
+                        tagName = null;
+                        break;
+                    case XmlResourceParser.TEXT:
+                        break;
+                }
+            }
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static int lookupID(TypedArray a, int index, int def) {
+        int ret = a.getResourceId(index, def);
+        if (ret == Constraint.UNSET) {
+            ret = a.getInt(index, Constraint.UNSET);
+        }
+        return ret;
+    }
+
+    private Constraint fillFromAttributeList(Context context, AttributeSet attrs) {
+        Constraint c = new Constraint();
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ConstraintSet);
+        populateConstraint(c, a);
+        a.recycle();
+        return c;
+    }
+
+    private void populateConstraint(Constraint c, TypedArray a) {
+        final int N = a.getIndexCount();
+        for (int i = 0; i < N; i++) {
+            int attr = a.getIndex(i);
+            if (DEBUG) { // USEFUL when adding features to track tags being parsed
+                try {
+                    Field[] campos = R.styleable.class.getFields();
+                    boolean found = false;
+                    for (Field f : campos) {
+                        try {
+                            if (f.getType().isPrimitive() && attr == f.getInt(null) && f.getName().contains("ConstraintSet")) {
+                                found = true;
+                                Log.v(TAG, "L id " + f.getName() + " #" + attr);
+                                break;
+                            }
+                        } catch (Exception e) {
+
+                        }
+                    }
+                    if (!found) {
+                        campos = android.R.attr.class.getFields();
+                        for (Field f : campos) {
+                            try {
+                                if (f.getType().isPrimitive() && attr == f.getInt(null) && f.getName().contains("ConstraintSet")) {
+                                    found = false;
+                                    Log.v(TAG, "x id " + f.getName());
+                                    break;
+                                }
+                            } catch (Exception e) {
+
+                            }
+                        }
+                    }
+                    if (!found) Log.v(TAG, " ? " + attr);
+                } catch (Exception e) {
+                    Log.v(TAG, " " + e.toString());
+                }
+            }
+            switch (mapToConstant.get(attr)) {
+                case LEFT_TO_LEFT:
+                    c.leftToLeft = lookupID(a, attr, c.leftToLeft);
+                    break;
+                case LEFT_TO_RIGHT:
+                    c.leftToRight = lookupID(a, attr, c.leftToRight);
+                    break;
+                case RIGHT_TO_LEFT:
+                    c.rightToLeft = lookupID(a, attr, c.rightToLeft);
+                    break;
+                case RIGHT_TO_RIGHT:
+                    c.rightToRight = lookupID(a, attr, c.rightToRight);
+                    break;
+                case TOP_TO_TOP:
+                    c.topToTop = lookupID(a, attr, c.topToTop);
+                    break;
+                case TOP_TO_BOTTOM:
+                    c.topToBottom = lookupID(a, attr, c.topToBottom);
+                    break;
+                case BOTTOM_TO_TOP:
+                    c.bottomToTop = lookupID(a, attr, c.bottomToTop);
+                    break;
+                case BOTTOM_TO_BOTTOM:
+                    c.bottomToBottom = lookupID(a, attr, c.bottomToBottom);
+                    break;
+                case BASELINE_TO_BASELINE:
+                    c.baselineToBaseline = lookupID(a, attr, c.baselineToBaseline);
+                    break;
+                case EDITOR_ABSOLUTE_X:
+                    c.editorAbsoluteX = a.getDimensionPixelOffset(attr, c.editorAbsoluteX);
+                    break;
+                case EDITOR_ABSOLUTE_Y:
+                    c.editorAbsoluteY = a.getDimensionPixelOffset(attr, c.editorAbsoluteY);
+                    break;
+                case GUIDE_BEGIN:
+                    c.guideBegin = a.getDimensionPixelOffset(attr, c.guideBegin);
+                    break;
+                case GUIDE_END:
+                    c.guideEnd = a.getDimensionPixelOffset(attr, c.guideEnd);
+                    break;
+                case GUIDE_PERCENT:
+                    c.guidePercent = a.getFloat(attr, c.guidePercent);
+                    break;
+                case ORIENTATION:
+                    c.orientation = a.getInt(attr, c.orientation);
+                    break;
+                case START_TO_END:
+                    c.startToEnd = lookupID(a, attr, c.startToEnd);
+                    break;
+                case START_TO_START:
+                    c.startToStart = lookupID(a, attr, c.startToStart);
+                    break;
+                case END_TO_START:
+                    c.endToStart = lookupID(a, attr, c.endToStart);
+                    break;
+                case END_TO_END:
+                    c.bottomToTop = lookupID(a, attr, c.endToEnd);
+                    break;
+                case GONE_LEFT_MARGIN:
+                    c.goneLeftMargin = a.getDimensionPixelSize(attr, c.goneLeftMargin);
+                    break;
+                case GONE_TOP_MARGIN:
+                    c.goneTopMargin = a.getDimensionPixelSize(attr, c.goneTopMargin);
+                    break;
+                case GONE_RIGHT_MARGIN:
+                    c.goneRightMargin = a.getDimensionPixelSize(attr, c.goneRightMargin);
+                    break;
+                case GONE_BOTTOM_MARGIN:
+                    c.goneBottomMargin = a.getDimensionPixelSize(attr, c.goneBottomMargin);
+                    break;
+                case GONE_START_MARGIN:
+                    c.goneStartMargin = a.getDimensionPixelSize(attr, c.goneStartMargin);
+                    break;
+                case GONE_END_MARGIN:
+                    c.goneEndMargin = a.getDimensionPixelSize(attr, c.goneEndMargin);
+                    break;
+                case HORIZONTAL_BIAS:
+                    c.horizontalBias = a.getFloat(attr, c.horizontalBias);
+                    break;
+                case VERTICAL_BIAS:
+                    c.verticalBias = a.getFloat(attr, c.verticalBias);
+                    break;
+                case LEFT_MARGIN:
+                    c.leftMargin = a.getDimensionPixelSize(attr, c.leftMargin);
+                    break;
+                case RIGHT_MARGIN:
+                    c.rightMargin = a.getDimensionPixelSize(attr, c.rightMargin);
+                    break;
+                case START_MARGIN:
+                    c.startMargin = a.getDimensionPixelSize(attr, c.startMargin);
+                    break;
+                case END_MARGIN:
+                    c.endMargin = a.getDimensionPixelSize(attr, c.endMargin);
+                    break;
+                case TOP_MARGIN:
+                    c.topMargin = a.getDimensionPixelSize(attr, c.topMargin);
+                    break;
+                case BOTTOM_MARGIN:
+                    c.bottomMargin = a.getDimensionPixelSize(attr, c.bottomMargin);
+                    break;
+                case LAYOUT_WIDTH:
+                    c.mWidth = a.getLayoutDimension(attr, c.mWidth);
+                    break;
+                case LAYOUT_HEIGHT:
+                    c.mHeight = a.getLayoutDimension(attr, c.mHeight);
+                    break;
+                case LAYOUT_VISIBILITY:
+                    c.visibility = a.getInt(attr, c.visibility);
+                    break;
+                case VIEW_ID:
+                    c.mViewId = a.getResourceId(attr, c.mViewId);
+                    break;
+                case DIMENSION_RATIO:
+                    String ratio = a.getString(attr);
+                    c.dimensionRatio = 0;
+                    c.dimensionRatioSide = Constraint.UNSET;
+                    if (ratio != null) {
+                        int len = ratio.length();
+                        int commaIndex = ratio.indexOf(',');
+                        if (commaIndex > 0 && commaIndex < len - 1) {
+                            String dimension = ratio.substring(0, commaIndex);
+                            if (dimension.equalsIgnoreCase("W")) {
+                                c.dimensionRatioSide = HORIZONTAL;
+                            } else if (dimension.equalsIgnoreCase("H")) {
+                                c.dimensionRatioSide = VERTICAL;
+                            }
+                            commaIndex++;
+                        } else {
+                            commaIndex = 0;
+                        }
+                        int colonIndex = ratio.indexOf(':');
+                        if (colonIndex >= 0 && colonIndex < len - 1) {
+                            String nominator = ratio.substring(commaIndex, colonIndex);
+                            String denominator = ratio.substring(colonIndex + 1);
+                            if (nominator.length() > 0 && denominator.length() > 0) {
+                                try {
+                                    float nominatorValue = Float.parseFloat(nominator);
+                                    float denominatorValue = Float.parseFloat(denominator);
+                                    if (nominatorValue > 0 && denominatorValue > 0) {
+                                        if (c.dimensionRatioSide == VERTICAL) {
+                                            c.dimensionRatio = Math.abs(denominatorValue / nominatorValue);
+                                        } else {
+                                            c.dimensionRatio = Math.abs(nominatorValue / denominatorValue);
+                                        }
+                                    }
+                                } catch (NumberFormatException e) {
+                                    // Ignore
+                                }
+                            }
+                        } else {
+                            String r = ratio.substring(commaIndex);
+                            if (r.length() > 0) {
+                                try {
+                                    c.dimensionRatio = Float.parseFloat(r);
+                                } catch (NumberFormatException e) {
+                                    // Ignore
+                                }
+                            }
+                        }
+                    }
+                    //noinspection UnusedLabel
+                    UNUSED:
+                    break;
+                default:
+                    Log.w(TAG, "Unknown attribute 0x" + Integer.toHexString(attr) + "   " + mapToConstant.get(attr));
+            }
+        }
+    }
+
 }
