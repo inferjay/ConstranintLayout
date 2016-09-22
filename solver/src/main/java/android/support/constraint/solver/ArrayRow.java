@@ -223,6 +223,21 @@ public class ArrayRow {
         return this;
     }
 
+    public ArrayRow createRowEqualDimension(SolverVariable variableStartA, int marginStartA,
+                                            SolverVariable variableEndA, int marginEndA,
+                                            SolverVariable variableStartB, int marginStartB,
+                                            SolverVariable variableEndB, int marginEndB) {
+        // endA - startA + marginStartA + marginEndA == endB - startB + marginStartB + marginEndB
+        // 0 = startA - endA + marginStartA + marginEndA + endB - startB + marginStartB + marginEndB
+        // 0 = (- marginStartA - marginEndA + marginStartB + marginEndB) + startA - endA + endB - startB
+        constantValue = - marginStartA - marginEndA + marginStartB + marginEndB;
+        variables.put(variableStartA, 1);
+        variables.put(variableEndA, -1);
+        variables.put(variableEndB, 1);
+        variables.put(variableStartB, -1);
+        return this;
+    }
+
     public ArrayRow createRowCentering(SolverVariable variableA, SolverVariable variableB, int marginA,
                                        float bias, SolverVariable variableC, SolverVariable variableD, int marginB,
                                        boolean withError) {

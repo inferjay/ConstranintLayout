@@ -1696,8 +1696,22 @@ public class ConstraintWidget implements Solvable {
             baseline = system.createObjectVariable(mBaseline);
         }
 
-        if (mParent != null) {
+        boolean inHorizontalChain = false;
+        boolean inVerticalChain = false;
 
+        if (mParent != null) {
+            // Add this widget to an horizontal chain if dual connections are found
+            if ((mLeft.mTarget != null && mLeft.mTarget.mTarget == mLeft)
+              || (mRight.mTarget != null && mRight.mTarget.mTarget == mRight)) {
+                ((ConstraintWidgetContainer) mParent).addChain(this, HORIZONTAL);
+                inHorizontalChain = true;
+            }
+            // Add this widget to an vertical chain if dual connections are found
+            if ((mTop.mTarget != null && mTop.mTarget.mTarget == mTop)
+              || (mBottom.mTarget != null && mBottom.mTarget.mTarget == mBottom)) {
+                ((ConstraintWidgetContainer) mParent).addChain(this, VERTICAL);
+                inVerticalChain = true;
+            }
             // If the parent is set to wrap content, we need to:
             // - possibly add an extra constraint to ensure that the widget is contained into the parent
             // - or if there is an existing constraint to the parent, make sure it's a strict constraint
@@ -1821,7 +1835,9 @@ public class ConstraintWidget implements Solvable {
                 && (this instanceof ConstraintWidgetContainer);
         if (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group)) {
             applyConstraints(system, wrapContent, horizontalDimensionFixed, mLeft, mRight,
-                    mX, mX + width, width, mHorizontalBiasPercent, useRatio && dimensionRatioSide == HORIZONTAL);
+                    mX, mX + width, width, mHorizontalBiasPercent,
+                    useRatio && dimensionRatioSide == HORIZONTAL,
+                    inHorizontalChain);
         }
 
         // Vertical Resolution
@@ -1842,12 +1858,15 @@ public class ConstraintWidget implements Solvable {
             }
             if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && end.mGroup == group)) {
                 applyConstraints(system, wrapContent, verticalDimensionFixed,
-                        mTop, end, mY, mY + height, height, mVerticalBiasPercent, useRatio && dimensionRatioSide == VERTICAL);
+                        mTop, end, mY, mY + height, height, mVerticalBiasPercent,
+                        useRatio && dimensionRatioSide == VERTICAL, false);
             }
         } else {
             if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && mBottom.mGroup == group)) {
                 applyConstraints(system, wrapContent, verticalDimensionFixed,
-                        mTop, mBottom, mY, mY + height, height, mVerticalBiasPercent, useRatio && dimensionRatioSide == VERTICAL);
+                        mTop, mBottom, mY, mY + height, height, mVerticalBiasPercent,
+                        useRatio && dimensionRatioSide == VERTICAL,
+                        inVerticalChain);
             }
         }
 
@@ -1877,7 +1896,8 @@ public class ConstraintWidget implements Solvable {
      */
     private void applyConstraints(LinearSystem system, boolean wrapContent, boolean dimensionFixed,
             ConstraintAnchor beginAnchor, ConstraintAnchor endAnchor,
-            int beginPosition, int endPosition, int dimension, float bias, boolean useRatio) {
+            int beginPosition, int endPosition, int dimension, float bias,
+            boolean useRatio, boolean inChain) {
         SolverVariable begin = system.createObjectVariable(beginAnchor);
         SolverVariable end = system.createObjectVariable(endAnchor);
         SolverVariable beginTarget = system.createObjectVariable(beginAnchor.getTarget());
@@ -1952,7 +1972,7 @@ public class ConstraintWidget implements Solvable {
                         system.addConstraint(EquationCreation
                                 .createRowCentering(system, begin, beginTarget,
                                         0, 0.5f, endTarget, end, 0, true));
-                    } else {
+                    } else if (!inChain) {
                         boolean useBidirectionalError = (beginAnchor.getConnectionType() !=
                                 ConstraintAnchor.ConnectionType.STRICT);
                         system.addConstraint(EquationCreation
@@ -1980,7 +2000,7 @@ public class ConstraintWidget implements Solvable {
                 system.addConstraint(EquationCreation
                         .createRowCentering(system, begin, beginTarget,
                           beginAnchorMargin, bias, endTarget, end, endAnchorMargin, true));
-            } else {
+            } else if (!inChain) {
                 system.addConstraint(system.createRow().createRowEquals(begin, beginTarget, beginAnchorMargin));
                 system.addConstraint(system.createRow().createRowEquals(end, endTarget, -1 * endAnchorMargin));
             }

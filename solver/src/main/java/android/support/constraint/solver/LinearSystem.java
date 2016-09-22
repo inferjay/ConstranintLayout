@@ -910,4 +910,56 @@ public class LinearSystem {
     public Cache getCache() {
         return mCache;
     }
+
+    /**
+     * Add an equation of the form a >= b + margin
+     * @param a
+     * @param b
+     * @param margin
+     */
+    public void addGreaterThan(SolverVariable a, SolverVariable b, int margin) {
+        ArrayRow row = createRow();
+        row.createRowGreaterThan(a, b, createSlackVariable(), margin);
+        addConstraint(row);
+    }
+
+    /**
+     * Add an equation of the form a <= b + margin
+     * @param a
+     * @param b
+     * @param margin
+     */
+    public void addLowerThan(SolverVariable a, SolverVariable b, int margin) {
+        ArrayRow row = createRow();
+        row.createRowLowerThan(a, b, createSlackVariable(), margin);
+        addConstraint(row);
+    }
+
+    /**
+     * Add an equation of the form (1 - bias) * (a - b) = bias * (c - d)
+     * @param a
+     * @param b
+     * @param m1
+     * @param bias
+     * @param c
+     * @param d
+     * @param m2
+     */
+    public void addCentering(SolverVariable a, SolverVariable b, int m1, float bias, SolverVariable c, SolverVariable d, int m2) {
+        ArrayRow row = createRow();
+        row.createRowCentering(a, b, m1, bias, c, d, m2, false);
+        addConstraint(row);
+    }
+
+    /**
+     * Add an equation of the form a = b + margin
+     * @param a
+     * @param b
+     * @param margin
+     */
+    public void addEquality(SolverVariable a, SolverVariable b, int margin) {
+        ArrayRow row = createRow();
+        row.createRowEquals(a, b, margin);
+        addConstraint(row);
+    }
 }
