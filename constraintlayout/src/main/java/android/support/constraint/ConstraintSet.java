@@ -315,6 +315,7 @@ public class ConstraintSet {
             horizontalBias = param.horizontalBias;
             verticalBias = param.verticalBias;
             dimensionRatio = param.dimensionRatio;
+            dimensionRatioSide = param.dimensionRatioSide;
             editorAbsoluteX = param.editorAbsoluteX;
             editorAbsoluteY = param.editorAbsoluteY;
             orientation = param.orientation;
@@ -327,6 +328,7 @@ public class ConstraintSet {
             rightMargin = param.rightMargin;
             topMargin = param.topMargin;
             bottomMargin = param.bottomMargin;
+
             endMargin = param.getMarginEnd();
             startMargin = param.getMarginStart();
         }
@@ -358,6 +360,7 @@ public class ConstraintSet {
             param.verticalBias = verticalBias;
 
             param.dimensionRatio = dimensionRatio;
+            param.dimensionRatioSide = dimensionRatioSide;
             param.editorAbsoluteX = editorAbsoluteX;
             param.editorAbsoluteY = editorAbsoluteY;
 
@@ -741,6 +744,19 @@ public class ConstraintSet {
      */
     public void setVerticalBias(int viewId, float bias) {
         get(viewId).verticalBias = bias;
+    }
+
+    /**
+     * Constrains the views aspect ratio.
+     * For Example a HD screen is 16 by 9 = 16/(float)9 = 1.777f.
+     *
+     * @param viewId ID of view to constrain
+     * @param side   the side to constrain see {@link #HORIZONTAL} , {@link #VERTICAL}
+     * @param ratio  The ratio of the width to height (width / height)
+     */
+    public void setDimensionRatio(int viewId, int side, float ratio) {
+        get(viewId).dimensionRatio = ratio;
+        get(viewId).dimensionRatioSide = side;
     }
 
     /**
