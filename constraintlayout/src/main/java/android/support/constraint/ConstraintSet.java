@@ -155,6 +155,7 @@ public class ConstraintSet {
      */
     public static final int END = ConstraintLayout.LayoutParams.END;
     private static final boolean DEBUG = false;
+    private static final int []VISIBILITY_FLAGS = new int[]{VISIBLE, INVISIBLE, GONE};
 
     private HashMap<Integer, Constraint> mConstraints = new HashMap<Integer, Constraint>();
 
@@ -1069,6 +1070,7 @@ public class ConstraintSet {
                     break;
                 case LAYOUT_VISIBILITY:
                     c.visibility = a.getInt(attr, c.visibility);
+                    c.visibility = VISIBILITY_FLAGS[c.visibility];
                     break;
                 case VIEW_ID:
                     c.mViewId = a.getResourceId(attr, c.mViewId);
