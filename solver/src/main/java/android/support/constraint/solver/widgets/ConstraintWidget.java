@@ -119,8 +119,8 @@ public class ConstraintWidget implements Solvable {
     // Percentages used for biasing one connection over another when dual connections
     // of the same strength exist
     public static float DEFAULT_BIAS = 0.5f;
-    private float mHorizontalBiasPercent = DEFAULT_BIAS;
-    private float mVerticalBiasPercent = DEFAULT_BIAS;
+    float mHorizontalBiasPercent = DEFAULT_BIAS;
+    float mVerticalBiasPercent = DEFAULT_BIAS;
 
     // The horizontal and vertical behaviour for the widgets' dimensions
     DimensionBehaviour mHorizontalDimensionBehaviour = DimensionBehaviour.FIXED;
@@ -147,6 +147,8 @@ public class ConstraintWidget implements Solvable {
     boolean mVisited;
 
     // Chain support
+    boolean mHorizontalChainPacked = false;
+    boolean mVerticalChainPacked = false;
     boolean mHorizontalChainFixedPosition;
     boolean mVerticalChainFixedPosition;
     float mHorizontalWeight = 0;
@@ -831,10 +833,10 @@ public class ConstraintWidget implements Solvable {
         mDrawHeight = bottom - top;
     }
 
-  /**
-   * Update the draw positition immediately to match the true position
-   */
-  public void forceUpdateDrawPosition() {
+    /**
+     * Update the draw positition immediately to match the true position
+     */
+    public void forceUpdateDrawPosition() {
         int left = mX;
         int top = mY;
         int right = mX + mWidth;
@@ -1165,6 +1167,26 @@ public class ConstraintWidget implements Solvable {
      */
     public void setVerticalWeight(float verticalWeight) {
         mVerticalWeight = verticalWeight;
+    }
+
+    /**
+     * Set the chain starting from this widget to be packed.
+     * The horizontal bias will control how elements of the chain are positioned.
+     *
+     * @param horizontalChainPacked
+     */
+    public void setHorizontalChainPacked(boolean horizontalChainPacked) {
+        mHorizontalChainPacked = horizontalChainPacked;
+    }
+
+    /**
+     * Set the chain starting from this widget to be packed.
+     * The vertical bias will control how elements of the chain are positioned.
+     *
+     * @param verticalChainPacked
+     */
+    public void setVerticalChainPacked(boolean verticalChainPacked) {
+        mVerticalChainPacked = verticalChainPacked;
     }
 
     /*-----------------------------------------------------------------------*/

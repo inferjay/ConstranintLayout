@@ -93,9 +93,17 @@
     <attr name="layout_constraintDimensionRatio" format="string"/>
 
     <!-- In a Chain, the amount of weight used to spread available horizontal space if the widget is set to MATCH_CONSTRAINT -->
-    <attr name="layout_constraintHorizontalWeight" format="float"/>
+    <attr name="layout_constraintHorizontal_weight" format="float"/>
     <!-- In a Chain, the amount of weight used to spread available vertical space if the widget is set to MATCH_CONSTRAINT -->
-    <attr name="layout_constraintVerticalWeight" format="float"/>
+    <attr name="layout_constraintVertical_weight" format="float"/>
+
+    <!-- Set a chain to be packed or not. If true and the widget is the first element of a chain, the chain will not spread,
+    and the bias will affect the position of the chain elements. It will only work if all elements have a set size (i.e. not MATCH_CONSTRAINT) -->
+    <attr name="layout_constraintHorizontal_chainPacked" format="boolean"/>
+
+    <!-- Set a chain to be packed or not. If true and the widget is the first element of a chain, the chain will not spread,
+    and the bias will affect the position of the chain elements. It will only work if all elements have a set size (i.e. not MATCH_CONSTRAINT) -->
+    <attr name="layout_constraintVertical_chainPacked" format="boolean"/>
 
     <!-- Used at design time to define to position the view -->
     <attr name="layout_editor_absoluteX" format="dimension"/>
@@ -136,8 +144,10 @@
         <attr name="layout_constraintBottom_creator" />
         <attr name="layout_constraintBaseline_creator"/>
         <attr name="layout_constraintDimensionRatio" />
-        <attr name="layout_constraintHorizontalWeight" />
-        <attr name="layout_constraintVerticalWeight" />
+        <attr name="layout_constraintHorizontal_weight" />
+        <attr name="layout_constraintVertical_weight" />
+        <attr name="layout_constraintHorizontal_chainPacked" />
+        <attr name="layout_constraintVertical_chainPacked" />
         <attr name="layout_editor_absoluteX" />
         <attr name="layout_editor_absoluteY"/>
     </declare-styleable>
@@ -185,8 +195,10 @@
         <attr name="layout_constraintBottom_creator" />
         <attr name="layout_constraintBaseline_creator"/>
         <attr name="layout_constraintDimensionRatio" />
-        <attr name="layout_constraintHorizontalWeight" />
-        <attr name="layout_constraintVerticalWeight" />
+        <attr name="layout_constraintHorizontal_weight" />
+        <attr name="layout_constraintVertical_weight" />
+        <attr name="layout_constraintHorizontal_chainPacked" />
+        <attr name="layout_constraintVertical_chainPacked" />
         <attr name="layout_editor_absoluteX" />
         <attr name="layout_editor_absoluteY"/>
 

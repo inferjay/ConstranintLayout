@@ -640,6 +640,8 @@ public class ConstraintLayout extends ViewGroup {
                 }
                 widget.setHorizontalWeight(layoutParams.horizontalWeight);
                 widget.setVerticalWeight(layoutParams.verticalWeight);
+                widget.setHorizontalChainPacked(layoutParams.horizontalChainPacked);
+                widget.setVerticalChainPacked(layoutParams.verticalChainPacked);
             }
         }
     }
@@ -1184,6 +1186,22 @@ public class ConstraintLayout extends ViewGroup {
         public float verticalWeight = 0;
 
         /**
+         * If the child is the start of a chain, and all elements of the chain have a fixed
+         * dimension on the horizontal axis, the elements of the chain will be grouped together,
+         * centered. The horizontal bias attribute of the child will affect the horizontal
+         * positioning of all elements of the chain.
+         */
+        public boolean horizontalChainPacked = false;
+
+        /**
+         * If the child is the start of a chain, and all elements of the chain have a fixed
+         * dimension on the vertical axis, the elements of the chain will be grouped together,
+         * centered. The vertical bias attribute of the child will affect the vertical
+         * positioning of all elements of the chain.
+         */
+        public boolean verticalChainPacked = false;
+
+        /**
          * The design time location of the left side of the child.
          * Used at design time for a horizontally unconstrained child.
          */
@@ -1362,10 +1380,14 @@ public class ConstraintLayout extends ViewGroup {
                             }
                         }
                     }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontalWeight) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_weight) {
                     horizontalWeight = a.getFloat(attr, 0);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVerticalWeight) {
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_weight) {
                     verticalWeight = a.getFloat(attr, 0);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_chainPacked) {
+                    horizontalChainPacked = a.getBoolean(attr, false);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_chainPacked) {
+                    verticalChainPacked = a.getBoolean(attr, false);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_creator) {
                     // Skip
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_creator) {

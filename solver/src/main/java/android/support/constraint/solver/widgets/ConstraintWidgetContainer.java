@@ -199,9 +199,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      */
     private void applyHorizontalChain(LinearSystem system) {
         for (int i = 0; i < mHorizontalChainsSize; i++) {
+            ConstraintWidget first = mHorizontalChainsArray[i];
             final int numMatchConstraints = countMatchConstraintsChainedWidgets(mHorizontalChainsArray[i], HORIZONTAL);
-            ConstraintWidget widget = mHorizontalChainsArray[i];
-            if (USE_DIRECT_CHAIN_RESOLUTION && widget.mHorizontalChainFixedPosition) {
+            // For now, only allow packed chains if all widgets are in fixed dimensions
+            boolean chainPacked = first.mHorizontalChainPacked && (numMatchConstraints == 0);
+            ConstraintWidget widget = first;
+            if (USE_DIRECT_CHAIN_RESOLUTION && widget.mHorizontalChainFixedPosition && !chainPacked) {
                 applyDirectResolutionHorizontalChain(system, numMatchConstraints, widget);
             } else { // use the solver
                 if (numMatchConstraints == 0) {
@@ -219,7 +222,11 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             margin += previous.mRight.getMargin();
                         }
                         if (leftTarget != null) {
-                            system.addGreaterThan(left, leftTarget, margin);
+                            if (chainPacked && widget != first) {
+                                system.addEquality(left, leftTarget, margin);
+                            } else {
+                                system.addGreaterThan(left, leftTarget, margin);
+                            }
                         }
                         if (rightTarget != null) {
                             margin = rightMargin;
@@ -228,8 +235,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             if (nextLeftTarget == widget) {
                                 margin += nextLeft.getMargin();
                             }
-                            system.addLowerThan(right, rightTarget, -margin);
-                            if (leftTarget != null) {
+                            if (chainPacked && nextLeftTarget == widget) {
+                                system.addEquality(right, rightTarget, -margin);
+                            } else {
+                                system.addLowerThan(right, rightTarget, -margin);
+                            }
+                            if (!chainPacked && leftTarget != null) {
                                 system.addCentering(left, leftTarget, leftMargin, 0.5f,
                                         rightTarget, right, rightMargin);
                             }
@@ -240,6 +251,16 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         } else {
                             break;
                         }
+                    }
+                    if (chainPacked) {
+                        int leftMargin = first.mLeft.getMargin();
+                        int rightMargin = previous.mRight.getMargin();
+                        SolverVariable left = first.mLeft.mSolverVariable;
+                        SolverVariable leftTarget = first.mLeft.mTarget != null ? first.mLeft.mTarget.mSolverVariable : null;
+                        SolverVariable right = previous.mRight.mSolverVariable;
+                        SolverVariable rightTarget = previous.mRight.mTarget != null ? previous.mRight.mTarget.mSolverVariable : null;
+                        system.addCentering(left, leftTarget, leftMargin, first.mHorizontalBiasPercent,
+                                rightTarget, right, rightMargin);
                     }
                 } else {
                     ConstraintWidget previous = null;
@@ -413,9 +434,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      */
     private void applyVerticalChain(LinearSystem system) {
         for (int i = 0; i < mVerticalChainsSize; i++) {
+            ConstraintWidget first = mVerticalChainsArray[i];
             final int numMatchConstraints = countMatchConstraintsChainedWidgets(mVerticalChainsArray[i], VERTICAL);
-            ConstraintWidget widget = mVerticalChainsArray[i];
-            if (USE_DIRECT_CHAIN_RESOLUTION && widget.mVerticalChainFixedPosition) {
+            // For now, only allow packed chains if all widgets are in fixed dimensions
+            boolean chainPacked = first.mVerticalChainPacked && (numMatchConstraints == 0);
+            ConstraintWidget widget = first;
+            if (USE_DIRECT_CHAIN_RESOLUTION && widget.mVerticalChainFixedPosition && !chainPacked) {
                 applyDirectResolutionVerticalChain(system, numMatchConstraints, widget);
             } else { // use the solver
                 if (numMatchConstraints == 0) {
@@ -433,7 +457,11 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             margin += previous.mBottom.getMargin();
                         }
                         if (topTarget != null) {
-                            system.addGreaterThan(top, topTarget, margin);
+                            if (chainPacked && widget != first) {
+                                system.addEquality(top, topTarget, margin);
+                            } else {
+                                system.addGreaterThan(top, topTarget, margin);
+                            }
                         }
                         if (bottomTarget != null) {
                             margin = bottomMargin;
@@ -442,8 +470,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             if (nextTopTarget == widget) {
                                 margin += nextTop.getMargin();
                             }
-                            system.addLowerThan(bottom, bottomTarget, -margin);
-                            if (topTarget != null) {
+                            if (chainPacked && nextTopTarget == widget) {
+                                system.addEquality(bottom, bottomTarget, -margin);
+                            } else {
+                                system.addLowerThan(bottom, bottomTarget, -margin);
+                            }
+                            if (!chainPacked && topTarget != null) {
                                 system.addCentering(top, topTarget, topMargin, 0.5f,
                                         bottomTarget, bottom, bottomMargin);
                             }
@@ -454,6 +486,16 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         } else {
                             break;
                         }
+                    }
+                    if (chainPacked) {
+                        int topMargin = first.mTop.getMargin();
+                        int bottomMargin = previous.mBottom.getMargin();
+                        SolverVariable top = first.mTop.mSolverVariable;
+                        SolverVariable topTarget = first.mTop.mTarget != null ? first.mTop.mTarget.mSolverVariable : null;
+                        SolverVariable bottom = previous.mBottom.mSolverVariable;
+                        SolverVariable bottomTarget = previous.mBottom.mTarget != null ? previous.mBottom.mTarget.mSolverVariable : null;
+                        system.addCentering(top, topTarget, topMargin, first.mVerticalBiasPercent,
+                                bottomTarget, bottom, bottomMargin);
                     }
                 } else {
                     ConstraintWidget previous = null;
