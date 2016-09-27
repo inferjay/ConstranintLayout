@@ -638,6 +638,8 @@ public class ConstraintLayout extends ViewGroup {
                 if (layoutParams.dimensionRatio > 0) {
                     widget.setDimensionRatio(layoutParams.dimensionRatio, layoutParams.dimensionRatioSide);
                 }
+                widget.setHorizontalWeight(layoutParams.horizontalWeight);
+                widget.setVerticalWeight(layoutParams.verticalWeight);
             }
         }
     }
@@ -1170,6 +1172,18 @@ public class ConstraintLayout extends ViewGroup {
         public int dimensionRatioSide = VERTICAL;
 
         /**
+         * The child's weight that we can use to distribute the available horizontal space
+         * in a chain, if the dimension behaviour is set to MATCH_CONSTRAINT
+         */
+        public float horizontalWeight = 0;
+
+        /**
+         * The child's weight that we can use to distribute the available vertical space
+         * in a chain, if the dimension behaviour is set to MATCH_CONSTRAINT
+         */
+        public float verticalWeight = 0;
+
+        /**
          * The design time location of the left side of the child.
          * Used at design time for a horizontally unconstrained child.
          */
@@ -1348,6 +1362,10 @@ public class ConstraintLayout extends ViewGroup {
                             }
                         }
                     }
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontalWeight) {
+                    horizontalWeight = a.getFloat(attr, 0);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVerticalWeight) {
+                    verticalWeight = a.getFloat(attr, 0);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_creator) {
                     // Skip
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_creator) {

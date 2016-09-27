@@ -443,43 +443,45 @@ public class LinearSystem {
             System.out.println("addConstraint: " + row.toReadableString());
         }
 
-        // Update the equation with the variables already defined in the system
-        updateRowFromVariables(row);
+        if (!row.isSimpleDefinition) {
+            // Update the equation with the variables already defined in the system
+            updateRowFromVariables(row);
 
-        // First, ensure that if we have a constant it's positive
-        row.ensurePositiveConstant();
+            // First, ensure that if we have a constant it's positive
+            row.ensurePositiveConstant();
 
-        if (DEBUG) {
-            System.out.println("addConstraint, updated row : " + row.toReadableString());
-        }
-
-        // Then pick a good variable to use for the row
-        row.pickRowVariable();
-
-        if (!row.hasKeyVariable()) {
-            // Can happen if row resolves to nil
             if (DEBUG) {
-                System.out.println("No variable found to pivot on " + row.toReadableString());
-                displayReadableRows();
+                System.out.println("addConstraint, updated row : " + row.toReadableString());
             }
-            // We haven't found a variable to pivot on. Normally, we should introduce a new stay
-            // variable to solve the system, then solve, and possibly remove the stay variable.
-            // But the equations we insert have (for this exact purpose) balanced +/- variables,
-            // so should not be necessary. Let's simply exit.
-            return;
-        }
 
+            // Then pick a good variable to use for the row
+            row.pickRowVariable();
+
+            if (!row.hasKeyVariable()) {
+                // Can happen if row resolves to nil
+                if (DEBUG) {
+                    System.out.println("No variable found to pivot on " + row.toReadableString());
+                    displayReadableRows();
+                }
+                // We haven't found a variable to pivot on. Normally, we should introduce a new stay
+                // variable to solve the system, then solve, and possibly remove the stay variable.
+                // But the equations we insert have (for this exact purpose) balanced +/- variables,
+                // so should not be necessary. Let's simply exit.
+                return;
+            }
+        }
         if (mRows[mNumRows] != null) {
             mCache.arrayRowPool.release(mRows[mNumRows]);
         }
-        row.updateClientEquations();
+        if (!row.isSimpleDefinition) {
+            row.updateClientEquations();
+        }
         mRows[mNumRows] = row;
         row.variable.definitionId = mNumRows;
         mNumRows++;
 
         final int count = row.variable.mClientEquationsCount;
         if (count > 0) {
-
             while (tempClientsCopy.length < count) {
                 tempClientsCopy = new ArrayRow[tempClientsCopy.length * 2];
             }
@@ -961,5 +963,25 @@ public class LinearSystem {
         ArrayRow row = createRow();
         row.createRowEquals(a, b, margin);
         addConstraint(row);
+    }
+
+    /**
+     * Add an equation of the form a = value
+     * @param a
+     * @param value
+     */
+    public void addEquality(SolverVariable a, int value) {
+        int idx = a.definitionId;
+        if (a.definitionId == -1) {
+            ArrayRow row = createRow();
+            row.createRowDefinition(a, value);
+            addConstraint(row);
+        } else {
+            ArrayRow row = mRows[idx];
+            if (row.isSimpleDefinition) {
+                row.constantValue = value;
+                return;
+            }
+        }
     }
 }

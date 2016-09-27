@@ -31,6 +31,7 @@ public class ChainTest {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
         ConstraintWidget A = new ConstraintWidget(100, 20);
         ConstraintWidget B = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
         A.setDebugName("A");
         B.setDebugName("B");
         ArrayList<ConstraintWidget> widgets = new ArrayList<ConstraintWidget>();
@@ -185,7 +186,6 @@ public class ChainTest {
         B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
         B.setWidth(100);
         root.layout();
-        root.getSystem().displayReadableRows();
         System.out.println("f) A: " + A + " B: " + B + " C: " + C);
         assertEquals(B.getWidth(), 100);
         assertEquals(A.getWidth(), C.getWidth());
@@ -298,7 +298,6 @@ public class ChainTest {
         B.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
         B.setHeight(20);
         root.layout();
-        root.getSystem().displayReadableRows();
         System.out.println("f) A: " + A + " B: " + B + " C: " + C);
         assertEquals(B.getHeight(), 20);
         assertEquals(A.getHeight(), C.getHeight());
@@ -323,4 +322,93 @@ public class ChainTest {
         assertEquals(B.getBottom() <= C.getTop(), true);
         assertEquals(C.getTop() <= C.getBottom(), true);
     }
-}
+
+    @Test
+    public void testHorizontalChainWeights() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        int marginL = 7;
+        int marginR = 27;
+        root.setDebugSolverName(root.getSystem(), "root");
+        A.setDebugSolverName(root.getSystem(), "A");
+        B.setDebugSolverName(root.getSystem(), "B");
+        C.setDebugSolverName(root.getSystem(), "C");
+        ArrayList<ConstraintWidget> widgets = new ArrayList<>();
+        widgets.add(A);
+        widgets.add(B);
+        widgets.add(C);
+        widgets.add(root);
+        root.add(A);
+        root.add(B);
+        root.add(C);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, marginL);
+        A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT, marginR);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT, marginL);
+        B.connect(ConstraintAnchor.Type.RIGHT, C, ConstraintAnchor.Type.LEFT, marginR);
+        C.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.RIGHT, marginL);
+        C.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, marginR);
+        A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        C.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setHorizontalWeight(1);
+        B.setHorizontalWeight(1);
+        C.setHorizontalWeight(1);
+        root.layout();
+        System.out.println("a) A: " + A + " B: " + B + " C: " + C);
+        assertEquals(A.getWidth(), B.getWidth(), 1);
+        assertEquals(B.getWidth(), C.getWidth(), 1);
+        A.setHorizontalWeight(1);
+        B.setHorizontalWeight(2);
+        C.setHorizontalWeight(1);
+        root.layout();
+        System.out.println("b) A: " + A + " B: " + B + " C: " + C);
+        assertEquals(2 * (A.getWidth() + marginL + marginR), B.getWidth() + marginL + marginR, 1);
+        assertEquals(A.getWidth(), C.getWidth(), 1);
+    }
+
+    @Test
+    public void testVerticalChainWeights() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        int marginT = 7;
+        int marginB = 27;
+        root.setDebugSolverName(root.getSystem(), "root");
+        A.setDebugSolverName(root.getSystem(), "A");
+        B.setDebugSolverName(root.getSystem(), "B");
+        C.setDebugSolverName(root.getSystem(), "C");
+        ArrayList<ConstraintWidget> widgets = new ArrayList<>();
+        widgets.add(A);
+        widgets.add(B);
+        widgets.add(C);
+        widgets.add(root);
+        root.add(A);
+        root.add(B);
+        root.add(C);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, marginT);
+        A.connect(ConstraintAnchor.Type.BOTTOM, B, ConstraintAnchor.Type.TOP, marginB);
+        B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM, marginT);
+        B.connect(ConstraintAnchor.Type.BOTTOM, C, ConstraintAnchor.Type.TOP, marginB);
+        C.connect(ConstraintAnchor.Type.TOP, B, ConstraintAnchor.Type.BOTTOM, marginT);
+        C.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, marginB);
+        A.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        B.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        C.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setVerticalWeight(1);
+        B.setVerticalWeight(1);
+        C.setVerticalWeight(1);
+        root.layout();
+        System.out.println("a) A: " + A + " B: " + B + " C: " + C);
+        assertEquals(A.getHeight(), B.getHeight(), 1);
+        assertEquals(B.getHeight(), C.getHeight(), 1);
+        A.setVerticalWeight(1);
+        B.setVerticalWeight(2);
+        C.setVerticalWeight(1);
+        root.layout();
+        System.out.println("b) A: " + A + " B: " + B + " C: " + C);
+        assertEquals(2 * (A.getHeight() + marginT + marginB), B.getHeight() + marginT + marginB, 1);
+        assertEquals(A.getHeight(), C.getHeight(), 1);
+    }}

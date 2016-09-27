@@ -140,6 +140,13 @@ public class ArrayRow {
         return variables.containsKey(v);
     }
 
+    public ArrayRow createRowDefinition(SolverVariable variable, int value) {
+        this.variable = variable;
+        constantValue = value;
+        isSimpleDefinition = true;
+        return this;
+    }
+
     public ArrayRow createRowEquals(SolverVariable variable, int value) {
         if (value < 0) {
             constantValue = -1 * value;
@@ -223,18 +230,33 @@ public class ArrayRow {
         return this;
     }
 
-    public ArrayRow createRowEqualDimension(SolverVariable variableStartA, int marginStartA,
+    public ArrayRow createRowEqualDimension(float currentWeight, float totalWeights, float nextWeight,
+                                            SolverVariable variableStartA, int marginStartA,
                                             SolverVariable variableEndA, int marginEndA,
                                             SolverVariable variableStartB, int marginStartB,
                                             SolverVariable variableEndB, int marginEndB) {
-        // endA - startA + marginStartA + marginEndA == endB - startB + marginStartB + marginEndB
-        // 0 = startA - endA + marginStartA + marginEndA + endB - startB + marginStartB + marginEndB
-        // 0 = (- marginStartA - marginEndA + marginStartB + marginEndB) + startA - endA + endB - startB
-        constantValue = - marginStartA - marginEndA + marginStartB + marginEndB;
-        variables.put(variableStartA, 1);
-        variables.put(variableEndA, -1);
-        variables.put(variableEndB, 1);
-        variables.put(variableStartB, -1);
+        if (totalWeights == 0 || (currentWeight == nextWeight)) {
+            // endA - startA + marginStartA + marginEndA == endB - startB + marginStartB + marginEndB
+            // 0 = startA - endA - marginStartA - marginEndA + endB - startB + marginStartB + marginEndB
+            // 0 = (- marginStartA - marginEndA + marginStartB + marginEndB) + startA - endA + endB - startB
+            constantValue = -marginStartA - marginEndA + marginStartB + marginEndB;
+            variables.put(variableStartA, 1);
+            variables.put(variableEndA, -1);
+            variables.put(variableEndB, 1);
+            variables.put(variableStartB, -1);
+        } else {
+            float cw = currentWeight / totalWeights;
+            float nw = nextWeight / totalWeights;
+            float w = cw / nw;
+            // (endA - startA + marginStartA + marginEndA) = w * (endB - startB) + marginStartB + marginEndB;
+            // 0 = (startA - endA - marginStartA - marginEndA) + w * (endB - startB) + marginStartB + marginEndB
+            // 0 = (- marginStartA - marginEndA + marginStartB + marginEndB) + startA - endA + w * endB - w * startB
+            constantValue = - marginStartA - marginEndA + w * marginStartB + w * marginEndB;
+            variables.put(variableStartA, 1);
+            variables.put(variableEndA, -1);
+            variables.put(variableEndB, w);
+            variables.put(variableStartB, -w);
+        }
         return this;
     }
 

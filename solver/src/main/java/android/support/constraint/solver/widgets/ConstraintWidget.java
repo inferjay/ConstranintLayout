@@ -50,12 +50,6 @@ public class ConstraintWidget implements Solvable {
     public static final int INVISIBLE = 4;
     public static final int GONE = 8;
 
-    int mDistToTop;
-    int mDistToLeft;
-    int mDistToRight;
-    int mDistToBottom;
-    boolean mVisited;
-
     /**
      * Define how the content of a widget should align, if the widget has children
      */
@@ -129,8 +123,8 @@ public class ConstraintWidget implements Solvable {
     private float mVerticalBiasPercent = DEFAULT_BIAS;
 
     // The horizontal and vertical behaviour for the widgets' dimensions
-    private DimensionBehaviour mHorizontalDimensionBehaviour = DimensionBehaviour.FIXED;
-    private DimensionBehaviour mVerticalDimensionBehaviour = DimensionBehaviour.FIXED;
+    DimensionBehaviour mHorizontalDimensionBehaviour = DimensionBehaviour.FIXED;
+    DimensionBehaviour mVerticalDimensionBehaviour = DimensionBehaviour.FIXED;
 
     // The companion widget (typically, the real widget we represent)
     private Object mCompanionWidget;
@@ -145,6 +139,18 @@ public class ConstraintWidget implements Solvable {
 
     private String mDebugName = null;
     private String mType = null;
+
+    int mDistToTop;
+    int mDistToLeft;
+    int mDistToRight;
+    int mDistToBottom;
+    boolean mVisited;
+
+    // Chain support
+    boolean mHorizontalChainFixedPosition;
+    boolean mVerticalChainFixedPosition;
+    float mHorizontalWeight = 0;
+    float mVerticalWeight = 0;
 
     // TODO: see if we can make this simpler
     public void reset() {
@@ -183,6 +189,11 @@ public class ConstraintWidget implements Solvable {
         mVisibility = VISIBLE;
         mDebugName = null;
         mType = null;
+        mVisited = false;
+        mHorizontalChainFixedPosition = false;
+        mVerticalChainFixedPosition = false;
+        mHorizontalWeight = 0;
+        mVerticalWeight = 0;
     }
 
     /*-----------------------------------------------------------------------*/
@@ -1138,6 +1149,24 @@ public class ConstraintWidget implements Solvable {
         return mContainerItemSkip;
     }
 
+    /**
+     * Set the horizontal weight (only used in chains)
+     *
+     * @param horizontalWeight
+     */
+    public void setHorizontalWeight(float horizontalWeight) {
+        mHorizontalWeight = horizontalWeight;
+    }
+
+    /**
+     * Set the vertical weight (only used in chains)
+     *
+     * @param verticalWeight
+     */
+    public void setVerticalWeight(float verticalWeight) {
+        mVerticalWeight = verticalWeight;
+    }
+
     /*-----------------------------------------------------------------------*/
     // Connections
     /*-----------------------------------------------------------------------*/
@@ -1967,6 +1996,7 @@ public class ConstraintWidget implements Solvable {
                         system.addConstraint(row);
                         system.addConstraint(system.createRow().createRowEquals(end, endTarget, -1 * endAnchorMargin));
                     }
+
                 } else {
                     if (beginTarget == endTarget) {
                         system.addConstraint(EquationCreation

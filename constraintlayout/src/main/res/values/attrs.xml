@@ -92,6 +92,11 @@
     Note it only works if one of the dimensions is set to 0dp.-->
     <attr name="layout_constraintDimensionRatio" format="string"/>
 
+    <!-- In a Chain, the amount of weight used to spread available horizontal space if the widget is set to MATCH_CONSTRAINT -->
+    <attr name="layout_constraintHorizontalWeight" format="float"/>
+    <!-- In a Chain, the amount of weight used to spread available vertical space if the widget is set to MATCH_CONSTRAINT -->
+    <attr name="layout_constraintVerticalWeight" format="float"/>
+
     <!-- Used at design time to define to position the view -->
     <attr name="layout_editor_absoluteX" format="dimension"/>
     <!-- Used at design time to define to position the view -->
@@ -131,6 +136,8 @@
         <attr name="layout_constraintBottom_creator" />
         <attr name="layout_constraintBaseline_creator"/>
         <attr name="layout_constraintDimensionRatio" />
+        <attr name="layout_constraintHorizontalWeight" />
+        <attr name="layout_constraintVerticalWeight" />
         <attr name="layout_editor_absoluteX" />
         <attr name="layout_editor_absoluteY"/>
     </declare-styleable>
@@ -178,6 +185,8 @@
         <attr name="layout_constraintBottom_creator" />
         <attr name="layout_constraintBaseline_creator"/>
         <attr name="layout_constraintDimensionRatio" />
+        <attr name="layout_constraintHorizontalWeight" />
+        <attr name="layout_constraintVerticalWeight" />
         <attr name="layout_editor_absoluteX" />
         <attr name="layout_editor_absoluteY"/>
 

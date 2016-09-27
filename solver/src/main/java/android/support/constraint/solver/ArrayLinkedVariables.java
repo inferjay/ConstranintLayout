@@ -538,7 +538,7 @@ public class ArrayLinkedVariables {
         int counter = 0;
         while (current != NONE && counter < currentSize) {
             SolverVariable variable = mCache.mIndexedVariables[mArrayIndices[current]];
-            if (variable.definitionId != -1) {// == definition.variable.id) {
+            if (variable.definitionId != -1) {
                 float value = mArrayValues[current];
                 remove(variable);
                 // now, let's add all values from the definition
