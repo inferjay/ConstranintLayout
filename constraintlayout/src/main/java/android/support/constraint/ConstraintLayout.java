@@ -65,6 +65,9 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *         <a href="#DimensionConstraints">Dimension constraints</a>
  *     </li>
  *     <li>
+ *         <a href="#Chains">Chains</a>
+ *     </li>
+ *     <li>
  *         <a href="#VirtualHelpers">Virtual Helpers objects</a>
  *     </li>
  * </ul>
@@ -309,6 +312,37 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *     to parent.
  *
  * </p>
+ *
+ * <h4 id="Chains">Chains</h4>
+ * <p>Chains provide group-like behavior in a single axis (horizontally or vertically).</p>
+ * <h5>Creating a chain</h5>
+ * <p>
+ *     A set of widgets are considered a chain if they a linked together via a bi-directional connection (see Fig. 8, showing a minimal chain, with two widgets).
+ * </p>
+ *     <p><div align="center" >
+ *       <img width="325px" src="resources/images/chains.png">
+ *           <br><b><i>Fig. 8 - Chain</i></b>
+ *     </div>
+ * <p>
+ * Once a chain is created, there are two possibilities:
+ * <ul>
+ *     <li>Spread the elements in the available space</li>
+ *     <li>A chain can also be "packed", in that case the elements are grouped together</li>
+ * </ul>
+ * <h5>Margins in chains</h5>
+ * <p>If margins are specified on connections, they will be taken in account. In the case of spread chains, margins will be deducted from the allocated space.</p>
+ * <h5>Spread chains</h5>
+ * <p>The default behavior of a chain is to spread the elements equally in the available space. If one or more elements are using {@code MATCH_CONSTRAINT}, they
+ * will use the available empty space (equally divided among themselves). The attribute {@code layout_constraintHorizontal_weight} and {@code layout_constraintVertical_weight}
+ * will control how the space will be distributed among the elements using {@code MATCH_CONSTRAINT}. For exemple, on a chain containing two elements using {@code MATCH_CONSTRAINT},
+ * with the first element using a weight of 2 and the second a weight of 1, the space occupied by the first element will be twice that of the second element.</p>
+ * <h5>Packed chains</h5>
+ * <p>When setting the attribute {@code layout_constraintHorizontal_chainPacked} or {@code layout_constraintVertical_chainPacked} to true on the first element of a chain,
+ * The behavior of the chain will change to instead pack the elements of the chain together (still taking in account specified margins), and by default center the chain among
+ * the two connections endpoints (e.g. the connection at the start of the chain and the connection at the end of the chain). The position of the packed chain
+ * can be further refined by using the {@code layout_constraintHorizontal_bias} or {@code layout_constraintVertical_bias} attributes of the first element of the chain.
+ * </p>
+ *
  * <h4 id="VirtualHelpers"> Virtual Helper objects </h4>
  * <p>In addition to the intrinsic capabilities detailed previously, you can also use special helper objects
  * in {@code ConstraintLayout} to help you with your layout. Currently, the {@code Guideline}{@see Guideline} object allows you to create
