@@ -155,7 +155,7 @@ public class ConstraintSet {
      */
     public static final int END = ConstraintLayout.LayoutParams.END;
     private static final boolean DEBUG = false;
-    private static final int []VISIBILITY_FLAGS = new int[]{VISIBLE, INVISIBLE, GONE};
+    private static final int[] VISIBILITY_FLAGS = new int[]{VISIBLE, INVISIBLE, GONE};
 
     private HashMap<Integer, Constraint> mConstraints = new HashMap<Integer, Constraint>();
 
@@ -198,7 +198,13 @@ public class ConstraintSet {
     private static final int TOP_TO_TOP = 36;
     private static final int VERTICAL_BIAS = 37;
     private static final int VIEW_ID = 38;
-    private static final int UNUSED = 39;
+    private static final int HORIZONTAL_WEIGHT = 39;
+    private static final int VERTICAL_WEIGHT = 40;
+    private static final int HORIZONTAL_PACK = 41;
+    private static final int VERTICAL_PACK = 42;
+
+
+    private static final int UNUSED = 43;
 
     static {
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintLeft_toLeftOf, LEFT_TO_LEFT);
@@ -227,6 +233,11 @@ public class ConstraintSet {
         mapToConstant.append(R.styleable.ConstraintSet_layout_goneMarginBottom, GONE_BOTTOM_MARGIN);
         mapToConstant.append(R.styleable.ConstraintSet_layout_goneMarginStart, GONE_START_MARGIN);
         mapToConstant.append(R.styleable.ConstraintSet_layout_goneMarginEnd, GONE_END_MARGIN);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintVertical_weight, VERTICAL_WEIGHT);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintHorizontal_weight, HORIZONTAL_WEIGHT);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintHorizontal_chainPacked, HORIZONTAL_PACK);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintVertical_chainPacked, VERTICAL_PACK);
+
 
 
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintHorizontal_bias, HORIZONTAL_BIAS);
@@ -296,6 +307,10 @@ public class ConstraintSet {
         public int goneEndMargin;
         public int goneStartMargin;
         public int dimensionRatioSide;
+        public float verticalWeight;
+        public float horizontalWeight;
+        public boolean horizontalChainPacked;
+        public boolean verticalChainPacked;
 
         private void fillFrom(int viewId, ConstraintLayout.LayoutParams param) {
             mViewId = viewId;
@@ -329,6 +344,10 @@ public class ConstraintSet {
             rightMargin = param.rightMargin;
             topMargin = param.topMargin;
             bottomMargin = param.bottomMargin;
+            verticalWeight = param.verticalWeight;
+            horizontalWeight = param.horizontalWeight;
+            verticalChainPacked = param.verticalChainPacked;
+            horizontalChainPacked = param.horizontalChainPacked;
 
             endMargin = param.getMarginEnd();
             startMargin = param.getMarginStart();
@@ -364,6 +383,10 @@ public class ConstraintSet {
             param.dimensionRatioSide = dimensionRatioSide;
             param.editorAbsoluteX = editorAbsoluteX;
             param.editorAbsoluteY = editorAbsoluteY;
+            param.verticalWeight = verticalWeight;
+            param.horizontalWeight = horizontalWeight;
+            param.verticalChainPacked = verticalChainPacked;
+            param.horizontalChainPacked = horizontalChainPacked;
 
             param.orientation = orientation;
             param.guidePercent = guidePercent;
@@ -498,6 +521,79 @@ public class ConstraintSet {
         connect(centerID, BOTTOM, bottomId, bottomSide, bottomMargin);
         Constraint constraint = mConstraints.get(centerID);
         constraint.verticalBias = bias;
+    }
+
+    /**
+     * Spaces a set of widgets vertically between the view topId and bottomId.
+     * Widgets can be spaced with weights.
+     *
+     * @param topId
+     * @param bottomId
+     * @param chainIds widgets to use as a chain
+     * @param weights can be null
+     * @param packed if true tightly pack group in center
+     */
+    public void createVerticalChain(int topId, int bottomId, int[] chainIds, float[] weights, boolean packed) {
+        if (chainIds.length < 2) {
+            throw new IllegalArgumentException("must have 2 or more widgets in a chain");
+        }
+        if (weights != null && weights.length != chainIds.length) {
+            throw new IllegalArgumentException("must have 2 or more widgets in a chain");
+        }
+        if (weights != null) {
+            get(chainIds[0]).verticalWeight = weights[0];
+        }
+        get(chainIds[0]).verticalChainPacked = packed;
+
+        connect(chainIds[0], TOP, topId, TOP, 0);
+        for (int i = 1; i < chainIds.length - 1; i++) {
+            int chainId = chainIds[i];
+            connect(chainIds[i], TOP, chainIds[i - 1], BOTTOM, 0);
+            connect(chainIds[i - 1], BOTTOM, chainIds[i], TOP, 0);
+            if (weights != null) {
+                get(chainIds[i]).verticalWeight = weights[i];
+            }
+        }
+        connect(chainIds[chainIds.length - 1], BOTTOM, bottomId, TOP, 0);
+        if (weights != null) {
+            get(chainIds[chainIds.length - 1]).verticalWeight = weights[chainIds.length - 1];
+        }
+    }
+
+    /**
+     * Spaces a set of widgets horizontal between the view topId and bottomId.
+     * Widgets can be spaced with weights.
+     *
+     * @param leftId
+     * @param rightId
+     * @param chainIds widgets to use as a chain
+     * @param weights can be null
+     * @param packed if true tightly pack group in center
+     */
+    public void createHorizontalChain(int leftId, int rightId, int[] chainIds, float[] weights, boolean packed) {
+        if (chainIds.length < 2) {
+            throw new IllegalArgumentException("must have 2 or more widgets in a chain");
+        }
+        if (weights != null && weights.length != chainIds.length) {
+            throw new IllegalArgumentException("must have 2 or more widgets in a chain");
+        }
+        if (weights != null) {
+            get(chainIds[0]).verticalWeight = weights[0];
+        }
+        get(chainIds[0]).horizontalChainPacked = packed;
+        connect(chainIds[0], TOP, leftId, TOP, 0);
+        for (int i = 1; i < chainIds.length - 1; i++) {
+            int chainId = chainIds[i];
+            connect(chainIds[i], TOP, chainIds[i - 1], BOTTOM, 0);
+            connect(chainIds[i - 1], BOTTOM, chainIds[i], TOP, 0);
+            if (weights != null) {
+                get(chainIds[i]).verticalWeight = weights[i];
+            }
+        }
+        connect(chainIds[chainIds.length - 1], BOTTOM, rightId, TOP, 0);
+        if (weights != null) {
+            get(chainIds[chainIds.length - 1]).verticalWeight = weights[chainIds.length - 1];
+        }
     }
 
     /**
@@ -1071,6 +1167,18 @@ public class ConstraintSet {
                 case LAYOUT_VISIBILITY:
                     c.visibility = a.getInt(attr, c.visibility);
                     c.visibility = VISIBILITY_FLAGS[c.visibility];
+                    break;
+                case VERTICAL_WEIGHT:
+                    c.verticalWeight = a.getFloat(attr, c.verticalWeight);
+                    break;
+                case HORIZONTAL_WEIGHT:
+                    c.horizontalWeight = a.getFloat(attr, c.horizontalWeight);
+                    break;
+                case VERTICAL_PACK:
+                    c.verticalChainPacked = a.getBoolean(attr, c.verticalChainPacked);
+                    break;
+                case HORIZONTAL_PACK:
+                    c.horizontalChainPacked = a.getBoolean(attr, c.horizontalChainPacked);
                     break;
                 case VIEW_ID:
                     c.mViewId = a.getResourceId(attr, c.mViewId);
