@@ -306,8 +306,9 @@ public class ArrayLinkedVariables {
             // only increment mLast if we haven't done the first filling pass
             mLast++;
         }
-        if (currentSize >= mArrayIndices.length) {
+        if (mLast >= mArrayIndices.length) {
             mDidFillOnce = true;
+            mLast = mArrayIndices.length-1;
         }
     }
 
