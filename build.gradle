@@ -34,7 +34,7 @@ ext.version = '1.0.0-alpha9'
 if (System.env.DIST_DIR != null && System.env.OUT_DIR != null) {
     ext.androidHostOut = file(System.env.OUT_DIR)
     ext.androidHostDist = file(System.env.DIST_DIR)
-    ext.buildNumber = Systen.env.BUILD
+    ext.buildNumber = System.env.BUILD
 } else {
     // ext.androidHostOut is shared by all tools/{base,build,swt} gradle projects/
     ext.androidHostOut = file("$rootDir/../../out")
