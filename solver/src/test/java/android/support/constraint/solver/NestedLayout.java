@@ -12,7 +12,7 @@ import static org.testng.Assert.assertEquals;
  */
 public class NestedLayout {
 
-    @Test
+    // @Test
     public void testNestedLayout() {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(20, 20, 1000, 1000);
         ConstraintWidgetContainer container = new ConstraintWidgetContainer(0, 0, 100, 100);

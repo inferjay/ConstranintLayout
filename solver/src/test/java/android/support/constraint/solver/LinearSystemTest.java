@@ -34,6 +34,57 @@ public class LinearSystemTest {
     }
 
     @Test
+    public void testPriority() {
+        for (int i = 0; i < 3; i++) {
+            s.reset();
+            LinearEquation eq1 = new LinearEquation(s);
+            eq1.var("A").equalsTo().var(10);
+            ArrayRow row1 = EquationCreation.createRowFromEquation(s, eq1);
+            SolverVariable e1 = s.createErrorVariable();
+            SolverVariable e2 = s.createErrorVariable();
+            e1.strength = i == 0 ? 1 : 0;
+            e2.strength = i == 0 ? 1 : 0;
+            row1.addError(e1, e2);
+
+            LinearEquation eq2 = new LinearEquation(s);
+            eq2.var("A").equalsTo().var(100);
+            ArrayRow row2 = EquationCreation.createRowFromEquation(s, eq2);
+            SolverVariable e3 = s.createErrorVariable();
+            SolverVariable e4 = s.createErrorVariable();
+            e3.strength = i == 1 ? 1 : 0;
+            e4.strength = i == 1 ? 1 : 0;
+            row2.addError(e3, e4);
+
+            LinearEquation eq3 = new LinearEquation(s);
+            eq3.var("A").equalsTo().var(1000);
+            ArrayRow row3 = EquationCreation.createRowFromEquation(s, eq3);
+            SolverVariable e5 = s.createErrorVariable();
+            SolverVariable e6 = s.createErrorVariable();
+            e5.strength = i == 2 ? 1 : 0;
+            e6.strength = i == 2 ? 1 : 0;
+            row3.addError(e5, e6);
+
+            s.addConstraint(row1);
+            s.addConstraint(row2);
+            s.addConstraint(row3);
+            try {
+                s.minimize();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            System.out.println("Check at iteration " + i);
+            s.displayReadableRows();
+            if (i == 0) {
+                assertEquals(s.getValueFor("A"), 10.0f);
+            } else if (i == 1) {
+                assertEquals(s.getValueFor("A"), 100.0f);
+            } else if (i == 2) {
+                assertEquals(s.getValueFor("A"), 1000.0f);
+            }
+        }
+    }
+
+    @Test
     public void testAddEquation1() {
         LinearEquation e1 = new LinearEquation(s);
         e1.var("W3.left").equalsTo().var(0);

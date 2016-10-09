@@ -472,7 +472,7 @@ public class ArrayLinkedVariables {
                     } else if (unrestrictedCandidate == null) {
                         unrestrictedCandidate = variable;
                     }
-                } else if (amount < 0 && restrictedCandidate == null) {
+                } else if (amount < 0 && (restrictedCandidate == null || variable.strength < restrictedCandidate.strength)) {
                     restrictedCandidate = variable;
                 }
             }
@@ -577,14 +577,20 @@ public class ArrayLinkedVariables {
             // if no candidate is known, let's figure it out
             int current = mHead;
             int counter = 0;
+            SolverVariable pivot = null;
             while (current != NONE && counter < currentSize) {
                 if (mArrayValues[current] < 0) {
                     // We can return the first negative candidate as in ArrayLinkedVariables
                     // they are already sorted by id
-                    return mCache.mIndexedVariables[mArrayIndices[current]];
+
+                    SolverVariable v = mCache.mIndexedVariables[mArrayIndices[current]];
+                    if (pivot == null || pivot.strength > v.strength) {
+                        pivot = v;
+                    }
                 }
                 current = mArrayNextIndices[current]; counter++;
             }
+            return pivot;
         }
         return candidate;
     }

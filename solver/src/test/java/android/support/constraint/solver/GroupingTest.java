@@ -97,7 +97,7 @@ public class GroupingTest {
         assertEquals(topC, C.getTop());
     }
 
-    @Test
+    // @Test
     public void testGroupSolver() {
         final ConstraintWidgetContainer root = new ConstraintWidgetContainer(37, 52, 1000, 1000);
         final ConstraintWidget A = new ConstraintWidget(20, 20, 200, 100);

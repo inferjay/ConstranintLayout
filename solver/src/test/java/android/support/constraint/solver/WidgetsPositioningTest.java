@@ -512,6 +512,44 @@ public class WidgetsPositioningTest {
         System.out.println("" + root + " " + A + " " + guideline);
     }
 
+
+    @Test
+    public void testGuidelinePosition() {
+        final ConstraintWidgetContainer root = new ConstraintWidgetContainer(800, 400);
+        final ConstraintWidget A = new ConstraintWidget(100, 20);
+        final ConstraintWidget B = new ConstraintWidget(100, 20);
+        final Guideline guideline = new Guideline();
+        root.add(guideline);
+        root.add(A);
+        root.add(B);
+        guideline.setGuidePercent(0.651f);
+        guideline.setOrientation(Guideline.VERTICAL);
+        root.setDebugSolverName(s, "root");
+        A.setDebugSolverName(s, "A");
+        B.setDebugSolverName(s, "B");
+        guideline.setDebugSolverName(s, "guideline");
+
+        ArrayList<ConstraintWidget> widgets = new ArrayList<ConstraintWidget>();
+        widgets.add(root);
+        widgets.add(A);
+        widgets.add(B);
+        widgets.add(guideline);
+
+        A.connect(ConstraintAnchor.Type.LEFT, guideline, ConstraintAnchor.Type.RIGHT);
+        B.connect(ConstraintAnchor.Type.RIGHT, guideline, ConstraintAnchor.Type.RIGHT);
+        Runnable check = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("" + root + " A: " + A + " " + " B: " + B + " guideline: " + guideline);
+                assertEquals(A.getWidth(), 100);
+                assertEquals(A.getHeight(), 20);
+                assertEquals(A.getX(), 521);
+                assertEquals(B.getRight(), 521);
+            }
+        };
+        runTestOnWidgets(widgets, check);
+    }
+
     @Test
     public void testWidgetInfeasiblePosition() {
         final ConstraintWidget A = new ConstraintWidget(100, 20);
@@ -559,7 +597,7 @@ public class WidgetsPositioningTest {
         runTestOnWidgets(widgets, new Runnable() {
             @Override
             public void run() {
-//                System.out.println("" + root + " " + A + " " + B);
+                System.out.println("root: " + root + " A: " + A + " B: " + B);
                 assertEquals(root.getHeight(), 400);
                 assertEquals(root.getHeight(), 400);
                 assertEquals(A.getHeight(), 20);

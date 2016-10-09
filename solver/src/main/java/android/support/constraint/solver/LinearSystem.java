@@ -232,7 +232,7 @@ public class LinearSystem {
         return variable;
     }
 
-    private SolverVariable createErrorVariable() {
+    SolverVariable createErrorVariable() {
         if (mNumColumns + 1 >= mMaxColumns) {
             increaseTableSize();
         }
@@ -324,7 +324,7 @@ public class LinearSystem {
         for (int i = 1; i < mNumColumns; i++) {
             SolverVariable variable = mCache.mIndexedVariables[i];
             if (variable.mType == SolverVariable.Type.ERROR
-                /* || variable.getType() == SolverVariable.Type.SLACK */) {
+                 /* || variable.mType == SolverVariable.Type.SLACK */) {
                 mGoal.variables.put(variable, 1.f);
             }
         }
@@ -539,6 +539,9 @@ public class LinearSystem {
             }
 
             SolverVariable pivotCandidate = goal.variables.getPivotCandidate();
+            if (DEBUG) {
+                System.out.println("pivot candidate: " + pivotCandidate);
+            }
             if (pivotCandidate != null) {
                 if (mAlreadyTestedCandidates[pivotCandidate.id]) {
                     pivotCandidate = null;
@@ -568,6 +571,8 @@ public class LinearSystem {
                 int pivotRowIndexWeak = -1;
                 int pivotRowIndexStrong = -1;
 
+                float d_j = goal.variables.get(pivotCandidate);
+
                 for (int i = 0; i < mNumRows; i++) {
                     ArrayRow current = mRows[i];
                     SolverVariable variable = current.variable;
@@ -580,10 +585,9 @@ public class LinearSystem {
                         // we want to pivot on
                         float C = current.constantValue;
                         float a_j = current.variables.get(pivotCandidate);
-                        if (a_j < 0) {
-                            float value = (C * -1) / a_j;
-                            if (pivotCandidate.mStrength ==
-                                    SolverVariable.Strength.STRONG) {
+                        if (a_j > 0) {
+                            float value = d_j / a_j;
+                            if (pivotCandidate.strength > 0) {
                                 if (value < minStrong) {
                                     minStrong = value;
                                     pivotRowIndexStrong = i;
@@ -681,11 +685,14 @@ public class LinearSystem {
                 }
                 float minWeak = Float.MAX_VALUE;
                 float minStrong = Float.MAX_VALUE;
+                float minStrength = Float.MAX_VALUE;
                 int pivotRowIndexWeak = -1;
                 int pivotRowIndexStrong = -1;
+                int pivotRowIndexStrength = -1;
                 int pivotRowIndex;
                 int pivotColumnIndexStrong = -1;
                 int pivotColumnIndexWeak = -1;
+                int pivotColumnIndexStrength = -1;
                 int pivotColumnIndex;
 
                 for (int i = 0; i < mNumRows; i++) {
@@ -698,6 +705,9 @@ public class LinearSystem {
                     }
                     if (current.constantValue < 0) {
                         // let's examine this row, see if we can find a good pivot
+                        if (DEBUG) {
+                            System.out.println("looking at pivoting on row " + current);
+                        }
                         for (int j = 1; j < mNumColumns; j++) {
                             SolverVariable candidate = mCache.mIndexedVariables[j];
                             float a_j = current.variables.get(candidate);
@@ -707,7 +717,16 @@ public class LinearSystem {
                             float d_j = goal.variables.get(candidate);
                             float value = d_j / a_j;
 
-                            if (variable.mStrength == SolverVariable.Strength.STRONG) {
+                            if (DEBUG) {
+                                System.out.println("candidate for pivot " + candidate);
+                            }
+                            if (candidate.strength > 0) {
+                                if (value < minStrength) {
+                                    minStrength = value;
+                                    pivotRowIndexStrength = i;
+                                    pivotColumnIndexStrength = j;
+                                }
+                            } else if (variable.mStrength == SolverVariable.Strength.STRONG) {
                                 if (value < minStrong) {
                                     minStrong = value;
                                     pivotRowIndexStrong = i;
@@ -724,17 +743,24 @@ public class LinearSystem {
                     }
                 }
 
-                if (pivotRowIndexStrong != -1) {
+                if (pivotRowIndexWeak != -1) {
+                    pivotRowIndex = pivotRowIndexWeak;
+                    pivotColumnIndex = pivotColumnIndexWeak;
+                } else if (pivotRowIndexStrong != -1) {
                     pivotRowIndex = pivotRowIndexStrong;
                     pivotColumnIndex = pivotColumnIndexStrong;
                 } else {
-                    pivotRowIndex = pivotRowIndexWeak;
-                    pivotColumnIndex = pivotColumnIndexWeak;
+                    pivotRowIndex = pivotRowIndexStrength;
+                    pivotColumnIndex = pivotColumnIndexStrength;
                 }
 
                 if (pivotRowIndex != -1) {
                     // We have a pivot!
                     ArrayRow pivotEquation = mRows[pivotRowIndex];
+                    if (DEBUG) {
+                        System.out.println("Pivoting on " + pivotEquation.variable + " with "
+                                + mCache.mIndexedVariables[pivotColumnIndex]);
+                    }
                     pivotEquation.variable.definitionId = -1;
                     pivotEquation.pivot(mCache.mIndexedVariables[pivotColumnIndex]);
                     pivotEquation.variable.definitionId = pivotRowIndex;
@@ -918,10 +944,16 @@ public class LinearSystem {
      * @param a
      * @param b
      * @param margin
+     * @param strength
      */
-    public void addGreaterThan(SolverVariable a, SolverVariable b, int margin) {
+    public void addGreaterThan(SolverVariable a, SolverVariable b, int margin, int strength) {
+        if (DEBUG) {
+            System.out.println("-> " + a + " >= " + b + (margin != 0 ? " + " + margin : ""));
+        }
         ArrayRow row = createRow();
-        row.createRowGreaterThan(a, b, createSlackVariable(), margin);
+        SolverVariable slack = createSlackVariable();
+        slack.strength = strength;
+        row.createRowGreaterThan(a, b, slack, margin);
         addConstraint(row);
     }
 
@@ -930,10 +962,16 @@ public class LinearSystem {
      * @param a
      * @param b
      * @param margin
+     * @param strength
      */
-    public void addLowerThan(SolverVariable a, SolverVariable b, int margin) {
+    public void addLowerThan(SolverVariable a, SolverVariable b, int margin, int strength) {
+        if (DEBUG) {
+            System.out.println("-> " + a + " <= " + b + (margin != 0 ? " + " + margin : ""));
+        }
         ArrayRow row = createRow();
-        row.createRowLowerThan(a, b, createSlackVariable(), margin);
+        SolverVariable slack = createSlackVariable();
+        slack.strength = strength;
+        row.createRowLowerThan(a, b, slack, margin);
         addConstraint(row);
     }
 
@@ -947,7 +985,11 @@ public class LinearSystem {
      * @param d
      * @param m2
      */
-    public void addCentering(SolverVariable a, SolverVariable b, int m1, float bias, SolverVariable c, SolverVariable d, int m2) {
+    public void addCentering(SolverVariable a, SolverVariable b, int m1, float bias,
+                             SolverVariable c, SolverVariable d, int m2) {
+        if (DEBUG) {
+            System.out.println("-> " + a + " - " + b + " = " + d + " - " + c);
+        }
         ArrayRow row = createRow();
         row.createRowCentering(a, b, m1, bias, c, d, m2, false);
         addConstraint(row);
@@ -958,10 +1000,19 @@ public class LinearSystem {
      * @param a
      * @param b
      * @param margin
+     * @param strength
      */
-    public void addEquality(SolverVariable a, SolverVariable b, int margin) {
+    public void addEquality(SolverVariable a, SolverVariable b, int margin, int strength) {
+        if (DEBUG) {
+            System.out.println("-> " + a + " = " + b + (margin != 0 ? " + " + margin : ""));
+        }
         ArrayRow row = createRow();
         row.createRowEquals(a, b, margin);
+        SolverVariable error1 = createErrorVariable();
+        SolverVariable error2 = createErrorVariable();
+        error1.strength = strength;
+        error2.strength = strength;
+        row.addError(error1, error2);
         addConstraint(row);
     }
 
@@ -971,17 +1022,24 @@ public class LinearSystem {
      * @param value
      */
     public void addEquality(SolverVariable a, int value) {
+        if (DEBUG) {
+            System.out.println("-> " + a + " = " + value);
+        }
         int idx = a.definitionId;
-        if (a.definitionId == -1) {
-            ArrayRow row = createRow();
-            row.createRowDefinition(a, value);
-            addConstraint(row);
-        } else {
+        if (a.definitionId != -1) {
             ArrayRow row = mRows[idx];
             if (row.isSimpleDefinition) {
                 row.constantValue = value;
                 return;
+            } else {
+                ArrayRow newRow = createRow();
+                newRow.createRowEquals(a, value);
+                addConstraint(newRow);
             }
+        } else {
+            ArrayRow row = createRow();
+            row.createRowDefinition(a, value);
+            addConstraint(row);
         }
     }
 }

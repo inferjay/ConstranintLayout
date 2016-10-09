@@ -77,7 +77,7 @@ public class AdvancedChainTest {
         A.connect(ConstraintAnchor.Type.BOTTOM, B, ConstraintAnchor.Type.TOP, 0);
         B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM, 0);
         B.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, 0);
-        A.setHorizontalChainPacked(true);
+        A.setVerticalChainPacked(true);
         root.layout();
         System.out.println("a) A: " + A + " B: " + B );
         assertEquals(A.getTop() - root.getTop(), root.getBottom() - B.getBottom(), 1);

@@ -449,7 +449,7 @@ public class ArrayRow {
             } else if (variableAmount < 0) {
                 // The variable is restricted, but has a negative amount. If we don't already
                 // have candidate for restricted variable, we should remember it as a candidate.
-                if (restrictedCandidate == null || restrictedCandidate.id > candidateVariable.id) {
+                if (restrictedCandidate == null || restrictedCandidate.id > candidateVariable.id || candidateVariable.strength < restrictedCandidate.strength) {
                     restrictedCandidate = candidateVariable;
                 }
             }

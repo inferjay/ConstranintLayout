@@ -35,6 +35,7 @@ public class SolverVariable {
 
     public int id = -1;
     public int definitionId = -1;
+    public int strength = 0;
     public float computedValue;
 
     Type mType;
@@ -190,6 +191,7 @@ public class SolverVariable {
         mName = null;
         mType = Type.UNKNOWN;
         mStrength = Strength.STRONG;
+        strength = 0;
         id = -1;
         definitionId = -1;
         computedValue = 0;
@@ -238,8 +240,8 @@ public class SolverVariable {
     @Override
     public String toString() {
         String result = "";
-        if (false && INTERNAL_DEBUG) {
-            result += "{" + mName + ":" + mType + ":" + mStrength + "}";
+        if (INTERNAL_DEBUG) {
+            result += mName + ":" + strength;
         } else {
             result += mName;
         }
