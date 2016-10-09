@@ -6,4 +6,5 @@ iml_module(
     srcs = ["solver/src/main/java"],
     javacopts = ["-extra_checks:off"],
     visibility = ["//visibility:public"],
+    tags = ["managed"],
 )
