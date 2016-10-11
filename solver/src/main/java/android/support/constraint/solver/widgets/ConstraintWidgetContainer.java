@@ -204,6 +204,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             // For now, only allow packed chains if all widgets are in fixed dimensions
             boolean chainPacked = first.mHorizontalChainPacked && (numMatchConstraints == 0);
             ConstraintWidget widget = first;
+            if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
+                chainPacked = true;
+            }
             if (USE_DIRECT_CHAIN_RESOLUTION && widget.mHorizontalChainFixedPosition && !chainPacked) {
                 applyDirectResolutionHorizontalChain(system, numMatchConstraints, widget);
             } else { // use the solver
@@ -443,6 +446,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             int numMatchConstraints = countMatchConstraintsChainedWidgets(mVerticalChainsArray[i], VERTICAL);
             // For now, only allow packed chains if all widgets are in fixed dimensions
             boolean chainPacked = first.mVerticalChainPacked && (numMatchConstraints == 0);
+            if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
+                chainPacked = true;
+            }
             ConstraintWidget widget = first;
             if (USE_DIRECT_CHAIN_RESOLUTION && widget.mVerticalChainFixedPosition && !chainPacked) {
                 applyDirectResolutionVerticalChain(system, numMatchConstraints, widget);
