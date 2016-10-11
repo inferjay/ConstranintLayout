@@ -22,16 +22,19 @@ android {
     }
 }
 
+configurations {
+    doclava
+}
+
 dependencies {
     compile project(':solver')
+    doclava project(':doclava')
 }
 
 archivesBaseName = 'constraint-layout'
 
 project.ext.pomName = 'Android ConstraintLayout'
 project.ext.pomDesc = 'ConstraintLayout for Android'
-
-
 
 task publishLocal(type: Upload) {
     configuration = configurations.archives
@@ -65,4 +68,32 @@ task publishLocal(type: Upload) {
             }
         }
     }
+}
+
+// Call upon the DocLava tool to generate API reference
+task makeJavadocs(type: Javadoc, dependsOn: project.configurations.doclava) {
+    def docDir = "javadoc-offline"
+    if (project.hasProperty("online")) {
+        docDir = "javadoc-online"
+        options.addStringOption("toroot", "/")
+        options.addStringOption("hdf", "android.whichdoc online")
+        options.addBooleanOption("devsite", true)
+        options.addBooleanOption("constraintSupportRef", true)
+    }
+
+    title = null
+    destinationDir = new File(buildDir, docDir)
+    source = 'src/main/java'
+    classpath = files("${rootDir}/../../prebuilts/sdk/${latestSdkVersion}/android.jar")
+    options.addStringOption "resourcesdir", "${rootDir}/constraintlayout/resources/"
+    options.addStringOption "resourcesoutdir", "reference/android/support/constraint/"
+    options.addStringOption "federate Android", "http://developer.android.com"
+    options.addStringOption "federationapi Android",
+                "${rootDir}/../../prebuilts/sdk/api/${latestSdkVersion}.txt"
+    options.encoding = "UTF-8"
+    options.doclet = "com.google.doclava.Doclava"
+    options.docletpath = configurations.doclava.files.asType(List)
+    options.addStringOption("templatedir", "${rootDir}/../../external/doclava/res/assets/templates-sdk/")
+    exclude '**/BuildConfig.java'
+    exclude '**/R.java'
 }
