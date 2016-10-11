@@ -192,6 +192,8 @@ public class ConstraintWidget implements Solvable {
         mDebugName = null;
         mType = null;
         mVisited = false;
+        mHorizontalChainPacked = false;
+        mVerticalChainPacked = false;
         mHorizontalChainFixedPosition = false;
         mVerticalChainFixedPosition = false;
         mHorizontalWeight = 0;
@@ -1910,7 +1912,7 @@ public class ConstraintWidget implements Solvable {
             if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && end.mGroup == group)) {
                 applyConstraints(system, wrapContent, verticalDimensionFixed,
                         mTop, end, mY, mY + height, height, mVerticalBiasPercent,
-                        useRatio && dimensionRatioSide == VERTICAL, false);
+                        useRatio && dimensionRatioSide == VERTICAL, inVerticalChain);
             }
         } else {
             if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && mBottom.mGroup == group)) {

@@ -42,8 +42,8 @@ public class LinearSystemTest {
             ArrayRow row1 = EquationCreation.createRowFromEquation(s, eq1);
             SolverVariable e1 = s.createErrorVariable();
             SolverVariable e2 = s.createErrorVariable();
-            e1.strength = i == 0 ? 1 : 0;
-            e2.strength = i == 0 ? 1 : 0;
+            e1.strength = i % 3;
+            e2.strength = i % 3;
             row1.addError(e1, e2);
 
             LinearEquation eq2 = new LinearEquation(s);
@@ -51,8 +51,8 @@ public class LinearSystemTest {
             ArrayRow row2 = EquationCreation.createRowFromEquation(s, eq2);
             SolverVariable e3 = s.createErrorVariable();
             SolverVariable e4 = s.createErrorVariable();
-            e3.strength = i == 1 ? 1 : 0;
-            e4.strength = i == 1 ? 1 : 0;
+            e3.strength = (i + 1) % 3;
+            e4.strength = (i + 1) % 3;
             row2.addError(e3, e4);
 
             LinearEquation eq3 = new LinearEquation(s);
@@ -60,8 +60,8 @@ public class LinearSystemTest {
             ArrayRow row3 = EquationCreation.createRowFromEquation(s, eq3);
             SolverVariable e5 = s.createErrorVariable();
             SolverVariable e6 = s.createErrorVariable();
-            e5.strength = i == 2 ? 1 : 0;
-            e6.strength = i == 2 ? 1 : 0;
+            e5.strength = (i + 2) % 3;
+            e6.strength = (i + 2) % 3;
             row3.addError(e5, e6);
 
             s.addConstraint(row1);
@@ -75,11 +75,11 @@ public class LinearSystemTest {
             System.out.println("Check at iteration " + i);
             s.displayReadableRows();
             if (i == 0) {
-                assertEquals(s.getValueFor("A"), 10.0f);
+                assertEquals(s.getValueFor("A"), 1000.0f);
             } else if (i == 1) {
                 assertEquals(s.getValueFor("A"), 100.0f);
             } else if (i == 2) {
-                assertEquals(s.getValueFor("A"), 1000.0f);
+                assertEquals(s.getValueFor("A"), 10.0f);
             }
         }
     }

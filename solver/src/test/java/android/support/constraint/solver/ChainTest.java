@@ -652,10 +652,12 @@ public class ChainTest {
         A.setBaselineDistance(7);
         C.setBaselineDistance(7);
         C.connect(ConstraintAnchor.Type.BASELINE, A, ConstraintAnchor.Type.BASELINE, 0);
-        A.setVerticalChainPacked(true);
         root.layout();
         System.out.println("b) root: " + root + " A: " + A + " B: " + B + " C: " + C);
         assertEquals(Ay, C.getTop(), 1);
+        A.setVerticalChainPacked(true);
+        root.layout();
+        System.out.println("c) root: " + root + " A: " + A + " B: " + B + " C: " + C);
     }
 
     @Test
@@ -735,12 +737,12 @@ public class ChainTest {
     }
 
     @Test
-    public void testPackNPE() {
-        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
-        ConstraintWidget A = new ConstraintWidget(100, 20);
-        ConstraintWidget B = new ConstraintWidget(100, 20);
-        ConstraintWidget C = new ConstraintWidget(100, 20);
-        ConstraintWidget D = new ConstraintWidget(100, 20);
+    public void testPackWithBaseline() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 411, 603);
+        ConstraintWidget A = new ConstraintWidget(118, 93, 88, 48);
+        ConstraintWidget B = new ConstraintWidget(206, 93, 88, 48);
+        ConstraintWidget C = new ConstraintWidget(69, 314, 88, 48);
+        ConstraintWidget D = new ConstraintWidget(83, 458, 88, 48);
         root.add(A);
         root.add(B);
         root.add(C);
@@ -750,8 +752,10 @@ public class ChainTest {
         B.setDebugSolverName(root.getSystem(), "B");
         C.setDebugSolverName(root.getSystem(), "C");
         D.setDebugSolverName(root.getSystem(), "D");
-        A.setBaselineDistance(7);
-        B.setBaselineDistance(7);
+        A.setBaselineDistance(29);
+        B.setBaselineDistance(29);
+        C.setBaselineDistance(29);
+        D.setBaselineDistance(29);
         A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 100);
         A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
         A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT);
@@ -773,5 +777,10 @@ public class ChainTest {
         System.out.println("a) root: " + root + " C: " + C + " D: " + D);
         C.getAnchor(ConstraintAnchor.Type.TOP).reset();
         root.layout();
+        C.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM);
+        root.layout();
+        System.out.println("a) root: " + root + " A: " + A + " B: " + B);
+        System.out.println("a) root: " + root + " C: " + C + " D: " + D);
+        assertEquals(C.getBottom(), D.getTop());
     }
 }

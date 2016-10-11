@@ -565,11 +565,9 @@ public class LinearSystem {
                 // - only look at equations containing the column we are trying to pivot on (duh)
                 // - select preferably an equation with strong strength over weak strength
 
-                float minWeak = Float.MAX_VALUE;
-                float minStrong = Float.MAX_VALUE;
-                int pivotRowIndex;
-                int pivotRowIndexWeak = -1;
-                int pivotRowIndexStrong = -1;
+                float min = Float.MAX_VALUE;
+                int pivotRowIndex = -1;
+                int strength = 0;
 
                 float d_j = goal.variables.get(pivotCandidate);
 
@@ -587,24 +585,13 @@ public class LinearSystem {
                         float a_j = current.variables.get(pivotCandidate);
                         if (a_j > 0) {
                             float value = d_j / a_j;
-                            if (pivotCandidate.strength > 0) {
-                                if (value < minStrong) {
-                                    minStrong = value;
-                                    pivotRowIndexStrong = i;
-                                }
-                            } else {
-                                if (value < minWeak) {
-                                    minWeak = value;
-                                    pivotRowIndexWeak = i;
-                                }
+                            if (pivotCandidate.strength >= strength && value < min) {
+                                min = value;
+                                strength = pivotCandidate.strength;
+                                pivotRowIndex = i;
                             }
                         }
                     }
-                }
-                if (pivotRowIndexStrong > -1) {
-                    pivotRowIndex = pivotRowIndexStrong;
-                } else {
-                    pivotRowIndex = pivotRowIndexWeak;
                 }
                 // At this point, we ought to have an equation to pivot on,
                 // either weak or strong.
@@ -683,17 +670,10 @@ public class LinearSystem {
                 if (DEBUG) {
                     System.out.println("iteration on infeasible system " + tries);
                 }
-                float minWeak = Float.MAX_VALUE;
-                float minStrong = Float.MAX_VALUE;
-                float minStrength = Float.MAX_VALUE;
-                int pivotRowIndexWeak = -1;
-                int pivotRowIndexStrong = -1;
-                int pivotRowIndexStrength = -1;
-                int pivotRowIndex;
-                int pivotColumnIndexStrong = -1;
-                int pivotColumnIndexWeak = -1;
-                int pivotColumnIndexStrength = -1;
-                int pivotColumnIndex;
+                float min = Float.MAX_VALUE;
+                int strength = Integer.MAX_VALUE;
+                int pivotRowIndex = -1;
+                int pivotColumnIndex = -1;
 
                 for (int i = 0; i < mNumRows; i++) {
                     ArrayRow current = mRows[i];
@@ -720,38 +700,14 @@ public class LinearSystem {
                             if (DEBUG) {
                                 System.out.println("candidate for pivot " + candidate);
                             }
-                            if (candidate.strength > 0) {
-                                if (value < minStrength) {
-                                    minStrength = value;
-                                    pivotRowIndexStrength = i;
-                                    pivotColumnIndexStrength = j;
-                                }
-                            } else if (variable.mStrength == SolverVariable.Strength.STRONG) {
-                                if (value < minStrong) {
-                                    minStrong = value;
-                                    pivotRowIndexStrong = i;
-                                    pivotColumnIndexStrong = j;
-                                }
-                            } else {
-                                if (value < minWeak) {
-                                    minWeak = value;
-                                    pivotRowIndexWeak = i;
-                                    pivotColumnIndexWeak = j;
-                                }
+                            if (candidate.strength <= strength && value < min) {
+                                min = value;
+                                pivotRowIndex = i;
+                                pivotColumnIndex = j;
+                                strength = candidate.strength;
                             }
                         }
                     }
-                }
-
-                if (pivotRowIndexWeak != -1) {
-                    pivotRowIndex = pivotRowIndexWeak;
-                    pivotColumnIndex = pivotColumnIndexWeak;
-                } else if (pivotRowIndexStrong != -1) {
-                    pivotRowIndex = pivotRowIndexStrong;
-                    pivotColumnIndex = pivotColumnIndexStrong;
-                } else {
-                    pivotRowIndex = pivotRowIndexStrength;
-                    pivotColumnIndex = pivotColumnIndexStrength;
                 }
 
                 if (pivotRowIndex != -1) {
@@ -984,14 +940,20 @@ public class LinearSystem {
      * @param c
      * @param d
      * @param m2
+     * @param strength
      */
     public void addCentering(SolverVariable a, SolverVariable b, int m1, float bias,
-                             SolverVariable c, SolverVariable d, int m2) {
+                             SolverVariable c, SolverVariable d, int m2, int strength) {
         if (DEBUG) {
-            System.out.println("-> " + a + " - " + b + " = " + d + " - " + c);
+            System.out.println("-> " + a + " - " + b + " = " + c + " - " + d);
         }
         ArrayRow row = createRow();
         row.createRowCentering(a, b, m1, bias, c, d, m2, false);
+        SolverVariable error1 = createErrorVariable();
+        SolverVariable error2 = createErrorVariable();
+        error1.strength = strength;
+        error2.strength = strength;
+        row.addError(error1, error2);
         addConstraint(row);
     }
 

@@ -226,7 +226,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         }
                         if (leftTarget != null) {
                             if (chainPacked && widget != first) {
-                                system.addEquality(left, leftTarget, margin, 1);
+                                system.addEquality(left, leftTarget, margin, 3);
                             } else {
                                 system.addGreaterThan(left, leftTarget, margin, 1);
                             }
@@ -243,7 +243,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             }
                             if (!chainPacked && leftTarget != null) {
                                 system.addCentering(left, leftTarget, leftMargin, 0.5f,
-                                        rightTarget, right, rightMargin);
+                                        rightTarget, right, rightMargin, 2);
                             }
                         }
                         previous = widget;
@@ -262,7 +262,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         SolverVariable rightTarget = previous.mRight.mTarget != null ? previous.mRight.mTarget.mSolverVariable : null;
                         if (leftTarget != null && rightTarget != null) {
                             system.addCentering(left, leftTarget, leftMargin, first.mHorizontalBiasPercent,
-                                    rightTarget, right, rightMargin);
+                                    rightTarget, right, rightMargin, 2);
                         }
                     }
                 } else {
@@ -471,7 +471,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         }
                         if (topTarget != null) {
                             if (chainPacked && widget != first) {
-                                system.addEquality(top, topTarget, margin, 1);
+                                system.addEquality(top, topTarget, margin, 3);
                             } else {
                                 system.addGreaterThan(top, topTarget, margin, 1);
                             }
@@ -488,7 +488,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             }
                             if (!chainPacked && topTarget != null) {
                                 system.addCentering(top, topTarget, topMargin, 0.5f,
-                                        bottomTarget, bottom, bottomMargin);
+                                        bottomTarget, bottom, bottomMargin, 2);
                             }
                         }
                         previous = widget;
@@ -507,7 +507,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         SolverVariable bottomTarget = previous.mBottom.mTarget != null ? previous.mBottom.mTarget.mSolverVariable : null;
                         if (topTarget != null && bottomTarget != null) {
                             system.addCentering(top, topTarget, topMargin, first.mVerticalBiasPercent,
-                                    bottomTarget, bottom, bottomMargin);
+                                    bottomTarget, bottom, bottomMargin, 2);
                         }
                     }
                 } else {
