@@ -845,6 +845,13 @@ public class ConstraintLayout extends ViewGroup {
                     widget.setHeight(measureHeight);
                     needSolverPass = true;
                 }
+                if (params.needsBaseline) {
+                    int baseline = child.getBaseline();
+                    if (baseline != -1 && baseline != widget.getBaselineDistance()) {
+                        widget.setBaselineDistance(baseline);
+                        needSolverPass = true;
+                    }
+                }
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                     childState = combineMeasuredStates(childState, child.getMeasuredState());
