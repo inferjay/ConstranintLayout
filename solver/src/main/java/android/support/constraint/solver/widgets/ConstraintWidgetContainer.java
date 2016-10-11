@@ -260,8 +260,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         SolverVariable leftTarget = first.mLeft.mTarget != null ? first.mLeft.mTarget.mSolverVariable : null;
                         SolverVariable right = previous.mRight.mSolverVariable;
                         SolverVariable rightTarget = previous.mRight.mTarget != null ? previous.mRight.mTarget.mSolverVariable : null;
-                        system.addCentering(left, leftTarget, leftMargin, first.mHorizontalBiasPercent,
-                                rightTarget, right, rightMargin);
+                        if (leftTarget != null && rightTarget != null) {
+                            system.addCentering(left, leftTarget, leftMargin, first.mHorizontalBiasPercent,
+                                    rightTarget, right, rightMargin);
+                        }
                     }
                 } else {
                     ConstraintWidget previous = null;
@@ -503,8 +505,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         SolverVariable topTarget = first.mTop.mTarget != null ? first.mTop.mTarget.mSolverVariable : null;
                         SolverVariable bottom = previous.mBottom.mSolverVariable;
                         SolverVariable bottomTarget = previous.mBottom.mTarget != null ? previous.mBottom.mTarget.mSolverVariable : null;
-                        system.addCentering(top, topTarget, topMargin, first.mVerticalBiasPercent,
-                                bottomTarget, bottom, bottomMargin);
+                        if (topTarget != null && bottomTarget != null) {
+                            system.addCentering(top, topTarget, topMargin, first.mVerticalBiasPercent,
+                                    bottomTarget, bottom, bottomMargin);
+                        }
                     }
                 } else {
                     ConstraintWidget previous = null;
