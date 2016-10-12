@@ -99,11 +99,19 @@
 
     <!-- Set a chain to be packed or not. If true and the widget is the first element of a chain, the chain will not spread,
     and the bias will affect the position of the chain elements. It will only work if all elements have a set size (i.e. not MATCH_CONSTRAINT) -->
-    <attr name="layout_constraintHorizontal_chainPacked" format="boolean"/>
+    <attr name="layout_constraintHorizontal_chainStyle" format="enum">
+        <enum name="spread" value="0"/>
+        <enum name="spread_inside" value="1"/>
+        <enum name="packed" value="2"/>
+    </attr>
 
     <!-- Set a chain to be packed or not. If true and the widget is the first element of a chain, the chain will not spread,
     and the bias will affect the position of the chain elements. It will only work if all elements have a set size (i.e. not MATCH_CONSTRAINT) -->
-    <attr name="layout_constraintVertical_chainPacked" format="boolean"/>
+    <attr name="layout_constraintVertical_chainStyle" format="enum">
+        <enum name="spread" value="0"/>
+        <enum name="spread_inside" value="1"/>
+        <enum name="packed" value="2"/>
+    </attr>
 
     <!-- Used at design time to define to position the view -->
     <attr name="layout_editor_absoluteX" format="dimension"/>
@@ -146,8 +154,8 @@
         <attr name="layout_constraintDimensionRatio" />
         <attr name="layout_constraintHorizontal_weight" />
         <attr name="layout_constraintVertical_weight" />
-        <attr name="layout_constraintHorizontal_chainPacked" />
-        <attr name="layout_constraintVertical_chainPacked" />
+        <attr name="layout_constraintHorizontal_chainStyle" />
+        <attr name="layout_constraintVertical_chainStyle" />
         <attr name="layout_editor_absoluteX" />
         <attr name="layout_editor_absoluteY"/>
     </declare-styleable>
@@ -197,8 +205,8 @@
         <attr name="layout_constraintDimensionRatio" />
         <attr name="layout_constraintHorizontal_weight" />
         <attr name="layout_constraintVertical_weight" />
-        <attr name="layout_constraintHorizontal_chainPacked" />
-        <attr name="layout_constraintVertical_chainPacked" />
+        <attr name="layout_constraintHorizontal_chainStyle" />
+        <attr name="layout_constraintVertical_chainStyle" />
         <attr name="layout_editor_absoluteX" />
         <attr name="layout_editor_absoluteY"/>
 
