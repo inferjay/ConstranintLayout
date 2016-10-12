@@ -439,7 +439,7 @@ public class ChainTest {
         B.connect(ConstraintAnchor.Type.RIGHT, C, ConstraintAnchor.Type.LEFT, marginR);
         C.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.RIGHT, marginL);
         C.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, marginR);
-        A.setHorizontalChainPacked(true);
+        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_PACKED);
         root.layout();
         System.out.println("a) A: " + A + " B: " + B + " C: " + C);
         assertEquals(A.getLeft() - root.getLeft() - marginL, root.getRight() - marginR - C.getRight(), 1);
@@ -471,7 +471,7 @@ public class ChainTest {
         B.connect(ConstraintAnchor.Type.BOTTOM, C, ConstraintAnchor.Type.TOP, marginB);
         C.connect(ConstraintAnchor.Type.TOP, B, ConstraintAnchor.Type.BOTTOM, marginT);
         C.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, marginB);
-        A.setVerticalChainPacked(true);
+        A.setVerticalChainStyle(ConstraintWidget.CHAIN_PACKED);
         root.layout();
         System.out.println("a) A: " + A + " B: " + B + " C: " + C);
         assertEquals(A.getTop() - root.getTop() - marginT, root.getBottom() - marginB - C.getBottom(), 1);
@@ -655,7 +655,7 @@ public class ChainTest {
         root.layout();
         System.out.println("b) root: " + root + " A: " + A + " B: " + B + " C: " + C);
         assertEquals(Ay, C.getTop(), 1);
-        A.setVerticalChainPacked(true);
+        A.setVerticalChainStyle(ConstraintWidget.CHAIN_PACKED);
         root.layout();
         System.out.println("c) root: " + root + " A: " + A + " B: " + B + " C: " + C);
     }
@@ -770,8 +770,8 @@ public class ChainTest {
         C.connect(ConstraintAnchor.Type.BOTTOM, D, ConstraintAnchor.Type.TOP);
         D.connect(ConstraintAnchor.Type.TOP, C, ConstraintAnchor.Type.BOTTOM);
         D.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM);
-        A.setHorizontalChainPacked(true);
-        C.setVerticalChainPacked(true);
+        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_PACKED);
+        C.setVerticalChainStyle(ConstraintWidget.CHAIN_PACKED);
         root.layout();
         System.out.println("a) root: " + root + " A: " + A + " B: " + B);
         System.out.println("a) root: " + root + " C: " + C + " D: " + D);
