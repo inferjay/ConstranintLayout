@@ -202,14 +202,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             ConstraintWidget first = mHorizontalChainsArray[i];
             int numMatchConstraints = countMatchConstraintsChainedWidgets(mHorizontalChainsArray[i], HORIZONTAL);
             // For now, only allow packed chains if all widgets are in fixed dimensions
-            boolean chainPacked = (first.mHorizontalChainStyle == CHAIN_PACKED) && (numMatchConstraints == 0);
+            boolean chainPacked = first.mHorizontalChainPacked && (numMatchConstraints == 0);
             ConstraintWidget widget = first;
             if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
                 chainPacked = true;
             }
-            if (USE_DIRECT_CHAIN_RESOLUTION && widget.mHorizontalChainFixedPosition && !chainPacked
-                    && first.mHorizontalChainStyle == CHAIN_SPREAD) {
-                // TODO: implements direct resolution for CHAIN_SPREAD_INSIDE and CHAIN_PACKED
+            if (USE_DIRECT_CHAIN_RESOLUTION && widget.mHorizontalChainFixedPosition && !chainPacked) {
                 applyDirectResolutionHorizontalChain(system, numMatchConstraints, widget);
             } else { // use the solver
                 if (numMatchConstraints == 0) {
@@ -227,8 +225,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             margin += previous.mRight.getMargin();
                         }
                         if (leftTarget != null) {
-                            if ((widget == first && widget.mHorizontalChainStyle == CHAIN_SPREAD_INSIDE)
-                                    || (chainPacked && widget != first)) {
+                            if (chainPacked && widget != first) {
                                 system.addEquality(left, leftTarget, margin, 3);
                             } else {
                                 system.addGreaterThan(left, leftTarget, margin, 1);
@@ -238,21 +235,15 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             margin = rightMargin;
                             ConstraintAnchor nextLeft = widget.mRight.mTarget.mOwner.mLeft;
                             ConstraintWidget nextLeftTarget = nextLeft.mTarget != null ? nextLeft.mTarget.mOwner : null;
-                            boolean isLast = true;
                             if (nextLeftTarget == widget) {
                                 margin += nextLeft.getMargin();
-                                isLast = false;
                             }
                             if (!chainPacked) {
-                                if (isLast && first.mHorizontalChainStyle == CHAIN_SPREAD_INSIDE) {
-                                    system.addEquality(right, rightTarget, -margin, 3);
-                                } else {
-                                    system.addLowerThan(right, rightTarget, -margin, 1);
-                                    if (leftTarget != null) {
-                                        system.addCentering(left, leftTarget, leftMargin, 0.5f,
-                                                rightTarget, right, rightMargin, 2);
-                                    }
-                                }
+                                system.addLowerThan(right, rightTarget, -margin, 1);
+                            }
+                            if (!chainPacked && leftTarget != null) {
+                                system.addCentering(left, leftTarget, leftMargin, 0.5f,
+                                        rightTarget, right, rightMargin, 2);
                             }
                         }
                         previous = widget;
@@ -456,14 +447,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             ConstraintWidget first = mVerticalChainsArray[i];
             int numMatchConstraints = countMatchConstraintsChainedWidgets(mVerticalChainsArray[i], VERTICAL);
             // For now, only allow packed chains if all widgets are in fixed dimensions
-            boolean chainPacked = (first.mVerticalChainStyle == ConstraintWidget.CHAIN_PACKED) && (numMatchConstraints == 0);
+            boolean chainPacked = first.mVerticalChainPacked && (numMatchConstraints == 0);
             if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
                 chainPacked = true;
             }
             ConstraintWidget widget = first;
-            if (USE_DIRECT_CHAIN_RESOLUTION && widget.mVerticalChainFixedPosition && !chainPacked
-                    && first.mVerticalChainStyle == CHAIN_SPREAD) {
-                // TODO: implements direct resolution for CHAIN_SPREAD_INSIDE and CHAIN_PACKED
+            if (USE_DIRECT_CHAIN_RESOLUTION && widget.mVerticalChainFixedPosition && !chainPacked) {
                 applyDirectResolutionVerticalChain(system, numMatchConstraints, widget);
             } else { // use the solver
                 if (numMatchConstraints == 0) {
@@ -481,8 +470,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             margin += previous.mBottom.getMargin();
                         }
                         if (topTarget != null) {
-                            if ((widget == first && widget.mVerticalChainStyle == CHAIN_SPREAD_INSIDE)
-                                || (chainPacked && widget != first)) {
+                            if (chainPacked && widget != first) {
                                 system.addEquality(top, topTarget, margin, 3);
                             } else {
                                 system.addGreaterThan(top, topTarget, margin, 1);
@@ -492,21 +480,15 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             margin = bottomMargin;
                             ConstraintAnchor nextTop = widget.mBottom.mTarget.mOwner.mTop;
                             ConstraintWidget nextTopTarget = nextTop.mTarget != null ? nextTop.mTarget.mOwner : null;
-                            boolean isLast = true;
                             if (nextTopTarget == widget) {
                                 margin += nextTop.getMargin();
-                                isLast = false;
                             }
                             if (!chainPacked) {
-                                if (isLast && first.mVerticalChainStyle == CHAIN_SPREAD_INSIDE) {
-                                    system.addEquality(bottom, bottomTarget, -margin, 3);
-                                } else {
-                                    system.addLowerThan(bottom, bottomTarget, -margin, 1);
-                                    if (topTarget != null) {
-                                        system.addCentering(top, topTarget, topMargin, 0.5f,
-                                                bottomTarget, bottom, bottomMargin, 2);
-                                    }
-                                }
+                                system.addLowerThan(bottom, bottomTarget, -margin, 1);
+                            }
+                            if (!chainPacked && topTarget != null) {
+                                system.addCentering(top, topTarget, topMargin, 0.5f,
+                                        bottomTarget, bottom, bottomMargin, 2);
                             }
                         }
                         previous = widget;

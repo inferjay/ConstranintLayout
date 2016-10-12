@@ -50,11 +50,6 @@ public class ConstraintWidget implements Solvable {
     public static final int INVISIBLE = 4;
     public static final int GONE = 8;
 
-    // Values of the chain styles
-    public static final int CHAIN_SPREAD = 0;
-    public static final int CHAIN_SPREAD_INSIDE = 1;
-    public static final int CHAIN_PACKED = 2;
-
     /**
      * Define how the content of a widget should align, if the widget has children
      */
@@ -152,8 +147,8 @@ public class ConstraintWidget implements Solvable {
     boolean mVisited;
 
     // Chain support
-    int mHorizontalChainStyle = CHAIN_SPREAD;
-    int mVerticalChainStyle = CHAIN_SPREAD;
+    boolean mHorizontalChainPacked = false;
+    boolean mVerticalChainPacked = false;
     boolean mHorizontalChainFixedPosition;
     boolean mVerticalChainFixedPosition;
     float mHorizontalWeight = 0;
@@ -197,8 +192,8 @@ public class ConstraintWidget implements Solvable {
         mDebugName = null;
         mType = null;
         mVisited = false;
-        mHorizontalChainStyle = CHAIN_SPREAD;
-        mVerticalChainStyle = CHAIN_SPREAD;
+        mHorizontalChainPacked = false;
+        mVerticalChainPacked = false;
         mHorizontalChainFixedPosition = false;
         mVerticalChainFixedPosition = false;
         mHorizontalWeight = 0;
@@ -1180,20 +1175,20 @@ public class ConstraintWidget implements Solvable {
      * Set the chain starting from this widget to be packed.
      * The horizontal bias will control how elements of the chain are positioned.
      *
-     * @param horizontalChainStyle
+     * @param horizontalChainPacked
      */
-    public void setHorizontalChainStyle(int horizontalChainStyle) {
-        mHorizontalChainStyle = horizontalChainStyle;
+    public void setHorizontalChainPacked(boolean horizontalChainPacked) {
+        mHorizontalChainPacked = horizontalChainPacked;
     }
 
     /**
      * Set the chain starting from this widget to be packed.
      * The vertical bias will control how elements of the chain are positioned.
      *
-     * @param verticalChainStyle
+     * @param verticalChainPacked
      */
-    public void setVerticalChainStyle(int verticalChainStyle) {
-        mVerticalChainStyle = verticalChainStyle;
+    public void setVerticalChainPacked(boolean verticalChainPacked) {
+        mVerticalChainPacked = verticalChainPacked;
     }
 
     /*-----------------------------------------------------------------------*/

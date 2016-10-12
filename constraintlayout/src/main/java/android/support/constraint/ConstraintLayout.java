@@ -331,21 +331,17 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * </ul>
  * <h5>Margins in chains</h5>
  * <p>If margins are specified on connections, they will be taken in account. In the case of spread chains, margins will be deducted from the allocated space.</p>
- * <h5>Chain Style</h5>
- * <p>When setting the attribute {@code layout_constraintHorizontal_chainStyle} or {@code layout_constraintVertical_chainStyle} on the first element of a chain,
- * The behavior of the chain will change according to the specified style (default is {@see CHAIN_SPREAD}).
- * <ul>
- *     <li>{@see CHAIN_SPREAD} -- the elements will be spread out</li>
- *     <li>{@see CHAIN_SPREAD_INSIDE} -- similar, but the endpoints of the chain will not be spread out</li>
- *     <li>{@see CHAIN_PACKED} -- the elements of the chain will be packed together. The horizontal or vertical
- *          bias attribute of the child will then affect the positioning of the packed elements</li>
- * </ul>
- * </p>
  * <h5>Spread chains</h5>
  * <p>The default behavior of a chain is to spread the elements equally in the available space. If one or more elements are using {@code MATCH_CONSTRAINT}, they
  * will use the available empty space (equally divided among themselves). The attribute {@code layout_constraintHorizontal_weight} and {@code layout_constraintVertical_weight}
  * will control how the space will be distributed among the elements using {@code MATCH_CONSTRAINT}. For exemple, on a chain containing two elements using {@code MATCH_CONSTRAINT},
  * with the first element using a weight of 2 and the second a weight of 1, the space occupied by the first element will be twice that of the second element.</p>
+ * <h5>Packed chains</h5>
+ * <p>When setting the attribute {@code layout_constraintHorizontal_chainPacked} or {@code layout_constraintVertical_chainPacked} to true on the first element of a chain,
+ * The behavior of the chain will change to instead pack the elements of the chain together (still taking in account specified margins), and by default center the chain among
+ * the two connections endpoints (e.g. the connection at the start of the chain and the connection at the end of the chain). The position of the packed chain
+ * can be further refined by using the {@code layout_constraintHorizontal_bias} or {@code layout_constraintVertical_bias} attributes of the first element of the chain.
+ * </p>
  *
  * <h4 id="VirtualHelpers"> Virtual Helper objects </h4>
  * <p>In addition to the intrinsic capabilities detailed previously, you can also use special helper objects
@@ -678,8 +674,8 @@ public class ConstraintLayout extends ViewGroup {
                 }
                 widget.setHorizontalWeight(layoutParams.horizontalWeight);
                 widget.setVerticalWeight(layoutParams.verticalWeight);
-                widget.setHorizontalChainStyle(layoutParams.horizontalChainStyle);
-                widget.setVerticalChainStyle(layoutParams.verticalChainStyle);
+                widget.setHorizontalChainPacked(layoutParams.horizontalChainPacked);
+                widget.setVerticalChainPacked(layoutParams.verticalChainPacked);
             }
         }
     }
@@ -1091,21 +1087,6 @@ public class ConstraintLayout extends ViewGroup {
         public static final int END =  7;
 
         /**
-         * Chain spread style
-         */
-        private static final int CHAIN_SPREAD = ConstraintWidget.CHAIN_SPREAD;
-
-        /**
-         * Chain spread inside style
-         */
-        private static final int CHAIN_SPREAD_INSIDE = ConstraintWidget.CHAIN_SPREAD_INSIDE;
-
-        /**
-         * Chain packed style
-         */
-        private static final int CHAIN_PACKED = ConstraintWidget.CHAIN_PACKED;
-
-        /**
          * The distance of child (guideline) to the top or left edge of its parent.
          */
         public int guideBegin = UNSET;
@@ -1248,28 +1229,20 @@ public class ConstraintLayout extends ViewGroup {
         public float verticalWeight = 0;
 
         /**
-         * If the child is the start of a horizontal chain, this attribute will drive how
-         * the elements of the chain will be positioned. The possible values are:
-         * <ul>
-         *     <li>{@see CHAIN_SPREAD} -- the elements will be spread out</li>
-         *     <li>{@see CHAIN_SPREAD_INSIDE} -- similar, but the endpoints of the chain will not be spread out</li>
-         *     <li>{@see CHAIN_PACKED} -- the elements of the chain will be packed together. The horizontal
-         *          bias attribute of the child will then affect the positioning of the packed elements</li>
-         * </ul>
+         * If the child is the start of a chain, and all elements of the chain have a fixed
+         * dimension on the horizontal axis, the elements of the chain will be grouped together,
+         * centered. The horizontal bias attribute of the child will affect the horizontal
+         * positioning of all elements of the chain.
          */
-        public int horizontalChainStyle = CHAIN_SPREAD;
+        public boolean horizontalChainPacked = false;
 
         /**
-         * If the child is the start of a vertical chain, this attribute will drive how
-         * the elements of the chain will be positioned. The possible values are:
-         * <ul>
-         *     <li>{@see CHAIN_SPREAD} -- the elements will be spread out</li>
-         *     <li>{@see CHAIN_SPREAD_INSIDE} -- similar, but the endpoints of the chain will not be spread out</li>
-         *     <li>{@see CHAIN_PACKED} -- the elements of the chain will be packed together. The vertical
-         *          bias attribute of the child will then affect the positioning of the packed elements</li>
-         * </ul>
+         * If the child is the start of a chain, and all elements of the chain have a fixed
+         * dimension on the vertical axis, the elements of the chain will be grouped together,
+         * centered. The vertical bias attribute of the child will affect the vertical
+         * positioning of all elements of the chain.
          */
-        public int verticalChainStyle = CHAIN_SPREAD;
+        public boolean verticalChainPacked = false;
 
         /**
          * The design time location of the left side of the child.
@@ -1454,10 +1427,10 @@ public class ConstraintLayout extends ViewGroup {
                     horizontalWeight = a.getFloat(attr, 0);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_weight) {
                     verticalWeight = a.getFloat(attr, 0);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_chainStyle) {
-                    horizontalChainStyle = a.getInt(attr, CHAIN_SPREAD);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_chainStyle) {
-                    verticalChainStyle = a.getInt(attr, CHAIN_SPREAD);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_chainPacked) {
+                    horizontalChainPacked = a.getBoolean(attr, false);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_chainPacked) {
+                    verticalChainPacked = a.getBoolean(attr, false);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_creator) {
                     // Skip
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_creator) {

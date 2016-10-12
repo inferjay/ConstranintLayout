@@ -200,8 +200,8 @@ public class ConstraintSet {
     private static final int VIEW_ID = 38;
     private static final int HORIZONTAL_WEIGHT = 39;
     private static final int VERTICAL_WEIGHT = 40;
-    private static final int HORIZONTAL_STYLE = 41;
-    private static final int VERTICAL_STYLE = 42;
+    private static final int HORIZONTAL_PACK = 41;
+    private static final int VERTICAL_PACK = 42;
 
 
     private static final int UNUSED = 43;
@@ -235,8 +235,8 @@ public class ConstraintSet {
         mapToConstant.append(R.styleable.ConstraintSet_layout_goneMarginEnd, GONE_END_MARGIN);
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintVertical_weight, VERTICAL_WEIGHT);
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintHorizontal_weight, HORIZONTAL_WEIGHT);
-        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintHorizontal_chainStyle, HORIZONTAL_STYLE);
-        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintVertical_chainStyle, VERTICAL_STYLE);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintHorizontal_chainPacked, HORIZONTAL_PACK);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintVertical_chainPacked, VERTICAL_PACK);
 
 
 
@@ -309,8 +309,8 @@ public class ConstraintSet {
         public int dimensionRatioSide;
         public float verticalWeight;
         public float horizontalWeight;
-        public int horizontalChainStyle;
-        public int verticalChainStyle;
+        public boolean horizontalChainPacked;
+        public boolean verticalChainPacked;
 
         private void fillFrom(int viewId, ConstraintLayout.LayoutParams param) {
             mViewId = viewId;
@@ -346,8 +346,8 @@ public class ConstraintSet {
             bottomMargin = param.bottomMargin;
             verticalWeight = param.verticalWeight;
             horizontalWeight = param.horizontalWeight;
-            verticalChainStyle = param.verticalChainStyle;
-            horizontalChainStyle = param.horizontalChainStyle;
+            verticalChainPacked = param.verticalChainPacked;
+            horizontalChainPacked = param.horizontalChainPacked;
 
             endMargin = param.getMarginEnd();
             startMargin = param.getMarginStart();
@@ -385,8 +385,8 @@ public class ConstraintSet {
             param.editorAbsoluteY = editorAbsoluteY;
             param.verticalWeight = verticalWeight;
             param.horizontalWeight = horizontalWeight;
-            param.verticalChainStyle = verticalChainStyle;
-            param.horizontalChainStyle = horizontalChainStyle;
+            param.verticalChainPacked = verticalChainPacked;
+            param.horizontalChainPacked = horizontalChainPacked;
 
             param.orientation = orientation;
             param.guidePercent = guidePercent;
@@ -531,9 +531,9 @@ public class ConstraintSet {
      * @param bottomId
      * @param chainIds widgets to use as a chain
      * @param weights can be null
-     * @param style set the style of the chain
+     * @param packed if true tightly pack group in center
      */
-    public void createVerticalChain(int topId, int bottomId, int[] chainIds, float[] weights, int style) {
+    public void createVerticalChain(int topId, int bottomId, int[] chainIds, float[] weights, boolean packed) {
         if (chainIds.length < 2) {
             throw new IllegalArgumentException("must have 2 or more widgets in a chain");
         }
@@ -543,7 +543,7 @@ public class ConstraintSet {
         if (weights != null) {
             get(chainIds[0]).verticalWeight = weights[0];
         }
-        get(chainIds[0]).verticalChainStyle = style;
+        get(chainIds[0]).verticalChainPacked = packed;
 
         connect(chainIds[0], TOP, topId, TOP, 0);
         for (int i = 1; i < chainIds.length - 1; i++) {
@@ -568,9 +568,9 @@ public class ConstraintSet {
      * @param rightId
      * @param chainIds widgets to use as a chain
      * @param weights can be null
-     * @param style set the style of the chain
+     * @param packed if true tightly pack group in center
      */
-    public void createHorizontalChain(int leftId, int rightId, int[] chainIds, float[] weights, int style) {
+    public void createHorizontalChain(int leftId, int rightId, int[] chainIds, float[] weights, boolean packed) {
         if (chainIds.length < 2) {
             throw new IllegalArgumentException("must have 2 or more widgets in a chain");
         }
@@ -580,7 +580,7 @@ public class ConstraintSet {
         if (weights != null) {
             get(chainIds[0]).verticalWeight = weights[0];
         }
-        get(chainIds[0]).horizontalChainStyle = style;
+        get(chainIds[0]).horizontalChainPacked = packed;
         connect(chainIds[0], TOP, leftId, TOP, 0);
         for (int i = 1; i < chainIds.length - 1; i++) {
             int chainId = chainIds[i];
@@ -1174,11 +1174,11 @@ public class ConstraintSet {
                 case HORIZONTAL_WEIGHT:
                     c.horizontalWeight = a.getFloat(attr, c.horizontalWeight);
                     break;
-                case VERTICAL_STYLE:
-                    c.verticalChainStyle = a.getInt(attr, c.verticalChainStyle);
+                case VERTICAL_PACK:
+                    c.verticalChainPacked = a.getBoolean(attr, c.verticalChainPacked);
                     break;
-                case HORIZONTAL_STYLE:
-                    c.horizontalChainStyle = a.getInt(attr, c.horizontalChainStyle);
+                case HORIZONTAL_PACK:
+                    c.horizontalChainPacked = a.getBoolean(attr, c.horizontalChainPacked);
                     break;
                 case VIEW_ID:
                     c.mViewId = a.getResourceId(attr, c.mViewId);
