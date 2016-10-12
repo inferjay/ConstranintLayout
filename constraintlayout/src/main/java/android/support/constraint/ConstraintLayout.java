@@ -927,8 +927,10 @@ public class ConstraintLayout extends ViewGroup {
         }
 
         mLayoutWidget.setHorizontalDimensionBehaviour(widthBehaviour);
+        mLayoutWidget.setMinWidth(getMinimumWidth());
         mLayoutWidget.setWidth(desiredWidth);
         mLayoutWidget.setVerticalDimensionBehaviour(heightBehaviour);
+        mLayoutWidget.setMinHeight(getMinimumHeight());
         mLayoutWidget.setHeight(desiredHeight);
     }
 

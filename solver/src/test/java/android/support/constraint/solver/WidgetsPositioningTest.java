@@ -607,6 +607,59 @@ public class WidgetsPositioningTest {
             }
         });
     }
+
+    @Test
+    public void testMinSize() {
+        final ConstraintWidgetContainer root = new ConstraintWidgetContainer(600, 400);
+        final ConstraintWidget A = new ConstraintWidget(100, 20);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        A.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        A.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM);
+        root.add(A);
+        root.layout();
+        System.out.println("a) root: " + root + " A: " + A);
+        assertEquals(root.getWidth(), 600);
+        assertEquals(root.getHeight(), 400);
+        assertEquals(A.getWidth(), 100);
+        assertEquals(A.getHeight(), 20);
+        assertEquals(A.getLeft() - root.getLeft(), root.getRight() - A.getRight());
+        assertEquals(A.getTop() - root.getTop(), root.getBottom() - A.getBottom());
+        root.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
+        root.layout();
+        System.out.println("b) root: " + root + " A: " + A);
+        assertEquals(root.getHeight(), A.getHeight());
+        assertEquals(A.getWidth(), 100);
+        assertEquals(A.getHeight(), 20);
+        assertEquals(A.getLeft() - root.getLeft(), root.getRight() - A.getRight());
+        assertEquals(A.getTop() - root.getTop(), root.getBottom() - A.getBottom());
+        root.setMinHeight(200);
+        root.layout();
+        System.out.println("c) root: " + root + " A: " + A);
+        assertEquals(root.getHeight(), 200);
+        assertEquals(A.getWidth(), 100);
+        assertEquals(A.getHeight(), 20);
+        assertEquals(A.getLeft() - root.getLeft(), root.getRight() - A.getRight());
+        assertEquals(A.getTop() - root.getTop(), root.getBottom() - A.getBottom());
+        root.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
+        root.layout();
+        System.out.println("d) root: " + root + " A: " + A);
+        assertEquals(root.getWidth(), A.getWidth());
+        assertEquals(root.getHeight(), 200);
+        assertEquals(A.getWidth(), 100);
+        assertEquals(A.getHeight(), 20);
+        assertEquals(A.getLeft() - root.getLeft(), root.getRight() - A.getRight());
+        assertEquals(A.getTop() - root.getTop(), root.getBottom() - A.getBottom());
+        root.setMinWidth(300);
+        root.layout();
+        System.out.println("e) root: " + root + " A: " + A);
+        assertEquals(root.getWidth(), 300);
+        assertEquals(root.getHeight(), 200);
+        assertEquals(A.getWidth(), 100);
+        assertEquals(A.getHeight(), 20);
+        assertEquals(A.getLeft() - root.getLeft(), root.getRight() - A.getRight());
+        assertEquals(A.getTop() - root.getTop(), root.getBottom() - A.getBottom());
+    }
      /*
      * Insert the widgets in all permutations
      * (to test that the insert order

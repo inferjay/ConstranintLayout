@@ -1888,9 +1888,8 @@ public class ConstraintWidget implements Solvable {
                 && (this instanceof ConstraintWidgetContainer);
         if (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group)) {
             applyConstraints(system, wrapContent, horizontalDimensionFixed, mLeft, mRight,
-                    mX, mX + width, width, mHorizontalBiasPercent,
-                    useRatio && dimensionRatioSide == HORIZONTAL,
-                    inHorizontalChain);
+                    mX, mX + width, width, mMinWidth, mHorizontalBiasPercent,
+                    useRatio && dimensionRatioSide == HORIZONTAL, inHorizontalChain);
         }
 
         // Vertical Resolution
@@ -1911,15 +1910,14 @@ public class ConstraintWidget implements Solvable {
             }
             if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && end.mGroup == group)) {
                 applyConstraints(system, wrapContent, verticalDimensionFixed,
-                        mTop, end, mY, mY + height, height, mVerticalBiasPercent,
+                        mTop, end, mY, mY + height, height, mMinHeight, mVerticalBiasPercent,
                         useRatio && dimensionRatioSide == VERTICAL, inVerticalChain);
             }
         } else {
             if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && mBottom.mGroup == group)) {
                 applyConstraints(system, wrapContent, verticalDimensionFixed,
-                        mTop, mBottom, mY, mY + height, height, mVerticalBiasPercent,
-                        useRatio && dimensionRatioSide == VERTICAL,
-                        inVerticalChain);
+                        mTop, mBottom, mY, mY + height, height, mMinHeight, mVerticalBiasPercent,
+                        useRatio && dimensionRatioSide == VERTICAL, inVerticalChain);
             }
         }
 
@@ -1937,7 +1935,6 @@ public class ConstraintWidget implements Solvable {
 
     /**
      * Apply the constraints in the system depending on the existing anchors, in one dimension
-     *
      * @param system          the linear system we are adding constraints to
      * @param wrapContent     is the widget trying to wrap its content (i.e. its size will depends on its content)
      * @param dimensionFixed is the widget dimensions fixed or can they change
@@ -1946,11 +1943,12 @@ public class ConstraintWidget implements Solvable {
      * @param beginPosition   the original position of the anchor
      * @param endPosition     the original position of the anchor
      * @param dimension       the dimension
+     * @param minDimension
      */
     private void applyConstraints(LinearSystem system, boolean wrapContent, boolean dimensionFixed,
-            ConstraintAnchor beginAnchor, ConstraintAnchor endAnchor,
-            int beginPosition, int endPosition, int dimension, float bias,
-            boolean useRatio, boolean inChain) {
+                                  ConstraintAnchor beginAnchor, ConstraintAnchor endAnchor,
+                                  int beginPosition, int endPosition, int dimension, int minDimension,
+                                  float bias, boolean useRatio, boolean inChain) {
         SolverVariable begin = system.createObjectVariable(beginAnchor);
         SolverVariable end = system.createObjectVariable(endAnchor);
         SolverVariable beginTarget = system.createObjectVariable(beginAnchor.getTarget());
@@ -1965,7 +1963,7 @@ public class ConstraintWidget implements Solvable {
             system.addConstraint(system.createRow().createRowEquals(begin, beginPosition));
             if (!useRatio) {
                 if (wrapContent) {
-                    system.addConstraint(EquationCreation.createRowEquals(system, end, begin, 0, true));
+                    system.addConstraint(EquationCreation.createRowEquals(system, end, begin, minDimension, true));
                 } else {
                     if (dimensionFixed) {
                         system.addConstraint(
@@ -1978,7 +1976,7 @@ public class ConstraintWidget implements Solvable {
         } else if (beginTarget != null && endTarget == null) {
             system.addConstraint(system.createRow().createRowEquals(begin, beginTarget, beginAnchorMargin));
             if (wrapContent) {
-                system.addConstraint(EquationCreation.createRowEquals(system, end, begin, 0, true));
+                system.addConstraint(EquationCreation.createRowEquals(system, end, begin, minDimension, true));
             } else if (!useRatio) {
                 if (dimensionFixed) {
                     system.addConstraint(system.createRow().createRowEquals(end, begin, dimension));
@@ -1989,7 +1987,7 @@ public class ConstraintWidget implements Solvable {
         } else if (beginTarget == null && endTarget != null) {
             system.addConstraint(system.createRow().createRowEquals(end, endTarget, -1 * endAnchorMargin));
             if (wrapContent) {
-                system.addConstraint(EquationCreation.createRowEquals(system, end, begin, 0, true));
+                system.addConstraint(EquationCreation.createRowEquals(system, end, begin, minDimension, true));
             } else if (!useRatio) {
                 if (dimensionFixed) {
                     system.addConstraint(system.createRow().createRowEquals(end, begin, dimension));
@@ -2001,7 +1999,7 @@ public class ConstraintWidget implements Solvable {
             if (dimensionFixed) {
                 if (wrapContent) {
                     system.addConstraint(
-                            EquationCreation.createRowEquals(system, end, begin, 0, true));
+                            EquationCreation.createRowEquals(system, end, begin, minDimension, true));
                 } else {
                     system.addConstraint(system.createRow().createRowEquals(end, begin, dimension));
                 }
