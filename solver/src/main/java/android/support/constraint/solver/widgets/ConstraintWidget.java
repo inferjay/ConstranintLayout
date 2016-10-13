@@ -1187,6 +1187,16 @@ public class ConstraintWidget implements Solvable {
     }
 
     /**
+     * get the chain starting from this widget to be packed.
+     * The horizontal bias will control how elements of the chain are positioned.
+     *
+     * @return Horizontal Chain Style
+     */
+    public int getHorizontalChainStyle( ) {
+        return mHorizontalChainStyle;
+    }
+
+    /**
      * Set the chain starting from this widget to be packed.
      * The vertical bias will control how elements of the chain are positioned.
      *
@@ -1194,6 +1204,16 @@ public class ConstraintWidget implements Solvable {
      */
     public void setVerticalChainStyle(int verticalChainStyle) {
         mVerticalChainStyle = verticalChainStyle;
+    }
+
+    /**
+     * Set the chain starting from this widget to be packed.
+     * The vertical bias will control how elements of the chain are positioned.
+     *
+     * @return
+     */
+    public int getVerticalChainStyle( ) {
+          return mVerticalChainStyle;
     }
 
     /*-----------------------------------------------------------------------*/
@@ -1716,6 +1736,30 @@ public class ConstraintWidget implements Solvable {
         if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
             setHeight(mWrapHeight);
         }
+    }
+
+    /**
+     * test if you are in a Horizontal chain
+     * @return
+     */
+    public boolean isInHorizontalChain() {
+      if ((mLeft.mTarget != null && mLeft.mTarget.mTarget == mLeft)
+          || (mRight.mTarget != null && mRight.mTarget.mTarget == mRight)) {
+         return true;
+      }
+      return false;
+    }
+
+   /**
+     * test if you are in a vertical chain
+     * @return
+     */
+    public boolean isInVerticalChain() {
+      if ((mTop.mTarget != null && mTop.mTarget.mTarget == mTop)
+        || (mBottom.mTarget != null && mBottom.mTarget.mTarget == mBottom)) {
+        return true;
+      }
+      return false;
     }
 
     /*-----------------------------------------------------------------------*/

@@ -287,7 +287,7 @@ public class ConstraintSet {
 
         public float horizontalBias = 0.5f;
         public float verticalBias = 0.5f;
-        public float dimensionRatio = 0f;
+        public String dimensionRatio = null;
 
         public int editorAbsoluteX = UNSET;
         public int editorAbsoluteY = UNSET;
@@ -306,7 +306,6 @@ public class ConstraintSet {
         public int goneBottomMargin;
         public int goneEndMargin;
         public int goneStartMargin;
-        public int dimensionRatioSide;
         public float verticalWeight;
         public float horizontalWeight;
         public int horizontalChainStyle;
@@ -331,7 +330,6 @@ public class ConstraintSet {
             horizontalBias = param.horizontalBias;
             verticalBias = param.verticalBias;
             dimensionRatio = param.dimensionRatio;
-            dimensionRatioSide = param.dimensionRatioSide;
             editorAbsoluteX = param.editorAbsoluteX;
             editorAbsoluteY = param.editorAbsoluteY;
             orientation = param.orientation;
@@ -380,7 +378,6 @@ public class ConstraintSet {
             param.verticalBias = verticalBias;
 
             param.dimensionRatio = dimensionRatio;
-            param.dimensionRatioSide = dimensionRatioSide;
             param.editorAbsoluteX = editorAbsoluteX;
             param.editorAbsoluteY = editorAbsoluteY;
             param.verticalWeight = verticalWeight;
@@ -848,12 +845,10 @@ public class ConstraintSet {
      * For Example a HD screen is 16 by 9 = 16/(float)9 = 1.777f.
      *
      * @param viewId ID of view to constrain
-     * @param side   the side to constrain see {@link #HORIZONTAL} , {@link #VERTICAL}
      * @param ratio  The ratio of the width to height (width / height)
      */
-    public void setDimensionRatio(int viewId, int side, float ratio) {
+    public void setDimensionRatio(int viewId, String ratio) {
         get(viewId).dimensionRatio = ratio;
-        get(viewId).dimensionRatioSide = side;
     }
 
     /**
@@ -1184,55 +1179,7 @@ public class ConstraintSet {
                     c.mViewId = a.getResourceId(attr, c.mViewId);
                     break;
                 case DIMENSION_RATIO:
-                    String ratio = a.getString(attr);
-                    c.dimensionRatio = 0;
-                    c.dimensionRatioSide = Constraint.UNSET;
-                    if (ratio != null) {
-                        int len = ratio.length();
-                        int commaIndex = ratio.indexOf(',');
-                        if (commaIndex > 0 && commaIndex < len - 1) {
-                            String dimension = ratio.substring(0, commaIndex);
-                            if (dimension.equalsIgnoreCase("W")) {
-                                c.dimensionRatioSide = HORIZONTAL;
-                            } else if (dimension.equalsIgnoreCase("H")) {
-                                c.dimensionRatioSide = VERTICAL;
-                            }
-                            commaIndex++;
-                        } else {
-                            commaIndex = 0;
-                        }
-                        int colonIndex = ratio.indexOf(':');
-                        if (colonIndex >= 0 && colonIndex < len - 1) {
-                            String nominator = ratio.substring(commaIndex, colonIndex);
-                            String denominator = ratio.substring(colonIndex + 1);
-                            if (nominator.length() > 0 && denominator.length() > 0) {
-                                try {
-                                    float nominatorValue = Float.parseFloat(nominator);
-                                    float denominatorValue = Float.parseFloat(denominator);
-                                    if (nominatorValue > 0 && denominatorValue > 0) {
-                                        if (c.dimensionRatioSide == VERTICAL) {
-                                            c.dimensionRatio = Math.abs(denominatorValue / nominatorValue);
-                                        } else {
-                                            c.dimensionRatio = Math.abs(nominatorValue / denominatorValue);
-                                        }
-                                    }
-                                } catch (NumberFormatException e) {
-                                    // Ignore
-                                }
-                            }
-                        } else {
-                            String r = ratio.substring(commaIndex);
-                            if (r.length() > 0) {
-                                try {
-                                    c.dimensionRatio = Float.parseFloat(r);
-                                } catch (NumberFormatException e) {
-                                    // Ignore
-                                }
-                            }
-                        }
-                    }
-                    //noinspection UnusedLabel
-                    UNUSED:
+                    c.dimensionRatio = a.getString(attr);
                     break;
                 default:
                     Log.w(TAG, "Unknown attribute 0x" + Integer.toHexString(attr) + "   " + mapToConstant.get(attr));

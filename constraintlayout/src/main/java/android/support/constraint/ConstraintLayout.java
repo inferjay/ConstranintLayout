@@ -673,8 +673,8 @@ public class ConstraintLayout extends ViewGroup {
                     widget.setOrigin(layoutParams.editorAbsoluteX, layoutParams.editorAbsoluteY);
                 }
 
-                if (layoutParams.dimensionRatio > 0) {
-                    widget.setDimensionRatio(layoutParams.dimensionRatio, layoutParams.dimensionRatioSide);
+                if (layoutParams.dimensionRatio != null) {
+                    widget.setDimensionRatio(layoutParams.dimensionRatio);
                 }
                 widget.setHorizontalWeight(layoutParams.horizontalWeight);
                 widget.setVerticalWeight(layoutParams.verticalWeight);
@@ -1226,14 +1226,19 @@ public class ConstraintLayout extends ViewGroup {
         public float verticalBias = 0.5f;
 
         /**
+         * The ratio information.
+         */
+        public String dimensionRatio = null;
+
+        /**
          * The ratio between the width and height of the child.
          */
-        public float dimensionRatio = 0;
+        float dimensionRatioValue = 0;
 
         /**
          * The child's side to constrain using dimensRatio.
          */
-        public int dimensionRatioSide = VERTICAL;
+        int dimensionRatioSide = VERTICAL;
 
         /**
          * The child's weight that we can use to distribute the available horizontal space
@@ -1403,14 +1408,14 @@ public class ConstraintLayout extends ViewGroup {
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_bias) {
                     verticalBias = a.getFloat(attr, verticalBias);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintDimensionRatio) {
-                    String ratio = a.getString(attr);
-                    dimensionRatio = 0;
+                    dimensionRatio = a.getString(attr);
+                    dimensionRatioValue = Float.NaN;
                     dimensionRatioSide = UNSET;
-                    if (ratio != null) {
-                        int len = ratio.length();
-                        int commaIndex = ratio.indexOf(',');
+                    if (dimensionRatio != null) {
+                        int len = dimensionRatio.length();
+                        int commaIndex = dimensionRatio.indexOf(',');
                         if (commaIndex > 0 && commaIndex < len - 1) {
-                            String dimension = ratio.substring(0, commaIndex);
+                            String dimension = dimensionRatio.substring(0, commaIndex);
                             if (dimension.equalsIgnoreCase("W")) {
                                 dimensionRatioSide = HORIZONTAL;
                             } else if (dimension.equalsIgnoreCase("H")) {
@@ -1420,19 +1425,19 @@ public class ConstraintLayout extends ViewGroup {
                         } else {
                             commaIndex = 0;
                         }
-                        int colonIndex = ratio.indexOf(':');
+                        int colonIndex = dimensionRatio.indexOf(':');
                         if (colonIndex >= 0 && colonIndex < len - 1) {
-                            String nominator = ratio.substring(commaIndex, colonIndex);
-                            String denominator = ratio.substring(colonIndex + 1);
+                            String nominator = dimensionRatio.substring(commaIndex, colonIndex);
+                            String denominator = dimensionRatio.substring(colonIndex + 1);
                             if (nominator.length() > 0 && denominator.length() > 0) {
                                 try {
                                     float nominatorValue = Float.parseFloat(nominator);
                                     float denominatorValue = Float.parseFloat(denominator);
                                     if (nominatorValue > 0 && denominatorValue > 0) {
                                         if (dimensionRatioSide == VERTICAL) {
-                                            dimensionRatio = Math.abs(denominatorValue / nominatorValue);
+                                            dimensionRatioValue = Math.abs(denominatorValue / nominatorValue);
                                         } else {
-                                            dimensionRatio = Math.abs(nominatorValue / denominatorValue);
+                                            dimensionRatioValue = Math.abs(nominatorValue / denominatorValue);
                                         }
                                     }
                                 } catch (NumberFormatException e) {
@@ -1440,10 +1445,10 @@ public class ConstraintLayout extends ViewGroup {
                                 }
                             }
                         } else {
-                            String r = ratio.substring(commaIndex);
+                            String r = dimensionRatio.substring(commaIndex);
                             if (r.length() > 0) {
                                 try {
-                                    dimensionRatio = Float.parseFloat(r);
+                                    dimensionRatioValue = Float.parseFloat(r);
                                 } catch (NumberFormatException e) {
                                     // Ignore
                                 }

@@ -417,9 +417,16 @@ public class ConstraintAnchor {
      */
     @Override
     public String toString() {
-        return mOwner.getDebugName() + ":" + mType.toString() + (mTarget != null ? " connected to " + mTarget : "");
+        HashSet<ConstraintAnchor> visited = new HashSet<ConstraintAnchor>();
+        return mOwner.getDebugName() + ":" + mType.toString() + (mTarget != null ? " connected to " + mTarget.toString(visited) : "");
     }
 
+    private String toString(HashSet<ConstraintAnchor> visited) {
+        if (visited.add(this)) {
+            return mOwner.getDebugName() + ":" + mType.toString() + (mTarget != null ? " connected to " + mTarget.toString(visited) : "");
+        }
+        return "<-";
+    }
     /**
      * Return the priority level of the anchor (higher is stronger).
      * This method is used to pick an anchor among many when there's a choice (we use it
