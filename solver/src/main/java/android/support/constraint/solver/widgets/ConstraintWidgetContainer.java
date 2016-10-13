@@ -1371,7 +1371,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             // find the left most widget that doesn't have a dual connection (i.e., start of chain)
             while (widget.mLeft.mTarget != null
                     && widget.mLeft.mTarget.mOwner.mRight.mTarget != null
-                    && widget.mLeft.mTarget.mOwner.mRight.mTarget.mOwner == widget) {
+                    && widget.mLeft.mTarget.mOwner.mRight.mTarget.mOwner == widget
+                    && widget.mLeft.mTarget.mOwner != widget) {
                 widget = widget.mLeft.mTarget.mOwner;
             }
             addHorizontalChain(widget);
@@ -1379,7 +1380,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             // find the top most widget that doesn't have a dual connection (i.e., start of chain)
             while (widget.mTop.mTarget != null
                     && widget.mTop.mTarget.mOwner.mBottom.mTarget != null
-                    && widget.mTop.mTarget.mOwner.mBottom.mTarget.mOwner == widget) {
+                    && widget.mTop.mTarget.mOwner.mBottom.mTarget.mOwner == widget
+                    && widget.mTop.mTarget.mOwner != widget) {
                 widget = widget.mTop.mTarget.mOwner;
             }
             addVerticalChain(widget);
@@ -1450,6 +1452,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 if (widget.mRight.mTarget.mOwner.mLeft.mTarget.mOwner != widget) {
                     break;
                 }
+                if (widget.mRight.mTarget.mOwner == widget) {
+                  break;
+                }
                 widget = widget.mRight.mTarget.mOwner;
             }
             if (widget.mRight.mTarget != null && widget.mRight.mTarget.mOwner != this) {
@@ -1476,6 +1481,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 }
                 if (widget.mBottom.mTarget.mOwner.mTop.mTarget.mOwner != widget) {
                     break;
+                }
+                if (widget.mBottom.mTarget.mOwner == widget) {
+                  break;
                 }
                 widget = widget.mBottom.mTarget.mOwner;
             }
