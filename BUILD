@@ -5,6 +5,6 @@ iml_module(
     name = "sherpa-solver",
     srcs = ["solver/src/main/java"],
     javacopts = ["-extra_checks:off"],
-    visibility = ["//visibility:public"],
     tags = ["managed"],
+    visibility = ["//visibility:public"],
 )
