@@ -1750,6 +1750,37 @@ public class ConstraintWidget implements Solvable {
       return false;
     }
 
+  /**
+   * if in a horizontal chain return the left most widget in the chain.
+   *
+   * @return left most widget in chain or null
+   */
+  public ConstraintWidget getHorizontalChainControlWidget() {
+        ConstraintWidget found = null;
+        if (isInHorizontalChain()) {
+            ConstraintWidget tmp = this;
+
+            while (found == null && tmp != null) {
+                ConstraintAnchor anchor = tmp.getAnchor(ConstraintAnchor.Type.LEFT);
+                ConstraintAnchor targetOwner = (anchor == null) ? null : anchor.getTarget();
+                ConstraintWidget target = (targetOwner == null) ? null : targetOwner.getOwner();
+                if (target == getParent()) {
+                    found = tmp;
+                    break;
+                }
+                ConstraintAnchor targetAnchor = (target == null) ? null : target.getAnchor(ConstraintAnchor.Type.RIGHT).getTarget();
+                if (targetAnchor != null && targetAnchor.getOwner() != tmp) {
+                    found = tmp;
+                }
+                else {
+                    tmp = target;
+                }
+            }
+        }
+        return found;
+    }
+
+
    /**
      * test if you are in a vertical chain
      * @return
@@ -1760,6 +1791,34 @@ public class ConstraintWidget implements Solvable {
         return true;
       }
       return false;
+    }
+
+  /**
+   * return the top most widget in the control chain
+   * @return
+   */
+  public ConstraintWidget getVerticalChainControlWidget() {
+        ConstraintWidget found = null;
+        if (isInVerticalChain()) {
+            ConstraintWidget tmp = this;
+            while (found == null && tmp != null) {
+                ConstraintAnchor anchor = tmp.getAnchor(ConstraintAnchor.Type.TOP);
+                ConstraintAnchor targetOwner = (anchor==null)?null:anchor.getTarget();
+                ConstraintWidget target = (targetOwner==null)?null:targetOwner.getOwner();
+                if (target == getParent()) {
+                    found = tmp;
+                    break;
+                }
+                ConstraintAnchor targetAnchor = (target == null)?null: target.getAnchor(ConstraintAnchor.Type.BOTTOM).getTarget();
+                if (targetAnchor != null && targetAnchor.getOwner() != tmp) {
+                    found = tmp;
+                } else {
+                    tmp = target;
+                }
+            }
+
+        }
+        return found;
     }
 
     /*-----------------------------------------------------------------------*/
