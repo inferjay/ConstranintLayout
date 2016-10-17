@@ -1371,7 +1371,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             // find the left most widget that doesn't have a dual connection (i.e., start of chain)
             while (widget.mLeft.mTarget != null
                     && widget.mLeft.mTarget.mOwner.mRight.mTarget != null
-                    && widget.mLeft.mTarget.mOwner.mRight.mTarget.mOwner == widget
+                    && widget.mLeft.mTarget.mOwner.mRight.mTarget == widget.mLeft
                     && widget.mLeft.mTarget.mOwner != widget) {
                 widget = widget.mLeft.mTarget.mOwner;
             }
@@ -1380,7 +1380,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             // find the top most widget that doesn't have a dual connection (i.e., start of chain)
             while (widget.mTop.mTarget != null
                     && widget.mTop.mTarget.mOwner.mBottom.mTarget != null
-                    && widget.mTop.mTarget.mOwner.mBottom.mTarget.mOwner == widget
+                   && widget.mTop.mTarget.mOwner.mBottom.mTarget == widget.mTop
                     && widget.mTop.mTarget.mOwner != widget) {
                 widget = widget.mTop.mTarget.mOwner;
             }
@@ -1439,6 +1439,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             if (widget.mLeft.mTarget != null && widget.mLeft.mTarget.mOwner != this) {
                 fixedPosition = false;
             }
+
             while (widget.mRight.mTarget != null) {
                 if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                     if (count + 1 >= mMatchConstraintsChainedWidgets.length) {
@@ -1455,7 +1456,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 if (widget.mRight.mTarget.mOwner == widget) {
                   break;
                 }
-                widget = widget.mRight.mTarget.mOwner;
+
+                widget =  widget.mRight.mTarget.mOwner;
             }
             if (widget.mRight.mTarget != null && widget.mRight.mTarget.mOwner != this) {
                 fixedPosition = false;
