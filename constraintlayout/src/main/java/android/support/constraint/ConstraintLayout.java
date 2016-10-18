@@ -769,11 +769,6 @@ public class ConstraintLayout extends ViewGroup {
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (mDirtyHierarchy) {
-            mDirtyHierarchy = false;
-            updateHierarchy();
-        }
-
         int paddingLeft = getPaddingLeft();
         int paddingTop = getPaddingTop();
 
@@ -788,6 +783,10 @@ public class ConstraintLayout extends ViewGroup {
             mLayoutWidget.setX(paddingLeft);
             mLayoutWidget.setY(paddingTop);
             setSelfDimensionBehaviour(widthMeasureSpec, heightMeasureSpec);
+        }
+        if (mDirtyHierarchy) {
+            mDirtyHierarchy = false;
+            updateHierarchy();
         }
         previousPaddingLeft = paddingLeft;
         previousPaddingTop = paddingTop;
@@ -832,21 +831,22 @@ public class ConstraintLayout extends ViewGroup {
 
                 ConstraintLayout.LayoutParams params = (LayoutParams) child.getLayoutParams();
                 if (params.width == WRAP_CONTENT) {
-                    widthSpec = MeasureSpec.makeMeasureSpec(widget.getWidth(), MeasureSpec.UNSPECIFIED);
+                    widthSpec = getChildMeasureSpec(widthMeasureSpec, widthPadding, params.width);
                 } else if (params.height == WRAP_CONTENT) {
-                    heightSpec = MeasureSpec.makeMeasureSpec(widget.getHeight(), MeasureSpec.UNSPECIFIED);
+                    heightSpec = getChildMeasureSpec(heightMeasureSpec, heightPadding, params.height);
                 }
 
                 // we need to re-measure the child...
                 child.measure(widthSpec, heightSpec);
 
                 int measuredWidth = child.getMeasuredWidth();
-                int measureHeight = child.getMeasuredHeight();
+                int measuredHeight = child.getMeasuredHeight();
                 if (measuredWidth != widget.getWidth()) {
                     widget.setWidth(measuredWidth);
                     needSolverPass = true;
-                } else if (measureHeight != widget.getHeight()) {
-                    widget.setHeight(measureHeight);
+                }
+                if (measuredHeight != widget.getHeight()) {
+                    widget.setHeight(measuredHeight);
                     needSolverPass = true;
                 }
                 if (params.needsBaseline) {
