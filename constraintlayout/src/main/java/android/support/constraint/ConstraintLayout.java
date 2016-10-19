@@ -1330,6 +1330,61 @@ public class ConstraintLayout extends ViewGroup {
 
         ConstraintWidget widget = new ConstraintWidget();
 
+        /**
+         * Create a LayoutParams base on an existing layout Params
+         *
+         * @param source the Layout Params to be copied
+         */
+        public LayoutParams(LayoutParams source) {
+            super(source);
+            this.guideBegin = source.guideBegin;
+            this.guideEnd = source.guideEnd;
+            this.guidePercent = source.guidePercent;
+            this.leftToLeft = source.leftToLeft;
+            this.leftToRight = source.leftToRight;
+            this.rightToLeft = source.rightToLeft;
+            this.rightToRight = source.rightToRight;
+            this.topToTop = source.topToTop;
+            this.topToBottom = source.topToBottom;
+            this.bottomToTop = source.bottomToTop;
+            this.bottomToBottom = source.bottomToBottom;
+            this.baselineToBaseline = source.baselineToBaseline;
+            this.startToEnd = source.startToEnd;
+            this.startToStart = source.startToStart;
+            this.endToStart = source.endToStart;
+            this.endToEnd = source.endToEnd;
+            this.goneLeftMargin = source.goneLeftMargin;
+            this.goneTopMargin = source.goneTopMargin;
+            this.goneRightMargin = source.goneRightMargin;
+            this.goneBottomMargin = source.goneBottomMargin;
+            this.goneStartMargin = source.goneStartMargin;
+            this.goneEndMargin = source.goneEndMargin;
+            this.horizontalBias = source.horizontalBias;
+            this.verticalBias = source.verticalBias;
+            this.dimensionRatio = source.dimensionRatio;
+            this.dimensionRatioValue = source.dimensionRatioValue;
+            this.dimensionRatioSide = source.dimensionRatioSide;
+            this.horizontalWeight = source.horizontalWeight;
+            this.verticalWeight = source.verticalWeight;
+            this.horizontalChainStyle = source.horizontalChainStyle;
+            this.verticalChainStyle = source.verticalChainStyle;
+            this.editorAbsoluteX = source.editorAbsoluteX;
+            this.editorAbsoluteY = source.editorAbsoluteY;
+            this.orientation = source.orientation;
+            this.horizontalDimensionFixed = source.horizontalDimensionFixed;
+            this.verticalDimensionFixed = source.verticalDimensionFixed;
+            this.needsBaseline = source.needsBaseline;
+            this.isGuideline = source.isGuideline;
+            this.resolvedLeftToLeft = source.resolvedLeftToLeft;
+            this.resolvedLeftToRight = source.resolvedLeftToRight;
+            this.resolvedRightToLeft = source.resolvedRightToLeft;
+            this.resolvedRightToRight = source.resolvedRightToRight;
+            this.resolveGoneLeftMargin = source.resolveGoneLeftMargin;
+            this.resolveGoneRightMargin = source.resolveGoneRightMargin;
+            this.resolvedHorizontalBias = source.resolvedHorizontalBias;
+            this.widget = source.widget;
+        }
+
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
 
