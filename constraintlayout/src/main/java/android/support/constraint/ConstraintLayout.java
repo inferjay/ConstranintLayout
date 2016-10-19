@@ -245,7 +245,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *       <img width="350px" src="resources/images/visibility-behavior.png">
  *           <br><b><i>Fig. 6 - Visibility Behavior</i></b>
  *     </div>
- *     <p>This specific behavior allows to build layout where you can temporarily mark widgets as being {@code GONE},
+ *     <p>This specific behavior allows to build layouts where you can temporarily mark widgets as being {@code GONE},
  *     without breaking the layout (Fig. 6), which can be particularly useful when doing simple layout animations.
  *     <p><b>Note: </b>The margin used will be the margin that B had defined when connecting to A (see Fig. 6 for an example).
  *     In some cases, this might not be the margin you want (e.g. A had a 100dp margin to the side of its container,
@@ -256,6 +256,16 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * </p>
  *
  * <h4 id="DimensionConstraints"> Dimensions constraints </h4>
+ * <h5>Minimum dimensions on ConstraintLayout</h5>
+ * <p>
+ *     You can define minimum sizes for the {@code ConstraintLayout} itself:
+ *     <ul>
+ *         <li>{@code android:minWidth} set the minimum width for the layout</li>
+ *         <li>{@code android:minHeight} set the minimum height for the layout</li>
+ *     </ul>
+ *     Those minimum dimensions will be used by {@code ConstraintLayout} when its dimensions are set to {@code WRAP_CONTENT}.
+ * </p>
+ * <h5>Widgets dimension constraints</h5>
  * <p>
  *     The dimension of the widgets can be specified by setting the {@code android:layout_width} and
  *     {@code android:layout_height} attributes in 3 different ways:
@@ -271,6 +281,10 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *     The first two works in a similar fashion as other layouts. The last one will resize the widget in such a way as
  *     matching the constraints that are set (see Fig. 7, (a) is wrap_content, (b) is 0dp). If margins are set, they will be taken in account
  *     in the computation (Fig. 7, (c) with 0dp).
+ *     <p>
+ *         <b>Important: </b> {@code MATCH_PARENT} is not supported for widgets contained in a {@code ConstraintLayout}, though similar behavior can
+ *         be defined by using {@code MATCH_CONSTRAINT} with the corresponding left/right or top/bottom constraints being set to {@code "parent"}.
+ *     </p>
  * </p>
  * <h5>Ratio</h5>
  * <p>
@@ -314,7 +328,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * </p>
  *
  * <h4 id="Chains">Chains</h4>
- * <p>Chains provide group-like behavior in a single axis (horizontally or vertically).</p>
+ * <p>Chains provide group-like behavior in a single axis (horizontally or vertically). The other axis can be constrained independently.</p>
  * <h5>Creating a chain</h5>
  * <p>
  *     A set of widgets are considered a chain if they a linked together via a bi-directional connection (see Fig. 8, showing a minimal chain, with two widgets).
@@ -324,24 +338,33 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *           <br><b><i>Fig. 8 - Chain</i></b>
  *     </div>
  * <p>
- * Once a chain is created, there are two possibilities:
- * <ul>
- *     <li>Spread the elements in the available space</li>
- *     <li>A chain can also be "packed", in that case the elements are grouped together</li>
- * </ul>
+ * <h5>Chain heads</h5>
+ * <p>
+ *     Chains are controlled by attributes set on the first element of the chain (the "head" of the chain):
+ * </p>
+ *     <p><div align="center" >
+ *       <img width="400px" src="resources/images/chains-head.png">
+ *           <br><b><i>Fig. 9 - Chain Head</i></b>
+ *     </div>
+ *     <p>The head is the left-most widget for horizontal chains, and the top-most widget for vertical chains.</p>
  * <h5>Margins in chains</h5>
  * <p>If margins are specified on connections, they will be taken in account. In the case of spread chains, margins will be deducted from the allocated space.</p>
  * <h5>Chain Style</h5>
  * <p>When setting the attribute {@code layout_constraintHorizontal_chainStyle} or {@code layout_constraintVertical_chainStyle} on the first element of a chain,
- * The behavior of the chain will change according to the specified style (default is {@see CHAIN_SPREAD}).
+ * the behavior of the chain will change according to the specified style (default is {@code CHAIN_SPREAD}).
  * <ul>
- *     <li>{@see CHAIN_SPREAD} -- the elements will be spread out</li>
- *     <li>{@see CHAIN_SPREAD_INSIDE} -- similar, but the endpoints of the chain will not be spread out</li>
- *     <li>{@see CHAIN_PACKED} -- the elements of the chain will be packed together. The horizontal or vertical
+ *     <li>{@code CHAIN_SPREAD} -- the elements will be spread out (default style)</li>
+ *     <li>Weighted chain -- in {@code CHAIN_SPREAD} mode, if some widgets are set to {@code MATCH_CONSTRAINT}, they will split the available space</li>
+ *     <li>{@code CHAIN_SPREAD_INSIDE} -- similar, but the endpoints of the chain will not be spread out</li>
+ *     <li>{@code CHAIN_PACKED} -- the elements of the chain will be packed together. The horizontal or vertical
  *          bias attribute of the child will then affect the positioning of the packed elements</li>
  * </ul>
+ *     <p><div align="center" >
+ *       <img width="600px" src="resources/images/chains-styles.png">
+ *           <br><b><i>Fig. 10 - Chains Styles</i></b>
+ *     </div>
  * </p>
- * <h5>Spread chains</h5>
+ * <h5>Weighted chains</h5>
  * <p>The default behavior of a chain is to spread the elements equally in the available space. If one or more elements are using {@code MATCH_CONSTRAINT}, they
  * will use the available empty space (equally divided among themselves). The attribute {@code layout_constraintHorizontal_weight} and {@code layout_constraintVertical_weight}
  * will control how the space will be distributed among the elements using {@code MATCH_CONSTRAINT}. For exemple, on a chain containing two elements using {@code MATCH_CONSTRAINT},
