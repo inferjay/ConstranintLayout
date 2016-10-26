@@ -954,10 +954,12 @@ public class ConstraintLayout extends ViewGroup {
         }
 
         mLayoutWidget.setHorizontalDimensionBehaviour(widthBehaviour);
-        mLayoutWidget.setMinWidth(getMinimumWidth());
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {  //  for API Level 16+
+            mLayoutWidget.setMinWidth(getMinimumWidth());
+            mLayoutWidget.setMinHeight(getMinimumHeight());
+        }
         mLayoutWidget.setWidth(desiredWidth);
         mLayoutWidget.setVerticalDimensionBehaviour(heightBehaviour);
-        mLayoutWidget.setMinHeight(getMinimumHeight());
         mLayoutWidget.setHeight(desiredHeight);
     }
 
