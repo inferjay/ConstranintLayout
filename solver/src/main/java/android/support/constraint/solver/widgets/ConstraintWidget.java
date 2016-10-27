@@ -39,6 +39,8 @@ import java.util.ArrayList;
  */
 public class ConstraintWidget implements Solvable {
     private static final boolean AUTOTAG_CENTER = false;
+    protected static final int SOLVER = 1;
+    protected static final int DIRECT = 2;
 
     private Animator mAnimator = new Animator(this);
 
@@ -54,6 +56,10 @@ public class ConstraintWidget implements Solvable {
     public static final int CHAIN_SPREAD = 0;
     public static final int CHAIN_SPREAD_INSIDE = 1;
     public static final int CHAIN_PACKED = 2;
+
+    // Support for direct resolution
+    public int mHorizontalResolution = UNKNOWN;
+    public int mVerticalResolution = UNKNOWN;
 
     /**
      * Define how the content of a widget should align, if the widget has children
@@ -111,7 +117,7 @@ public class ConstraintWidget implements Solvable {
     protected int mOffsetY = 0;
 
     // Baseline distance relative to the top of the widget
-    private int mBaselineDistance = 0;
+    int mBaselineDistance = 0;
 
     // Minimum sizes for the widget
     private int mMinWidth;
@@ -149,7 +155,7 @@ public class ConstraintWidget implements Solvable {
     int mDistToLeft;
     int mDistToRight;
     int mDistToBottom;
-    boolean mVisited;
+    boolean mWrapVisited;
 
     // Chain support
     int mHorizontalChainStyle = CHAIN_SPREAD;
@@ -196,13 +202,15 @@ public class ConstraintWidget implements Solvable {
         mVisibility = VISIBLE;
         mDebugName = null;
         mType = null;
-        mVisited = false;
+        mWrapVisited = false;
         mHorizontalChainStyle = CHAIN_SPREAD;
         mVerticalChainStyle = CHAIN_SPREAD;
         mHorizontalChainFixedPosition = false;
         mVerticalChainFixedPosition = false;
         mHorizontalWeight = 0;
         mVerticalWeight = 0;
+        mHorizontalResolution = UNKNOWN;
+        mVerticalResolution = UNKNOWN;
     }
 
     /*-----------------------------------------------------------------------*/
@@ -1099,12 +1107,12 @@ public class ConstraintWidget implements Solvable {
         int w = right - left;
         int h = bottom - top;
         // correct dimensional instability caused by rounding errors
-        if (getHorizontalDimensionBehaviour() == DimensionBehaviour.FIXED) {
+        if (mHorizontalDimensionBehaviour == DimensionBehaviour.FIXED) {
             if (w < getWidth()) {
                 w = getWidth();
             }
         }
-        if (getVerticalDimensionBehaviour() == DimensionBehaviour.FIXED) {
+        if (mVerticalDimensionBehaviour == DimensionBehaviour.FIXED) {
             if (h < getHeight()) {
                 h = getHeight();
             }
@@ -1112,6 +1120,34 @@ public class ConstraintWidget implements Solvable {
         mX = left;
         mY = top;
         setDimension(w, h);
+    }
+
+    /**
+     * Set the positions for the horizontal dimension only
+     *
+     * @param left
+     * @param right
+     */
+    public void setHorizontalDimension(int left, int right) {
+        mX = left;
+        mWidth = right - left;
+        if (mWidth < mMinWidth) {
+            mWidth = mMinWidth;
+        }
+    }
+
+    /**
+     * Set the positions for the vertical dimension only
+     *
+     * @param top
+     * @param bottom
+     */
+    public void setVerticalDimension(int top, int bottom) {
+        mY = top;
+        mHeight = bottom - top;
+        if (mHeight < mMinHeight) {
+            mHeight = mMinHeight;
+        }
     }
 
     /**
@@ -1994,12 +2030,16 @@ public class ConstraintWidget implements Solvable {
         // Horizontal resolution
         boolean wrapContent = (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)
                 && (this instanceof ConstraintWidgetContainer);
-        if (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group)) {
+        if (mHorizontalResolution != DIRECT
+          && (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group))) {
             applyConstraints(system, wrapContent, horizontalDimensionFixed, mLeft, mRight,
                     mX, mX + width, width, mMinWidth, mHorizontalBiasPercent,
                     useRatio && dimensionRatioSide == HORIZONTAL, inHorizontalChain);
         }
 
+        if (mVerticalResolution == DIRECT) {
+            return;
+        }
         // Vertical Resolution
         wrapContent = (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)
                 && (this instanceof ConstraintWidgetContainer);

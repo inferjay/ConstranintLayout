@@ -179,7 +179,9 @@ public class SolverVariable {
         } else {
             for (int i = 0; i < mClientEquationsCount; i++) {
                 if (mClientEquations[i] == equation) {
-                    System.arraycopy(mClientEquations, i + 1, mClientEquations, i, (mClientEquationsCount - i - 1));
+                    for (int j = 0; j < (mClientEquationsCount - i - 1); j++) {
+                        mClientEquations[i + j] = mClientEquations[i + j + 1];
+                    }
                     mClientEquationsCount--;
                     return;
                 }

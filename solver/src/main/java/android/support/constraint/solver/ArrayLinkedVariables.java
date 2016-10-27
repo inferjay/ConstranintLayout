@@ -544,15 +544,18 @@ public class ArrayLinkedVariables {
                 remove(variable);
                 // now, let's add all values from the definition
                 ArrayRow definition = rows[variable.definitionId];
-                ArrayLinkedVariables definitionVariables = ((ArrayLinkedVariables) (Object) definition.variables);
-                int definitionCurrent = definitionVariables.mHead;
-                int definitionCounter = 0;
-                while (definitionCurrent != NONE && definitionCounter < definitionVariables.currentSize) {
-                    SolverVariable definitionVariable = mCache.mIndexedVariables[
-                            definitionVariables.mArrayIndices[definitionCurrent]];
-                    float definitionValue = definitionVariables.mArrayValues[definitionCurrent];
-                    add(definitionVariable, definitionValue * value);
-                    definitionCurrent = definitionVariables.mArrayNextIndices[definitionCurrent]; definitionCounter++;
+                if (!definition.isSimpleDefinition) {
+                    ArrayLinkedVariables definitionVariables = ((ArrayLinkedVariables) (Object) definition.variables);
+                    int definitionCurrent = definitionVariables.mHead;
+                    int definitionCounter = 0;
+                    while (definitionCurrent != NONE && definitionCounter < definitionVariables.currentSize) {
+                        SolverVariable definitionVariable = mCache.mIndexedVariables[
+                                definitionVariables.mArrayIndices[definitionCurrent]];
+                        float definitionValue = definitionVariables.mArrayValues[definitionCurrent];
+                        add(definitionVariable, definitionValue * value);
+                        definitionCurrent = definitionVariables.mArrayNextIndices[definitionCurrent];
+                        definitionCounter++;
+                    }
                 }
                 self.constantValue += definition.constantValue * value;
                 definition.variable.removeClientEquation(self);

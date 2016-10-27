@@ -54,6 +54,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     private ConstraintWidget[] mVerticalChainsArray = new ConstraintWidget[4];
     private ConstraintWidget[] mHorizontalChainsArray = new ConstraintWidget[4];
 
+    // If true, we will resolve as much as we can directly, bypassing the solver
+    private boolean mDirectResolution = true;
+
     /*-----------------------------------------------------------------------*/
     // Construction
     /*-----------------------------------------------------------------------*/
@@ -84,6 +87,14 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      */
     public ConstraintWidgetContainer(int width, int height) {
         super(width, height);
+    }
+
+    /**
+     * Resolves the system directly when possible
+     * @param value true to resolve directly, false to use the generic solver
+     */
+    public void setDirectResolution(boolean value) {
+        mDirectResolution = value;
     }
 
     /**
@@ -159,9 +170,97 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      *
      * @param system the solver we want to add the widget to
      */
-    public void addChildrenToSolver(LinearSystem system, int group) {
+    public boolean addChildrenToSolver(LinearSystem system, int group) {
         addToSolver(system, group);
         final int count = mChildren.size();
+        boolean done = false;
+        int dv = 0;
+        int dh = 0;
+        int n = 0;
+        if (mDirectResolution) {
+            for (int i = 0; i < count; i++) {
+                ConstraintWidget widget = mChildren.get(i);
+                // TODO: we should try to cache some of that
+                widget.mHorizontalResolution = UNKNOWN;
+                widget.mVerticalResolution = UNKNOWN;
+                if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
+                  || widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
+                    widget.mHorizontalResolution = SOLVER;
+                    widget.mVerticalResolution = SOLVER;
+                }
+            }
+            while (!done) {
+                int prev = dv;
+                int preh = dh;
+                dv = 0;
+                dh = 0;
+                n++;
+                if (DEBUG) {
+                    System.out.println("Iteration " + n);
+                }
+                for (int i = 0; i < count; i++) {
+                    ConstraintWidget widget = mChildren.get(i);
+                    if (widget.mHorizontalResolution == UNKNOWN) {
+                        if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
+                            widget.mHorizontalResolution = SOLVER;
+                        }
+                        else {
+                            checkHorizontalSimpleDependency(system, widget);
+                        }
+                    }
+                    if (widget.mVerticalResolution == UNKNOWN) {
+                        if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
+                            widget.mVerticalResolution = SOLVER;
+                        }
+                        else {
+                            checkVerticalSimpleDependency(system, widget);
+                        }
+                    }
+                    if (DEBUG) {
+                        System.out.println("[" + i + "]" + widget
+                                  + " H: "+ widget.mHorizontalResolution
+                                  + " V: " + widget.mVerticalResolution);
+                    }
+                    if (widget.mVerticalResolution == UNKNOWN) {
+                        dv++;
+                    }
+                    if (widget.mHorizontalResolution == UNKNOWN) {
+                        dh++;
+                    }
+                }
+                if (DEBUG) {
+                    System.out.println("dv: " + dv + " dh: " + dh);
+                }
+                if (dv == 0 && dh == 0) {
+                    done = true;
+                } else if (prev == dv && preh == dh) {
+                    done = true;
+                    if (DEBUG) {
+                        System.out.println("Escape clause");
+                    }
+                }
+            }
+        }
+
+        int sh = 0;
+        int sv = 0;
+        for (int i = 0; i < count; i++) {
+            ConstraintWidget widget = mChildren.get(i);
+            if (!mDirectResolution) {
+                widget.mHorizontalResolution = SOLVER;
+                widget.mVerticalResolution = SOLVER;
+            } else {
+                if (widget.mHorizontalResolution == SOLVER) {
+                    sh++;
+                }
+                if (widget.mVerticalResolution == SOLVER) {
+                    sv++;
+                }
+            }
+        }
+        if (mDirectResolution && sh == 0 && sv == 0) {
+            return false;
+        }
         for (int i = 0; i < count; i++) {
             ConstraintWidget widget = mChildren.get(i);
             if (widget instanceof ConstraintWidgetContainer) {
@@ -190,6 +289,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         if (mVerticalChainsSize > 0) {
             applyVerticalChain(system);
         }
+        return true;
     }
 
     /**
@@ -770,6 +870,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         }
 
         // Now let's solve our system as usual
+        boolean needsSolving = true;
         try {
             mSystem.reset();
             if (DEBUG) {
@@ -781,12 +882,18 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                     }
                 }
             }
-            addChildrenToSolver(mSystem, ConstraintAnchor.ANY_GROUP);
-            mSystem.minimize();
+            needsSolving = addChildrenToSolver(mSystem, ConstraintAnchor.ANY_GROUP);
+            if (needsSolving) {
+                mSystem.minimize();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        updateChildrenFromSolver(mSystem, ConstraintAnchor.ANY_GROUP);
+        if (needsSolving) {
+            updateChildrenFromSolver(mSystem, ConstraintAnchor.ANY_GROUP);
+        } else {
+            updateFromSolver(mSystem, ConstraintAnchor.ANY_GROUP);
+        }
 
         if (mParent != null && USE_SNAPSHOT) {
             int width = getWidth();
@@ -862,21 +969,21 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         ConstraintWidget leftWidget = null;
         ConstraintWidget rightWidget = null;
 
-        widget.mVisited = true;
+        widget.mWrapVisited = true;
         if (!(widget.mRight.isConnected() || (widget.mLeft.isConnected()))) {
             distToLeft += widget.getX();
         } else {
             if (widget.mRight.mTarget != null) {
                 rightWidget = widget.mRight.mTarget.getOwner();
                 distToRight += widget.mRight.getMargin();
-                if (!rightWidget.isRoot() && !rightWidget.mVisited) {
+                if (!rightWidget.isRoot() && !rightWidget.mWrapVisited) {
                     findWrapRecursive(rightWidget);
                 }
             }
             if (widget.mLeft.isConnected()) {
                 leftWidget = widget.mLeft.mTarget.getOwner();
                 distToLeft += widget.mLeft.getMargin();
-                if (!leftWidget.isRoot() && !leftWidget.mVisited) {
+                if (!leftWidget.isRoot() && !leftWidget.mWrapVisited) {
                     findWrapRecursive(leftWidget);
                 }
             }
@@ -910,7 +1017,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         } else {
             if (widget.mBaseline.isConnected()) {
                 ConstraintWidget baseLineWidget = widget.mBaseline.mTarget.getOwner();
-                if (!baseLineWidget.mVisited) {
+                if (!baseLineWidget.mWrapVisited) {
                     findWrapRecursive(baseLineWidget);
                 }
                 if (baseLineWidget.mDistToBottom > distToBottom) {
@@ -927,7 +1034,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             if (widget.mTop.isConnected()) {
                 topWidget = widget.mTop.mTarget.getOwner();
                 distToTop += widget.mTop.getMargin();
-                if (!topWidget.isRoot() && !topWidget.mVisited) {
+                if (!topWidget.isRoot() && !topWidget.mWrapVisited) {
                     findWrapRecursive(topWidget);
                 }
             }
@@ -936,7 +1043,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             if (widget.mBottom.isConnected()) {
                 bottomWidget = widget.mBottom.mTarget.getOwner();
                 distToBottom += widget.mBottom.getMargin();
-                if (!bottomWidget.isRoot() && !bottomWidget.mVisited) {
+                if (!bottomWidget.isRoot() && !bottomWidget.mWrapVisited) {
                     findWrapRecursive(bottomWidget);
                 }
             }
@@ -964,6 +1071,203 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     }
 
     /**
+     * Resolve simple dependency directly, without using the equation solver
+     * @param system
+     * @param widget
+     */
+    private void checkHorizontalSimpleDependency(LinearSystem system, ConstraintWidget widget) {
+        if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
+            widget.mHorizontalResolution = SOLVER;
+            return;
+        }
+        if (widget.mLeft.mTarget != null && widget.mRight.mTarget != null) {
+            if (widget.mLeft.mTarget.mOwner == this && widget.mRight.mTarget.mOwner == this) {
+                int left = 0;
+                int right = 0;
+                int leftMargin = widget.mLeft.getMargin();
+                int rightMargin = widget.mRight.getMargin();
+                if (mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
+                    left = leftMargin;
+                    right = getWidth() - rightMargin;
+                } else {
+                    int w = widget.getWidth();
+                    int dim = getWidth() - leftMargin - rightMargin - w;
+                    left = leftMargin + (int) (dim * widget.mHorizontalBiasPercent);
+                    right = left + widget.getWidth();
+                }
+                widget.mLeft.mSolverVariable = system.createObjectVariable(widget.mLeft);
+                widget.mRight.mSolverVariable = system.createObjectVariable(widget.mRight);
+                system.addEquality(widget.mLeft.mSolverVariable, left);
+                system.addEquality(widget.mRight.mSolverVariable, right);
+                widget.mHorizontalResolution = DIRECT;
+                widget.setHorizontalDimension(left, right);
+                return;
+            }
+            widget.mHorizontalResolution = SOLVER;
+            return;
+        }
+        if (widget.mLeft.mTarget != null
+                && widget.mLeft.mTarget.mOwner == this) {
+            int left = widget.mLeft.getMargin();
+            int right = left + widget.getWidth();
+            widget.mLeft.mSolverVariable = system.createObjectVariable(widget.mLeft);
+            widget.mRight.mSolverVariable = system.createObjectVariable(widget.mRight);
+            system.addEquality(widget.mLeft.mSolverVariable, left);
+            system.addEquality(widget.mRight.mSolverVariable, right);
+            widget.mHorizontalResolution = ConstraintWidget.DIRECT;
+            widget.setHorizontalDimension(left, right);
+        } else
+        if (widget.mRight.mTarget != null
+                && widget.mRight.mTarget.mOwner == this) {
+            widget.mLeft.mSolverVariable = system.createObjectVariable(widget.mLeft);
+            widget.mRight.mSolverVariable = system.createObjectVariable(widget.mRight);
+            int right = getWidth() - widget.mRight.getMargin();
+            int left = right - widget.getWidth();
+            system.addEquality(widget.mLeft.mSolverVariable, left);
+            system.addEquality(widget.mRight.mSolverVariable, right);
+            widget.mHorizontalResolution = ConstraintWidget.DIRECT;
+            widget.setHorizontalDimension(left, right);
+        } else
+        if (widget.mLeft.mTarget != null && widget.mLeft.mTarget.mOwner.mVerticalResolution == DIRECT) {
+            SolverVariable target = widget.mLeft.mTarget.mSolverVariable;
+            widget.mLeft.mSolverVariable = system.createObjectVariable(widget.mLeft);
+            widget.mRight.mSolverVariable = system.createObjectVariable(widget.mRight);
+            int left = (int) (target.computedValue + widget.mLeft.getMargin());
+            int right = left + widget.getWidth();
+            system.addEquality(widget.mLeft.mSolverVariable, left);
+            system.addEquality(widget.mRight.mSolverVariable, right);
+            widget.mHorizontalResolution = ConstraintWidget.DIRECT;
+            widget.setHorizontalDimension(left, right);
+        } else
+        if (widget.mRight.mTarget != null && widget.mRight.mTarget.mOwner.mVerticalResolution == DIRECT) {
+            SolverVariable target = widget.mRight.mTarget.mSolverVariable;
+            widget.mLeft.mSolverVariable = system.createObjectVariable(widget.mLeft);
+            widget.mRight.mSolverVariable = system.createObjectVariable(widget.mRight);
+            int right = (int) (target.computedValue - widget.mRight.getMargin());
+            int left = right - widget.getWidth();
+            system.addEquality(widget.mLeft.mSolverVariable, left);
+            system.addEquality(widget.mRight.mSolverVariable, right);
+            widget.mHorizontalResolution = ConstraintWidget.DIRECT;
+            widget.setHorizontalDimension(left, right);
+        }
+    }
+
+    /**
+     * Resolve simple dependency directly, without using the equation solver
+     * @param system
+     * @param widget
+     */
+    private void checkVerticalSimpleDependency(LinearSystem system, ConstraintWidget widget) {
+        if (widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
+            widget.mVerticalResolution = SOLVER;
+            return;
+        }
+        if (widget.mTop.mTarget != null && widget.mBottom.mTarget != null) {
+            if (widget.mTop.mTarget.mOwner == this && widget.mBottom.mTarget.mOwner == this) {
+                int top = 0;
+                int bottom = 0;
+                int topMargin = widget.mTop.getMargin();
+                int bottomMargin = widget.mBottom.getMargin();
+                if (mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
+                    top = topMargin;
+                    bottom = top + widget.getHeight();
+                } else {
+                    int h = widget.getHeight();
+                    int dim = getHeight() - topMargin - bottomMargin - h;
+                    top = topMargin + (int)(dim * widget.mVerticalBiasPercent);
+                    bottom = top + widget.getHeight();
+                }
+                widget.mTop.mSolverVariable = system.createObjectVariable(widget.mTop);
+                widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
+                system.addEquality(widget.mTop.mSolverVariable, top);
+                system.addEquality(widget.mBottom.mSolverVariable, bottom);
+                if (widget.mBaselineDistance > 0) {
+                    widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
+                    system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
+                }
+                widget.mVerticalResolution = DIRECT;
+                widget.setVerticalDimension(top, bottom);
+                return;
+            }
+            widget.mVerticalResolution = SOLVER;
+            return;
+        }
+        if (widget.mTop.mTarget != null
+                && widget.mTop.mTarget.mOwner == this) {
+            int top = widget.mTop.getMargin();
+            int bottom = top + widget.getHeight();
+            widget.mTop.mSolverVariable = system.createObjectVariable(widget.mTop);
+            widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
+            system.addEquality(widget.mTop.mSolverVariable, top);
+            system.addEquality(widget.mBottom.mSolverVariable, bottom);
+            if (widget.mBaselineDistance > 0) {
+                widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
+                system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
+            }
+            widget.mVerticalResolution = ConstraintWidget.DIRECT;
+            widget.setVerticalDimension(top, bottom);
+        } else
+        if (widget.mBottom.mTarget != null
+                && widget.mBottom.mTarget.mOwner == this) {
+            widget.mTop.mSolverVariable = system.createObjectVariable(widget.mTop);
+            widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
+            int bottom = getHeight() - widget.mBottom.getMargin();
+            int top = bottom - widget.getHeight();
+            system.addEquality(widget.mTop.mSolverVariable, top);
+            system.addEquality(widget.mBottom.mSolverVariable, bottom);
+            if (widget.mBaselineDistance > 0) {
+                widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
+                system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
+            }
+            widget.mVerticalResolution = ConstraintWidget.DIRECT;
+            widget.setVerticalDimension(top, bottom);
+        } else
+        if (widget.mTop.mTarget != null && widget.mTop.mTarget.mOwner.mVerticalResolution == DIRECT) {
+            SolverVariable target = widget.mTop.mTarget.mSolverVariable;
+            widget.mTop.mSolverVariable = system.createObjectVariable(widget.mTop);
+            widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
+            int top = (int) (target.computedValue + widget.mTop.getMargin());
+            int bottom = top + widget.getHeight();
+            system.addEquality(widget.mTop.mSolverVariable, top);
+            system.addEquality(widget.mBottom.mSolverVariable, bottom);
+            if (widget.mBaselineDistance > 0) {
+                widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
+                system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
+            }
+            widget.mVerticalResolution = ConstraintWidget.DIRECT;
+            widget.setVerticalDimension(top, bottom);
+        } else
+        if (widget.mBottom.mTarget != null && widget.mBottom.mTarget.mOwner.mVerticalResolution == DIRECT) {
+            SolverVariable target = widget.mBottom.mTarget.mSolverVariable;
+            widget.mTop.mSolverVariable = system.createObjectVariable(widget.mTop);
+            widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
+            int bottom = (int) (target.computedValue - widget.mBottom.getMargin());
+            int top = bottom - widget.getHeight();
+            system.addEquality(widget.mTop.mSolverVariable, top);
+            system.addEquality(widget.mBottom.mSolverVariable, bottom);
+            if (widget.mBaselineDistance > 0) {
+                widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
+                system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
+            }
+            widget.mVerticalResolution = ConstraintWidget.DIRECT;
+            widget.setVerticalDimension(top, bottom);
+        } else
+        if (widget.mBaseline.mTarget != null && widget.mBaseline.mTarget.mOwner.mVerticalResolution == DIRECT) {
+            SolverVariable target = widget.mBaseline.mTarget.mSolverVariable;
+            widget.mTop.mSolverVariable = system.createObjectVariable(widget.mTop);
+            widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
+            int top = (int) (target.computedValue - widget.mBaselineDistance);
+            int bottom = top + widget.getHeight();
+            system.addEquality(widget.mTop.mSolverVariable, top);
+            system.addEquality(widget.mBottom.mSolverVariable, bottom);
+            widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
+            system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
+            widget.mVerticalResolution = ConstraintWidget.DIRECT;
+            widget.setVerticalDimension(top, bottom);
+        }
+    }
+
+    /**
      * calculates the wrapContent size.
      *
      * @param children
@@ -982,7 +1286,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             if (widget.isRoot()) {
                 continue;
             }
-            if (!widget.mVisited) {
+            if (!widget.mWrapVisited) {
                 findWrapRecursive(widget);
             }
             int connectWidth = widget.mDistToLeft + widget.mDistToRight - widget.getWrapWidth();
@@ -1000,7 +1304,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         mWrapHeight = Math.max(max, maxConnectHeight);
 
         for (int j = 0; j < size; j++) {
-            children.get(j).mVisited = false;
+            children.get(j).mWrapVisited = false;
         }
     }
 

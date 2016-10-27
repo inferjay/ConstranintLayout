@@ -825,7 +825,9 @@ public class ConstraintLayout extends ViewGroup {
         }
 
         // let's solve the linear system.
-        solveLinearSystem(); // first pass
+        if (getChildCount() > 0) {
+            solveLinearSystem(); // first pass
+        }
         int childState = 0;
 
         // let's update the size dependent widgets if any...
@@ -966,7 +968,7 @@ public class ConstraintLayout extends ViewGroup {
     /**
      * Solve the linear system
      */
-    private void solveLinearSystem() {
+    protected void solveLinearSystem() {
         Animator.setAnimationEnabled(false);
         if (SIMPLE_LAYOUT) {
             mLayoutWidget.layout();
@@ -1014,6 +1016,14 @@ public class ConstraintLayout extends ViewGroup {
             }
             child.layout(l, t, r, b);
         }
+    }
+
+    /**
+     * @hide
+     * @param value
+     */
+    protected void setDebugDirectResolution(boolean value) {
+        mLayoutWidget.setDirectResolution(value);
     }
 
     /**

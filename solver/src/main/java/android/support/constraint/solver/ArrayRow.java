@@ -142,6 +142,7 @@ public class ArrayRow {
 
     public ArrayRow createRowDefinition(SolverVariable variable, int value) {
         this.variable = variable;
+        variable.computedValue = value;
         constantValue = value;
         isSimpleDefinition = true;
         return this;

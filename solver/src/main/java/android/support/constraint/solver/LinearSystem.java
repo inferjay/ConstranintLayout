@@ -497,7 +497,9 @@ public class LinearSystem {
                     current = current.next;
                 }
             } else {
-                System.arraycopy(row.variable.mClientEquations, 0, clients, 0, count);
+                for (int i = 0; i < count; i++) {
+                  clients[i] = row.variable.mClientEquations[i];
+                }
             }
             for (int i = 0; i < count; i++) {
                 ArrayRow client = clients[i];
