@@ -346,9 +346,11 @@ public class ConstraintSet {
             horizontalWeight = param.horizontalWeight;
             verticalChainStyle = param.verticalChainStyle;
             horizontalChainStyle = param.horizontalChainStyle;
-
-            endMargin = param.getMarginEnd();
-            startMargin = param.getMarginStart();
+            int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+            if (currentapiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                endMargin = param.getMarginEnd();
+                startMargin = param.getMarginStart();
+            }
         }
 
         public void applyTo(ConstraintLayout.LayoutParams param) {

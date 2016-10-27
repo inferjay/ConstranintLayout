@@ -67,7 +67,7 @@ public class Guideline extends View {
     }
 
     public Guideline(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
+        super(context, attrs, defStyleAttr);
         super.setVisibility(View.GONE);
     }
 

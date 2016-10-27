@@ -1567,6 +1567,7 @@ public class ConstraintLayout extends ViewGroup {
                     Log.w(TAG, "Unknown attribute 0x" + Integer.toHexString(attr));
                 }
             }
+            a.recycle();
             validate();
         }
 
