@@ -26,6 +26,82 @@ import static org.testng.Assert.assertEquals;
 public class OptimizationsTest {
 
     @Test
+    public void testDependency() {
+        testDependency(false);
+        testDependency(true);
+    }
+
+    public void testDependency(boolean directResolution) {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        root.setDirectResolution(directResolution);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        A.setDebugName("A");
+        B.setDebugName("B");
+        C.setDebugName("C");
+        root.add(A);
+        root.add(B);
+        root.add(C);
+        A.setBaselineDistance(8);
+        B.setBaselineDistance(8);
+        C.setBaselineDistance(8);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 10);
+        A.connect(ConstraintAnchor.Type.BASELINE, B, ConstraintAnchor.Type.BASELINE);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT, 16);
+        B.connect(ConstraintAnchor.Type.BASELINE, C, ConstraintAnchor.Type.BASELINE);
+        C.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.RIGHT, 48);
+        C.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 32);
+        root.layout();
+        System.out.println("res: " + directResolution + " root: " + root
+            + " A: " + A + " B: " + B + " C: " + C);
+        assertEquals(A.getLeft(), 10);
+        assertEquals(A.getTop(), 32);
+        assertEquals(B.getLeft(), 126);
+        assertEquals(B.getTop(), 32);
+        assertEquals(C.getLeft(), 274);
+        assertEquals(C.getTop(), 32);
+    }
+
+    @Test
+    public void testDependency2() {
+        testDependency2(false);
+        testDependency2(true);
+    }
+
+    public void testDependency2(boolean directResolution) {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        root.setDirectResolution(directResolution);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        A.setDebugName("A");
+        B.setDebugName("B");
+        C.setDebugName("C");
+        root.add(A);
+        root.add(B);
+        root.add(C);
+        A.setBaselineDistance(8);
+        B.setBaselineDistance(8);
+        C.setBaselineDistance(8);
+        A.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM);
+        A.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.LEFT);
+        B.connect(ConstraintAnchor.Type.BOTTOM, A, ConstraintAnchor.Type.TOP);
+        B.connect(ConstraintAnchor.Type.LEFT, C, ConstraintAnchor.Type.LEFT);
+        C.connect(ConstraintAnchor.Type.BOTTOM, B, ConstraintAnchor.Type.TOP);
+        C.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 12);
+        root.layout();
+        System.out.println("res: " + directResolution + " root: " + root
+                + " A: " + A + " B: " + B + " C: " + C);
+        assertEquals(A.getLeft(), 12);
+        assertEquals(A.getTop(), 580);
+        assertEquals(B.getLeft(), 12);
+        assertEquals(B.getTop(), 560);
+        assertEquals(C.getLeft(), 12);
+        assertEquals(C.getTop(), 540);
+    }
+
+    @Test
     public void testFullLayout() {
         testFullLayout(false);
         testFullLayout(true);

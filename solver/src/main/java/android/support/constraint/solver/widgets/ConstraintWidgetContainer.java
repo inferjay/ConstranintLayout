@@ -1128,7 +1128,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             widget.mHorizontalResolution = ConstraintWidget.DIRECT;
             widget.setHorizontalDimension(left, right);
         } else
-        if (widget.mLeft.mTarget != null && widget.mLeft.mTarget.mOwner.mVerticalResolution == DIRECT) {
+        if (widget.mLeft.mTarget != null && widget.mLeft.mTarget.mOwner.mHorizontalResolution == DIRECT) {
             SolverVariable target = widget.mLeft.mTarget.mSolverVariable;
             widget.mLeft.mSolverVariable = system.createObjectVariable(widget.mLeft);
             widget.mRight.mSolverVariable = system.createObjectVariable(widget.mRight);
@@ -1139,7 +1139,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             widget.mHorizontalResolution = ConstraintWidget.DIRECT;
             widget.setHorizontalDimension(left, right);
         } else
-        if (widget.mRight.mTarget != null && widget.mRight.mTarget.mOwner.mVerticalResolution == DIRECT) {
+        if (widget.mRight.mTarget != null && widget.mRight.mTarget.mOwner.mHorizontalResolution == DIRECT) {
             SolverVariable target = widget.mRight.mTarget.mSolverVariable;
             widget.mLeft.mSolverVariable = system.createObjectVariable(widget.mLeft);
             widget.mRight.mSolverVariable = system.createObjectVariable(widget.mRight);
