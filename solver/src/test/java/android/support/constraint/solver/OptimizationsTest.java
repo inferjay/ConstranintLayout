@@ -102,6 +102,46 @@ public class OptimizationsTest {
     }
 
     @Test
+    public void testUnconstrainedDependency() {
+        testUnconstrainedDependency(false);
+        testUnconstrainedDependency(true);
+    }
+
+    public void testUnconstrainedDependency(boolean directResolution) {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        root.setDirectResolution(directResolution);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        C.setDebugName("C");
+        root.add(A);
+        root.add(B);
+        root.add(C);
+        A.setBaselineDistance(8);
+        B.setBaselineDistance(8);
+        C.setBaselineDistance(8);
+        A.setFrame(142, 96, 242, 130);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT, 10);
+        B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.TOP, 100);
+        C.connect(ConstraintAnchor.Type.RIGHT, A, ConstraintAnchor.Type.LEFT);
+        C.connect(ConstraintAnchor.Type.BASELINE, A, ConstraintAnchor.Type.BASELINE);
+        root.layout();
+        System.out.println("res: " + directResolution + " root: " + root
+                + " A: " + A + " B: " + B + " C: " + C);
+        assertEquals(A.getLeft(), 142);
+        assertEquals(A.getTop(), 96);
+        assertEquals(A.getWidth(), 100);
+        assertEquals(A.getHeight(), 34);
+        assertEquals(B.getLeft(), 252);
+        assertEquals(B.getTop(), 196);
+        assertEquals(C.getLeft(), 42);
+        assertEquals(C.getTop(), 96);
+    }
+
+    @Test
     public void testFullLayout() {
         testFullLayout(false);
         testFullLayout(true);

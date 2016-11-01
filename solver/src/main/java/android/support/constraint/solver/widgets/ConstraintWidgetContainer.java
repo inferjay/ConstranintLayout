@@ -1149,6 +1149,18 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             system.addEquality(widget.mRight.mSolverVariable, right);
             widget.mHorizontalResolution = ConstraintWidget.DIRECT;
             widget.setHorizontalDimension(left, right);
+        } else {
+            boolean hasLeft = widget.mLeft.mTarget != null;
+            boolean hasRight = widget.mRight.mTarget != null;
+            if (!hasLeft && !hasRight) {
+                widget.mLeft.mSolverVariable = system.createObjectVariable(widget.mLeft);
+                widget.mRight.mSolverVariable = system.createObjectVariable(widget.mRight);
+                int left = widget.getX();
+                int right = left + widget.getWidth();
+                system.addEquality(widget.mLeft.mSolverVariable, left);
+                system.addEquality(widget.mRight.mSolverVariable, right);
+                widget.mHorizontalResolution = ConstraintWidget.DIRECT;
+            }
         }
     }
 
@@ -1264,6 +1276,23 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
             widget.mVerticalResolution = ConstraintWidget.DIRECT;
             widget.setVerticalDimension(top, bottom);
+        } else {
+            boolean hasBaseline = widget.mBaseline.mTarget != null;
+            boolean hasTop = widget.mTop.mTarget != null;
+            boolean hasBottom = widget.mBottom.mTarget != null;
+            if (!hasBaseline && !hasTop && !hasBottom) {
+                widget.mTop.mSolverVariable = system.createObjectVariable(widget.mTop);
+                widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
+                int top = widget.getY();
+                int bottom = top + widget.getHeight();
+                system.addEquality(widget.mTop.mSolverVariable, top);
+                system.addEquality(widget.mBottom.mSolverVariable, bottom);
+                if (widget.mBaselineDistance > 0) {
+                    widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
+                    system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
+                }
+                widget.mVerticalResolution = ConstraintWidget.DIRECT;
+            }
         }
     }
 
