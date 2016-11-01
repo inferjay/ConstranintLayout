@@ -396,26 +396,47 @@ public class ConstraintLayout extends ViewGroup {
 
     ConstraintWidgetContainer mLayoutWidget = new ConstraintWidgetContainer();
 
+    private int mMinWidth = 0;
+    private int mMinHeight = 0;
+    private int mMaxWidth = Integer.MAX_VALUE;
+    private int mMaxHeight = Integer.MAX_VALUE;
+
     private boolean mDirtyHierarchy = true;
 
     public ConstraintLayout(Context context) {
         super(context);
-        init();
+        init(null);
     }
 
     public ConstraintLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(attrs);
     }
 
     public ConstraintLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(attrs);
     }
 
-    private void init() {
+    private void init(AttributeSet attrs) {
         mLayoutWidget.setCompanionWidget(this);
         mChildrenByIds.put(getId(), this);
+        if (attrs != null) {
+            TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.ConstraintLayout_Layout);
+            final int N = a.getIndexCount();
+            for (int i = 0; i < N; i++) {
+                int attr = a.getIndex(i);
+                if (attr == R.styleable.ConstraintLayout_Layout_android_minWidth) {
+                    mMinWidth = a.getDimensionPixelOffset(attr, mMinWidth);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_android_minHeight) {
+                    mMinHeight = a.getDimensionPixelOffset(attr, mMinHeight);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_android_maxWidth) {
+                    mMaxWidth = a.getDimensionPixelOffset(attr, mMaxWidth);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_android_maxHeight) {
+                    mMaxHeight = a.getDimensionPixelOffset(attr, mMaxHeight);
+                }
+            }
+        }
     }
 
     /**
@@ -477,6 +498,86 @@ public class ConstraintLayout extends ViewGroup {
         mChildrenByIds.remove(view.getId());
         mLayoutWidget.remove(getViewWidget(view));
         mDirtyHierarchy = true;
+    }
+
+    /**
+     * Set the min width for this view
+     *
+     * @param value
+     */
+    public void setMinWidth(int value) {
+        mMinWidth = value;
+    }
+
+    /**
+     * Set the min height for this view
+     *
+     * @param value
+     */
+    public void setMinHeight(int value) {
+        mMinHeight = value;
+    }
+
+    /*
+     * The minimum width of this view.
+     *
+     * @return The minimum width of this view
+     *
+     * @see #setMinWidth(int)
+     */
+    public int getMinWidth() {
+        return mMinWidth;
+    }
+
+    /**
+     * The minimum height of this view.
+     *
+     * @return The minimum height of this view
+     *
+     * @see #setMinHeight(int)
+     */
+    public int getMinHeight() {
+        return mMinHeight;
+    }
+
+    /**
+     * Set the max width for this view
+     *
+     * @param value
+     */
+    public void setMaxWidth(int value) {
+        mMaxWidth = value;
+    }
+
+    /**
+     * Set the max height for this view
+     *
+     * @param value
+     */
+    public void setMaxHeight(int value) {
+        mMaxHeight = value;
+    }
+
+    /*
+     * The maximum width of this view.
+     *
+     * @return The maximum width of this view
+     *
+     * @see #setMaxWidth(int)
+     */
+    public int getMaxWidth() {
+        return mMaxWidth;
+    }
+
+    /**
+     * The maximum height of this view.
+     *
+     * @return The maximum height of this view
+     *
+     * @see #setMaxHeight(int)
+     */
+    public int getMaxHeight() {
+        return mMaxHeight;
     }
 
     private void updateHierarchy() {
@@ -898,6 +999,8 @@ public class ConstraintLayout extends ViewGroup {
             int resolvedWidthSize = resolveSizeAndState(androidLayoutWidth, widthMeasureSpec, childState);
             int resolvedHeightSize = resolveSizeAndState(androidLayoutHeight, heightMeasureSpec,
                     childState << MEASURED_HEIGHT_STATE_SHIFT);
+            resolvedWidthSize = Math.min(mMaxWidth, resolvedWidthSize);
+            resolvedHeightSize = Math.min(mMaxHeight, resolvedHeightSize);
             setMeasuredDimension(resolvedWidthSize & MEASURED_SIZE_MASK, resolvedHeightSize & MEASURED_SIZE_MASK);
         } else {
             setMeasuredDimension(androidLayoutWidth, androidLayoutHeight);
@@ -927,14 +1030,14 @@ public class ConstraintLayout extends ViewGroup {
             break;
             case MeasureSpec.UNSPECIFIED: {
                 if (params.width > 0) {
-                    desiredWidth = params.width;
+                    desiredWidth = Math.min(mMaxWidth, params.width);
                 } else {
                     widthBehaviour = ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
                 }
             }
             break;
             case MeasureSpec.EXACTLY: {
-                desiredWidth = widthSize - widthPadding;
+                desiredWidth = Math.min(mMaxWidth, widthSize) - widthPadding;
             }
         }
         switch (heightMode) {
@@ -944,22 +1047,20 @@ public class ConstraintLayout extends ViewGroup {
             break;
             case MeasureSpec.UNSPECIFIED: {
                 if (params.height > 0) {
-                    desiredHeight = params.height;
+                    desiredHeight = Math.min(mMaxHeight, params.height);
                 } else {
                     heightBehaviour = ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
                 }
             }
             break;
             case MeasureSpec.EXACTLY: {
-                desiredHeight = heightSize - heightPadding;
+                desiredHeight = Math.min(mMaxHeight, heightSize) - heightPadding;
             }
         }
 
+        mLayoutWidget.setMinWidth(mMinWidth);
+        mLayoutWidget.setMinHeight(mMinHeight);
         mLayoutWidget.setHorizontalDimensionBehaviour(widthBehaviour);
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {  //  for API Level 16+
-            mLayoutWidget.setMinWidth(getMinimumWidth());
-            mLayoutWidget.setMinHeight(getMinimumHeight());
-        }
         mLayoutWidget.setWidth(desiredWidth);
         mLayoutWidget.setVerticalDimensionBehaviour(heightBehaviour);
         mLayoutWidget.setHeight(desiredHeight);

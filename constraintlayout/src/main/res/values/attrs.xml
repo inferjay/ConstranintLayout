@@ -121,6 +121,10 @@
 
     <declare-styleable name="ConstraintLayout_Layout">
         <attr name="android:orientation"/>
+        <attr name="android:minWidth"/>
+        <attr name="android:minHeight"/>
+        <attr name="android:maxWidth"/>
+        <attr name="android:maxHeight"/>
 
         <attr name="layout_constraintGuide_begin"/>
         <attr name="layout_constraintGuide_end"/>

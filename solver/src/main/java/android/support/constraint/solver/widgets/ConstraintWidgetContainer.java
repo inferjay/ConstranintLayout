@@ -1152,7 +1152,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         } else {
             boolean hasLeft = widget.mLeft.mTarget != null;
             boolean hasRight = widget.mRight.mTarget != null;
-            if (!hasLeft && !hasRight) {
+            if (!hasLeft && !hasRight && !(widget instanceof Guideline)) {
                 widget.mLeft.mSolverVariable = system.createObjectVariable(widget.mLeft);
                 widget.mRight.mSolverVariable = system.createObjectVariable(widget.mRight);
                 int left = widget.getX();
@@ -1280,7 +1280,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             boolean hasBaseline = widget.mBaseline.mTarget != null;
             boolean hasTop = widget.mTop.mTarget != null;
             boolean hasBottom = widget.mBottom.mTarget != null;
-            if (!hasBaseline && !hasTop && !hasBottom) {
+            if (!hasBaseline && !hasTop && !hasBottom && !(widget instanceof Guideline)) {
                 widget.mTop.mSolverVariable = system.createObjectVariable(widget.mTop);
                 widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
                 int top = widget.getY();
