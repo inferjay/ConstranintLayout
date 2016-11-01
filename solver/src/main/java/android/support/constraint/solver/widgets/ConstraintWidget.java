@@ -1917,7 +1917,7 @@ public class ConstraintWidget implements Solvable {
             //   not be contained in the parent)
 
             if (mParent.getHorizontalDimensionBehaviour()
-                    == DimensionBehaviour.WRAP_CONTENT) {
+                    == DimensionBehaviour.WRAP_CONTENT && !inHorizontalChain) {
                 if (mLeft.mTarget == null ||
                         mLeft.mTarget.mOwner != mParent) {
                     SolverVariable parentLeft = system.createObjectVariable(mParent.mLeft);
@@ -1942,7 +1942,7 @@ public class ConstraintWidget implements Solvable {
             }
 
             if (mParent.getVerticalDimensionBehaviour()
-                    == DimensionBehaviour.WRAP_CONTENT) {
+                    == DimensionBehaviour.WRAP_CONTENT && !inVerticalChain) {
                 if (mTop.mTarget == null ||
                         mTop.mTarget.mOwner != mParent) {
                     SolverVariable parentTop = system.createObjectVariable(mParent.mTop);
@@ -1955,7 +1955,7 @@ public class ConstraintWidget implements Solvable {
                 }
                 if (mBottom.mTarget == null ||
                         mBottom.mTarget.mOwner != mParent) {
-                    SolverVariable parentBottom = system.createObjectVariable(getParent().mBottom);
+                    SolverVariable parentBottom = system.createObjectVariable(mParent.mBottom);
                     ArrayRow row = system.createRow();
                     row.createRowGreaterThan(parentBottom, bottom, system.createSlackVariable(), 0);
                     system.addConstraint(row);

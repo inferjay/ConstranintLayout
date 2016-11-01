@@ -305,7 +305,24 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             boolean chainPacked = (first.mHorizontalChainStyle == CHAIN_PACKED) && (numMatchConstraints == 0);
             ConstraintWidget widget = first;
             if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
-                chainPacked = true;
+                ConstraintWidget previous = null;
+                int strength = 1;
+                while (previous == null || (widget.mLeft.mTarget != null && widget.mLeft.mTarget.mOwner == previous)) {
+                    if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
+                        system.addGreaterThan(widget.mRight.mSolverVariable, widget.mLeft.mSolverVariable, widget.getWidth(), strength);
+                    }
+                    int margin = widget.mLeft.getMargin();
+                    if (previous != null) {
+                        margin += previous.mRight.getMargin();
+                    }
+                    system.addGreaterThan(widget.mLeft.mSolverVariable, widget.mLeft.mTarget.mSolverVariable, margin, strength);
+                    previous = widget;
+                    widget = widget.mRight.mTarget.mOwner;
+                }
+                if (previous != null) {
+                    system.addGreaterThan(previous.mRight.mTarget.mSolverVariable, previous.mRight.mSolverVariable, previous.mRight.getMargin(), 0);
+                }
+                continue;
             }
             if (USE_DIRECT_CHAIN_RESOLUTION && widget.mHorizontalChainFixedPosition && !chainPacked
                     && first.mHorizontalChainStyle == CHAIN_SPREAD) {
@@ -557,10 +574,27 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             int numMatchConstraints = countMatchConstraintsChainedWidgets(mVerticalChainsArray[i], VERTICAL);
             // For now, only allow packed chains if all widgets are in fixed dimensions
             boolean chainPacked = (first.mVerticalChainStyle == ConstraintWidget.CHAIN_PACKED) && (numMatchConstraints == 0);
-            if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
-                chainPacked = true;
-            }
             ConstraintWidget widget = first;
+            if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
+                ConstraintWidget previous = null;
+                int strength = 1;
+                while (previous == null || (widget.mTop.mTarget != null && widget.mTop.mTarget.mOwner == previous)) {
+                    if (widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
+                        system.addGreaterThan(widget.mBottom.mSolverVariable, widget.mTop.mSolverVariable, widget.getHeight(), strength);
+                    }
+                    int margin = widget.mTop.getMargin();
+                    if (previous != null) {
+                        margin += previous.mBottom.getMargin();
+                    }
+                    system.addGreaterThan(widget.mTop.mSolverVariable, widget.mTop.mTarget.mSolverVariable, margin, strength);
+                    previous = widget;
+                    widget = widget.mBottom.mTarget.mOwner;
+                }
+                if (previous != null) {
+                    system.addGreaterThan(previous.mBottom.mTarget.mSolverVariable, previous.mBottom.mSolverVariable, previous.mBottom.getMargin(), 0);
+                }
+                continue;
+            }
             if (USE_DIRECT_CHAIN_RESOLUTION && widget.mVerticalChainFixedPosition && !chainPacked
                     && first.mVerticalChainStyle == CHAIN_SPREAD) {
                 // TODO: implements direct resolution for CHAIN_SPREAD_INSIDE and CHAIN_PACKED
