@@ -86,7 +86,7 @@ public class Optimizer {
             int left = widget.mLeft.mTarget != null ? widget.mLeft.getMargin() : 0;
             int right = widget.mRight.mTarget != null ? widget.mRight.getMargin() : 0;
             currentPosition += left;
-            system.addEquality(widget.mLeft.mSolverVariable, (int) currentPosition);
+            system.addEquality(widget.mLeft.mSolverVariable, (int) (currentPosition + 0.5f));
             if (widget.mHorizontalDimensionBehaviour == ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT) {
                 if (totalWeights == 0) {
                     currentPosition += split - left - right;
@@ -96,7 +96,7 @@ public class Optimizer {
             } else {
                 currentPosition += widget.getWidth();
             }
-            system.addEquality(widget.mRight.mSolverVariable, (int) currentPosition);
+            system.addEquality(widget.mRight.mSolverVariable, (int) (currentPosition + 0.5f));
             if (numMatchConstraints == 0) {
                 currentPosition += split;
             }
@@ -176,7 +176,7 @@ public class Optimizer {
             int top = widget.mTop.mTarget != null ? widget.mTop.getMargin() : 0;
             int bottom = widget.mBottom.mTarget != null ? widget.mBottom.getMargin() : 0;
             currentPosition += top;
-            system.addEquality(widget.mTop.mSolverVariable, (int) currentPosition);
+            system.addEquality(widget.mTop.mSolverVariable, (int) (currentPosition + 0.5f));
             if (widget.mVerticalDimensionBehaviour == ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT) {
                 if (totalWeights == 0) {
                     currentPosition += split - top - bottom;
@@ -186,7 +186,7 @@ public class Optimizer {
             } else {
                 currentPosition += widget.getHeight();
             }
-            system.addEquality(widget.mBottom.mSolverVariable, (int) currentPosition);
+            system.addEquality(widget.mBottom.mSolverVariable, (int) (currentPosition + 0.5f));
             if (numMatchConstraints == 0) {
                 currentPosition += split;
             }
@@ -226,7 +226,7 @@ public class Optimizer {
                 } else {
                     int w = widget.getWidth();
                     int dim = container.getWidth() - leftMargin - rightMargin - w;
-                    left = leftMargin + (int) (dim * widget.mHorizontalBiasPercent);
+                    left = leftMargin + (int) ((dim * widget.mHorizontalBiasPercent) + 0.5f);
                     right = left + widget.getWidth();
                 }
                 widget.mLeft.mSolverVariable = system.createObjectVariable(widget.mLeft);
@@ -264,7 +264,7 @@ public class Optimizer {
             SolverVariable target = widget.mLeft.mTarget.mSolverVariable;
             widget.mLeft.mSolverVariable = system.createObjectVariable(widget.mLeft);
             widget.mRight.mSolverVariable = system.createObjectVariable(widget.mRight);
-            int left = (int) (target.computedValue + widget.mLeft.getMargin());
+            int left = (int) (target.computedValue + widget.mLeft.getMargin() + 0.5f);
             int right = left + widget.getWidth();
             system.addEquality(widget.mLeft.mSolverVariable, left);
             system.addEquality(widget.mRight.mSolverVariable, right);
@@ -274,7 +274,7 @@ public class Optimizer {
             SolverVariable target = widget.mRight.mTarget.mSolverVariable;
             widget.mLeft.mSolverVariable = system.createObjectVariable(widget.mLeft);
             widget.mRight.mSolverVariable = system.createObjectVariable(widget.mRight);
-            int right = (int) (target.computedValue - widget.mRight.getMargin());
+            int right = (int) (target.computedValue - widget.mRight.getMargin() + 0.5f);
             int left = right - widget.getWidth();
             system.addEquality(widget.mLeft.mSolverVariable, left);
             system.addEquality(widget.mRight.mSolverVariable, right);
@@ -319,7 +319,7 @@ public class Optimizer {
                 } else {
                     int h = widget.getHeight();
                     int dim = container.getHeight() - topMargin - bottomMargin - h;
-                    top = topMargin + (int) (dim * widget.mVerticalBiasPercent);
+                    top = (int) (topMargin + (dim * widget.mVerticalBiasPercent) + 0.5f);
                     bottom = top + widget.getHeight();
                 }
                 widget.mTop.mSolverVariable = system.createObjectVariable(widget.mTop);
@@ -369,7 +369,7 @@ public class Optimizer {
             SolverVariable target = widget.mTop.mTarget.mSolverVariable;
             widget.mTop.mSolverVariable = system.createObjectVariable(widget.mTop);
             widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
-            int top = (int) (target.computedValue + widget.mTop.getMargin());
+            int top = (int) (target.computedValue + widget.mTop.getMargin() + 0.5f);
             int bottom = top + widget.getHeight();
             system.addEquality(widget.mTop.mSolverVariable, top);
             system.addEquality(widget.mBottom.mSolverVariable, bottom);
@@ -383,7 +383,7 @@ public class Optimizer {
             SolverVariable target = widget.mBottom.mTarget.mSolverVariable;
             widget.mTop.mSolverVariable = system.createObjectVariable(widget.mTop);
             widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
-            int bottom = (int) (target.computedValue - widget.mBottom.getMargin());
+            int bottom = (int) (target.computedValue - widget.mBottom.getMargin() + 0.5f);
             int top = bottom - widget.getHeight();
             system.addEquality(widget.mTop.mSolverVariable, top);
             system.addEquality(widget.mBottom.mSolverVariable, bottom);
@@ -397,7 +397,7 @@ public class Optimizer {
             SolverVariable target = widget.mBaseline.mTarget.mSolverVariable;
             widget.mTop.mSolverVariable = system.createObjectVariable(widget.mTop);
             widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
-            int top = (int) (target.computedValue - widget.mBaselineDistance);
+            int top = (int) (target.computedValue - widget.mBaselineDistance + 0.5f);
             int bottom = top + widget.getHeight();
             system.addEquality(widget.mTop.mSolverVariable, top);
             system.addEquality(widget.mBottom.mSolverVariable, bottom);
