@@ -435,9 +435,9 @@ public class WidgetsPositioningTest {
         root.add(A);
         guideline.setGuidePercent(0.50f);
         guideline.setOrientation(Guideline.VERTICAL);
-        root.setDebugSolverName(s, "root");
-        A.setDebugSolverName(s, "A");
-        guideline.setDebugSolverName(s, "guideline");
+        root.setDebugName("root");
+        A.setDebugName("A");
+        guideline.setDebugName("guideline");
 
         ArrayList<ConstraintWidget> widgets = new ArrayList<ConstraintWidget>();
         widgets.add(root);
@@ -454,10 +454,9 @@ public class WidgetsPositioningTest {
                 assertEquals(A.getX(), 200);
             }
         };
-        runTestOnWidgets(widgets, check);
-////        s.displayReadableRows();
+        runTest(root, check);
         guideline.setGuidePercent(0);
-        runTestOnWidgets(widgets, new Runnable() {
+        runTest(root, new Runnable() {
             @Override
             public void run() {
                 System.out.println("" + root + " " + A + " " + guideline);
@@ -467,7 +466,7 @@ public class WidgetsPositioningTest {
             }
         });
         guideline.setGuideBegin(150);
-        runTestOnWidgets(widgets, new Runnable() {
+        runTest(root, new Runnable() {
             @Override
             public void run() {
                 assertEquals(A.getWidth(), 100);
@@ -477,7 +476,7 @@ public class WidgetsPositioningTest {
         });
         System.out.println("" + root + " " + A + " " + guideline);
         guideline.setGuideEnd(150);
-        runTestOnWidgets(widgets, new Runnable() {
+        runTest(root, new Runnable() {
             @Override
             public void run() {
                 assertEquals(A.getWidth(), 100);
@@ -490,9 +489,10 @@ public class WidgetsPositioningTest {
         A.resetAnchors();
         A.connect(ConstraintAnchor.Type.TOP, guideline, ConstraintAnchor.Type.TOP);
         guideline.setGuideBegin(150);
-        runTestOnWidgets(widgets, new Runnable() {
+        runTest(root, new Runnable() {
             @Override
             public void run() {
+                System.out.println("" + root + " " + A + " " + guideline);
                 assertEquals(A.getWidth(), 100);
                 assertEquals(A.getHeight(), 20);
                 assertEquals(A.getY(), 150);
@@ -501,7 +501,7 @@ public class WidgetsPositioningTest {
         System.out.println("" + root + " " + A + " " + guideline);
         A.resetAnchors();
         A.connect(ConstraintAnchor.Type.TOP, guideline, ConstraintAnchor.Type.BOTTOM);
-        runTestOnWidgets(widgets, new Runnable() {
+        runTest(root, new Runnable() {
             @Override
             public void run() {
                 assertEquals(A.getWidth(), 100);
@@ -510,6 +510,11 @@ public class WidgetsPositioningTest {
             }
         });
         System.out.println("" + root + " " + A + " " + guideline);
+    }
+
+    private void runTest(ConstraintWidgetContainer root, Runnable check) {
+        root.layout();
+        check.run();
     }
 
 

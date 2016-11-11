@@ -497,7 +497,8 @@ public class ConstraintWidget implements Solvable {
     public String toString() {
         return (mType != null ? "type: " + mType + " " : "")
                 + (mDebugName != null ? "id: " + mDebugName + " " : "")
-                + "(" + mX + ", " + mY + ") - (" + mWidth + " x " + mHeight + ")";
+                + "(" + mX + ", " + mY + ") - (" + mWidth + " x " + mHeight + ")"
+                + " wrap: (" + mWrapWidth + " x " + mWrapHeight + ")";
     }
 
     /*-----------------------------------------------------------------------*/

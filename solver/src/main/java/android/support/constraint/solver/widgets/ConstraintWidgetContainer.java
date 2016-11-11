@@ -292,10 +292,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 widget.mHorizontalResolution = SOLVER;
                 widget.mVerticalResolution = SOLVER;
             } else {
-                if (widget.mHorizontalResolution == SOLVER) {
+                if (widget.mHorizontalResolution == SOLVER
+                        || widget.mHorizontalResolution == UNKNOWN) {
                     sh++;
                 }
-                if (widget.mVerticalResolution == SOLVER) {
+                if (widget.mVerticalResolution == SOLVER
+                        || widget.mVerticalResolution == UNKNOWN) {
                     sv++;
                 }
             }
