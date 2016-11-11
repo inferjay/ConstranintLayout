@@ -283,14 +283,37 @@ public class Optimizer {
         } else {
             boolean hasLeft = widget.mLeft.mTarget != null;
             boolean hasRight = widget.mRight.mTarget != null;
-            if (!hasLeft && !hasRight && !(widget instanceof Guideline)) {
-                widget.mLeft.mSolverVariable = system.createObjectVariable(widget.mLeft);
-                widget.mRight.mSolverVariable = system.createObjectVariable(widget.mRight);
-                int left = widget.getX();
-                int right = left + widget.getWidth();
-                system.addEquality(widget.mLeft.mSolverVariable, left);
-                system.addEquality(widget.mRight.mSolverVariable, right);
-                widget.mHorizontalResolution = ConstraintWidget.DIRECT;
+            if (!hasLeft && !hasRight) {
+                if (widget instanceof Guideline) {
+                    Guideline guideline = (Guideline) widget;
+                    if (guideline.getOrientation() == ConstraintWidget.VERTICAL) {
+                        widget.mLeft.mSolverVariable = system.createObjectVariable(widget.mLeft);
+                        widget.mRight.mSolverVariable = system.createObjectVariable(widget.mRight);
+                        float position = 0;
+                        if (guideline.getRelativeBegin() != -1) {
+                            position = guideline.getRelativeBegin();
+                        } else if (guideline.getRelativeEnd() != -1) {
+                            position = container.getWidth() - guideline.getRelativeEnd();
+                        } else {
+                            position = container.getWidth() * guideline.getRelativePercent();
+                        }
+                        int value = (int) (position + 0.5f);
+                        system.addEquality(widget.mLeft.mSolverVariable, value);
+                        system.addEquality(widget.mRight.mSolverVariable, value);
+                        widget.mHorizontalResolution = ConstraintWidget.DIRECT;
+                        widget.mVerticalResolution = ConstraintWidget.DIRECT;
+                        widget.setHorizontalDimension(value, value);
+                        widget.setVerticalDimension(0, container.getHeight());
+                    }
+                } else {
+                    widget.mLeft.mSolverVariable = system.createObjectVariable(widget.mLeft);
+                    widget.mRight.mSolverVariable = system.createObjectVariable(widget.mRight);
+                    int left = widget.getX();
+                    int right = left + widget.getWidth();
+                    system.addEquality(widget.mLeft.mSolverVariable, left);
+                    system.addEquality(widget.mRight.mSolverVariable, right);
+                    widget.mHorizontalResolution = ConstraintWidget.DIRECT;
+                }
             }
         }
     }
@@ -409,18 +432,41 @@ public class Optimizer {
             boolean hasBaseline = widget.mBaseline.mTarget != null;
             boolean hasTop = widget.mTop.mTarget != null;
             boolean hasBottom = widget.mBottom.mTarget != null;
-            if (!hasBaseline && !hasTop && !hasBottom && !(widget instanceof Guideline)) {
-                widget.mTop.mSolverVariable = system.createObjectVariable(widget.mTop);
-                widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
-                int top = widget.getY();
-                int bottom = top + widget.getHeight();
-                system.addEquality(widget.mTop.mSolverVariable, top);
-                system.addEquality(widget.mBottom.mSolverVariable, bottom);
-                if (widget.mBaselineDistance > 0) {
-                    widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
-                    system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
+            if (!hasBaseline && !hasTop && !hasBottom) {
+                if (widget instanceof Guideline) {
+                    Guideline guideline = (Guideline) widget;
+                    if (guideline.getOrientation() == ConstraintWidget.HORIZONTAL) {
+                        widget.mTop.mSolverVariable = system.createObjectVariable(widget.mTop);
+                        widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
+                        float position = 0;
+                        if (guideline.getRelativeBegin() != -1) {
+                            position = guideline.getRelativeBegin();
+                        } else if (guideline.getRelativeEnd() != -1) {
+                            position = container.getHeight() - guideline.getRelativeEnd();
+                        } else {
+                            position = container.getHeight() * guideline.getRelativePercent();
+                        }
+                        int value = (int) (position + 0.5f);
+                        system.addEquality(widget.mTop.mSolverVariable, value);
+                        system.addEquality(widget.mBottom.mSolverVariable, value);
+                        widget.mVerticalResolution = ConstraintWidget.DIRECT;
+                        widget.mHorizontalResolution = ConstraintWidget.DIRECT;
+                        widget.setVerticalDimension(value, value);
+                        widget.setHorizontalDimension(0, container.getWidth());
+                    }
+                } else {
+                    widget.mTop.mSolverVariable = system.createObjectVariable(widget.mTop);
+                    widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
+                    int top = widget.getY();
+                    int bottom = top + widget.getHeight();
+                    system.addEquality(widget.mTop.mSolverVariable, top);
+                    system.addEquality(widget.mBottom.mSolverVariable, bottom);
+                    if (widget.mBaselineDistance > 0) {
+                        widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
+                        system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
+                    }
+                    widget.mVerticalResolution = ConstraintWidget.DIRECT;
                 }
-                widget.mVerticalResolution = ConstraintWidget.DIRECT;
             }
         }
     }
