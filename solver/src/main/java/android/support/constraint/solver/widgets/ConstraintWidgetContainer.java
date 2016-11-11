@@ -173,7 +173,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     public boolean addChildrenToSolver(LinearSystem system, int group) {
         addToSolver(system, group);
         final int count = mChildren.size();
-        if (optimize(system)) {
+        if (mDirectResolution && optimize(system)) {
             return false;
         }
         for (int i = 0; i < count; i++) {

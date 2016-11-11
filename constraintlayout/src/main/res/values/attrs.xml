@@ -118,6 +118,13 @@
     <!-- Used at design time to define to position the view -->
     <attr name="layout_editor_absoluteY" format="dimension"/>
 
+    <!-- Used to set the type of optimization we apply -->
+    <attr name="layout_optimizationLevel">
+        <flag name="none" value="1"/>
+        <flag name="all" value="2" />
+        <flag name="basic" value="4"/>
+        <flag name="chains" value="8"/>
+    </attr>
 
     <declare-styleable name="ConstraintLayout_Layout">
         <attr name="android:orientation"/>
@@ -125,6 +132,7 @@
         <attr name="android:minHeight"/>
         <attr name="android:maxWidth"/>
         <attr name="android:maxHeight"/>
+        <attr name="layout_optimizationLevel"/>
 
         <attr name="layout_constraintGuide_begin"/>
         <attr name="layout_constraintGuide_end"/>

@@ -402,6 +402,7 @@ public class ConstraintLayout extends ViewGroup {
     private int mMaxHeight = Integer.MAX_VALUE;
 
     private boolean mDirtyHierarchy = true;
+    private int mOptimizationLevel = 2; // all
 
     public ConstraintLayout(Context context) {
         super(context);
@@ -434,6 +435,8 @@ public class ConstraintLayout extends ViewGroup {
                     mMaxWidth = a.getDimensionPixelOffset(attr, mMaxWidth);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_android_maxHeight) {
                     mMaxHeight = a.getDimensionPixelOffset(attr, mMaxHeight);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_optimizationLevel) {
+                    mOptimizationLevel = a.getInt(attr, mOptimizationLevel);
                 }
             }
         }
@@ -1071,6 +1074,11 @@ public class ConstraintLayout extends ViewGroup {
      */
     protected void solveLinearSystem() {
         Animator.setAnimationEnabled(false);
+        if (mOptimizationLevel == 2) {
+            mLayoutWidget.setDirectResolution(true);
+        } else {
+            mLayoutWidget.setDirectResolution(false);
+        }
         if (SIMPLE_LAYOUT) {
             mLayoutWidget.layout();
         } else {
