@@ -18,12 +18,96 @@ package android.support.constraint.solver;
 import android.support.constraint.solver.widgets.ConstraintAnchor;
 import android.support.constraint.solver.widgets.ConstraintWidget;
 import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
-import org.testng.annotations.BeforeMethod;
+import android.support.constraint.solver.widgets.Guideline;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 
 public class OptimizationsTest {
+
+    @Test
+    public void testGuideline() {
+        testVerticalGuideline(false);
+        testVerticalGuideline(true);
+        testHorizontalGuideline(false);
+        testHorizontalGuideline(true);
+    }
+
+    public void testVerticalGuideline(boolean directResolution) {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        root.setDirectResolution(directResolution);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        Guideline guideline = new Guideline();
+        guideline.setOrientation(Guideline.VERTICAL);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        guideline.setDebugName("guideline");
+        root.add(A);
+        root.add(guideline);
+        A.connect(ConstraintAnchor.Type.LEFT, guideline, ConstraintAnchor.Type.LEFT, 16);
+        guideline.setGuideBegin(100);
+        root.layout();
+        System.out.println("res: " + directResolution + " root: " + root + " A: " + A + " guideline: " + guideline);
+        assertEquals(guideline.getLeft(), 100);
+        assertEquals(A.getLeft(), 116);
+        assertEquals(A.getWidth(), 100);
+        assertEquals(A.getHeight(), 20);
+        assertEquals(A.getTop(), 0);
+        guideline.setGuidePercent(0.5f);
+        root.layout();
+        System.out.println("res: " + directResolution + " root: " + root + " A: " + A + " guideline: " + guideline);
+        assertEquals(guideline.getLeft(), root.getWidth() / 2);
+        assertEquals(A.getLeft(), 316);
+        assertEquals(A.getWidth(), 100);
+        assertEquals(A.getHeight(), 20);
+        assertEquals(A.getTop(), 0);
+        guideline.setGuideEnd(100);
+        root.layout();
+        System.out.println("res: " + directResolution + " root: " + root + " A: " + A + " guideline: " + guideline);
+        assertEquals(guideline.getLeft(), 500);
+        assertEquals(A.getLeft(), 516);
+        assertEquals(A.getWidth(), 100);
+        assertEquals(A.getHeight(), 20);
+        assertEquals(A.getTop(), 0);
+    }
+
+    public void testHorizontalGuideline(boolean directResolution) {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        root.setDirectResolution(directResolution);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        Guideline guideline = new Guideline();
+        guideline.setOrientation(Guideline.HORIZONTAL);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        guideline.setDebugName("guideline");
+        root.add(A);
+        root.add(guideline);
+        A.connect(ConstraintAnchor.Type.TOP, guideline, ConstraintAnchor.Type.TOP, 16);
+        guideline.setGuideBegin(100);
+        root.layout();
+        System.out.println("res: " + directResolution + " root: " + root + " A: " + A + " guideline: " + guideline);
+        assertEquals(guideline.getTop(), 100);
+        assertEquals(A.getTop(), 116);
+        assertEquals(A.getWidth(), 100);
+        assertEquals(A.getHeight(), 20);
+        assertEquals(A.getLeft(), 0);
+        guideline.setGuidePercent(0.5f);
+        root.layout();
+        System.out.println("res: " + directResolution + " root: " + root + " A: " + A + " guideline: " + guideline);
+        assertEquals(guideline.getTop(), root.getHeight() / 2);
+        assertEquals(A.getTop(), 316);
+        assertEquals(A.getWidth(), 100);
+        assertEquals(A.getHeight(), 20);
+        assertEquals(A.getLeft(), 0);
+        guideline.setGuideEnd(100);
+        root.layout();
+        System.out.println("res: " + directResolution + " root: " + root + " A: " + A + " guideline: " + guideline);
+        assertEquals(guideline.getTop(), 500);
+        assertEquals(A.getTop(), 516);
+        assertEquals(A.getWidth(), 100);
+        assertEquals(A.getHeight(), 20);
+        assertEquals(A.getLeft(), 0);
+    }
 
     @Test
     public void testDependency() {
