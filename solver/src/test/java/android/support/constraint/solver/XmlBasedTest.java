@@ -83,9 +83,16 @@ public class XmlBasedTest {
         if (v.equals("END")) return "RIGHT";
         return v;
     }
+    @Test
+    public void testAccessToResources() {
+        String dirName  = System.getProperty("user.dir") + "/src/test/resources/";
+        assertTrue(new File(dirName).exists(), " could not find dir "+dirName);
+        Object[][]  names =  genListOfName();
+        assertTrue(names.length>1," Could not get Path "+dirName);
+    }
 
     @DataProvider(name = "test1")
-    public static Object[][] primeNumbers() {
+    public static Object[][] genListOfName() {
         String dirName = System.getProperty("user.dir") + "/src/test/resources/";
 
         File[] f = new File(dirName).listFiles(new FileFilter() {
