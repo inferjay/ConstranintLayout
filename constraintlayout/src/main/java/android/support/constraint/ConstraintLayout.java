@@ -1713,19 +1713,6 @@ public class ConstraintLayout extends ViewGroup {
          * {@inheritDoc}
          */
         @Override
-        protected void setBaseAttributes(TypedArray a, int widthAttr, int heightAttr) {
-            try {
-                width = a.getLayoutDimension(widthAttr, "layout_width");
-                height = a.getLayoutDimension(heightAttr, "layout_height");
-            } catch (RuntimeException e) {
-                // we ignore the runtime exception for now if layout_width and layout_height aren't there.
-            }
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
         public void resolveLayoutDirection(int layoutDirection) {
             super.resolveLayoutDirection(layoutDirection);
