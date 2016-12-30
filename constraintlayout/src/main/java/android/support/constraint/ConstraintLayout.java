@@ -1094,10 +1094,13 @@ public class ConstraintLayout extends ViewGroup {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         final int widgetsCount = getChildCount();
+        final boolean isInEditMode = isInEditMode();
         for (int i = 0; i < widgetsCount; i++) {
             final View child = getChildAt(i);
             LayoutParams params = (LayoutParams) child.getLayoutParams();
-            if (child.getVisibility() == GONE && !params.isGuideline) {
+            if (child.getVisibility() == GONE && !params.isGuideline && !isInEditMode) {
+                // If we are in edit mode, let's layout the widget so that they are at "the right place"
+                // visually in the editor (as we get our positions from layoutlib)
                 continue;
             }
 

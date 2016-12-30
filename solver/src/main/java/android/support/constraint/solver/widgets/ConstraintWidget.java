@@ -2107,6 +2107,7 @@ public class ConstraintWidget implements Solvable {
         int endAnchorMargin = endAnchor.getMargin();
         if (mVisibility == ConstraintWidget.GONE) {
             dimension = 0;
+            dimensionFixed = true;
         }
         if (beginTarget == null && endTarget == null) {
             system.addConstraint(system.createRow().createRowEquals(begin, beginPosition));
