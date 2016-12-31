@@ -510,7 +510,11 @@ public class ConstraintLayout extends ViewGroup {
      * @param value
      */
     public void setMinWidth(int value) {
+        if (value == mMinWidth) {
+            return;
+        }
         mMinWidth = value;
+        requestLayout();
     }
 
     /**
@@ -519,7 +523,11 @@ public class ConstraintLayout extends ViewGroup {
      * @param value
      */
     public void setMinHeight(int value) {
+        if (value == mMinHeight) {
+            return;
+        }
         mMinHeight = value;
+        requestLayout();
     }
 
     /*
@@ -550,7 +558,11 @@ public class ConstraintLayout extends ViewGroup {
      * @param value
      */
     public void setMaxWidth(int value) {
+        if (value == mMaxWidth) {
+            return;
+        }
         mMaxWidth = value;
+        requestLayout();
     }
 
     /**
@@ -559,7 +571,11 @@ public class ConstraintLayout extends ViewGroup {
      * @param value
      */
     public void setMaxHeight(int value) {
+        if (value == mMaxHeight) {
+            return;
+        }
         mMaxHeight = value;
+        requestLayout();
     }
 
     /*
