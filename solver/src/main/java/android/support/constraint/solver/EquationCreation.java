@@ -142,7 +142,11 @@ public class EquationCreation {
         row.createRowCentering(variableA, variableB, marginA, bias,
                 variableC, variableD, marginB, withError);
         if (withError) {
-            linearSystem.addError(row);
+            SolverVariable error1 = linearSystem.createErrorVariable();
+            SolverVariable error2 = linearSystem.createErrorVariable();
+            error1.strength = 2;
+            error2.strength = 2;
+            row.addError(error1, error2);
             if (DEBUG) {
                 System.out.println(
                         "Add centering " + variableA.getName() + " - " + variableB.getName() +
