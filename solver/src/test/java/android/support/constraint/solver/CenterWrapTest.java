@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,160 +24,97 @@ import java.util.ArrayList;
 
 import static org.testng.Assert.assertEquals;
 
-public class AdvancedChainTest {
+public class CenterWrapTest {
 
     @Test
-    public void testSimpleHorizontalChainPacked() {
+    public void testComplexLayout() {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
-        ConstraintWidget A = new ConstraintWidget(100, 20);
-        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget IMG = new ConstraintWidget(100, 100);
 
-        root.setDebugSolverName(root.getSystem(), "root");
-        A.setDebugSolverName(root.getSystem(), "A");
-        B.setDebugSolverName(root.getSystem(), "B");
-        ArrayList<ConstraintWidget> widgets = new ArrayList<>();
-        widgets.add(A);
-        widgets.add(B);
-        widgets.add(root);
-        root.add(A);
-        root.add(B);
-        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 20);
-        B.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 20);
+        int margin = 16;
 
-        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 0);
-        A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT, 0);
-        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT, 0);
-        B.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, 0);
-        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_PACKED);
-        root.layout();
-        System.out.println("a) A: " + A + " B: " + B );
-        assertEquals(A.getLeft() - root.getLeft(), root.getRight() - B.getRight(), 1);
-        assertEquals(B.getLeft() - A.getRight(), 0, 1);
-    }
-
-    @Test
-    public void testSimpleVerticalTChainPacked() {
-        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
-        ConstraintWidget A = new ConstraintWidget(100, 20);
-        ConstraintWidget B = new ConstraintWidget(100, 20);
-
-        root.setDebugSolverName(root.getSystem(), "root");
-        A.setDebugSolverName(root.getSystem(), "A");
-        B.setDebugSolverName(root.getSystem(), "B");
-        ArrayList<ConstraintWidget> widgets = new ArrayList<>();
-        widgets.add(A);
-        widgets.add(B);
-        widgets.add(root);
-        root.add(A);
-        root.add(B);
-        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 20);
-        B.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 20);
-
-        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 0);
-        A.connect(ConstraintAnchor.Type.BOTTOM, B, ConstraintAnchor.Type.TOP, 0);
-        B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM, 0);
-        B.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, 0);
-        A.setVerticalChainStyle(ConstraintWidget.CHAIN_PACKED);
-        root.layout();
-        System.out.println("a) A: " + A + " B: " + B );
-        assertEquals(A.getTop() - root.getTop(), root.getBottom() - B.getBottom(), 1);
-        assertEquals(B.getTop() - A.getBottom(), 0, 1);
-    }
-
-    @Test
-    public void testHorizontalChainStyles() {
-        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
+        ConstraintWidget BUTTON = new ConstraintWidget(50, 50);
         ConstraintWidget A = new ConstraintWidget(100, 20);
         ConstraintWidget B = new ConstraintWidget(100, 20);
         ConstraintWidget C = new ConstraintWidget(100, 20);
-        root.add(A);
-        root.add(B);
-        root.add(C);
-        root.setDebugSolverName(root.getSystem(), "root");
-        A.setDebugSolverName(root.getSystem(), "A");
-        B.setDebugSolverName(root.getSystem(), "B");
-        C.setDebugSolverName(root.getSystem(), "C");
-        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 0);
-        A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT, 0);
-        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT, 0);
-        B.connect(ConstraintAnchor.Type.RIGHT, C, ConstraintAnchor.Type.LEFT, 0);
-        C.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.RIGHT, 0);
-        C.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, 0);
-        root.layout();
-        System.out.println("       spread) root: " + root + " A: " + A + " B: " + B + " C: " + C);
-        int gap = (root.getWidth() - A.getWidth() - B.getWidth() - C.getWidth()) / 4;
-        int size = 100;
-        assertEquals(A.getWidth(), size);
-        assertEquals(B.getWidth(), size);
-        assertEquals(C.getWidth(), size);
-        assertEquals(gap, A.getLeft());
-        assertEquals(A.getRight() + gap, B.getLeft());
-        assertEquals(root.getWidth() - gap - C.getWidth(), C.getLeft());
-        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_SPREAD_INSIDE);
-        root.layout();
-        System.out.println("spread inside) root: " + root + " A: " + A + " B: " + B + " C: " + C);
-        gap = (root.getWidth() - A.getWidth() - B.getWidth() - C.getWidth()) / 2;
-        assertEquals(A.getWidth(), size);
-        assertEquals(B.getWidth(), size);
-        assertEquals(C.getWidth(), size);
-        assertEquals(A.getLeft(), 0);
-        assertEquals(A.getRight() + gap, B.getLeft());
-        assertEquals(root.getWidth(), C.getRight());
-        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_PACKED);
-        root.layout();
-        System.out.println("       packed) root: " + root + " A: " + A + " B: " + B + " C: " + C);
-        assertEquals(A.getWidth(), size);
-        assertEquals(B.getWidth(), size);
-        assertEquals(C.getWidth(), size);
-        assertEquals(A.getLeft(), gap);
-        assertEquals(root.getWidth() - gap, C.getRight());
-    }
 
-    @Test
-    public void testVerticalChainStyles() {
-        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
-        ConstraintWidget A = new ConstraintWidget(100, 20);
-        ConstraintWidget B = new ConstraintWidget(100, 20);
-        ConstraintWidget C = new ConstraintWidget(100, 20);
+        IMG.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        IMG.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+        IMG.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        IMG.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+
+        BUTTON.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, margin);
+        BUTTON.connect(ConstraintAnchor.Type.TOP, IMG, ConstraintAnchor.Type.BOTTOM);
+        BUTTON.connect(ConstraintAnchor.Type.BOTTOM, IMG, ConstraintAnchor.Type.BOTTOM);
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, margin);
+        A.connect(ConstraintAnchor.Type.TOP, BUTTON, ConstraintAnchor.Type.BOTTOM, margin);
+
+        B.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, margin);
+        B.connect(ConstraintAnchor.Type.TOP, BUTTON, ConstraintAnchor.Type.BOTTOM, margin);
+
+        C.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, margin);
+        C.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, margin);
+        C.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM, margin);
+        C.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM);
+
+        root.add(IMG);
+        root.add(BUTTON);
         root.add(A);
         root.add(B);
         root.add(C);
-        root.setDebugSolverName(root.getSystem(), "root");
-        A.setDebugSolverName(root.getSystem(), "A");
-        B.setDebugSolverName(root.getSystem(), "B");
-        C.setDebugSolverName(root.getSystem(), "C");
-        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 0);
-        A.connect(ConstraintAnchor.Type.BOTTOM, B, ConstraintAnchor.Type.TOP, 0);
-        B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM, 0);
-        B.connect(ConstraintAnchor.Type.BOTTOM, C, ConstraintAnchor.Type.TOP, 0);
-        C.connect(ConstraintAnchor.Type.TOP, B, ConstraintAnchor.Type.BOTTOM, 0);
-        C.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, 0);
+
         root.layout();
-        System.out.println("       spread) root: " + root + " A: " + A + " B: " + B + " C: " + C);
-        int gap = (root.getHeight() - A.getHeight() - B.getHeight() - C.getHeight()) / 4;
-        int size = 20;
-        assertEquals(A.getHeight(), size);
-        assertEquals(B.getHeight(), size);
-        assertEquals(C.getHeight(), size);
-        assertEquals(gap, A.getTop());
-        assertEquals(A.getBottom() + gap, B.getTop());
-        assertEquals(root.getHeight() - gap - C.getHeight(), C.getTop());
-        A.setVerticalChainStyle(ConstraintWidget.CHAIN_SPREAD_INSIDE);
+        System.out.println("a) root: " + root + " IMG: " + IMG + " BUTTON: " + BUTTON + " A: " + A + " B: " + B + " C: " + C);
+        assertEquals(root.getWidth(), 800);
+        assertEquals(root.getHeight(), 600);
+        assertEquals(IMG.getWidth(), root.getWidth());
+        assertEquals(BUTTON.getWidth(), 50);
+        assertEquals(A.getWidth(), 100);
+        assertEquals(B.getWidth(), 100);
+        assertEquals(C.getWidth(), 100);
+        assertEquals(IMG.getHeight(), 100);
+        assertEquals(BUTTON.getHeight(), 50);
+        assertEquals(A.getHeight(), 20);
+        assertEquals(B.getHeight(), 20);
+        assertEquals(C.getHeight(), 20);
+        assertEquals(IMG.getLeft(), 0);
+        assertEquals(IMG.getRight(), root.getRight());
+        assertEquals(BUTTON.getLeft(), 734);
+        assertEquals(BUTTON.getTop(), IMG.getBottom() - BUTTON.getHeight() / 2);
+        assertEquals(A.getLeft(), margin);
+        assertEquals(A.getTop(), BUTTON.getBottom() + margin);
+        assertEquals(B.getRight(), root.getRight() - margin);
+        assertEquals(B.getTop(), A.getTop());
+        assertEquals(C.getLeft(), 350);
+        assertEquals(C.getRight(), 450);
+        assertEquals(C.getTop(), 379);
+
+        root.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
         root.layout();
-        System.out.println("spread inside) root: " + root + " A: " + A + " B: " + B + " C: " + C);
-        gap = (root.getHeight() - A.getHeight() - B.getHeight() - C.getHeight()) / 2;
-        assertEquals(A.getHeight(), size);
-        assertEquals(B.getHeight(), size);
-        assertEquals(C.getHeight(), size);
-        assertEquals(A.getTop(), 0);
-        assertEquals(A.getBottom() + gap, B.getTop());
-        assertEquals(root.getHeight(), C.getBottom());
-        A.setVerticalChainStyle(ConstraintWidget.CHAIN_PACKED);
-        root.layout();
-        System.out.println("       packed) root: " + root + " A: " + A + " B: " + B + " C: " + C);
-        assertEquals(A.getHeight(), size);
-        assertEquals(B.getHeight(), size);
-        assertEquals(C.getHeight(), size);
-        assertEquals(A.getTop(), gap);
-        assertEquals(root.getHeight() - gap, C.getBottom());    }
+        System.out.println("b) root: " + root + " IMG: " + IMG + " BUTTON: " + BUTTON + " A: " + A + " B: " + B + " C: " + C);
+        assertEquals(root.getWidth(), 800);
+        assertEquals(root.getHeight(), 197);
+        assertEquals(IMG.getWidth(), root.getWidth());
+        assertEquals(BUTTON.getWidth(), 50);
+        assertEquals(A.getWidth(), 100);
+        assertEquals(B.getWidth(), 100);
+        assertEquals(C.getWidth(), 100);
+        assertEquals(IMG.getHeight(), 100);
+        assertEquals(BUTTON.getHeight(), 50);
+        assertEquals(A.getHeight(), 20);
+        assertEquals(B.getHeight(), 20);
+        assertEquals(C.getHeight(), 20);
+        assertEquals(IMG.getLeft(), 0);
+        assertEquals(IMG.getRight(), root.getRight());
+        assertEquals(BUTTON.getLeft(), 734);
+        assertEquals(BUTTON.getTop(), IMG.getBottom() - BUTTON.getHeight() / 2);
+        assertEquals(A.getLeft(), margin);
+        assertEquals(A.getTop(), BUTTON.getBottom() + margin);
+        assertEquals(B.getRight(), root.getRight() - margin);
+        assertEquals(B.getTop(), A.getTop());
+        assertEquals(C.getLeft(), 350);
+        assertEquals(C.getRight(), 450);
+        assertEquals(C.getTop(), 177);
+    }
 }

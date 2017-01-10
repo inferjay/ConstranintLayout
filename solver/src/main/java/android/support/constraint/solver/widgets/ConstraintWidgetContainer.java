@@ -343,9 +343,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         if (leftTarget != null) {
                             if ((widget == first && widget.mHorizontalChainStyle == CHAIN_SPREAD_INSIDE)
                                     || (chainPacked && widget != first)) {
-                                system.addEquality(left, leftTarget, margin, 3);
+                                system.addEquality(left, leftTarget, margin, SolverVariable.STRENGTH_EQUALITY);
                             } else {
-                                system.addGreaterThan(left, leftTarget, margin, 1);
+                                system.addGreaterThan(left, leftTarget, margin, SolverVariable.STRENGTH_MEDIUM);
                             }
                         }
                         if (rightTarget != null) {
@@ -359,19 +359,19 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             }
                             if (!chainPacked) {
                                 if (isLast && first.mHorizontalChainStyle == CHAIN_SPREAD_INSIDE) {
-                                    system.addEquality(right, rightTarget, -margin, 3);
+                                    system.addEquality(right, rightTarget, -margin, SolverVariable.STRENGTH_EQUALITY);
                                 } else {
-                                    system.addLowerThan(right, rightTarget, -margin, 1);
+                                    system.addLowerThan(right, rightTarget, -margin, SolverVariable.STRENGTH_MEDIUM);
                                     if (leftTarget != null) {
                                         system.addCentering(left, leftTarget, leftMargin, 0.5f,
-                                                rightTarget, right, rightMargin, 2);
+                                                rightTarget, right, rightMargin, SolverVariable.STRENGTH_HIGH);
                                     }
                                 }
                             }
                         }
                         if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                             // Bypass those widgets
-                            system.addEquality(widget.mRight.mSolverVariable, widget.mLeft.mSolverVariable, 0, 3);
+                            system.addEquality(widget.mRight.mSolverVariable, widget.mLeft.mSolverVariable, 0, SolverVariable.STRENGTH_EQUALITY);
                         }
                         previous = widget;
                         if (rightTarget != null) {
@@ -390,7 +390,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         SolverVariable rightTarget = previous.mRight.mTarget != null ? previous.mRight.mTarget.mSolverVariable : null;
                         if (leftTarget != null && rightTarget != null) {
                             system.addCentering(left, leftTarget, leftMargin, first.mHorizontalBiasPercent,
-                                    rightTarget, right, rightMargin, 2);
+                                    rightTarget, right, rightMargin, SolverVariable.STRENGTH_HIGH);
                         }
                     }
                 } else {
@@ -402,24 +402,24 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             if (previous != null) {
                                 margin += previous.mRight.getMargin();
                             }
-                            int strength = 2;
+                            int strength = SolverVariable.STRENGTH_HIGH;
                             if (widget.mLeft.mTarget.mOwner.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
-                                strength = 1;
+                                strength = SolverVariable.STRENGTH_MEDIUM;
                             }
                             system.addGreaterThan(widget.mLeft.mSolverVariable, widget.mLeft.mTarget.mSolverVariable, margin, strength);
                             margin = widget.mRight.getMargin();
                             if (widget.mRight.mTarget.mOwner.mLeft.mTarget != null && widget.mRight.mTarget.mOwner.mLeft.mTarget.mOwner == widget) {
                                 margin += widget.mRight.mTarget.mOwner.mLeft.getMargin();
                             }
-                            strength = 2;
+                            strength = SolverVariable.STRENGTH_HIGH;
                             if (widget.mRight.mTarget.mOwner.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
-                                strength = 1;
+                                strength = SolverVariable.STRENGTH_MEDIUM;
                             }
                             system.addLowerThan(widget.mRight.mSolverVariable, widget.mRight.mTarget.mSolverVariable, -margin, strength);
                         } else {
                             totalWeights += widget.mHorizontalWeight;
-                            system.addGreaterThan(widget.mRight.mSolverVariable, widget.mLeft.mSolverVariable, 0, 0);
-                            system.addLowerThan(widget.mRight.mSolverVariable, widget.mRight.mTarget.mSolverVariable, 0, 0);
+                            system.addGreaterThan(widget.mRight.mSolverVariable, widget.mLeft.mSolverVariable, 0, SolverVariable.STRENGTH_LOW);
+                            system.addLowerThan(widget.mRight.mSolverVariable, widget.mRight.mTarget.mSolverVariable, 0, SolverVariable.STRENGTH_LOW);
                         }
                         previous = widget;
                         widget = widget.mRight.mTarget.mOwner;
@@ -430,12 +430,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         if (w.mLeft.mTarget != null) {
                             leftMargin += w.mLeft.mTarget.getMargin();
                         }
-                        system.addEquality(w.mLeft.mSolverVariable, w.mLeft.mTarget.mSolverVariable, leftMargin, 0);
+                        system.addEquality(w.mLeft.mSolverVariable, w.mLeft.mTarget.mSolverVariable, leftMargin, SolverVariable.STRENGTH_LOW);
                         int rightMargin = w.mRight.getMargin();
                         if (w.mRight.mTarget != null) {
                             rightMargin += w.mRight.mTarget.getMargin();
                         }
-                        system.addEquality(w.mRight.mSolverVariable, w.mRight.mTarget.mSolverVariable, -rightMargin, 0);
+                        system.addEquality(w.mRight.mSolverVariable, w.mRight.mTarget.mSolverVariable, -rightMargin, SolverVariable.STRENGTH_LOW);
                     } else {
                         for (int j = 0; j < numMatchConstraints - 1; j++) {
                             ConstraintWidget current = mMatchConstraintsChainedWidgets[j];
@@ -449,13 +449,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                                     && current.mLeft.mTarget.mOwner.mRight.mTarget.mOwner == current) {
                                 margin += current.mLeft.mTarget.mOwner.mRight.getMargin();
                             }
-                            system.addGreaterThan(left, current.mLeft.mTarget.mSolverVariable, margin, 1);
+                            system.addGreaterThan(left, current.mLeft.mTarget.mSolverVariable, margin, SolverVariable.STRENGTH_MEDIUM);
                             margin = current.mRight.getMargin();
                             if (current.mRight.mTarget != null && current.mRight.mTarget.mOwner.mLeft.mTarget != null
                                     && current.mRight.mTarget.mOwner.mLeft.mTarget.mOwner == current) {
                                 margin += current.mRight.mTarget.mOwner.mLeft.getMargin();
                             }
-                            system.addLowerThan(right, current.mRight.mTarget.mSolverVariable, -margin, 1);
+                            system.addLowerThan(right, current.mRight.mTarget.mSolverVariable, -margin, SolverVariable.STRENGTH_MEDIUM);
                             if (j + 1 == numMatchConstraints - 1) {
                                 // last element
                                 margin = nextWidget.mLeft.getMargin();
@@ -463,13 +463,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                                         && nextWidget.mLeft.mTarget.mOwner.mRight.mTarget.mOwner == nextWidget) {
                                     margin += nextWidget.mLeft.mTarget.mOwner.mRight.getMargin();
                                 }
-                                system.addGreaterThan(nextLeft, nextWidget.mLeft.mTarget.mSolverVariable, margin, 1);
+                                system.addGreaterThan(nextLeft, nextWidget.mLeft.mTarget.mSolverVariable, margin, SolverVariable.STRENGTH_MEDIUM);
                                 margin = nextWidget.mRight.getMargin();
                                 if (nextWidget.mRight.mTarget != null && nextWidget.mRight.mTarget.mOwner.mLeft.mTarget != null
                                         && nextWidget.mRight.mTarget.mOwner.mLeft.mTarget.mOwner == nextWidget) {
                                     margin += nextWidget.mRight.mTarget.mOwner.mLeft.getMargin();
                                 }
-                                system.addLowerThan(nextRight, nextWidget.mRight.mTarget.mSolverVariable, -margin, 1);
+                                system.addLowerThan(nextRight, nextWidget.mRight.mTarget.mSolverVariable, -margin, SolverVariable.STRENGTH_MEDIUM);
                             }
 
                             ArrayRow row = system.createRow();
@@ -522,9 +522,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         if (topTarget != null) {
                             if ((widget == first && widget.mVerticalChainStyle == CHAIN_SPREAD_INSIDE)
                                 || (chainPacked && widget != first)) {
-                                system.addEquality(top, topTarget, margin, 3);
+                                system.addEquality(top, topTarget, margin, SolverVariable.STRENGTH_EQUALITY);
                             } else {
-                                system.addGreaterThan(top, topTarget, margin, 1);
+                                system.addGreaterThan(top, topTarget, margin, SolverVariable.STRENGTH_MEDIUM);
                             }
                         }
                         if (bottomTarget != null) {
@@ -538,19 +538,19 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             }
                             if (!chainPacked) {
                                 if (isLast && first.mVerticalChainStyle == CHAIN_SPREAD_INSIDE) {
-                                    system.addEquality(bottom, bottomTarget, -margin, 3);
+                                    system.addEquality(bottom, bottomTarget, -margin, SolverVariable.STRENGTH_EQUALITY);
                                 } else {
-                                    system.addLowerThan(bottom, bottomTarget, -margin, 1);
+                                    system.addLowerThan(bottom, bottomTarget, -margin, SolverVariable.STRENGTH_MEDIUM);
                                     if (topTarget != null) {
                                         system.addCentering(top, topTarget, topMargin, 0.5f,
-                                                bottomTarget, bottom, bottomMargin, 2);
+                                                bottomTarget, bottom, bottomMargin, SolverVariable.STRENGTH_HIGH);
                                     }
                                 }
                             }
                         }
                         if (widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                             // Bypass those widgets
-                            system.addEquality(widget.mBottom.mSolverVariable, widget.mTop.mSolverVariable, 0, 3);
+                            system.addEquality(widget.mBottom.mSolverVariable, widget.mTop.mSolverVariable, 0, SolverVariable.STRENGTH_EQUALITY);
                         }
                         previous = widget;
                         if (bottomTarget != null) {
@@ -569,7 +569,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         SolverVariable bottomTarget = previous.mBottom.mTarget != null ? previous.mBottom.mTarget.mSolverVariable : null;
                         if (topTarget != null && bottomTarget != null) {
                             system.addCentering(top, topTarget, topMargin, first.mVerticalBiasPercent,
-                                    bottomTarget, bottom, bottomMargin, 2);
+                                    bottomTarget, bottom, bottomMargin, SolverVariable.STRENGTH_HIGH);
                         }
                     }
                 } else {
@@ -581,24 +581,24 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             if (previous != null) {
                                 margin += previous.mBottom.getMargin();
                             }
-                            int strength = 2;
+                            int strength = SolverVariable.STRENGTH_HIGH;
                             if (widget.mTop.mTarget.mOwner.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
-                                strength = 1;
+                                strength = SolverVariable.STRENGTH_MEDIUM;
                             }
                             system.addGreaterThan(widget.mTop.mSolverVariable, widget.mTop.mTarget.mSolverVariable, margin, strength);
                             margin = widget.mBottom.getMargin();
                             if (widget.mBottom.mTarget.mOwner.mTop.mTarget != null && widget.mBottom.mTarget.mOwner.mTop.mTarget.mOwner == widget) {
                                 margin += widget.mBottom.mTarget.mOwner.mTop.getMargin();
                             }
-                            strength = 2;
+                            strength = SolverVariable.STRENGTH_HIGH;
                             if (widget.mBottom.mTarget.mOwner.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
-                                strength = 1;
+                                strength = SolverVariable.STRENGTH_MEDIUM;
                             }
                             system.addLowerThan(widget.mBottom.mSolverVariable, widget.mBottom.mTarget.mSolverVariable, -margin, strength);
                         } else {
                             totalWeights += widget.mVerticalWeight;
-                            system.addGreaterThan(widget.mBottom.mSolverVariable, widget.mTop.mSolverVariable, 0, 0);
-                            system.addLowerThan(widget.mBottom.mSolverVariable, widget.mBottom.mTarget.mSolverVariable, 0, 0);
+                            system.addGreaterThan(widget.mBottom.mSolverVariable, widget.mTop.mSolverVariable, 0, SolverVariable.STRENGTH_LOW);
+                            system.addLowerThan(widget.mBottom.mSolverVariable, widget.mBottom.mTarget.mSolverVariable, 0, SolverVariable.STRENGTH_LOW);
                         }
                         previous = widget;
                         widget = widget.mBottom.mTarget.mOwner;
@@ -609,12 +609,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         if (w.mTop.mTarget != null) {
                             topMargin += w.mTop.mTarget.getMargin();
                         }
-                        system.addEquality(w.mTop.mSolverVariable, w.mTop.mTarget.mSolverVariable, topMargin, 0);
+                        system.addEquality(w.mTop.mSolverVariable, w.mTop.mTarget.mSolverVariable, topMargin, SolverVariable.STRENGTH_LOW);
                         int bottomMargin = w.mBottom.getMargin();
                         if (w.mBottom.mTarget != null) {
                             bottomMargin += w.mBottom.mTarget.getMargin();
                         }
-                        system.addEquality(w.mBottom.mSolverVariable, w.mBottom.mTarget.mSolverVariable, - bottomMargin, 0);
+                        system.addEquality(w.mBottom.mSolverVariable, w.mBottom.mTarget.mSolverVariable, - bottomMargin, SolverVariable.STRENGTH_LOW);
                     } else {
                         for (int j = 0; j < numMatchConstraints - 1; j++) {
                             ConstraintWidget current = mMatchConstraintsChainedWidgets[j];
@@ -628,13 +628,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                                     && current.mTop.mTarget.mOwner.mBottom.mTarget.mOwner == current) {
                                 margin += current.mTop.mTarget.mOwner.mBottom.getMargin();
                             }
-                            system.addGreaterThan(top, current.mTop.mTarget.mSolverVariable, margin, 1);
+                            system.addGreaterThan(top, current.mTop.mTarget.mSolverVariable, margin, SolverVariable.STRENGTH_MEDIUM);
                             margin = current.mBottom.getMargin();
                             if (current.mBottom.mTarget != null && current.mBottom.mTarget.mOwner.mTop.mTarget != null
                                     && current.mBottom.mTarget.mOwner.mTop.mTarget.mOwner == current) {
                                 margin += current.mBottom.mTarget.mOwner.mTop.getMargin();
                             }
-                            system.addLowerThan(bottom, current.mBottom.mTarget.mSolverVariable, -margin, 1);
+                            system.addLowerThan(bottom, current.mBottom.mTarget.mSolverVariable, -margin, SolverVariable.STRENGTH_MEDIUM);
                             if (j + 1 == numMatchConstraints - 1) {
                                 // last element
                                 margin = nextWidget.mTop.getMargin();
@@ -642,13 +642,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                                         && nextWidget.mTop.mTarget.mOwner.mBottom.mTarget.mOwner == nextWidget) {
                                     margin += nextWidget.mTop.mTarget.mOwner.mBottom.getMargin();
                                 }
-                                system.addGreaterThan(nextLeft, nextWidget.mTop.mTarget.mSolverVariable, margin, 1);
+                                system.addGreaterThan(nextLeft, nextWidget.mTop.mTarget.mSolverVariable, margin, SolverVariable.STRENGTH_MEDIUM);
                                 margin = nextWidget.mBottom.getMargin();
                                 if (nextWidget.mBottom.mTarget != null && nextWidget.mBottom.mTarget.mOwner.mTop.mTarget != null
                                         && nextWidget.mBottom.mTarget.mOwner.mTop.mTarget.mOwner == nextWidget) {
                                     margin += nextWidget.mBottom.mTarget.mOwner.mTop.getMargin();
                                 }
-                                system.addLowerThan(nextRight, nextWidget.mBottom.mTarget.mSolverVariable, -margin, 1);
+                                system.addLowerThan(nextRight, nextWidget.mBottom.mTarget.mSolverVariable, -margin, SolverVariable.STRENGTH_MEDIUM);
                             }
 
                             ArrayRow row = system.createRow();

@@ -144,8 +144,8 @@ public class EquationCreation {
         if (withError) {
             SolverVariable error1 = linearSystem.createErrorVariable();
             SolverVariable error2 = linearSystem.createErrorVariable();
-            error1.strength = 2;
-            error2.strength = 2;
+            error1.strength = SolverVariable.STRENGTH_HIGHEST;
+            error2.strength = SolverVariable.STRENGTH_HIGHEST;
             row.addError(error1, error2);
             if (DEBUG) {
                 System.out.println(
