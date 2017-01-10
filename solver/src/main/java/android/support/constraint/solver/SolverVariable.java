@@ -46,7 +46,6 @@ public class SolverVariable {
     public float computedValue;
 
     Type mType;
-    Strength mStrength = Strength.WEAK;
 
     final class Link {
         ArrayRow row;
@@ -90,26 +89,16 @@ public class SolverVariable {
         UNKNOWN
     }
 
-    public enum Strength {
-        STRONG,
-        WEAK,
-        UNKNOWN
-    }
-
     public static String getUniqueName() { uniqueId++; return "V" + uniqueId; }
 
-    public static String getUniqueName(Type type, Strength strength) {
+    public static String getUniqueName(Type type) {
         uniqueId++;
         switch (type) {
             case UNRESTRICTED: return "U" + uniqueId;
             case CONSTANT: return "C" + uniqueId;
             case SLACK: return "S" + uniqueId;
             case ERROR: {
-                if (strength == Strength.STRONG) {
-                    return "E" + uniqueId;
-                } else {
-                    return "e" + uniqueId;
-                }
+                return "e" + uniqueId;
             }
         }
         return "V" + uniqueId;
@@ -131,7 +120,7 @@ public class SolverVariable {
         mCache = cache;
         mType = type;
         if (INTERNAL_DEBUG) {
-            mName = getUniqueName(type, Strength.UNKNOWN);
+            mName = getUniqueName(type);
         }
     }
 
@@ -199,7 +188,6 @@ public class SolverVariable {
     public void reset() {
         mName = null;
         mType = Type.UNKNOWN;
-        mStrength = Strength.STRONG;
         strength = SolverVariable.STRENGTH_NONE;
         id = -1;
         definitionId = -1;
@@ -228,18 +216,7 @@ public class SolverVariable {
     public void setType(Type type) {
         mType = type;
         if (INTERNAL_DEBUG && mName == null) {
-            mName = getUniqueName(type, Strength.UNKNOWN);
-        }
-    }
-
-    /**
-     * Setter for the strength (used for errors and slack variables)
-     * @param s the strength
-     */
-    public void setStrength(Strength s) {
-        mStrength = s;
-        if (INTERNAL_DEBUG && mName == null) {
-            mName = getUniqueName(mType, mStrength);
+            mName = getUniqueName(type);
         }
     }
 

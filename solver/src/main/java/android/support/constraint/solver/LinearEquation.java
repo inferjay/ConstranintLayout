@@ -740,17 +740,6 @@ class LinearEquation {
         return this;
     }
 
-    public LinearEquation withStrongError() {
-        String name = getNextErrorVariableName();
-        EquationVariable e = new EquationVariable(mSystem, 1, name + "+", SolverVariable.Type.ERROR);
-        e.getSolverVariable().setStrength(SolverVariable.Strength.STRONG);
-        mCurrentSide.add(e);
-        e = new EquationVariable(mSystem, -1, name + "-", SolverVariable.Type.ERROR);
-        e.getSolverVariable().setStrength(SolverVariable.Strength.STRONG);
-        mCurrentSide.add(e);
-        return this;
-    }
-
     public EquationVariable addArtificialVar() {
         EquationVariable e = new EquationVariable(mSystem, 1,
                 getNextArtificialVariableName(), SolverVariable.Type.ERROR);
