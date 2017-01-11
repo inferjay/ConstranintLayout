@@ -154,6 +154,22 @@ public class ConstraintSet {
      * In right to left languages it corresponds to the left side of the view
      */
     public static final int END = ConstraintLayout.LayoutParams.END;
+
+    /**
+     * Chain spread style
+     */
+    public static final int CHAIN_SPREAD = ConstraintLayout.LayoutParams.CHAIN_SPREAD;
+
+    /**
+     * Chain spread inside style
+     */
+    public static final int CHAIN_SPREAD_INSIDE = ConstraintLayout.LayoutParams.CHAIN_SPREAD_INSIDE;
+
+    /**
+     * Chain packed style
+     */
+    public static final int CHAIN_PACKED = ConstraintLayout.LayoutParams.CHAIN_PACKED;
+
     private static final boolean DEBUG = false;
     private static final int[] VISIBILITY_FLAGS = new int[]{VISIBLE, INVISIBLE, GONE};
 
@@ -751,21 +767,25 @@ public class ConstraintSet {
                     constraint.leftToRight = Constraint.UNSET;
                     constraint.leftToLeft = Constraint.UNSET;
                     constraint.leftMargin = 0;
+                    constraint.goneLeftMargin = 0;
                     break;
                 case RIGHT:
                     constraint.leftToRight = Constraint.UNSET;
                     constraint.leftToLeft = Constraint.UNSET;
                     constraint.rightMargin = 0;
+                    constraint.goneRightMargin = 0;
                     break;
                 case TOP:
                     constraint.topToBottom = Constraint.UNSET;
                     constraint.topToTop = Constraint.UNSET;
                     constraint.topMargin = 0;
+                    constraint.goneTopMargin = 0;
                     break;
                 case BOTTOM:
                     constraint.bottomToTop = Constraint.UNSET;
                     constraint.bottomToBottom = Constraint.UNSET;
                     constraint.bottomMargin = 0;
+                    constraint.goneBottomMargin = 0;
                     break;
                 case BASELINE:
 
@@ -775,11 +795,13 @@ public class ConstraintSet {
                     constraint.startToEnd = Constraint.UNSET;
                     constraint.startToStart = Constraint.UNSET;
                     constraint.startMargin = 0;
+                    constraint.goneStartMargin = 0;
                     break;
                 case END:
                     constraint.endToStart = Constraint.UNSET;
                     constraint.endToEnd = Constraint.UNSET;
                     constraint.endMargin = 0;
+                    constraint.goneEndMargin = 0;
                     break;
                 default:
                     throw new IllegalArgumentException("unknown constraint");
@@ -816,6 +838,41 @@ public class ConstraintSet {
                 break;
             case END:
                 constraint.endMargin = value;
+                break;
+            default:
+                throw new IllegalArgumentException("unknown constraint");
+        }
+    }
+
+    /**
+     * Sets the gone margin.
+     *
+     * @param viewId ID of view to adjust the margin on
+     * @param anchor The side to adjust the margin on
+     * @param value  The new value for the margin
+     */
+    public void setGoneMargin(int viewId, int anchor, int value) {
+        Constraint constraint = get(viewId);
+        switch (anchor) {
+            case LEFT:
+                constraint.goneLeftMargin = value;
+                break;
+            case RIGHT:
+                constraint.goneRightMargin = value;
+                break;
+            case TOP:
+                constraint.goneTopMargin = value;
+                break;
+            case BOTTOM:
+                constraint.goneBottomMargin = value;
+                break;
+            case BASELINE:
+                throw new IllegalArgumentException("baseline does not support margins");
+            case START:
+                constraint.goneStartMargin = value;
+                break;
+            case END:
+                constraint.goneEndMargin = value;
                 break;
             default:
                 throw new IllegalArgumentException("unknown constraint");
@@ -882,6 +939,65 @@ public class ConstraintSet {
     public void constrainWidth(int viewId, int width) {
         get(viewId).mWidth = width;
     }
+
+    /**
+     * The child's weight that we can use to distribute the available horizontal space
+     * in a chain, if the dimension behaviour is set to MATCH_CONSTRAINT
+     *
+     * @param viewId ID of view to adjust it height
+     * @param weight the weight that we can use to distribute the horizontal space
+     */
+    public void setHorizontalWeight(int viewId, int weight) {
+        get(viewId).horizontalWeight = weight;
+    }
+
+    /**
+     * The child's weight that we can use to distribute the available horizontal space
+     * in a chain, if the dimension behaviour is set to MATCH_CONSTRAINT
+     *
+     * @param viewId ID of view to adjust it height
+     * @param weight the weight that we can use to distribute the horizontal space
+     */
+    public void setVerticalWeight(int viewId, int weight) {
+        get(viewId).verticalWeight = weight;
+    }
+
+    /**
+     * How the elements of the horizontal chain will be positioned.
+     * The possible values are:
+     *
+     * <ul>
+     *     <li>{@see CHAIN_SPREAD} -- the elements will be spread out</li>
+     *     <li>{@see CHAIN_SPREAD_INSIDE} -- similar, but the endpoints of the chain will not be spread out</li>
+     *     <li>{@see CHAIN_PACKED} -- the elements of the chain will be packed together. The horizontal
+     *          bias attribute of the child will then affect the positioning of the packed elements</li>
+     * </ul>
+     *
+     * @param viewId ID of view to adjust it height
+     * @param chainStyle the weight that we can use to distribute the horizontal space
+     */
+    public void setHorizontalChainStyle(int viewId, int chainStyle) {
+        get(viewId).horizontalChainStyle = chainStyle;
+    }
+
+    /**
+     * How the elements of the vertical chain will be positioned.
+     * in a chain, if the dimension behaviour is set to MATCH_CONSTRAINT
+     *
+     * <ul>
+     *     <li>{@see CHAIN_SPREAD} -- the elements will be spread out</li>
+     *     <li>{@see CHAIN_SPREAD_INSIDE} -- similar, but the endpoints of the chain will not be spread out</li>
+     *     <li>{@see CHAIN_PACKED} -- the elements of the chain will be packed together. The horizontal
+     *          bias attribute of the child will then affect the positioning of the packed elements</li>
+     * </ul>
+     *
+     * @param viewId ID of view to adjust it height
+     * @param chainStyle the weight that we can use to distribute the horizontal space
+     */
+    public void setVerticalChainStyle(int viewId, int chainStyle) {
+        get(viewId).verticalChainStyle = chainStyle;
+    }
+
 
     /**
      * Creates a ConstraintLayout virtual object. Currently only horizontal or vertical GuideLines.

@@ -483,11 +483,7 @@ public class ConstraintLayout extends ViewGroup {
                 widget = layoutParams.widget;
             }
         }
-        ConstraintWidgetContainer container = mLayoutWidget;
-        widget.setCompanionWidget(view);
         mChildrenByIds.put(view.getId(), view);
-        container.add(widget);
-        widget.setParent(container);
         mDirtyHierarchy = true;
     }
 
@@ -627,11 +623,10 @@ public class ConstraintLayout extends ViewGroup {
             }
 
             final LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
-
             widget.reset();
-            widget.setParent(mLayoutWidget);
             widget.setVisibility(child.getVisibility());
             widget.setCompanionWidget(child);
+            mLayoutWidget.add(widget);
 
             if (!layoutParams.verticalDimensionFixed || !layoutParams.horizontalDimensionFixed) {
                 mVariableDimensionsWidgets.add(widget);
@@ -1257,17 +1252,17 @@ public class ConstraintLayout extends ViewGroup {
         /**
          * Chain spread style
          */
-        private static final int CHAIN_SPREAD = ConstraintWidget.CHAIN_SPREAD;
+        public static final int CHAIN_SPREAD = ConstraintWidget.CHAIN_SPREAD;
 
         /**
          * Chain spread inside style
          */
-        private static final int CHAIN_SPREAD_INSIDE = ConstraintWidget.CHAIN_SPREAD_INSIDE;
+        public static final int CHAIN_SPREAD_INSIDE = ConstraintWidget.CHAIN_SPREAD_INSIDE;
 
         /**
          * Chain packed style
          */
-        private static final int CHAIN_PACKED = ConstraintWidget.CHAIN_PACKED;
+        public static final int CHAIN_PACKED = ConstraintWidget.CHAIN_PACKED;
 
         /**
          * The distance of child (guideline) to the top or left edge of its parent.
