@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Use a constraintSet XML. -->
+    <attr name="constraintSet" format="reference"/>
     <!-- The space from the beginning edge of the parent to this guideline. -->
     <attr name="layout_constraintGuide_begin" format="dimension"/>
     <!-- The space from the ending edge of the parent to this  guideline. -->
@@ -134,6 +136,7 @@
         <attr name="android:maxHeight"/>
         <attr name="layout_optimizationLevel"/>
 
+        <attr name="constraintSet"/>
         <attr name="layout_constraintGuide_begin"/>
         <attr name="layout_constraintGuide_end"/>
         <attr name="layout_constraintGuide_percent"/>

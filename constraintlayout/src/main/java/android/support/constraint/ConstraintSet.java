@@ -450,12 +450,21 @@ public class ConstraintSet {
         }
     }
 
+
     /**
      * Apply the constraints to a ConstraintLayout.
      *
      * @param constraintLayout to be modified
      */
     public void applyTo(ConstraintLayout constraintLayout) {
+        applyToInternal(constraintLayout);
+        constraintLayout.removeConstraintSet();
+    }
+
+    /**
+     *
+     */
+    void applyToInternal(ConstraintLayout constraintLayout) {
         int count = constraintLayout.getChildCount();
         HashSet<Integer> used = new HashSet<Integer>(mConstraints.keySet());
 

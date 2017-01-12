@@ -34,6 +34,7 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 
 import static android.support.constraint.ConstraintLayout.LayoutParams.MATCH_CONSTRAINT;
+import static android.support.constraint.ConstraintLayout.LayoutParams.PARENT_ID;
 import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -404,6 +405,7 @@ public class ConstraintLayout extends ViewGroup {
 
     private boolean mDirtyHierarchy = true;
     private int mOptimizationLevel = 2; // all
+    private ConstraintSet mConstraintSet = null;
 
     public ConstraintLayout(Context context) {
         super(context);
@@ -423,6 +425,7 @@ public class ConstraintLayout extends ViewGroup {
     private void init(AttributeSet attrs) {
         mLayoutWidget.setCompanionWidget(this);
         mChildrenByIds.put(getId(), this);
+        mConstraintSet = null;
         if (attrs != null) {
             TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.ConstraintLayout_Layout);
             final int N = a.getIndexCount();
@@ -438,6 +441,10 @@ public class ConstraintLayout extends ViewGroup {
                     mMaxHeight = a.getDimensionPixelOffset(attr, mMaxHeight);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_optimizationLevel) {
                     mOptimizationLevel = a.getInt(attr, mOptimizationLevel);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_constraintSet) {
+                    int id = a.getResourceId(attr, 0);
+                    mConstraintSet = new ConstraintSet();
+                    mConstraintSet.load(getContext(),id);
                 }
             }
         }
@@ -614,6 +621,9 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     private void setChildrenConstraints() {
+        if (mConstraintSet != null) {
+            mConstraintSet.applyToInternal(this);
+        }
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
@@ -1180,6 +1190,13 @@ public class ConstraintLayout extends ViewGroup {
     @Override
     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
         return p instanceof LayoutParams;
+    }
+
+    /**
+     * Clears a constraint set assigned with the constraintSet attribute
+     */
+    public void removeConstraintSet() {
+        mConstraintSet = null;
     }
 
     /**
