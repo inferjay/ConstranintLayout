@@ -179,6 +179,17 @@
         <attr name="android:orientation"/>
         <attr name="android:id"/>
         <attr name="android:visibility"/>
+        <attr name="android:alpha"/>
+        <attr name="android:elevation"/>
+        <attr name="android:rotationX"/>
+        <attr name="android:rotationY"/>
+        <attr name="android:scaleX"/>
+        <attr name="android:scaleY"/>
+        <attr name="android:transformPivotX"/>
+        <attr name="android:transformPivotY"/>
+        <attr name="android:translationX"/>
+        <attr name="android:translationY"/>
+        <attr name="android:translationZ"/>
         <attr name="android:layout_width"/>
         <attr name="android:layout_height"/>
         <attr name="android:layout_marginStart"/>

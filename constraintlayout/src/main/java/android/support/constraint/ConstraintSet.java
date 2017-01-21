@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.util.*;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -218,9 +219,18 @@ public class ConstraintSet {
     private static final int VERTICAL_WEIGHT = 40;
     private static final int HORIZONTAL_STYLE = 41;
     private static final int VERTICAL_STYLE = 42;
-
-
-    private static final int UNUSED = 43;
+    private static final int ALPHA = 43;
+    private static final int ELEVATION = 44;
+    private static final int ROTATION_X = 45;
+    private static final int ROTATION_Y = 46;
+    private static final int SCALE_X = 47;
+    private static final int SCALE_Y = 48;
+    private static final int TRANSFORM_PIVOT_X = 49;
+    private static final int TRANSFORM_PIVOT_Y = 50;
+    private static final int TRANSLATION_X = 51;
+    private static final int TRANSLATION_Y = 52;
+    private static final int TRANSLATION_Z = 53;
+    private static final int UNUSED = 54;
 
     static {
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintLeft_toLeftOf, LEFT_TO_LEFT);
@@ -273,6 +283,19 @@ public class ConstraintSet {
         mapToConstant.append(R.styleable.ConstraintSet_android_layout_width, LAYOUT_WIDTH);
         mapToConstant.append(R.styleable.ConstraintSet_android_layout_height, LAYOUT_HEIGHT);
         mapToConstant.append(R.styleable.ConstraintSet_android_visibility, LAYOUT_VISIBILITY);
+        mapToConstant.append(R.styleable.ConstraintSet_android_alpha, ALPHA);
+        mapToConstant.append(R.styleable.ConstraintSet_android_elevation, ELEVATION);
+        mapToConstant.append(R.styleable.ConstraintSet_android_rotationX, ROTATION_X);
+        mapToConstant.append(R.styleable.ConstraintSet_android_rotationY, ROTATION_Y);
+        mapToConstant.append(R.styleable.ConstraintSet_android_scaleX, SCALE_X);
+        mapToConstant.append(R.styleable.ConstraintSet_android_scaleY, SCALE_Y);
+        mapToConstant.append(R.styleable.ConstraintSet_android_transformPivotX, TRANSFORM_PIVOT_X);
+        mapToConstant.append(R.styleable.ConstraintSet_android_transformPivotY, TRANSFORM_PIVOT_Y);
+        mapToConstant.append(R.styleable.ConstraintSet_android_translationX, TRANSLATION_X);
+        mapToConstant.append(R.styleable.ConstraintSet_android_translationY, TRANSLATION_Y);
+        mapToConstant.append(R.styleable.ConstraintSet_android_translationZ, TRANSLATION_Z);
+
+
         mapToConstant.append(R.styleable.ConstraintSet_android_id, VIEW_ID);
     }
 
@@ -326,6 +349,17 @@ public class ConstraintSet {
         public float horizontalWeight;
         public int horizontalChainStyle;
         public int verticalChainStyle;
+        public float alpha;
+        public float elevation;
+        public float rotationX;
+        public float rotationY;
+        public float scaleX;
+        public float scaleY;
+        public float transformPivotX;
+        public float transformPivotY;
+        public float translationX;
+        public float translationY;
+        public float translationZ;
 
         private void fillFrom(int viewId, ConstraintLayout.LayoutParams param) {
             mViewId = viewId;
@@ -447,6 +481,21 @@ public class ConstraintSet {
             Constraint constraint = mConstraints.get(id);
             constraint.fillFrom(id, param);
             constraint.visibility = view.getVisibility();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                constraint.alpha = view.getAlpha();
+                constraint.rotationX = view.getRotationX();
+                constraint.rotationY = view.getRotationY();
+                constraint.scaleX = view.getScaleX();
+                constraint.scaleY = view.getScaleY();
+                constraint.transformPivotX = view.getPivotX();
+                constraint.transformPivotY = view.getPivotY();
+                constraint.translationX = view.getTranslationX();
+                constraint.translationY = view.getTranslationY();
+                if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+                    constraint.translationZ = view.getTranslationZ();
+                    constraint.elevation = view.getElevation();
+                }
+            }
         }
     }
 
@@ -478,6 +527,21 @@ public class ConstraintSet {
                 constraint.applyTo(param);
                 view.setLayoutParams(param);
                 view.setVisibility(constraint.visibility);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    view.setAlpha(constraint.alpha);
+                    view.setRotationX(constraint.rotationX);
+                    view.setRotationY(constraint.rotationY);
+                    view.setScaleX(constraint.scaleX);
+                    view.setScaleY(constraint.scaleY);
+                    view.setPivotX(constraint.transformPivotX);
+                    view.setPivotY(constraint.transformPivotY);
+                    view.setTranslationX(constraint.translationX);
+                    view.setTranslationY(constraint.translationY);
+                    if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+                        view.setTranslationZ(constraint.translationZ);
+                        view.setElevation(constraint.elevation);
+                    }
+                }
             }
         }
         for (Integer id : used) {
@@ -913,7 +977,7 @@ public class ConstraintSet {
      * For Example a HD screen is 16 by 9 = 16/(float)9 = 1.777f.
      *
      * @param viewId ID of view to constrain
-     * @param ratio  The ratio of the width to height (width / height)
+     * @param ratio The ratio of the width to height (width / height)
      */
     public void setDimensionRatio(int viewId, String ratio) {
         get(viewId).dimensionRatio = ratio;
@@ -922,11 +986,146 @@ public class ConstraintSet {
     /**
      * Adjust the visibility of a view.
      *
-     * @param viewId     ID of view to adjust the vertical
+     * @param viewId ID of view to adjust the vertical
      * @param visibility the visibility
      */
     public void setVisibility(int viewId, int visibility) {
         get(viewId).visibility = visibility;
+    }
+
+    /**
+     * Adjust the alpha of a view.
+     *
+     * @param viewId ID of view to adjust the vertical
+     * @param alpha the alpha
+     */
+    public void setAlpha(int viewId, int alpha) {
+        get(viewId).alpha = alpha;
+    }
+
+    /**
+     * Adjust the elevation of a view.
+     *
+     * @param viewId ID of view to adjust the elevation
+     * @param elevation the elevation
+     */
+    public void setElevation(int viewId, int elevation) {
+        get(viewId).elevation = elevation;
+    }
+
+    /**
+     * Adjust the post-layout rotation about the X axis of a view.
+     *
+     * @param viewId ID of view to adjust th X rotation
+     * @param rotationX the rotation about the X axis
+     */
+    public void setRotationX(int viewId, int rotationX) {
+        get(viewId).rotationX = rotationX;
+    }
+
+    /**
+     * Adjust the post-layout rotation about the Y axis of a view.
+     *
+     * @param viewId ID of view to adjust the Y rotation
+     * @param rotationY the rotationY
+     */
+    public void setRotationY(int viewId, int rotationY) {
+        get(viewId).rotationY = rotationY;
+    }
+
+    /**
+     * Adjust the post-layout scale in X of a view.
+     *
+     * @param viewId ID of view to adjust the scale in X
+     * @param scaleX the the scale in X
+     */
+    public void setScaleX(int viewId, int scaleX) {
+        get(viewId).scaleX = scaleX;
+    }
+
+    /**
+     * Adjust the post-layout scale in Y of a view.
+     *
+     * @param viewId ID of view to adjust the scale in Y
+     * @param scaleY the scale in Y
+     */
+    public void setScaleY(int viewId, int scaleY) {
+        get(viewId).scaleY = scaleY;
+    }
+
+    /**
+     * Set X location of the pivot point around which the view will rotate and scale.
+     *
+     * @param viewId ID of view to adjust the transforms pivot point about X
+     * @param transformPivotX X location of the pivot point.
+     */
+    public void setTransformPivotX(int viewId, int transformPivotX) {
+        get(viewId).transformPivotX = transformPivotX;
+    }
+
+    /**
+     * Set Y location of the pivot point around which the view will rotate and scale.
+     *
+     * @param viewId ID of view to adjust the transforms pivot point about Y
+     * @param transformPivotY Y location of the pivot point.
+     */
+    public void setTransformPivotY(int viewId, int transformPivotY) {
+        get(viewId).transformPivotY = transformPivotY;
+    }
+
+    /**
+     * Set X,Y location of the pivot point around which the view will rotate and scale.
+     *
+     * @param viewId ID of view to adjust the transforms pivot point
+     * @param transformPivotX X location of the pivot point.
+     * @param transformPivotY Y location of the pivot point.
+     */
+    public void setTransformPivot(int viewId, int transformPivotX, int transformPivotY) {
+        Constraint constraint = get(viewId);
+        constraint.transformPivotY = transformPivotY;
+        constraint.transformPivotX = transformPivotX;
+    }
+    /**
+     * Adjust the post-layout X translation of a view.
+     *
+     * @param viewId ID of view to translation
+     * @param translationX the translation in X
+     */
+    public void setTranslationX(int viewId, int translationX) {
+        get(viewId).translationX = translationX;
+    }
+
+    /**
+     * Adjust the  post-layout Y translation of a view.
+     *
+     * @param viewId ID of view to adjust its translation in Y
+     * @param translationY the translation in Y
+     */
+    public void setTranslationY(int viewId, int translationY) {
+        get(viewId).translationY = translationY;
+    }
+
+    /**
+     * Adjust the post-layout translation of a view.
+     *
+     * @param viewId ID of view to adjust its translation in Y
+     * @param translationX the translation in X
+     * @param translationY the translation in Y
+     */
+    public void setTranslation(int viewId, int translationX, int translationY) {
+        Constraint constraint = get(viewId);
+        constraint.translationX = translationX;
+        constraint.translationY = translationY;
+    }
+
+    /**
+     * Adjust the translation in Z of a view.
+     *
+     * @param viewId ID of view to adjust the
+     * @param translationZ the translationZ
+     */
+    public void setTranslationZ(int viewId, int translationZ) {
+        get(viewId).translationZ = translationZ;
     }
 
     /**
@@ -1290,6 +1489,39 @@ public class ConstraintSet {
                     c.visibility = a.getInt(attr, c.visibility);
                     c.visibility = VISIBILITY_FLAGS[c.visibility];
                     break;
+                case ALPHA:
+                    c.alpha = a.getFloat(attr, c.alpha);
+                     break;
+                case ELEVATION:
+                    c.elevation = a.getFloat(attr, c.elevation);
+                    break;
+                case ROTATION_X:
+                    c.rotationX = a.getFloat(attr, c.rotationX);
+                    break;
+                case ROTATION_Y:
+                    c.rotationY = a.getFloat(attr, c.rotationY);
+                    break;
+                case SCALE_X:
+                    c.scaleX = a.getFloat(attr, c.scaleX);
+                    break;
+                case SCALE_Y:
+                    c.scaleY = a.getFloat(attr, c.scaleY);
+                    break;
+                case TRANSFORM_PIVOT_X:
+                    c.transformPivotX = a.getFloat(attr, c.transformPivotX);
+                    break;
+                case TRANSFORM_PIVOT_Y:
+                    c.transformPivotY = a.getFloat(attr, c.transformPivotY);
+                    break;
+                case TRANSLATION_X:
+                    c.translationX = a.getFloat(attr, c.translationX);
+                    break;
+                case TRANSLATION_Y:
+                    c.translationY = a.getFloat(attr, c.translationY);
+                    break;
+                case TRANSLATION_Z:
+                    c.translationZ = a.getFloat(attr, c.translationZ);
+                    break;
                 case VERTICAL_WEIGHT:
                     c.verticalWeight = a.getFloat(attr, c.verticalWeight);
                     break;
@@ -1307,6 +1539,9 @@ public class ConstraintSet {
                     break;
                 case DIMENSION_RATIO:
                     c.dimensionRatio = a.getString(attr);
+                    break;
+                case UNUSED:
+                    Log.w(TAG, "unused attribute 0x" + Integer.toHexString(attr) + "   " + mapToConstant.get(attr));
                     break;
                 default:
                     Log.w(TAG, "Unknown attribute 0x" + Integer.toHexString(attr) + "   " + mapToConstant.get(attr));
