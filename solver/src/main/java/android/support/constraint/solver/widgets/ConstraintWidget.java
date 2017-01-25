@@ -94,8 +94,8 @@ public class ConstraintWidget implements Solvable {
     // Dimensions of the widget
     private int mWidth = 0;
     private int mHeight = 0;
-    private float mDimensionRatio = 0;
-    private int mDimensionRatioSide = UNKNOWN;
+    protected float mDimensionRatio = 0;
+    protected int mDimensionRatioSide = UNKNOWN;
 
     private int mSolverLeft = 0;
     private int mSolverTop = 0;
@@ -155,6 +155,10 @@ public class ConstraintWidget implements Solvable {
     int mDistToLeft;
     int mDistToRight;
     int mDistToBottom;
+    boolean mLeftHasCentered;
+    boolean mRightHasCentered;
+    boolean mTopHasCentered;
+    boolean mBottomHasCentered;
     boolean mWrapVisited;
 
     // Chain support
