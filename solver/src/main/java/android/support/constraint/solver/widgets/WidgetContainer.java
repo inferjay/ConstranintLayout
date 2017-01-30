@@ -294,4 +294,8 @@ public class WidgetContainer extends ConstraintWidget {
             widget.resetGroups();
         }
     }
+
+    public void removeAllChildren() {
+        mChildren.clear();
+    }
 }

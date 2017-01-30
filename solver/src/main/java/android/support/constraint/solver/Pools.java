@@ -130,6 +130,9 @@ final class Pools {
 
         @Override
         public void releaseAll(T[] variables, int count) {
+            if (count > variables.length) {
+                count = variables.length;
+            }
             for (int i = 0; i < count; i++) {
                 T instance = variables[i];
                 if (DEBUG) {

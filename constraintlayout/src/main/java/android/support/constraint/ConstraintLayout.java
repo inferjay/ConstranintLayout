@@ -625,6 +625,7 @@ public class ConstraintLayout extends ViewGroup {
             mConstraintSet.applyToInternal(this);
         }
         final int count = getChildCount();
+        mLayoutWidget.removeAllChildren();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             ConstraintWidget widget = getViewWidget(child);
@@ -1193,10 +1194,11 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     /**
-     * Clears a constraint set assigned with the constraintSet attribute
+     * Sets a ConstraintSet object to manage constraints. Constraints set overrides LayoutParams of child views.
+     * @param set Layout children using ConstraintSet
      */
-    public void removeConstraintSet() {
-        mConstraintSet = null;
+    public void setConstraintSet(ConstraintSet set) {
+        mConstraintSet = set;
     }
 
     /**
