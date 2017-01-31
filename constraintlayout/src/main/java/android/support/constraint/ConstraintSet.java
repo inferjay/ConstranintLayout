@@ -264,8 +264,6 @@ public class ConstraintSet {
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintHorizontal_chainStyle, HORIZONTAL_STYLE);
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintVertical_chainStyle, VERTICAL_STYLE);
 
-
-
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintHorizontal_bias, HORIZONTAL_BIAS);
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintVertical_bias, VERTICAL_BIAS);
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintDimensionRatio, DIMENSION_RATIO);
@@ -295,11 +293,11 @@ public class ConstraintSet {
         mapToConstant.append(R.styleable.ConstraintSet_android_translationY, TRANSLATION_Y);
         mapToConstant.append(R.styleable.ConstraintSet_android_translationZ, TRANSLATION_Z);
 
-
         mapToConstant.append(R.styleable.ConstraintSet_android_id, VIEW_ID);
     }
 
     private static class Constraint {
+
         boolean mIsGuideline = false;
         public int mWidth;
         public int mHeight;
@@ -332,34 +330,99 @@ public class ConstraintSet {
         public int editorAbsoluteY = UNSET;
 
         public int orientation = UNSET;
-        public int leftMargin;
-        public int rightMargin;
-        public int topMargin;
-        public int bottomMargin;
-        public int endMargin;
-        public int startMargin;
-        public int visibility;
-        public int goneLeftMargin;
-        public int goneTopMargin;
-        public int goneRightMargin;
-        public int goneBottomMargin;
-        public int goneEndMargin;
-        public int goneStartMargin;
-        public float verticalWeight;
-        public float horizontalWeight;
-        public int horizontalChainStyle;
-        public int verticalChainStyle;
-        public float alpha;
-        public float elevation;
-        public float rotationX;
-        public float rotationY;
-        public float scaleX;
-        public float scaleY;
-        public float transformPivotX;
-        public float transformPivotY;
-        public float translationX;
-        public float translationY;
-        public float translationZ;
+        public int leftMargin = 0;
+        public int rightMargin = 0;
+        public int topMargin = 0;
+        public int bottomMargin = 0;
+        public int endMargin = 0;
+        public int startMargin = 0;
+        public int visibility = VISIBLE;
+        public int goneLeftMargin = 0;
+        public int goneTopMargin = 0;
+        public int goneRightMargin = 0;
+        public int goneBottomMargin = 0;
+        public int goneEndMargin = 0;
+        public int goneStartMargin = 0;
+        public float verticalWeight = 0;
+        public float horizontalWeight = 0;
+        public int horizontalChainStyle = CHAIN_SPREAD;
+        public int verticalChainStyle = CHAIN_SPREAD;
+        public float alpha = 1;
+        public boolean applyElevation = false;
+        public float elevation = 0;
+        public float rotationX = 0;
+        public float rotationY = 0;
+        public float scaleX = 1;
+        public float scaleY = 1;
+        public float transformPivotX = 0;
+        public float transformPivotY = 0;
+        public float translationX = 0;
+        public float translationY = 0;
+        public float translationZ = 0;
+
+        public Constraint clone() {
+            Constraint clone = new Constraint();
+            clone.mIsGuideline = mIsGuideline;
+            clone.mWidth = mWidth;
+            clone.mHeight = mHeight;
+            clone.guideBegin = guideBegin;
+            clone.guideEnd = guideEnd;
+            clone.guidePercent = guidePercent;
+            clone.leftToLeft = leftToLeft;
+            clone.leftToRight = leftToRight;
+            clone.rightToLeft = rightToLeft;
+            clone.rightToRight = rightToRight;
+            clone.topToTop = topToTop;
+            clone.topToBottom = topToBottom;
+            clone.bottomToTop = bottomToTop;
+            clone.bottomToBottom = bottomToBottom;
+            clone.baselineToBaseline = baselineToBaseline;
+            clone.startToEnd = startToEnd;
+            clone.startToStart = startToStart;
+            clone.endToStart = endToStart;
+            clone.endToEnd = endToEnd;
+            clone.horizontalBias = horizontalBias;
+            clone.verticalBias = verticalBias;
+            clone.dimensionRatio = dimensionRatio;
+            clone.editorAbsoluteX = editorAbsoluteX;
+            clone.editorAbsoluteY = editorAbsoluteY;
+            clone.horizontalBias = horizontalBias;
+            clone.horizontalBias = horizontalBias;
+            clone.horizontalBias = horizontalBias;
+            clone.horizontalBias = horizontalBias;
+            clone.horizontalBias = horizontalBias;
+            clone.orientation = orientation;
+            clone.leftMargin = leftMargin;
+            clone.rightMargin = rightMargin;
+            clone.topMargin = topMargin;
+            clone.bottomMargin = bottomMargin;
+            clone.endMargin = endMargin;
+            clone.startMargin = startMargin;
+            clone.visibility = visibility;
+            clone.goneLeftMargin = goneLeftMargin;
+            clone.goneTopMargin = goneTopMargin;
+            clone.goneRightMargin = goneRightMargin;
+            clone.goneBottomMargin = goneBottomMargin;
+            clone.goneEndMargin = goneEndMargin;
+            clone.goneStartMargin = goneStartMargin;
+            clone.verticalWeight = verticalWeight;
+            clone.horizontalWeight = horizontalWeight;
+            clone.horizontalChainStyle = horizontalChainStyle;
+            clone.verticalChainStyle = verticalChainStyle;
+            clone.alpha = alpha;
+            clone.applyElevation = applyElevation;
+            clone.elevation = elevation;
+            clone.rotationX = rotationX;
+            clone.rotationY = rotationY;
+            clone.scaleX = scaleX;
+            clone.scaleY = scaleY;
+            clone.transformPivotX = transformPivotX;
+            clone.transformPivotY = transformPivotY;
+            clone.translationX = translationX;
+            clone.translationY = translationY;
+            clone.translationZ = translationZ;
+            return clone;
+        }
 
         private void fillFrom(int viewId, ConstraintLayout.LayoutParams param) {
             mViewId = viewId;
@@ -455,11 +518,23 @@ public class ConstraintSet {
     /**
      * Copy the constraints from a layout.
      *
-     * @param context            the context for the layout inflation
+     * @param context the context for the layout inflation
      * @param constraintLayoutId the id of the layout file
      */
     public void clone(Context context, int constraintLayoutId) {
         clone((ConstraintLayout) LayoutInflater.from(context).inflate(constraintLayoutId, null));
+    }
+
+    /**
+     * Copy the constraints from a layout.
+     *
+     * @param set constraint set to copy
+     */
+    public void clone(ConstraintSet set) {
+        mConstraints.clear();
+        for (Integer key : set.mConstraints.keySet()) {
+            mConstraints.put(key, set.mConstraints.get(key).clone());
+        }
     }
 
     /**
@@ -493,12 +568,13 @@ public class ConstraintSet {
                 constraint.translationY = view.getTranslationY();
                 if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
                     constraint.translationZ = view.getTranslationZ();
-                    constraint.elevation = view.getElevation();
+                    if (constraint.applyElevation) {
+                        constraint.elevation = view.getElevation();
+                    }
                 }
             }
         }
     }
-
 
     /**
      * Apply the constraints to a ConstraintLayout.
@@ -507,7 +583,7 @@ public class ConstraintSet {
      */
     public void applyTo(ConstraintLayout constraintLayout) {
         applyToInternal(constraintLayout);
-        constraintLayout.removeConstraintSet();
+        constraintLayout.setConstraintSet(null);
     }
 
     /**
@@ -523,7 +599,8 @@ public class ConstraintSet {
             if (mConstraints.containsKey(id)) {
                 used.remove(id);
                 Constraint constraint = mConstraints.get(id);
-                ConstraintLayout.LayoutParams param = (ConstraintLayout.LayoutParams) view.getLayoutParams();
+                ConstraintLayout.LayoutParams param = (ConstraintLayout.LayoutParams) view
+                    .getLayoutParams();
                 constraint.applyTo(param);
                 view.setLayoutParams(param);
                 view.setVisibility(constraint.visibility);
@@ -539,7 +616,9 @@ public class ConstraintSet {
                     view.setTranslationY(constraint.translationY);
                     if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
                         view.setTranslationZ(constraint.translationZ);
-                        view.setElevation(constraint.elevation);
+                        if (constraint.applyElevation) {
+                            view.setElevation(constraint.elevation);
+                        }
                     }
                 }
             }
@@ -559,19 +638,19 @@ public class ConstraintSet {
     /**
      * Center widget between the other two widgets.
      *
-     * @param centerID     ID of the widget to be centered
-     * @param firstID      ID of the first widget to connect the left or top of the widget to
-     * @param firstSide    the side of the widget to connect to
-     * @param firstMargin  the connection margin
-     * @param secondId     the ID of the second widget to connect to right or top of the widget to
-     * @param secondSide   the side of the widget to connect to
+     * @param centerID ID of the widget to be centered
+     * @param firstID ID of the first widget to connect the left or top of the widget to
+     * @param firstSide the side of the widget to connect to
+     * @param firstMargin the connection margin
+     * @param secondId the ID of the second widget to connect to right or top of the widget to
+     * @param secondSide the side of the widget to connect to
      * @param secondMargin the connection margin
-     * @param bias         the ratio between two connections
+     * @param bias the ratio between two connections
      */
     public void center(int centerID,
-                       int firstID, int firstSide, int firstMargin,
-                       int secondId, int secondSide, int secondMargin,
-                       float bias) {
+        int firstID, int firstSide, int firstMargin,
+        int secondId, int secondSide, int secondMargin,
+        float bias) {
         // Error checking
 
         if (firstMargin < 0) {
@@ -597,14 +676,16 @@ public class ConstraintSet {
         }
     }
 
-    private void centerHorizontally(int centerID, int leftId, int leftSide, int leftMargin, int rightId, int rightSide, int rightMargin, float bias) {
+    private void centerHorizontally(int centerID, int leftId, int leftSide, int leftMargin,
+        int rightId, int rightSide, int rightMargin, float bias) {
         connect(centerID, LEFT, leftId, leftSide, leftMargin);
         connect(centerID, RIGHT, rightId, rightSide, rightMargin);
         Constraint constraint = mConstraints.get(centerID);
         constraint.horizontalBias = bias;
     }
 
-    private void centerVertically(int centerID, int topId, int topSide, int topMargin, int bottomId, int bottomSide, int bottomMargin, float bias) {
+    private void centerVertically(int centerID, int topId, int topSide, int topMargin, int bottomId,
+        int bottomSide, int bottomMargin, float bias) {
         connect(centerID, TOP, topId, topSide, topMargin);
         connect(centerID, BOTTOM, bottomId, bottomSide, bottomMargin);
         Constraint constraint = mConstraints.get(centerID);
@@ -615,13 +696,12 @@ public class ConstraintSet {
      * Spaces a set of widgets vertically between the view topId and bottomId.
      * Widgets can be spaced with weights.
      *
-     * @param topId
-     * @param bottomId
      * @param chainIds widgets to use as a chain
      * @param weights can be null
      * @param style set the style of the chain
      */
-    public void createVerticalChain(int topId, int bottomId, int[] chainIds, float[] weights, int style) {
+    public void createVerticalChain(int topId, int bottomId, int[] chainIds, float[] weights,
+        int style) {
         if (chainIds.length < 2) {
             throw new IllegalArgumentException("must have 2 or more widgets in a chain");
         }
@@ -634,7 +714,7 @@ public class ConstraintSet {
         get(chainIds[0]).verticalChainStyle = style;
 
         connect(chainIds[0], TOP, topId, TOP, 0);
-        for (int i = 1; i < chainIds.length - 1; i++) {
+        for (int i = 1; i < chainIds.length; i++) {
             int chainId = chainIds[i];
             connect(chainIds[i], TOP, chainIds[i - 1], BOTTOM, 0);
             connect(chainIds[i - 1], BOTTOM, chainIds[i], TOP, 0);
@@ -643,22 +723,18 @@ public class ConstraintSet {
             }
         }
         connect(chainIds[chainIds.length - 1], BOTTOM, bottomId, TOP, 0);
-        if (weights != null) {
-            get(chainIds[chainIds.length - 1]).verticalWeight = weights[chainIds.length - 1];
-        }
     }
 
     /**
-     * Spaces a set of widgets horizontal between the view topId and bottomId.
+     * Spaces a set of widgets horizontal between the view leftID and rightId.
      * Widgets can be spaced with weights.
      *
-     * @param leftId
-     * @param rightId
      * @param chainIds widgets to use as a chain
      * @param weights can be null
      * @param style set the style of the chain
      */
-    public void createHorizontalChain(int leftId, int rightId, int[] chainIds, float[] weights, int style) {
+    public void createHorizontalChain(int leftId, int rightId, int[] chainIds, float[] weights,
+        int style) {
         if (chainIds.length < 2) {
             throw new IllegalArgumentException("must have 2 or more widgets in a chain");
         }
@@ -669,29 +745,29 @@ public class ConstraintSet {
             get(chainIds[0]).verticalWeight = weights[0];
         }
         get(chainIds[0]).horizontalChainStyle = style;
-        connect(chainIds[0], TOP, leftId, TOP, 0);
-        for (int i = 1; i < chainIds.length - 1; i++) {
+        connect(chainIds[0], LEFT, leftId, (leftId == PARENT_ID) ? LEFT : RIGHT, 0);
+        for (int i = 1; i < chainIds.length; i++) {
             int chainId = chainIds[i];
-            connect(chainIds[i], TOP, chainIds[i - 1], BOTTOM, 0);
-            connect(chainIds[i - 1], BOTTOM, chainIds[i], TOP, 0);
+            connect(chainIds[i], LEFT, chainIds[i - 1], RIGHT, 0);
+            connect(chainIds[i - 1], RIGHT, chainIds[i], LEFT, 0);
             if (weights != null) {
-                get(chainIds[i]).verticalWeight = weights[i];
+                get(chainIds[i]).horizontalWeight = weights[i];
             }
         }
-        connect(chainIds[chainIds.length - 1], BOTTOM, rightId, TOP, 0);
-        if (weights != null) {
-            get(chainIds[chainIds.length - 1]).verticalWeight = weights[chainIds.length - 1];
-        }
+
+        connect(chainIds[chainIds.length - 1], RIGHT, rightId, (rightId == PARENT_ID) ? RIGHT : LEFT,
+            0);
+
     }
 
     /**
      * Create a constraint between two widgets.
      *
-     * @param startID   the ID of the widget to be constrained
+     * @param startID the ID of the widget to be constrained
      * @param startSide the side of the widget to constrain
-     * @param endID     the id of the widget to constrain to
-     * @param endSide   the side of widget to constrain to
-     * @param margin    the margin to constrain (margin must be postive)
+     * @param endID the id of the widget to constrain to
+     * @param endSide the side of widget to constrain to
+     * @param margin the margin to constrain (margin must be postive)
      */
     public void connect(int startID, int startSide, int endID, int endSide, int margin) {
         if (!mConstraints.containsKey(startID)) {
@@ -793,7 +869,8 @@ public class ConstraintSet {
                 constraint.endMargin = margin;
                 break;
             default:
-                throw new IllegalArgumentException(sideToString(startSide) + " to " + sideToString(endSide) + " unknown");
+                throw new IllegalArgumentException(
+                    sideToString(startSide) + " to " + sideToString(endSide) + " unknown");
         }
     }
 
@@ -887,7 +964,7 @@ public class ConstraintSet {
      *
      * @param viewId ID of view to adjust the margin on
      * @param anchor The side to adjust the margin on
-     * @param value  The new value for the margin
+     * @param value The new value for the margin
      */
     public void setMargin(int viewId, int anchor, int value) {
         Constraint constraint = get(viewId);
@@ -922,7 +999,7 @@ public class ConstraintSet {
      *
      * @param viewId ID of view to adjust the margin on
      * @param anchor The side to adjust the margin on
-     * @param value  The new value for the margin
+     * @param value The new value for the margin
      */
     public void setGoneMargin(int viewId, int anchor, int value) {
         Constraint constraint = get(viewId);
@@ -956,7 +1033,7 @@ public class ConstraintSet {
      * Adjust the horizontal bias of the view (used with views constrained on left and right).
      *
      * @param viewId ID of view to adjust the horizontal
-     * @param bias   the new bias 0.5 is in the middle
+     * @param bias the new bias 0.5 is in the middle
      */
     public void setHorizontalBias(int viewId, float bias) {
         get(viewId).horizontalBias = bias;
@@ -966,7 +1043,7 @@ public class ConstraintSet {
      * Adjust the vertical bias of the view (used with views constrained on left and right).
      *
      * @param viewId ID of view to adjust the vertical
-     * @param bias   the new bias 0.5 is in the middle
+     * @param bias the new bias 0.5 is in the middle
      */
     public void setVerticalBias(int viewId, float bias) {
         get(viewId).verticalBias = bias;
@@ -1004,6 +1081,26 @@ public class ConstraintSet {
     }
 
     /**
+     * return with the constraint set will apply elevation for the specified view.
+     *
+     * @return true if the elevation will be set on this view (default is false)
+     */
+    public boolean getApplyElevation(int viewId) {
+        return get(viewId).applyElevation;
+    }
+
+    /**
+     * set if elevation will be applied to the view.
+     * Elevation logic is based on style and animation. By default it is not used because it would
+     * lead to unexpected results.
+     *
+     * @param apply true if this constraint set applies elevation to this view
+     */
+    public void setApplyElevation(int viewId, boolean apply) {
+        get(viewId).applyElevation = apply;
+    }
+
+    /**
      * Adjust the elevation of a view.
      *
      * @param viewId ID of view to adjust the elevation
@@ -1011,6 +1108,7 @@ public class ConstraintSet {
      */
     public void setElevation(int viewId, int elevation) {
         get(viewId).elevation = elevation;
+        get(viewId).applyElevation = true;
     }
 
     /**
@@ -1085,6 +1183,7 @@ public class ConstraintSet {
         constraint.transformPivotY = transformPivotY;
         constraint.transformPivotX = transformPivotX;
     }
+
     /**
      * Adjust the post-layout X translation of a view.
      *
@@ -1129,7 +1228,8 @@ public class ConstraintSet {
     }
 
     /**
-     * Sets the height of the view. It can be a dimension, {@link #WRAP_CONTENT} or {@link #MATCH_CONSTRAINT}.
+     * Sets the height of the view. It can be a dimension, {@link #WRAP_CONTENT} or {@link
+     * #MATCH_CONSTRAINT}.
      *
      * @param viewId ID of view to adjust it height
      * @param height the height of the constraint
@@ -1139,10 +1239,11 @@ public class ConstraintSet {
     }
 
     /**
-     * Sets the width of the view. It can be a dimension, {@link #WRAP_CONTENT} or {@link #MATCH_CONSTRAINT}.
+     * Sets the width of the view. It can be a dimension, {@link #WRAP_CONTENT} or {@link
+     * #MATCH_CONSTRAINT}.
      *
      * @param viewId ID of view to adjust it height
-     * @param width  the width of the view
+     * @param width the width of the view
      */
     public void constrainWidth(int viewId, int width) {
         get(viewId).mWidth = width;
@@ -1171,15 +1272,12 @@ public class ConstraintSet {
     }
 
     /**
-     * How the elements of the horizontal chain will be positioned.
-     * The possible values are:
+     * How the elements of the horizontal chain will be positioned. The possible values are:
      *
-     * <ul>
-     *     <li>{@see CHAIN_SPREAD} -- the elements will be spread out</li>
-     *     <li>{@see CHAIN_SPREAD_INSIDE} -- similar, but the endpoints of the chain will not be spread out</li>
-     *     <li>{@see CHAIN_PACKED} -- the elements of the chain will be packed together. The horizontal
-     *          bias attribute of the child will then affect the positioning of the packed elements</li>
-     * </ul>
+     * <ul> <li>{@see CHAIN_SPREAD} -- the elements will be spread out</li> <li>{@see
+     * CHAIN_SPREAD_INSIDE} -- similar, but the endpoints of the chain will not be spread out</li>
+     * <li>{@see CHAIN_PACKED} -- the elements of the chain will be packed together. The horizontal
+     * bias attribute of the child will then affect the positioning of the packed elements</li> </ul>
      *
      * @param viewId ID of view to adjust it height
      * @param chainStyle the weight that we can use to distribute the horizontal space
@@ -1189,15 +1287,13 @@ public class ConstraintSet {
     }
 
     /**
-     * How the elements of the vertical chain will be positioned.
-     * in a chain, if the dimension behaviour is set to MATCH_CONSTRAINT
+     * How the elements of the vertical chain will be positioned. in a chain, if the dimension
+     * behaviour is set to MATCH_CONSTRAINT
      *
-     * <ul>
-     *     <li>{@see CHAIN_SPREAD} -- the elements will be spread out</li>
-     *     <li>{@see CHAIN_SPREAD_INSIDE} -- similar, but the endpoints of the chain will not be spread out</li>
-     *     <li>{@see CHAIN_PACKED} -- the elements of the chain will be packed together. The horizontal
-     *          bias attribute of the child will then affect the positioning of the packed elements</li>
-     * </ul>
+     * <ul> <li>{@see CHAIN_SPREAD} -- the elements will be spread out</li> <li>{@see
+     * CHAIN_SPREAD_INSIDE} -- similar, but the endpoints of the chain will not be spread out</li>
+     * <li>{@see CHAIN_PACKED} -- the elements of the chain will be packed together. The horizontal
+     * bias attribute of the child will then affect the positioning of the packed elements</li> </ul>
      *
      * @param viewId ID of view to adjust it height
      * @param chainStyle the weight that we can use to distribute the horizontal space
@@ -1206,6 +1302,98 @@ public class ConstraintSet {
         get(viewId).verticalChainStyle = chainStyle;
     }
 
+    /**
+     * Adds a view to a horizontal chain.
+     */
+    public void addToHorizontalChain(int viewId, int leftId, int rightId) {
+        connect(viewId, LEFT, leftId, (leftId == PARENT_ID) ? LEFT : RIGHT, 0);
+        connect(viewId, RIGHT, rightId, (rightId == PARENT_ID) ? RIGHT : LEFT, 0);
+        if (leftId != PARENT_ID) {
+            connect(leftId, RIGHT, viewId, LEFT, 0);
+        }
+        if (rightId != PARENT_ID) {
+            connect(rightId, LEFT, viewId, RIGHT, 0);
+        }
+
+    }
+
+    /**
+     * Adds a view to a vertical chain.
+     */
+    public void addToVerticalChain(int viewId, int topId, int bottomId) {
+        connect(viewId, TOP, topId, (topId == PARENT_ID) ? TOP : BOTTOM, 0);
+        connect(viewId, BOTTOM, bottomId, (bottomId == PARENT_ID) ? BOTTOM : TOP, 0);
+        if (topId != PARENT_ID) {
+            connect(topId, BOTTOM, viewId, TOP, 0);
+        }
+        if (topId != PARENT_ID) {
+            connect(bottomId, TOP, viewId, BOTTOM, 0);
+        }
+    }
+
+    /**
+     * Removes a view from a vertical chain.
+     * This assumes the view is connected to a vertical chain.
+     * Its behaviour is undefined if not part of a vertical chain.
+     *
+     * @param viewId the view to be removed
+     */
+    public void removeFromVerticalChain(int viewId) {
+        if (mConstraints.containsKey(viewId)) {
+            Constraint constraint = mConstraints.get(viewId);
+            int topId = constraint.topToBottom;
+            int bottomId = constraint.bottomToTop;
+            if (topId != Constraint.UNSET || bottomId != Constraint.UNSET) {
+                if (topId != Constraint.UNSET && bottomId != Constraint.UNSET) {
+                    // top and bottom connected to views
+                    connect(topId, BOTTOM, bottomId, TOP, 0);
+                    connect(bottomId, TOP, topId, BOTTOM, 0);
+                } else if (topId != Constraint.UNSET || bottomId != Constraint.UNSET) {
+                    if (constraint.bottomToBottom != Constraint.UNSET) {
+                        // top connected to view. Bottom connected to parent
+                        connect(topId, BOTTOM, constraint.bottomToBottom, BOTTOM, 0);
+                    } else if (constraint.topToTop != Constraint.UNSET) {
+                        // bottom connected to view. Top connected to parent
+                        connect(bottomId, TOP, constraint.topToTop, TOP, 0);
+                    }
+                }
+            }
+        }
+        clear(viewId, TOP);
+        clear(viewId, BOTTOM);
+    }
+
+    /**
+     * Removes a view from a horizontal chain.
+     * This assumes the view is connected to a horizontal chain.
+     * Its behaviour is undefined if not part of a horizontal chain.
+     *
+     * @param viewId the view to be removed
+     */
+    public void removeFromHorizontalChain(int viewId) {
+        if (mConstraints.containsKey(viewId)) {
+            Constraint constraint = mConstraints.get(viewId);
+            int leftId = constraint.leftToRight;
+            int rightId = constraint.rightToLeft;
+            if (leftId != Constraint.UNSET || rightId != Constraint.UNSET) {
+                if (leftId != Constraint.UNSET && rightId != Constraint.UNSET) {
+                    // left and right connected to views
+                    connect(leftId, RIGHT, rightId, LEFT, 0);
+                    connect(rightId, LEFT, leftId, RIGHT, 0);
+                } else if (leftId != Constraint.UNSET || rightId != Constraint.UNSET) {
+                    if (constraint.rightToRight != Constraint.UNSET) {
+                        // left connected to view. right connected to parent
+                        connect(leftId, RIGHT, constraint.rightToRight, RIGHT, 0);
+                    } else if (constraint.leftToLeft != Constraint.UNSET) {
+                        // right connected to view. left connected to parent
+                        connect(rightId, LEFT, constraint.leftToLeft, LEFT, 0);
+                    }
+                }
+            }
+        }
+        clear(viewId, LEFT);
+        clear(viewId, RIGHT);
+    }
 
     /**
      * Creates a ConstraintLayout virtual object. Currently only horizontal or vertical GuideLines.
@@ -1223,7 +1411,7 @@ public class ConstraintSet {
      * Set the guideline's distance form the top or left edge.
      *
      * @param guidelineID ID of the guideline
-     * @param margin      the distance to the top or left edge
+     * @param margin the distance to the top or left edge
      */
     public void setGuidelineBegin(int guidelineID, int margin) {
         get(guidelineID).guideBegin = margin;
@@ -1236,7 +1424,7 @@ public class ConstraintSet {
      * Set a guideline's distance to end.
      *
      * @param guidelineID ID of the guideline
-     * @param margin      the margin to the right or bottom side of container
+     * @param margin the margin to the right or bottom side of container
      */
     public void setGuidelineEnd(int guidelineID, int margin) {
         get(guidelineID).guideEnd = margin;
@@ -1248,7 +1436,7 @@ public class ConstraintSet {
      * Set a Guideline's percent.
      *
      * @param guidelineID ID of the guideline
-     * @param ratio       the ratio between the gap on the left and right 0.0 is top/left 0.5 is middle
+     * @param ratio the ratio between the gap on the left and right 0.0 is top/left 0.5 is middle
      */
     public void setGuidelinePercent(int guidelineID, float ratio) {
         get(guidelineID).guidePercent = ratio;
@@ -1286,7 +1474,7 @@ public class ConstraintSet {
     /**
      * Load a constraint set from a constraintSet.xml file
      *
-     * @param context    the context for the inflation
+     * @param context the context for the inflation
      * @param resourceId id of xml file in res/xml/
      */
     public void load(Context context, int resourceId) {
@@ -1297,8 +1485,8 @@ public class ConstraintSet {
         try {
 
             for (int eventType = parser.getEventType();
-                 eventType != XmlResourceParser.END_DOCUMENT;
-                 eventType = parser.next()) {
+                eventType != XmlResourceParser.END_DOCUMENT;
+                eventType = parser.next()) {
                 switch (eventType) {
                     case XmlResourceParser.START_DOCUMENT:
                         document = parser.getName();
@@ -1351,7 +1539,8 @@ public class ConstraintSet {
                     boolean found = false;
                     for (Field f : campos) {
                         try {
-                            if (f.getType().isPrimitive() && attr == f.getInt(null) && f.getName().contains("ConstraintSet")) {
+                            if (f.getType().isPrimitive() && attr == f.getInt(null) && f.getName()
+                                .contains("ConstraintSet")) {
                                 found = true;
                                 Log.v(TAG, "L id " + f.getName() + " #" + attr);
                                 break;
@@ -1364,7 +1553,8 @@ public class ConstraintSet {
                         campos = android.R.attr.class.getFields();
                         for (Field f : campos) {
                             try {
-                                if (f.getType().isPrimitive() && attr == f.getInt(null) && f.getName().contains("ConstraintSet")) {
+                                if (f.getType().isPrimitive() && attr == f.getInt(null) && f.getName()
+                                    .contains("ConstraintSet")) {
                                     found = false;
                                     Log.v(TAG, "x id " + f.getName());
                                     break;
@@ -1374,7 +1564,9 @@ public class ConstraintSet {
                             }
                         }
                     }
-                    if (!found) Log.v(TAG, " ? " + attr);
+                    if (!found) {
+                        Log.v(TAG, " ? " + attr);
+                    }
                 } catch (Exception e) {
                     Log.v(TAG, " " + e.toString());
                 }
@@ -1491,8 +1683,9 @@ public class ConstraintSet {
                     break;
                 case ALPHA:
                     c.alpha = a.getFloat(attr, c.alpha);
-                     break;
+                    break;
                 case ELEVATION:
+                    c.applyElevation = true;
                     c.elevation = a.getFloat(attr, c.elevation);
                     break;
                 case ROTATION_X:
@@ -1541,10 +1734,12 @@ public class ConstraintSet {
                     c.dimensionRatio = a.getString(attr);
                     break;
                 case UNUSED:
-                    Log.w(TAG, "unused attribute 0x" + Integer.toHexString(attr) + "   " + mapToConstant.get(attr));
+                    Log.w(TAG,
+                        "unused attribute 0x" + Integer.toHexString(attr) + "   " + mapToConstant.get(attr));
                     break;
                 default:
-                    Log.w(TAG, "Unknown attribute 0x" + Integer.toHexString(attr) + "   " + mapToConstant.get(attr));
+                    Log.w(TAG,
+                        "Unknown attribute 0x" + Integer.toHexString(attr) + "   " + mapToConstant.get(attr));
             }
         }
     }
