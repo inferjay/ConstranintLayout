@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class WidgetsPositioningTest {
 
@@ -188,6 +189,37 @@ public class WidgetsPositioningTest {
                         A.getTop() + A.getBaselineDistance());
             }
         });
+    }
+
+    @Test
+    public void testAddingWidgets() {
+        final ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 1000, 1000);
+        root.setDirectResolution(false);
+        ArrayList<ConstraintWidget> widgetsA = new ArrayList();
+        ArrayList<ConstraintWidget> widgetsB = new ArrayList();
+        for (int i = 0; i < 1000; i++) {
+            final ConstraintWidget A = new ConstraintWidget(0, 0, 200, 20);
+            final ConstraintWidget B = new ConstraintWidget(0, 0, 200, 20);
+            A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+            A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+            A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT);
+            B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT);
+            B.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+            B.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM);
+            widgetsA.add(A);
+            widgetsB.add(B);
+            root.add(A);
+            root.add(B);
+        }
+        root.layout();
+        for (ConstraintWidget widget : widgetsA) {
+            assertEquals(widget.getLeft(), 200);
+            assertEquals(widget.getTop(), 0);
+        }
+        for (ConstraintWidget widget : widgetsB) {
+            assertEquals(widget.getLeft(), 600);
+            assertEquals(widget.getTop(), 980);
+        }
     }
 
     @Test

@@ -31,7 +31,7 @@ public class LinearSystem {
     /*
      * Default size for the object pools
      */
-    private static final int POOL_SIZE = 1000;
+    private static int POOL_SIZE = 1000;
 
     /*
      * Variable counter
@@ -256,6 +256,10 @@ public class LinearSystem {
         }
         variable.reset();
         variable.setType(type);
+        if (mPoolVariablesCount >= POOL_SIZE) {
+            POOL_SIZE *= 2;
+            mPoolVariables = Arrays.copyOf(mPoolVariables, POOL_SIZE);
+        }
         mPoolVariables[mPoolVariablesCount++] = variable;
         return variable;
     }
