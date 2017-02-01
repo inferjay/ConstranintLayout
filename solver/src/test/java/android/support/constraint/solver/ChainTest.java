@@ -783,4 +783,41 @@ public class ChainTest {
         System.out.println("a) root: " + root + " C: " + C + " D: " + D);
         assertEquals(C.getBottom(), D.getTop());
     }
+
+    @Test
+    public void testBasicGoneChain() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        ConstraintWidget D = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        C.setDebugName("C");
+        D.setDebugName("D");
+        root.add(A);
+        root.add(B);
+        root.add(C);
+        root.add(D);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT);
+        B.connect(ConstraintAnchor.Type.RIGHT, C, ConstraintAnchor.Type.LEFT);
+        C.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.RIGHT);
+        C.connect(ConstraintAnchor.Type.RIGHT, D, ConstraintAnchor.Type.LEFT);
+        D.connect(ConstraintAnchor.Type.LEFT, C, ConstraintAnchor.Type.RIGHT);
+        D.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_SPREAD_INSIDE);
+        B.setVisibility(ConstraintWidget.GONE);
+        root.layout();
+        System.out.println("a) A: " + A + " B: " + B + " C: " + C + " D: " + D);
+        assertEquals(A.getLeft(), 0);
+        assertEquals(C.getLeft(), 250);
+        assertEquals(D.getLeft(), 500);
+        B.setVisibility(ConstraintWidget.VISIBLE);
+        D.setVisibility(ConstraintWidget.GONE);
+        root.layout();
+        System.out.println("b) A: " + A + " B: " + B + " C: " + C + " D: " + D);
+    }
 }

@@ -42,13 +42,16 @@ public class Optimizer {
 
         // Let's first get the size occupied by all widgets not 0dp
         while (widget != null) {
-            count++;
-            if (widget.mHorizontalDimensionBehaviour != ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT) {
-                widgetSize += widget.getWidth();
-                widgetSize += widget.mLeft.mTarget != null ? widget.mLeft.getMargin() : 0;
-                widgetSize += widget.mRight.mTarget != null ? widget.mRight.getMargin() : 0;
-            } else {
-                totalWeights += widget.mHorizontalWeight;
+            boolean isGone = widget.getVisibility() == ConstraintWidget.GONE;
+            if (!isGone) {
+                count++;
+                if (widget.mHorizontalDimensionBehaviour != ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT) {
+                    widgetSize += widget.getWidth();
+                    widgetSize += widget.mLeft.mTarget != null ? widget.mLeft.getMargin() : 0;
+                    widgetSize += widget.mRight.mTarget != null ? widget.mRight.getMargin() : 0;
+                } else {
+                    totalWeights += widget.mHorizontalWeight;
+                }
             }
             previous = widget;
             widget = widget.mRight.mTarget != null ? widget.mRight.mTarget.mOwner : null;
@@ -85,22 +88,28 @@ public class Optimizer {
         while (widget != null) {
             int left = widget.mLeft.mTarget != null ? widget.mLeft.getMargin() : 0;
             int right = widget.mRight.mTarget != null ? widget.mRight.getMargin() : 0;
-            currentPosition += left;
-            system.addEquality(widget.mLeft.mSolverVariable, (int) (currentPosition + 0.5f));
-            if (widget.mHorizontalDimensionBehaviour == ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT) {
-                if (totalWeights == 0) {
-                    currentPosition += split - left - right;
+            if (widget.getVisibility() != ConstraintWidget.GONE) {
+                currentPosition += left;
+                system.addEquality(widget.mLeft.mSolverVariable, (int) (currentPosition + 0.5f));
+                if (widget.mHorizontalDimensionBehaviour == ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT) {
+                    if (totalWeights == 0) {
+                        currentPosition += split - left - right;
+                    } else {
+                        currentPosition += (spreadSpace * widget.mHorizontalWeight / totalWeights) - left - right;
+                    }
                 } else {
-                    currentPosition += (spreadSpace * widget.mHorizontalWeight / totalWeights) - left - right;
+                    currentPosition += widget.getWidth();
                 }
+                system.addEquality(widget.mRight.mSolverVariable, (int) (currentPosition + 0.5f));
+                if (numMatchConstraints == 0) {
+                    currentPosition += split;
+                }
+                currentPosition += right;
             } else {
-                currentPosition += widget.getWidth();
+                float position = currentPosition - split / 2;
+                system.addEquality(widget.mLeft.mSolverVariable, (int) (position + 0.5f));
+                system.addEquality(widget.mRight.mSolverVariable, (int) (position + 0.5f));
             }
-            system.addEquality(widget.mRight.mSolverVariable, (int) (currentPosition + 0.5f));
-            if (numMatchConstraints == 0) {
-                currentPosition += split;
-            }
-            currentPosition += right;
             previous = widget;
             widget = widget.mRight.mTarget != null ? widget.mRight.mTarget.mOwner : null;
             if (widget != null && widget.mLeft.mTarget != null && widget.mLeft.mTarget.mOwner != previous) {
@@ -132,13 +141,16 @@ public class Optimizer {
 
         // Let's first get the size occupied by all widgets not 0dp
         while (widget != null) {
-            count++;
-            if (widget.mVerticalDimensionBehaviour != ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT) {
-                widgetSize += widget.getHeight();
-                widgetSize += widget.mTop.mTarget != null ? widget.mTop.getMargin() : 0;
-                widgetSize += widget.mBottom.mTarget != null ? widget.mBottom.getMargin() : 0;
-            } else {
-                totalWeights += widget.mVerticalWeight;
+            boolean isGone = widget.getVisibility() == ConstraintWidget.GONE;
+            if (!isGone) {
+                count++;
+                if (widget.mVerticalDimensionBehaviour != ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT) {
+                    widgetSize += widget.getHeight();
+                    widgetSize += widget.mTop.mTarget != null ? widget.mTop.getMargin() : 0;
+                    widgetSize += widget.mBottom.mTarget != null ? widget.mBottom.getMargin() : 0;
+                } else {
+                    totalWeights += widget.mVerticalWeight;
+                }
             }
             previous = widget;
             widget = widget.mBottom.mTarget != null ? widget.mBottom.mTarget.mOwner : null;
@@ -175,22 +187,28 @@ public class Optimizer {
         while (widget != null) {
             int top = widget.mTop.mTarget != null ? widget.mTop.getMargin() : 0;
             int bottom = widget.mBottom.mTarget != null ? widget.mBottom.getMargin() : 0;
-            currentPosition += top;
-            system.addEquality(widget.mTop.mSolverVariable, (int) (currentPosition + 0.5f));
-            if (widget.mVerticalDimensionBehaviour == ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT) {
-                if (totalWeights == 0) {
-                    currentPosition += split - top - bottom;
+            if (widget.getVisibility() != ConstraintWidget.GONE) {
+                currentPosition += top;
+                system.addEquality(widget.mTop.mSolverVariable, (int) (currentPosition + 0.5f));
+                if (widget.mVerticalDimensionBehaviour == ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT) {
+                    if (totalWeights == 0) {
+                        currentPosition += split - top - bottom;
+                    } else {
+                        currentPosition += (spreadSpace * widget.mVerticalWeight / totalWeights) - top - bottom;
+                    }
                 } else {
-                    currentPosition += (spreadSpace * widget.mVerticalWeight / totalWeights) - top - bottom;
+                    currentPosition += widget.getHeight();
                 }
+                system.addEquality(widget.mBottom.mSolverVariable, (int) (currentPosition + 0.5f));
+                if (numMatchConstraints == 0) {
+                    currentPosition += split;
+                }
+                currentPosition += bottom;
             } else {
-                currentPosition += widget.getHeight();
+                float position = currentPosition - split / 2;
+                system.addEquality(widget.mTop.mSolverVariable, (int) (position + 0.5f));
+                system.addEquality(widget.mBottom.mSolverVariable, (int) (position + 0.5f));
             }
-            system.addEquality(widget.mBottom.mSolverVariable, (int) (currentPosition + 0.5f));
-            if (numMatchConstraints == 0) {
-                currentPosition += split;
-            }
-            currentPosition += bottom;
             previous = widget;
             widget = widget.mBottom.mTarget != null ? widget.mBottom.mTarget.mOwner : null;
             if (widget != null && widget.mTop.mTarget != null && widget.mTop.mTarget.mOwner != previous) {
