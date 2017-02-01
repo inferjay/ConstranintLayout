@@ -66,8 +66,8 @@ final class Pools {
         /**
          * Try releasing all instances at the same time
          *
-         * @param variables
-         * @param count
+         * @param variables the variables to release
+         * @param count the number of variables to release
          */
         void releaseAll(T[] variables, int count);
     }
@@ -93,7 +93,7 @@ final class Pools {
          *
          * @throws IllegalArgumentException If the max pool size is less than zero.
          */
-        public SimplePool(int maxPoolSize) {
+        SimplePool(int maxPoolSize) {
             if (maxPoolSize <= 0) {
                 throw new IllegalArgumentException("The max pool size must be > 0");
             }

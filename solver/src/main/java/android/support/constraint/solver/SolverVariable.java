@@ -20,28 +20,27 @@ import java.util.Arrays;
 
 /**
  * Represents a given variable used in the {@link LinearSystem linear expression solver}.
- * The {@link EquationVariable} variables point to SolverVariable.
  */
 public class SolverVariable {
 
     private static final boolean INTERNAL_DEBUG = false;
 
     // Set to true if mClientEquations is a linked list
-    public static final boolean USE_LIST = false;
+    static final boolean USE_LIST = false;
 
-    public static final int STRENGTH_NONE = 0;
+    private static final int STRENGTH_NONE = 0;
     public static final int STRENGTH_LOW = 1;
     public static final int STRENGTH_MEDIUM = 2;
     public static final int STRENGTH_HIGH = 3;
-    public static final int STRENGTH_HIGHEST = 4;
+    static final int STRENGTH_HIGHEST = 4;
     public static final int STRENGTH_EQUALITY = 5;
 
-    static int uniqueId = 1;
+    private static int uniqueId = 1;
 
     private String mName;
 
     public int id = -1;
-    public int definitionId = -1;
+    int definitionId = -1;
     public int strength = 0;
     public float computedValue;
 
@@ -89,9 +88,7 @@ public class SolverVariable {
         UNKNOWN
     }
 
-    public static String getUniqueName() { uniqueId++; return "V" + uniqueId; }
-
-    public static String getUniqueName(Type type) {
+    private static String getUniqueName(Type type) {
         uniqueId++;
         switch (type) {
             case UNRESTRICTED: return "U" + uniqueId;
@@ -124,7 +121,7 @@ public class SolverVariable {
         }
     }
 
-    public void addClientEquation(ArrayRow equation) {
+    void addClientEquation(ArrayRow equation) {
         if (USE_LIST) {
             Link current = (Link) (Object) mClientEquations;
             while (current.next != null) {
@@ -155,7 +152,7 @@ public class SolverVariable {
         mClientEquationsCount++;
     }
 
-    public void removeClientEquation(ArrayRow equation) {
+    void removeClientEquation(ArrayRow equation) {
         if (INTERNAL_DEBUG) {
             if (equation.variables.get(this) != 0) {
                 return;

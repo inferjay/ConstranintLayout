@@ -570,7 +570,19 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                                 int previousMargin = previousVisibleWidget.mBottom.getMargin();
                                 margin += previousMargin;
                             }
-                            system.addGreaterThan(top.mSolverVariable, top.mTarget.mSolverVariable, margin, SolverVariable.STRENGTH_LOW);
+                            SolverVariable source = null;
+                            SolverVariable target = null;
+                            if (top.mTarget != null) {
+                                source = top.mSolverVariable;
+                                target = top.mTarget.mSolverVariable;
+                            } else if (currentWidget.mBaseline.mTarget != null) {
+                                source = currentWidget.mBaseline.mSolverVariable;
+                                target = currentWidget.mBaseline.mTarget.mSolverVariable;
+                                margin -= top.getMargin();
+                            }
+                            if (source != null && target != null) {
+                                system.addGreaterThan(source, target, margin, SolverVariable.STRENGTH_LOW);
+                            }
                         } else {
                             if (!isChainSpread && isLast && previousVisibleWidget != null) {
                                 if (currentWidget.mBottom.mTarget == null) {

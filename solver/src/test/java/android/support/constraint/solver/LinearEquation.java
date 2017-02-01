@@ -97,13 +97,39 @@ class LinearEquation {
     }
 
     /**
+     * Transform a LinearEquation into a Row
+     * @param linearSystem
+     * @param e linear equation
+     * @return a Row object
+     */
+    static ArrayRow createRowFromEquation(LinearSystem linearSystem, LinearEquation e) {
+        e.normalize();
+        e.moveAllToTheRight();
+        // Let's build a row from the LinearEquation
+        ArrayRow row = linearSystem.createRow();
+        ArrayList<EquationVariable> eq = e.getRightSide();
+        final int count = eq.size();
+        for (int i = 0; i < count; i++) {
+            EquationVariable v = eq.get(i);
+            SolverVariable sv = v.getSolverVariable();
+            if (sv != null) {
+                row.variables.put(sv, v.getAmount().toFloat());
+            } else {
+                row.constantValue = v.getAmount().toFloat();
+            }
+        }
+        return row;
+    }
+
+    /**
      * Insert the equation in the system
      */
     public void i() {
         if (mSystem == null) {
             return;
         }
-        mSystem.addConstraint(this);
+        ArrayRow row = createRowFromEquation(mSystem, this);
+        mSystem.addConstraint(row);
     }
 
     /**

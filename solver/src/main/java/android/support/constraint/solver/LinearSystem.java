@@ -142,15 +142,6 @@ public class LinearSystem {
     // Creation of rows / variables / errors
     /*--------------------------------------------------------------------------------------------*/
 
-    /**
-     * Add the equation to the system
-     * @param e the equation we want to add.
-     */
-    public void addConstraint(LinearEquation e) {
-        ArrayRow row = EquationCreation.createRowFromEquation(this, e);
-        addConstraint(row);
-    }
-
     public SolverVariable createObjectVariable(Object anchor) {
         if (anchor == null) {
             return null;
@@ -870,7 +861,6 @@ public class LinearSystem {
                 + " rows: " + mNumRows + "/" + mMaxRows
                 + " cols: " + mNumColumns + "/" + mMaxColumns
                 + " " + count + " occupied cells, " + getDisplaySize(count)
-                + " " + LinkedVariables.sCreation + " created Link variables"
         );
     }
 
@@ -970,7 +960,7 @@ public class LinearSystem {
      * @param margin
      * @param strength
      */
-    public void addEquality(SolverVariable a, SolverVariable b, int margin, int strength) {
+    public ArrayRow addEquality(SolverVariable a, SolverVariable b, int margin, int strength) {
         if (DEBUG) {
             System.out.println("-> " + a + " = " + b + (margin != 0 ? " + " + margin : ""));
         }
@@ -982,6 +972,7 @@ public class LinearSystem {
         error2.strength = strength;
         row.addError(error1, error2);
         addConstraint(row);
+        return row;
     }
 
     /**
@@ -1009,5 +1000,131 @@ public class LinearSystem {
             row.createRowDefinition(a, value);
             addConstraint(row);
         }
+    }
+
+
+    public static ArrayRow createRowEquals(LinearSystem linearSystem, SolverVariable variableA,
+                                           SolverVariable variableB, int margin, boolean withError) {
+        // expression is: variableA = variableB + margin
+        // we turn it into row = margin - variableA + variableB
+        ArrayRow row = linearSystem.createRow();
+        row.createRowEquals(variableA, variableB, margin);
+        if (withError) {
+            linearSystem.addSingleError(row, 1);
+            if (DEBUG) {
+                System.out.println(
+                        "Add " + variableA.getName() + " = " + variableB + " + " + margin + " + e");
+            }
+        } else {
+            if (DEBUG) {
+                System.out
+                        .println("Add " + variableA.getName() + " = " + variableB + " + " + margin);
+            }
+        }
+        return row;
+    }
+
+    /**
+     * Create a constraint to express A = B + (C - B) * percent
+     * @param linearSystem
+     * @param variableA
+     * @param variableB
+     * @param variableC
+     * @param percent
+     * @return
+     */
+    public static ArrayRow createRowDimensionPercent(LinearSystem linearSystem,
+                                                     SolverVariable variableA,
+                                                     SolverVariable variableB, SolverVariable variableC, float percent, boolean withError) {
+        ArrayRow row = linearSystem.createRow();
+        if (withError) {
+            linearSystem.addError(row);
+        }
+        return row.createRowDimensionPercent(variableA, variableB, variableC, percent);
+    }
+
+    public static ArrayRow createRowGreaterThan(LinearSystem linearSystem, SolverVariable variableA,
+                                                SolverVariable variableB, int margin, boolean withError) {
+        // expression is: variableA >= variableB + margin
+        // we turn it into: variableA - slack = variableB + margin
+        // row = margin - variableA + variableB + slack
+        SolverVariable slack = linearSystem.createSlackVariable();
+        ArrayRow row = linearSystem.createRow();
+        row.createRowGreaterThan(variableA, variableB, slack, margin);
+        if (withError) {
+            float slackValue = row.variables.get(slack);
+            linearSystem.addSingleError(row, (int) (-1 * slackValue));
+            if (DEBUG) {
+                System.out.println(
+                        "Add " + variableA.getName() + " >= " + variableB.getName() + " + " +
+                                margin + " + e");
+            }
+        } else {
+            if (DEBUG) {
+                System.out.println(
+                        "Add " + variableA.getName() + " >= " + variableB.getName() + " + " +
+                                margin);
+            }
+        }
+        return row;
+    }
+
+    public static ArrayRow createRowLowerThan(LinearSystem linearSystem, SolverVariable variableA,
+                                              SolverVariable variableB, int margin, boolean withError) {
+        // expression is: variableA <= variableB + margin
+        // we turn it into: variableA + slack = variableB + margin
+        // row = margin - variableA + variableB - slack
+        SolverVariable slack = linearSystem.createSlackVariable();
+        ArrayRow row = linearSystem.createRow();
+        row.createRowLowerThan(variableA, variableB, slack, margin);
+        if (withError) {
+            float slackValue = row.variables.get(slack);
+            linearSystem.addSingleError(row, (int) (-1 * slackValue));
+            if (DEBUG) {
+                System.out.println(
+                        "Add " + variableA.getName() + " <= " + variableB.getName() + " + " +
+                                margin + " + e");
+            }
+        } else {
+            if (DEBUG) {
+                System.out.println(
+                        "Add " + variableA.getName() + " <= " + variableB.getName() + " + " +
+                                margin);
+            }
+        }
+        return row;
+    }
+
+    public static ArrayRow createRowCentering(LinearSystem linearSystem,
+                                              SolverVariable variableA, SolverVariable variableB, int marginA,
+                                              float bias,
+                                              SolverVariable variableC, SolverVariable variableD, int marginB,
+                                              boolean withError) {
+        // expression is: (1 - bias) * (variableA - variableB) = bias * (variableC - variableD)
+        // we turn it into:
+        // row = (1 - bias) * variableA - (1 - bias) * variableB - bias * variableC + bias * variableD
+        ArrayRow row = linearSystem.createRow();
+        row.createRowCentering(variableA, variableB, marginA, bias,
+                variableC, variableD, marginB, withError);
+        if (withError) {
+            SolverVariable error1 = linearSystem.createErrorVariable();
+            SolverVariable error2 = linearSystem.createErrorVariable();
+            error1.strength = SolverVariable.STRENGTH_HIGHEST;
+            error2.strength = SolverVariable.STRENGTH_HIGHEST;
+            row.addError(error1, error2);
+            if (DEBUG) {
+                System.out.println(
+                        "Add centering " + variableA.getName() + " - " + variableB.getName() +
+                                " = " + variableC.getName() + " - " + variableD.getName() +
+                                " +/- e");
+            }
+        } else {
+            if (DEBUG) {
+                System.out.println(
+                        "Add centering " + variableA.getName() + " - " + variableB.getName() +
+                                " = " + variableC.getName() + " - " + variableD.getName());
+            }
+        }
+        return row;
     }
 }

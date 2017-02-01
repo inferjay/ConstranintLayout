@@ -2053,7 +2053,7 @@ public class ConstraintWidget implements Solvable {
             ConstraintAnchor end = mBottom;
             if (group == ConstraintAnchor.ANY_GROUP || (mBottom.mGroup == group && mBaseline.mGroup == group)) {
                 system.addConstraint(
-                        EquationCreation.createRowEquals(system, bottom, baseline,
+                        LinearSystem.createRowEquals(system, bottom, baseline,
                                 height - getBaselineDistance(),
                                 false));
             }
@@ -2117,11 +2117,11 @@ public class ConstraintWidget implements Solvable {
             system.addConstraint(system.createRow().createRowEquals(begin, beginPosition));
             if (!useRatio) {
                 if (wrapContent) {
-                    system.addConstraint(EquationCreation.createRowEquals(system, end, begin, minDimension, true));
+                    system.addConstraint(LinearSystem.createRowEquals(system, end, begin, minDimension, true));
                 } else {
                     if (dimensionFixed) {
                         system.addConstraint(
-                                EquationCreation.createRowEquals(system, end, begin, dimension, false));
+                                LinearSystem.createRowEquals(system, end, begin, dimension, false));
                     } else {
                         system.addConstraint(system.createRow().createRowEquals(end, endPosition));
                     }
@@ -2130,7 +2130,7 @@ public class ConstraintWidget implements Solvable {
         } else if (beginTarget != null && endTarget == null) {
             system.addConstraint(system.createRow().createRowEquals(begin, beginTarget, beginAnchorMargin));
             if (wrapContent) {
-                system.addConstraint(EquationCreation.createRowEquals(system, end, begin, minDimension, true));
+                system.addConstraint(LinearSystem.createRowEquals(system, end, begin, minDimension, true));
             } else if (!useRatio) {
                 if (dimensionFixed) {
                     system.addConstraint(system.createRow().createRowEquals(end, begin, dimension));
@@ -2141,7 +2141,7 @@ public class ConstraintWidget implements Solvable {
         } else if (beginTarget == null && endTarget != null) {
             system.addConstraint(system.createRow().createRowEquals(end, endTarget, -1 * endAnchorMargin));
             if (wrapContent) {
-                system.addConstraint(EquationCreation.createRowEquals(system, end, begin, minDimension, true));
+                system.addConstraint(LinearSystem.createRowEquals(system, end, begin, minDimension, true));
             } else if (!useRatio) {
                 if (dimensionFixed) {
                     system.addConstraint(system.createRow().createRowEquals(end, begin, dimension));
@@ -2153,7 +2153,7 @@ public class ConstraintWidget implements Solvable {
             if (dimensionFixed) {
                 if (wrapContent) {
                     system.addConstraint(
-                            EquationCreation.createRowEquals(system, end, begin, minDimension, true));
+                            LinearSystem.createRowEquals(system, end, begin, minDimension, true));
                 } else {
                     system.addConstraint(system.createRow().createRowEquals(end, begin, dimension));
                 }
@@ -2175,35 +2175,35 @@ public class ConstraintWidget implements Solvable {
 
                 } else {
                     if (beginTarget == endTarget) {
-                        system.addConstraint(EquationCreation
+                        system.addConstraint(LinearSystem
                                 .createRowCentering(system, begin, beginTarget,
                                         0, 0.5f, endTarget, end, 0, true));
                     } else if (!inChain) {
                         boolean useBidirectionalError = (beginAnchor.getConnectionType() !=
                                 ConstraintAnchor.ConnectionType.STRICT);
-                        system.addConstraint(EquationCreation
+                        system.addConstraint(LinearSystem
                                 .createRowGreaterThan(system, begin, beginTarget,
                                   beginAnchorMargin, useBidirectionalError));
                         useBidirectionalError = (endAnchor.getConnectionType() !=
                                 ConstraintAnchor.ConnectionType.STRICT);
-                        system.addConstraint(EquationCreation
+                        system.addConstraint(LinearSystem
                                 .createRowLowerThan(system, end, endTarget,
                                         -1 * endAnchorMargin,
                                         useBidirectionalError));
-                        system.addConstraint(EquationCreation
+                        system.addConstraint(LinearSystem
                                 .createRowCentering(system, begin, beginTarget,
                                         beginAnchorMargin,
                                         bias, endTarget, end, endAnchorMargin, false));
                     }
                 }
             } else  if (useRatio) {
-                system.addConstraint(EquationCreation
+                system.addConstraint(LinearSystem
                         .createRowGreaterThan(system, begin, beginTarget, beginAnchorMargin,
                                 true));
-                system.addConstraint(EquationCreation
+                system.addConstraint(LinearSystem
                         .createRowLowerThan(system, end, endTarget, -1 * endAnchorMargin,
                                 true));
-                system.addConstraint(EquationCreation
+                system.addConstraint(LinearSystem
                         .createRowCentering(system, begin, beginTarget,
                           beginAnchorMargin, bias, endTarget, end, endAnchorMargin, true));
             } else if (!inChain) {

@@ -15,7 +15,6 @@
  */
 package android.support.constraint.solver.widgets;
 
-import android.support.constraint.solver.EquationCreation;
 import android.support.constraint.solver.LinearSystem;
 import android.support.constraint.solver.SolverVariable;
 
@@ -196,19 +195,19 @@ public class Guideline extends ConstraintWidget {
             SolverVariable guide = system.createObjectVariable(mAnchor);
             SolverVariable parentLeft = system.createObjectVariable(begin);
             system.addConstraint(
-                    EquationCreation
+                    LinearSystem
                             .createRowEquals(system, guide, parentLeft, mRelativeBegin, false));
         } else if (mRelativeEnd != -1) {
             SolverVariable guide = system.createObjectVariable(mAnchor);
             SolverVariable parentRight = system.createObjectVariable(end);
             system.addConstraint(
-                    EquationCreation
+                    LinearSystem
                             .createRowEquals(system, guide, parentRight, -mRelativeEnd, false));
         } else if (mRelativePercent != -1) {
             SolverVariable guide = system.createObjectVariable(mAnchor);
             SolverVariable parentLeft = system.createObjectVariable(begin);
             SolverVariable parentRight = system.createObjectVariable(end);
-            system.addConstraint(EquationCreation
+            system.addConstraint(LinearSystem
                     .createRowDimensionPercent(system, guide, parentLeft, parentRight,
                             mRelativePercent, mIsPositionRelaxed));
             if (mMinimumPosition > 0) {
