@@ -48,8 +48,6 @@ public class ArrayLinkedVariables {
 
     private SolverVariable candidate = null;
 
-    private float epsilon = 0.001f;
-
     // mArrayIndices point to indexes in mCache.mIndexedVariables (i.e., the SolverVariables)
     private int[] mArrayIndices = new int[ROW_SIZE];
 
@@ -95,10 +93,10 @@ public class ArrayLinkedVariables {
 
     /**
      * Constructor
-     * @param arrayRow
-     * @param cache
+     * @param arrayRow the row owning us
+     * @param cache instances cache
      */
-    public ArrayLinkedVariables(ArrayRow arrayRow, Cache cache) {
+    ArrayLinkedVariables(ArrayRow arrayRow, Cache cache) {
         mRow = arrayRow;
         mCache = cache;
         if (DEBUG) {
@@ -111,8 +109,8 @@ public class ArrayLinkedVariables {
     /**
      * Insert a variable with a given value in the linked list
      *
-     * @param variable
-     * @param value
+     * @param variable the variable to add in the list
+     * @param value the value of the variable
      */
     public final void put(SolverVariable variable, float value) {
         if (value == 0) {
@@ -207,8 +205,8 @@ public class ArrayLinkedVariables {
      * The code is broadly identical to the put() method, only differing
      * in in-line deletion, and of course doing an add rather than a put
      *
-     * @param variable
-     * @param value
+     * @param variable the variable we want to add
+     * @param value its value
      */
     public final void add(SolverVariable variable, float value) {
         if (value == 0) {
@@ -315,7 +313,7 @@ public class ArrayLinkedVariables {
     /**
      * Remove a variable from the list
      *
-     * @param variable
+     * @param variable the variable we want to remove
      * @return the value of the removed variable
      */
     public final float remove(SolverVariable variable) {
@@ -364,10 +362,10 @@ public class ArrayLinkedVariables {
     /**
      * Returns true if the variable is contained in the list
      *
-     * @param variable
-     * @return
+     * @param variable the variable we are looking for
+     * @return return true if we found the variable
      */
-    public final boolean containsKey(SolverVariable variable) {
+    final boolean containsKey(SolverVariable variable) {
         if (mHead == NONE) {
             return false;
         }
@@ -385,9 +383,9 @@ public class ArrayLinkedVariables {
     /**
      * Returns true if at least one of the variable is positive
      *
-     * @return
+     * @return true if at least one of the variable is positive
      */
-    public boolean hasAtLeastOnePositiveVariable() {
+    boolean hasAtLeastOnePositiveVariable() {
         int current = mHead;
         int counter = 0;
         while (current != NONE && counter < currentSize) {
@@ -402,7 +400,7 @@ public class ArrayLinkedVariables {
     /**
      * Invert the values of all the variables in the list
      */
-    public void invert() {
+    void invert() {
         int current = mHead;
         int counter = 0;
         while (current != NONE && counter < currentSize) {
@@ -417,7 +415,7 @@ public class ArrayLinkedVariables {
      *
      * @param amount aount to divide by
      */
-    public void divideByAmount(float amount) {
+    void divideByAmount(float amount) {
         int current = mHead;
         int counter = 0;
         while (current != NONE && counter < currentSize) {
@@ -430,9 +428,9 @@ public class ArrayLinkedVariables {
      * Make sure that all variables contained in the list
      * know we reference them
      *
-     * @param row
+     * @param row update the variable to reference the row
      */
-    public void updateClientEquations(ArrayRow row) {
+    void updateClientEquations(ArrayRow row) {
         int current = mHead;
         int counter = 0;
         while (current != NONE && counter < currentSize) {
@@ -444,15 +442,16 @@ public class ArrayLinkedVariables {
     /**
      * Return a candidate for a pivot variable
      *
-     * @return
+     * @return a candidate variable we can pivot on
      */
-    public SolverVariable pickPivotCandidate() {
+    SolverVariable pickPivotCandidate() {
         SolverVariable restrictedCandidate = null;
         SolverVariable unrestrictedCandidate = null;
         int current = mHead;
         int counter = 0;
         while (current != NONE && counter < currentSize) {
             float amount = mArrayValues[current];
+            float epsilon = 0.001f;
             if (amount < 0) {
                 if (amount > -epsilon) {
                     mArrayValues[current] = 0;
@@ -487,10 +486,10 @@ public class ArrayLinkedVariables {
     /**
      * Update the current list with a new definition
      *
-     * @param self
-     * @param definition
+     * @param self the row we will update with the definition
+     * @param definition the row containing the definition
      */
-    public void updateFromRow(ArrayRow self, ArrayRow definition) {
+    void updateFromRow(ArrayRow self, ArrayRow definition) {
         // This is one of the two method (the other being updateFromSystem())
         // that is constantly being called while building and solving the linear system
         // performances are critical
@@ -501,7 +500,7 @@ public class ArrayLinkedVariables {
                 float value = mArrayValues[current];
                 remove(definition.variable);
                 // now, let's add all values from the definition
-                ArrayLinkedVariables definitionVariables = ((ArrayLinkedVariables) (Object) definition.variables);
+                ArrayLinkedVariables definitionVariables = definition.variables;
                 int definitionCurrent = definitionVariables.mHead;
                 int definitionCounter = 0;
                 while (definitionCurrent != NONE && definitionCounter < definitionVariables.currentSize) {
@@ -528,10 +527,10 @@ public class ArrayLinkedVariables {
     /**
      * Update the list of elements from the system definitions
      *
-     * @param self
-     * @param rows
+     * @param self the row to update
+     * @param rows the array of rows we will update from (i.e., the system of equations)
      */
-    public void updateFromSystem(ArrayRow self, ArrayRow[] rows) {
+    void updateFromSystem(ArrayRow self, ArrayRow[] rows) {
         // This is one of the two method (the other being updateFromRow())
         // that is constantly being called while building and solving the linear system
         // performances are critical
@@ -545,7 +544,7 @@ public class ArrayLinkedVariables {
                 // now, let's add all values from the definition
                 ArrayRow definition = rows[variable.definitionId];
                 if (!definition.isSimpleDefinition) {
-                    ArrayLinkedVariables definitionVariables = ((ArrayLinkedVariables) (Object) definition.variables);
+                    ArrayLinkedVariables definitionVariables = definition.variables;
                     int definitionCurrent = definitionVariables.mHead;
                     int definitionCounter = 0;
                     while (definitionCurrent != NONE && definitionCounter < definitionVariables.currentSize) {
@@ -573,9 +572,9 @@ public class ArrayLinkedVariables {
 
     /**
      * Return a pivot candidate
-     * @return
+     * @return return a variable we can pivot on
      */
-    public SolverVariable getPivotCandidate() {
+    SolverVariable getPivotCandidate() {
         if (candidate == null) {
             // if no candidate is known, let's figure it out
             int current = mHead;
@@ -601,10 +600,10 @@ public class ArrayLinkedVariables {
     /**
      * Return a variable from its position in the linked list
      *
-     * @param index
-     * @return
+     * @param index the index of the variable we want to return
+     * @return the variable found, or null
      */
-    public final SolverVariable getVariable(int index) {
+    final SolverVariable getVariable(int index) {
         int current = mHead;
         int counter = 0;
         while (current != NONE && counter < currentSize) {
@@ -619,10 +618,10 @@ public class ArrayLinkedVariables {
     /**
      * Return the value of a variable from its position in the linked list
      *
-     * @param index
-     * @return
+     * @param index the index of the variable we want to look up
+     * @return the value of the found variable, or 0 if not found
      */
-    public final float getVariableValue(int index) {
+    final float getVariableValue(int index) {
         int current = mHead;
         int counter = 0;
         while (current != NONE && counter < currentSize) {
@@ -635,46 +634,9 @@ public class ArrayLinkedVariables {
     }
 
     /**
-     * Update another linked list from this one
-     * Note: should be deprecated
-     * @param target
-     * @param amount
-     */
-    public final void updateArray(ArrayLinkedVariables target, float amount) {
-        if (amount == 0) {
-            return;
-        }
-        int current = mHead;
-        int counter = 0;
-        while (current != NONE && counter < currentSize) {
-            SolverVariable variable = mCache.mIndexedVariables[mArrayIndices[current]];
-            float value = mArrayValues[current];
-            target.put(variable, target.get(variable) + value * amount);
-            current = mArrayNextIndices[current]; counter++;
-        }
-    }
-
-    /**
-     * Set a value of a variable given its position in the linked list
-     * Note: should be deprecated
-     * @param index
-     * @param value
-     */
-    public final void setVariable(int index, float value) {
-        int current = mHead;
-        int counter = 0;
-        while (current != NONE && counter < currentSize) {
-            if (counter == index) {
-                mArrayValues[current] = value;
-            }
-            current = mArrayNextIndices[current]; counter++;
-        }
-    }
-
-    /**
      * Return the value of a variable, 0 if not found
-     * @param v
-     * @return
+     * @param v the variable we are looking up
+     * @return the value of the found variable, or 0 if not found
      */
     public final float get(SolverVariable v) {
         int current = mHead;
@@ -689,7 +651,7 @@ public class ArrayLinkedVariables {
     }
 
 
-    public int sizeInBytes() {
+    int sizeInBytes() {
         int size = 0;
         size += 3 * (mArrayIndices.length * 4);
         size += 9 * 4;
@@ -712,7 +674,7 @@ public class ArrayLinkedVariables {
     /**
      * Returns a string representation of the list
      *
-     * @return
+     * @return a string containing a representation of the list
      */
     @Override
     public String toString() {

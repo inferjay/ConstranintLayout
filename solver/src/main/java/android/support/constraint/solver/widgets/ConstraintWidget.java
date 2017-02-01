@@ -37,7 +37,7 @@ import java.util.ArrayList;
  * Constraints are set by connecting a widget's anchor to another via the
  * {@link #connect} function.
  */
-public class ConstraintWidget implements Solvable {
+public class ConstraintWidget {
     private static final boolean AUTOTAG_CENTER = false;
     protected static final int SOLVER = 1;
     protected static final int DIRECT = 2;
@@ -463,7 +463,6 @@ public class ConstraintWidget implements Solvable {
      * @param system solver used
      * @param name   name of the widget
      */
-    @Override
     public void setDebugSolverName(LinearSystem system, String name) {
         mDebugName = name;
         SolverVariable left = system.createObjectVariable(mLeft);
@@ -1875,7 +1874,6 @@ public class ConstraintWidget implements Solvable {
      *
      * @param system the solver we want to add the widget to
      */
-    @Override
     public void addToSolver(LinearSystem system, int group) {
         SolverVariable left = null;
         SolverVariable right = null;
@@ -2218,7 +2216,6 @@ public class ConstraintWidget implements Solvable {
      *
      * @param system the solver we get the values from.
      */
-    @Override
     public void updateFromSolver(LinearSystem system, int group) {
         if (group == ConstraintAnchor.ANY_GROUP) {
             int left = system.getObjectVariableValue(mLeft);

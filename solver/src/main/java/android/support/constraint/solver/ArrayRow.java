@@ -18,55 +18,28 @@ package android.support.constraint.solver;
 
 public class ArrayRow {
     private static final boolean DEBUG = false;
-    static final boolean USE_LINKED_VARIABLES = true;
 
     SolverVariable variable = null;
-    float variableValue = 0;
     float constantValue = 0;
     boolean used = false;
-    final float epsilon = 0.001f;
 
     final ArrayLinkedVariables variables;
-    // final LinkedVariables variables;
-    // final ArrayBackedVariables variables;
 
     boolean isSimpleDefinition = false;
 
     public ArrayRow(Cache cache) {
         variables = new ArrayLinkedVariables(this, cache);
-        // variables = new LinkedVariables(this, cache);
-        // variables =  new ArrayBackedVariables(this, cache);
     }
 
-    public void updateClientEquations() {
-        if (USE_LINKED_VARIABLES) {
-            variables.updateClientEquations(this);
-            return;
-        }
-        int count = variables.currentSize;
-        for (int i = 0; i < count; i++) {
-            SolverVariable v = variables.getVariable(i);
-            if (v != null) {
-                v.addClientEquation(this);
-            }
-        }
+    void updateClientEquations() {
+        variables.updateClientEquations(this);
     }
 
-    public boolean hasAtLeastOnePositiveVariable() {
-        if (USE_LINKED_VARIABLES) {
-            return variables.hasAtLeastOnePositiveVariable();
-        }
-        int count = variables.currentSize;
-        for (int i = 0; i < count; i++) {
-            float value = variables.getVariableValue(i);
-            if (value > 0) {
-                return true;
-            }
-        }
-        return false;
+    boolean hasAtLeastOnePositiveVariable() {
+        return variables.hasAtLeastOnePositiveVariable();
     }
 
-    public boolean hasKeyVariable() {
+    boolean hasKeyVariable() {
         return !(
                 (variable == null)
                         || (variable.mType != SolverVariable.Type.UNRESTRICTED
@@ -78,7 +51,7 @@ public class ArrayRow {
         return toReadableString();
     }
 
-    public String toReadableString() {
+    String toReadableString() {
         String s = "";
         if (variable == null) {
             s += "0";
@@ -131,16 +104,15 @@ public class ArrayRow {
     public void reset() {
         variable = null;
         variables.clear();
-        variableValue = 0;
         constantValue = 0;
         isSimpleDefinition = false;
     }
 
-    public boolean hasVariable(SolverVariable v) {
+    boolean hasVariable(SolverVariable v) {
         return variables.containsKey(v);
     }
 
-    public ArrayRow createRowDefinition(SolverVariable variable, int value) {
+    ArrayRow createRowDefinition(SolverVariable variable, int value) {
         this.variable = variable;
         variable.computedValue = value;
         constantValue = value;
@@ -179,7 +151,7 @@ public class ArrayRow {
         return this;
     }
 
-    public ArrayRow addSingleError(SolverVariable error, int sign) {
+    ArrayRow addSingleError(SolverVariable error, int sign) {
         variables.put(error, (float) sign);
         return this;
     }
@@ -261,9 +233,8 @@ public class ArrayRow {
         return this;
     }
 
-    public ArrayRow createRowCentering(SolverVariable variableA, SolverVariable variableB, int marginA,
-                                       float bias, SolverVariable variableC, SolverVariable variableD, int marginB,
-                                       boolean withError) {
+    ArrayRow createRowCentering(SolverVariable variableA, SolverVariable variableB, int marginA,
+                                float bias, SolverVariable variableC, SolverVariable variableD, int marginB) {
         if (variableB == variableC) {
             // centering on the same position
             // B - A == D - B
@@ -299,14 +270,14 @@ public class ArrayRow {
         return this;
     }
 
-    public ArrayRow addError(SolverVariable error1, SolverVariable error2) {
+    ArrayRow addError(SolverVariable error1, SolverVariable error2) {
         variables.put(error1, 1);
         variables.put(error2, -1);
         return this;
     }
 
-    public ArrayRow createRowDimensionPercent(SolverVariable variableA,
-                                              SolverVariable variableB, SolverVariable variableC, float percent) {
+    ArrayRow createRowDimensionPercent(SolverVariable variableA,
+                                       SolverVariable variableB, SolverVariable variableC, float percent) {
         variables.put(variableA, -1);
         variables.put(variableB, (1 - percent));
         variables.put(variableC, percent);
@@ -317,12 +288,12 @@ public class ArrayRow {
      * Create a constraint to express A = B + (C - D) * ratio
      * We use this for ratio, where for exemple Right = Left + (Bottom - Top) * percent
      *
-     * @param variableA
-     * @param variableB
-     * @param variableC
-     * @param variableD
-     * @param ratio
-     * @return
+     * @param variableA variable A
+     * @param variableB variable B
+     * @param variableC variable C
+     * @param variableD variable D
+     * @param ratio ratio between AB and CD
+     * @return the row
      */
     public ArrayRow createRowDimensionRatio(SolverVariable variableA, SolverVariable variableB,
                                             SolverVariable variableC, SolverVariable variableD, float ratio) {
@@ -334,12 +305,11 @@ public class ArrayRow {
         return this;
     }
 
-    public int sizeInBytes() {
+    int sizeInBytes() {
         int size = 0;
         if (variable != null) {
             size += 4; // object
         }
-        size += 4; // variableValue;
         size += 4; // constantValue
         size += 4; // used
 
@@ -347,181 +317,44 @@ public class ArrayRow {
         return size;
     }
 
-    public boolean updateRowWithEquation(ArrayRow definition) {
-        if (USE_LINKED_VARIABLES) {
-            variables.updateFromRow(this, definition);
-            return true;
-        }
-
-        final float amount = variables.get(definition.variable);
-        // let's replace this with the new definition
-        if (amount != 0) {
-            if (!definition.isSimpleDefinition) {
-                definition.variables.updateArray(variables, amount);
-            }
-            constantValue += definition.constantValue * amount;
-            variables.remove(definition.variable);
-            definition.variable.removeClientEquation(this);
-            if (variables.currentSize == 0) {
-                isSimpleDefinition = true;
-            }
-            return true;
-        }
-        return false;
+    boolean updateRowWithEquation(ArrayRow definition) {
+        variables.updateFromRow(this, definition);
+        return true;
     }
 
-    public void ensurePositiveConstant() {
+    void ensurePositiveConstant() {
         // Ensure that if we have a constant it's positive
         if (constantValue < 0) {
             // If not, simply multiply the equation by -1
             constantValue *= -1;
-            if (USE_LINKED_VARIABLES) {
-                variables.invert();
-                return;
-            }
-            int count = variables.currentSize;
-            for (int i = 0; i < count; i++) {
-                float previousAmount = variables.getVariableValue(i);
-                variables.setVariable(i, previousAmount * -1);
-            }
+            variables.invert();
         }
     }
 
-    public void pickRowVariable() {
-        if (USE_LINKED_VARIABLES) {
-            SolverVariable pivotCandidate = variables.pickPivotCandidate();
-            if (pivotCandidate != null) {
-                pivot(pivotCandidate);
-            }
-            if (variables.currentSize == 0) {
-                isSimpleDefinition = true;
-            }
-            return;
+    void pickRowVariable() {
+        SolverVariable pivotCandidate = variables.pickPivotCandidate();
+        if (pivotCandidate != null) {
+            pivot(pivotCandidate);
         }
-        SolverVariable restrictedCandidate = null;
-        SolverVariable unrestrictedCandidate = null;
-        // let's find an adequate variable to pivot on
-        int count = variables.currentSize;
-        SolverVariable candidate = null;
-        for (int i = 0; i < count; i++) {
-            SolverVariable candidateVariable = variables.getVariable(i);
-            if (candidateVariable == null) {
-                continue;
-            }
-            float variableAmount = variables.getVariableValue(i);
-            if (variableAmount != 0) {
-                if (variableAmount < 0) {
-                    if (variableAmount > -epsilon) {
-                        variableAmount = 0;
-                    }
-                } else {
-                    if (variableAmount < epsilon) {
-                        variableAmount = 0;
-                    }
-                }
-            } else {
-                continue;
-            }
-            if (variableAmount == 0) {
-                variables.setVariable(i, 0);
-                continue;
-            }
-
-            if (candidateVariable == null) {
-                // TODO: Log error condition
-                continue;
-            }
-
-            if (candidateVariable.mType == SolverVariable.Type.UNRESTRICTED) {
-                // If there's an unrestricted variable, it's a candidate to pivot on.
-                if (variableAmount < 0) {
-                    // if it has a negative value, remember it
-                    if (candidate == null || candidate.id > candidateVariable.id) {
-                        candidate = candidateVariable;
-                    }
-                    break;
-                } else if (unrestrictedCandidate == null) {
-                    // otherwise, let's remember this candidate. If we don't find another
-                    // negative unrestricted variable, this might be our best candidate.
-                    if (unrestrictedCandidate == null || unrestrictedCandidate.id > candidateVariable.id) {
-                        unrestrictedCandidate = candidateVariable;
-                    }
-                }
-            } else if (variableAmount < 0) {
-                // The variable is restricted, but has a negative amount. If we don't already
-                // have candidate for restricted variable, we should remember it as a candidate.
-                if (restrictedCandidate == null || restrictedCandidate.id > candidateVariable.id || candidateVariable.strength < restrictedCandidate.strength) {
-                    restrictedCandidate = candidateVariable;
-                }
-            }
-        }
-
-        if (candidate != null) {
-            pivot(candidate);
-        }
-
-        // we were not able to pivot on an unrestricted negative variable.
-        if (variable == null && unrestrictedCandidate != null) {
-            // We might have a previously unknown unrestricted variable with
-            // positive variable though, and we should pivot on it preferably.
-            pivot(unrestrictedCandidate);
-        }
-
-        if (variable == null && restrictedCandidate != null) {
-            // we were not able to pivot on an unrestricted variable, but we might
-            // have restricted variable candidate for the pivot
-            pivot(restrictedCandidate);
-        }
-
         if (variables.currentSize == 0) {
             isSimpleDefinition = true;
         }
     }
 
-    public void pivot(SolverVariable v) {
+    void pivot(SolverVariable v) {
         if (variable != null) {
             // first, move back the variable to its column
-            variables.put(variable, -1f /* * variableValue */);
+            variables.put(variable, -1f);
             variable = null;
         }
 
-        if (USE_LINKED_VARIABLES) {
-            float amount = variables.remove(v) * -1;
-            variable = v;
-            variableValue = 1;
-            if (amount == 1) {
-                return;
-            }
-            constantValue = constantValue / amount;
-            variables.divideByAmount(amount);
-            return;
-        }
-
-        // now grab the amount of the pivot, and divide the columns by it
-        float amount = variables.get(v) * -1;
-        variables.remove(v);
+        float amount = variables.remove(v) * -1;
         variable = v;
-        variableValue = 1;
         if (amount == 1) {
             return;
         }
         constantValue = constantValue / amount;
-        int count = variables.currentSize;
-
-        for (int i = 0; i < count; i++) {
-            float previousAmount = variables.getVariableValue(i);
-            float value = previousAmount / amount;
-            if (value < 0) {
-                if (value > -epsilon) {
-                    value = 0;
-                }
-            } else {
-                if (value < epsilon) {
-                    value = 0;
-                }
-            }
-            variables.setVariable(i, value);
-        }
+        variables.divideByAmount(amount);
     }
 
 }

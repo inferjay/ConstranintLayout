@@ -22,6 +22,11 @@ import android.support.constraint.solver.LinearSystem;
  */
 public class ConstraintHorizontalLayout extends ConstraintWidgetContainer {
 
+    // Define how the content of a widget should align, if the widget has children
+    public enum ContentAlignment {
+        BEGIN, MIDDLE, END, TOP, VERTICAL_MIDDLE, BOTTOM, LEFT, RIGHT
+    }
+
     private ContentAlignment mAlignment = ContentAlignment.MIDDLE;
 
     /**

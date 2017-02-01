@@ -28,11 +28,13 @@ public class SolverVariable {
     // Set to true if mClientEquations is a linked list
     static final boolean USE_LIST = false;
 
-    private static final int STRENGTH_NONE = 0;
+    @SuppressWarnings("WeakerAccess")
+    public static final int STRENGTH_NONE = 0;
     public static final int STRENGTH_LOW = 1;
     public static final int STRENGTH_MEDIUM = 2;
     public static final int STRENGTH_HIGH = 3;
-    static final int STRENGTH_HIGHEST = 4;
+    @SuppressWarnings("WeakerAccess")
+    public static final int STRENGTH_HIGHEST = 4;
     public static final int STRENGTH_EQUALITY = 5;
 
     private static int uniqueId = 1;

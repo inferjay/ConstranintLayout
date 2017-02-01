@@ -23,6 +23,8 @@ public class LinkedVariables {
     private final ArrayRow mRow;
     private final Cache mCache;
 
+    public static Pools.Pool<LinkedVariables.Link> linkedVariablesPool = new Pools.SimplePool<>(256);
+
     static class Link {
         SolverVariable variable;
         float value;
@@ -133,7 +135,7 @@ public class LinkedVariables {
     public void updateFromRow(ArrayRow self, ArrayRow definition) {
         Link current = head;
         Link previous = null;
-        Link newVariables = mCache.linkedVariablesPool.acquire();
+        Link newVariables = linkedVariablesPool.acquire();
         if (newVariables == null) {
             newVariables = new Link();
         }
@@ -145,7 +147,7 @@ public class LinkedVariables {
                 if (!definition.isSimpleDefinition) {
                     Link definitionCurrent = ((LinkedVariables) (Object) definition.variables).head;
                     while (definitionCurrent != null) {
-                        Link temp = mCache.linkedVariablesPool.acquire(); if (temp == null) { temp = new Link(); }
+                        Link temp = linkedVariablesPool.acquire(); if (temp == null) { temp = new Link(); }
                         temp.variable = definitionCurrent.variable;
                         temp.value = definitionCurrent.value * amount;
                         temp.next = null;
@@ -161,7 +163,7 @@ public class LinkedVariables {
                 } else {
                     previous.next = current.next;
                 }
-                mCache.linkedVariablesPool.release(current);
+                linkedVariablesPool.release(current);
                 currentSize--;
             } else {
                 previous = current;
@@ -173,15 +175,15 @@ public class LinkedVariables {
             add(current.variable, current.value);
             previous = current;
             current = current.next;
-            mCache.linkedVariablesPool.release(previous);
+            linkedVariablesPool.release(previous);
         }
-        mCache.linkedVariablesPool.release(newVariables);
+        linkedVariablesPool.release(newVariables);
     }
 
     public void updateFromSystem(ArrayRow self, ArrayRow[] rows) {
         Link current = head;
         Link previous = null;
-        Link newVariables = mCache.linkedVariablesPool.acquire();
+        Link newVariables = linkedVariablesPool.acquire();
         if (newVariables == null) {
             newVariables = new Link();
         }
@@ -195,7 +197,7 @@ public class LinkedVariables {
                 if (!definition.isSimpleDefinition) {
                     Link definitionCurrent = ((LinkedVariables) (Object) definition.variables).head;
                     while (definitionCurrent != null) {
-                        Link temp = mCache.linkedVariablesPool.acquire(); if (temp == null) { temp = new Link(); }
+                        Link temp = linkedVariablesPool.acquire(); if (temp == null) { temp = new Link(); }
                         temp.variable = definitionCurrent.variable;
                         temp.value = definitionCurrent.value * amount;
                         temp.next = null;
@@ -211,7 +213,7 @@ public class LinkedVariables {
                 } else {
                     previous.next = current.next;
                 }
-                mCache.linkedVariablesPool.release(current);
+                linkedVariablesPool.release(current);
                 currentSize--;
             } else {
                 previous = current;
@@ -223,9 +225,9 @@ public class LinkedVariables {
             add(current.variable, current.value);
             previous = current;
             current = current.next;
-            mCache.linkedVariablesPool.release(previous);
+            linkedVariablesPool.release(previous);
         }
-        mCache.linkedVariablesPool.release(newVariables);
+        linkedVariablesPool.release(newVariables);
     }
 
     public SolverVariable getPivotCandidate() {
@@ -316,7 +318,7 @@ public class LinkedVariables {
             }
             current = current.next;
         }
-        current = mCache.linkedVariablesPool.acquire();
+        current = linkedVariablesPool.acquire();
         if (current == null) {
             current = new Link();
         }
@@ -353,7 +355,7 @@ public class LinkedVariables {
                         previous.next = current.next;
                     }
                     current.variable.removeClientEquation(mRow);
-                    mCache.linkedVariablesPool.release(current);
+                    linkedVariablesPool.release(current);
                     currentSize--;
                 }
                 return;
@@ -363,7 +365,7 @@ public class LinkedVariables {
             }
             current = current.next;
         }
-        current = mCache.linkedVariablesPool.acquire();
+        current = linkedVariablesPool.acquire();
         if (current == null) {
             current = new Link();
         }
@@ -388,7 +390,7 @@ public class LinkedVariables {
         while (current != null) {
             Link previous = current;
             current = current.next;
-            mCache.linkedVariablesPool.release(previous);
+            linkedVariablesPool.release(previous);
         }
         head = null;
         currentSize = 0;
@@ -420,7 +422,7 @@ public class LinkedVariables {
                     previous.next = current.next;
                 }
                 current.variable.removeClientEquation(mRow);
-                mCache.linkedVariablesPool.release(current);
+                linkedVariablesPool.release(current);
                 currentSize--;
                 return value;
             }
