@@ -94,7 +94,7 @@ public class CenterWrapTest {
         root.layout();
         System.out.println("b) root: " + root + " IMG: " + IMG + " BUTTON: " + BUTTON + " A: " + A + " B: " + B + " C: " + C);
         assertEquals(root.getWidth(), 800);
-        assertEquals(root.getHeight(), 197);
+        assertEquals(root.getHeight(), 294);
         assertEquals(IMG.getWidth(), root.getWidth());
         assertEquals(BUTTON.getWidth(), 50);
         assertEquals(A.getWidth(), 100);
@@ -115,6 +115,6 @@ public class CenterWrapTest {
         assertEquals(B.getTop(), A.getTop());
         assertEquals(C.getLeft(), 350);
         assertEquals(C.getRight(), 450);
-        assertEquals(C.getTop(), 177);
+        assertEquals(C.getTop(), 226);
     }
 }

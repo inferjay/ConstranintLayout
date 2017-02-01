@@ -507,7 +507,7 @@ public class ConstraintSet {
      */
     public void applyTo(ConstraintLayout constraintLayout) {
         applyToInternal(constraintLayout);
-        constraintLayout.removeConstraintSet();
+        constraintLayout.setConstraintSet(null);
     }
 
     /**
