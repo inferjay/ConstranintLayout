@@ -488,6 +488,8 @@ public class ConstraintSet {
             param.rightMargin = rightMargin;
             param.topMargin = topMargin;
             param.bottomMargin = bottomMargin;
+            param.goneStartMargin = goneStartMargin;
+            param.goneEndMargin = goneEndMargin;
 
             param.horizontalBias = horizontalBias;
             param.verticalBias = verticalBias;
@@ -666,6 +668,11 @@ public class ConstraintSet {
         if (firstSide == LEFT || firstSide == RIGHT) {
             connect(centerID, LEFT, firstID, firstSide, firstMargin);
             connect(centerID, RIGHT, secondId, secondSide, secondMargin);
+            Constraint constraint = mConstraints.get(centerID);
+            constraint.horizontalBias = bias;
+        } else if (firstSide == START || firstSide == END) {
+            connect(centerID, START, firstID, firstSide, firstMargin);
+            connect(centerID, END, secondId, secondSide, secondMargin);
             Constraint constraint = mConstraints.get(centerID);
             constraint.horizontalBias = bias;
         } else {
@@ -881,7 +888,11 @@ public class ConstraintSet {
      * @param toView ID of view to center on (or in)
      */
     public void centerHorizontally(int viewId, int toView) {
-        center(viewId, toView, ConstraintSet.LEFT, 0, toView, ConstraintSet.RIGHT, 0, .5f);
+        if (toView == PARENT_ID) {
+            center(viewId, PARENT_ID , ConstraintSet.LEFT, 0, PARENT_ID, ConstraintSet.RIGHT, 0, 0.5f);
+        } else {
+            center(viewId, toView, ConstraintSet.RIGHT, 0, toView, ConstraintSet.LEFT, 0, 0.5f);
+        }
     }
 
     /**
@@ -891,7 +902,11 @@ public class ConstraintSet {
      * @param toView ID of view to center on (or in)
      */
     public void centerVertically(int viewId, int toView) {
-        center(viewId, toView, ConstraintSet.TOP, 0, toView, ConstraintSet.BOTTOM, 0, .5f);
+        if (toView == PARENT_ID) {
+            center(viewId, PARENT_ID, ConstraintSet.TOP, 0, PARENT_ID, ConstraintSet.BOTTOM, 0, 0.5f);
+        } else {
+            center(viewId, toView, ConstraintSet.BOTTOM, 0, toView, ConstraintSet.TOP, 0, 0.5f);
+        }
     }
 
     /**
@@ -920,8 +935,8 @@ public class ConstraintSet {
                     constraint.goneLeftMargin = 0;
                     break;
                 case RIGHT:
-                    constraint.leftToRight = Constraint.UNSET;
-                    constraint.leftToLeft = Constraint.UNSET;
+                    constraint.rightToRight = Constraint.UNSET;
+                    constraint.rightToLeft = Constraint.UNSET;
                     constraint.rightMargin = 0;
                     constraint.goneRightMargin = 0;
                     break;
@@ -1076,7 +1091,7 @@ public class ConstraintSet {
      * @param viewId ID of view to adjust the vertical
      * @param alpha the alpha
      */
-    public void setAlpha(int viewId, int alpha) {
+    public void setAlpha(int viewId, float alpha) {
         get(viewId).alpha = alpha;
     }
 
@@ -1106,7 +1121,7 @@ public class ConstraintSet {
      * @param viewId ID of view to adjust the elevation
      * @param elevation the elevation
      */
-    public void setElevation(int viewId, int elevation) {
+    public void setElevation(int viewId, float elevation) {
         get(viewId).elevation = elevation;
         get(viewId).applyElevation = true;
     }
@@ -1117,7 +1132,7 @@ public class ConstraintSet {
      * @param viewId ID of view to adjust th X rotation
      * @param rotationX the rotation about the X axis
      */
-    public void setRotationX(int viewId, int rotationX) {
+    public void setRotationX(int viewId, float rotationX) {
         get(viewId).rotationX = rotationX;
     }
 
@@ -1127,7 +1142,7 @@ public class ConstraintSet {
      * @param viewId ID of view to adjust the Y rotation
      * @param rotationY the rotationY
      */
-    public void setRotationY(int viewId, int rotationY) {
+    public void setRotationY(int viewId, float rotationY) {
         get(viewId).rotationY = rotationY;
     }
 
@@ -1137,7 +1152,7 @@ public class ConstraintSet {
      * @param viewId ID of view to adjust the scale in X
      * @param scaleX the the scale in X
      */
-    public void setScaleX(int viewId, int scaleX) {
+    public void setScaleX(int viewId, float scaleX) {
         get(viewId).scaleX = scaleX;
     }
 
@@ -1147,7 +1162,7 @@ public class ConstraintSet {
      * @param viewId ID of view to adjust the scale in Y
      * @param scaleY the scale in Y
      */
-    public void setScaleY(int viewId, int scaleY) {
+    public void setScaleY(int viewId, float scaleY) {
         get(viewId).scaleY = scaleY;
     }
 
@@ -1157,7 +1172,7 @@ public class ConstraintSet {
      * @param viewId ID of view to adjust the transforms pivot point about X
      * @param transformPivotX X location of the pivot point.
      */
-    public void setTransformPivotX(int viewId, int transformPivotX) {
+    public void setTransformPivotX(int viewId, float transformPivotX) {
         get(viewId).transformPivotX = transformPivotX;
     }
 
@@ -1167,7 +1182,7 @@ public class ConstraintSet {
      * @param viewId ID of view to adjust the transforms pivot point about Y
      * @param transformPivotY Y location of the pivot point.
      */
-    public void setTransformPivotY(int viewId, int transformPivotY) {
+    public void setTransformPivotY(int viewId, float transformPivotY) {
         get(viewId).transformPivotY = transformPivotY;
     }
 
@@ -1178,7 +1193,7 @@ public class ConstraintSet {
      * @param transformPivotX X location of the pivot point.
      * @param transformPivotY Y location of the pivot point.
      */
-    public void setTransformPivot(int viewId, int transformPivotX, int transformPivotY) {
+    public void setTransformPivot(int viewId, float transformPivotX, float transformPivotY) {
         Constraint constraint = get(viewId);
         constraint.transformPivotY = transformPivotY;
         constraint.transformPivotX = transformPivotX;
@@ -1190,7 +1205,7 @@ public class ConstraintSet {
      * @param viewId ID of view to translation
      * @param translationX the translation in X
      */
-    public void setTranslationX(int viewId, int translationX) {
+    public void setTranslationX(int viewId, float translationX) {
         get(viewId).translationX = translationX;
     }
 
@@ -1200,7 +1215,7 @@ public class ConstraintSet {
      * @param viewId ID of view to adjust its translation in Y
      * @param translationY the translation in Y
      */
-    public void setTranslationY(int viewId, int translationY) {
+    public void setTranslationY(int viewId, float translationY) {
         get(viewId).translationY = translationY;
     }
 
@@ -1211,7 +1226,7 @@ public class ConstraintSet {
      * @param translationX the translation in X
      * @param translationY the translation in Y
      */
-    public void setTranslation(int viewId, int translationX, int translationY) {
+    public void setTranslation(int viewId, float translationX, float translationY) {
         Constraint constraint = get(viewId);
         constraint.translationX = translationX;
         constraint.translationY = translationY;
@@ -1223,7 +1238,7 @@ public class ConstraintSet {
      * @param viewId ID of view to adjust the
      * @param translationZ the translationZ
      */
-    public void setTranslationZ(int viewId, int translationZ) {
+    public void setTranslationZ(int viewId, float translationZ) {
         get(viewId).translationZ = translationZ;
     }
 
@@ -1256,7 +1271,7 @@ public class ConstraintSet {
      * @param viewId ID of view to adjust it height
      * @param weight the weight that we can use to distribute the horizontal space
      */
-    public void setHorizontalWeight(int viewId, int weight) {
+    public void setHorizontalWeight(int viewId, float weight) {
         get(viewId).horizontalWeight = weight;
     }
 
@@ -1267,7 +1282,7 @@ public class ConstraintSet {
      * @param viewId ID of view to adjust it height
      * @param weight the weight that we can use to distribute the horizontal space
      */
-    public void setVerticalWeight(int viewId, int weight) {
+    public void setVerticalWeight(int viewId, float weight) {
         get(viewId).verticalWeight = weight;
     }
 
@@ -1416,7 +1431,7 @@ public class ConstraintSet {
     public void setGuidelineBegin(int guidelineID, int margin) {
         get(guidelineID).guideBegin = margin;
         get(guidelineID).guideEnd = Constraint.UNSET;
-        get(guidelineID).guidePercent = 0.5f;
+        get(guidelineID).guidePercent = Constraint.UNSET;
 
     }
 
@@ -1429,7 +1444,7 @@ public class ConstraintSet {
     public void setGuidelineEnd(int guidelineID, int margin) {
         get(guidelineID).guideEnd = margin;
         get(guidelineID).guideBegin = Constraint.UNSET;
-        get(guidelineID).guidePercent = 0.5f;
+        get(guidelineID).guidePercent = Constraint.UNSET;
     }
 
     /**
