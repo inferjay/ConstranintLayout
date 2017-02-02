@@ -22,6 +22,7 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
+import android.support.constraint.ConstraintLayout.LayoutParams;
 import android.util.*;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,6 +54,11 @@ import java.util.HashSet;
  */
 public class ConstraintSet {
     private static final String TAG = "ConstraintSet";
+
+    /**
+     * Used to indicate a parameter is cleared or not set
+     */
+    public static final int UNSET = LayoutParams.UNSET;
 
     /**
      * Dimension will be controlled by constraints
@@ -330,19 +336,19 @@ public class ConstraintSet {
         public int editorAbsoluteY = UNSET;
 
         public int orientation = UNSET;
-        public int leftMargin = 0;
-        public int rightMargin = 0;
-        public int topMargin = 0;
-        public int bottomMargin = 0;
-        public int endMargin = 0;
-        public int startMargin = 0;
+        public int leftMargin = UNSET;
+        public int rightMargin = UNSET;
+        public int topMargin = UNSET;
+        public int bottomMargin = UNSET;
+        public int endMargin = UNSET;
+        public int startMargin = UNSET;
         public int visibility = VISIBLE;
-        public int goneLeftMargin = 0;
-        public int goneTopMargin = 0;
-        public int goneRightMargin = 0;
-        public int goneBottomMargin = 0;
-        public int goneEndMargin = 0;
-        public int goneStartMargin = 0;
+        public int goneLeftMargin = UNSET;
+        public int goneTopMargin = UNSET;
+        public int goneRightMargin = UNSET;
+        public int goneBottomMargin = UNSET;
+        public int goneEndMargin = UNSET;
+        public int goneStartMargin = UNSET;
         public float verticalWeight = 0;
         public float horizontalWeight = 0;
         public int horizontalChainStyle = CHAIN_SPREAD;
@@ -752,18 +758,18 @@ public class ConstraintSet {
             get(chainIds[0]).verticalWeight = weights[0];
         }
         get(chainIds[0]).horizontalChainStyle = style;
-        connect(chainIds[0], LEFT, leftId, (leftId == PARENT_ID) ? LEFT : RIGHT, 0);
+        connect(chainIds[0], LEFT, leftId, (leftId == PARENT_ID) ? LEFT : RIGHT, UNSET);
         for (int i = 1; i < chainIds.length; i++) {
             int chainId = chainIds[i];
-            connect(chainIds[i], LEFT, chainIds[i - 1], RIGHT, 0);
-            connect(chainIds[i - 1], RIGHT, chainIds[i], LEFT, 0);
+            connect(chainIds[i], LEFT, chainIds[i - 1], RIGHT, UNSET);
+            connect(chainIds[i - 1], RIGHT, chainIds[i], LEFT, UNSET);
             if (weights != null) {
                 get(chainIds[i]).horizontalWeight = weights[i];
             }
         }
 
         connect(chainIds[chainIds.length - 1], RIGHT, rightId, (rightId == PARENT_ID) ? RIGHT : LEFT,
-            0);
+            UNSET);
 
     }
 
@@ -931,26 +937,26 @@ public class ConstraintSet {
                 case LEFT:
                     constraint.leftToRight = Constraint.UNSET;
                     constraint.leftToLeft = Constraint.UNSET;
-                    constraint.leftMargin = 0;
-                    constraint.goneLeftMargin = 0;
+                    constraint.leftMargin = Constraint.UNSET;
+                    constraint.goneLeftMargin = Constraint.UNSET;
                     break;
                 case RIGHT:
                     constraint.rightToRight = Constraint.UNSET;
                     constraint.rightToLeft = Constraint.UNSET;
-                    constraint.rightMargin = 0;
-                    constraint.goneRightMargin = 0;
+                    constraint.rightMargin = Constraint.UNSET;
+                    constraint.goneRightMargin = Constraint.UNSET;
                     break;
                 case TOP:
                     constraint.topToBottom = Constraint.UNSET;
                     constraint.topToTop = Constraint.UNSET;
-                    constraint.topMargin = 0;
-                    constraint.goneTopMargin = 0;
+                    constraint.topMargin = Constraint.UNSET;
+                    constraint.goneTopMargin = Constraint.UNSET;
                     break;
                 case BOTTOM:
                     constraint.bottomToTop = Constraint.UNSET;
                     constraint.bottomToBottom = Constraint.UNSET;
-                    constraint.bottomMargin = 0;
-                    constraint.goneBottomMargin = 0;
+                    constraint.bottomMargin = Constraint.UNSET;
+                    constraint.goneBottomMargin = Constraint.UNSET;
                     break;
                 case BASELINE:
 
@@ -959,14 +965,14 @@ public class ConstraintSet {
                 case START:
                     constraint.startToEnd = Constraint.UNSET;
                     constraint.startToStart = Constraint.UNSET;
-                    constraint.startMargin = 0;
-                    constraint.goneStartMargin = 0;
+                    constraint.startMargin = Constraint.UNSET;
+                    constraint.goneStartMargin = Constraint.UNSET;
                     break;
                 case END:
                     constraint.endToStart = Constraint.UNSET;
                     constraint.endToEnd = Constraint.UNSET;
-                    constraint.endMargin = 0;
-                    constraint.goneEndMargin = 0;
+                    constraint.endMargin = Constraint.UNSET;
+                    constraint.goneEndMargin = Constraint.UNSET;
                     break;
                 default:
                     throw new IllegalArgumentException("unknown constraint");
