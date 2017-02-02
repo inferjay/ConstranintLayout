@@ -1,9 +1,6 @@
 package android.support.constraint.solver;
 
 
-import android.support.constraint.solver.widgets.ConstraintAnchor;
-import android.support.constraint.solver.widgets.ConstraintWidget;
-import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -21,7 +18,7 @@ public class ArrayLinkedVariablesTest {
         SolverVariable []v = new SolverVariable[9];
         for (int i = 0; i < v.length; i++) {
             int p = i^3;
-            v[i] = new SolverVariable(cache,"dog"+p+"("+i+")"+p, SolverVariable.Type.UNRESTRICTED);
+            v[i] = new SolverVariable("dog"+p+"("+i+")"+p, SolverVariable.Type.UNRESTRICTED);
             cache.mIndexedVariables[i] = v[i];
             v[i].id = i;
             variables.add(v[i],20f);

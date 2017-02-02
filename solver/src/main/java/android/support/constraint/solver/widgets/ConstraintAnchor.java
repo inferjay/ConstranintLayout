@@ -94,7 +94,7 @@ public class ConstraintAnchor {
      */
     public void resetSolverVariable(Cache cache) {
         if (mSolverVariable == null) {
-            mSolverVariable = new SolverVariable(cache, SolverVariable.Type.UNRESTRICTED);
+            mSolverVariable = new SolverVariable(SolverVariable.Type.UNRESTRICTED);
         } else {
             mSolverVariable.reset();
         }

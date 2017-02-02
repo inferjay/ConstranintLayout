@@ -19,10 +19,7 @@ package android.support.constraint.solver;
  * Cache for common objects
  */
 public class Cache {
-
     Pools.Pool<ArrayRow> arrayRowPool = new Pools.SimplePool<>(256);
     Pools.Pool<SolverVariable> solverVariablePool = new Pools.SimplePool<>(256);
-    Pools.Pool<SolverVariable.Link> linkedSolverVariablePool = new Pools.SimplePool<>(256);
-
     SolverVariable[] mIndexedVariables = new SolverVariable[32];
 }

@@ -243,7 +243,7 @@ public class LinearSystem {
     private SolverVariable acquireSolverVariable(SolverVariable.Type type) {
         SolverVariable variable = mCache.solverVariablePool.acquire();
         if (variable == null) {
-            variable = new SolverVariable(mCache, type);
+            variable = new SolverVariable(type);
         }
         variable.reset();
         variable.setType(type);
@@ -456,22 +456,9 @@ public class LinearSystem {
                 tempClientsCopy = new ArrayRow[tempClientsCopy.length * 2];
             }
             ArrayRow[] clients = tempClientsCopy;
-            if (SolverVariable.USE_LIST) {
-                //noinspection ManualArrayCopy
-                for (int i = 0; i < count; i++) {
-                    clients[i] = row.variable.mClientEquations[i];
-                }
-                SolverVariable.Link current = (SolverVariable.Link) (Object) row.variable.mClientEquations;
-                int n = 0;
-                while (current.next != null) {
-                    clients[n++] = current.next.row;
-                    current = current.next;
-                }
-            } else {
-                //noinspection ManualArrayCopy
-                for (int i = 0; i < count; i++) {
-                  clients[i] = row.variable.mClientEquations[i];
-                }
+            //noinspection ManualArrayCopy
+            for (int i = 0; i < count; i++) {
+                clients[i] = row.variable.mClientEquations[i];
             }
             for (int i = 0; i < count; i++) {
                 ArrayRow client = clients[i];
