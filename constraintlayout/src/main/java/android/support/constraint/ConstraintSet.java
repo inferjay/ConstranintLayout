@@ -689,7 +689,19 @@ public class ConstraintSet {
         }
     }
 
-    private void centerHorizontally(int centerID, int leftId, int leftSide, int leftMargin,
+    /**
+     * Centers the widget horizontally to the left and right side on another widgets sides.
+     *
+     * @param centerID ID of widget to be centered
+     * @param leftId The Id of the widget on the left side
+     * @param leftSide The side of the leftId widget to connect to
+     * @param leftMargin The margin on the left side
+     * @param rightId The Id of the widget on the right side
+     * @param rightSide  The side  of the rightId widget to connect to
+     * @param rightMargin The margin on the right side
+     * @param bias The ratio of the space on the left vs. right sides 0.5 is centered (default)
+     */
+    public void centerHorizontally(int centerID, int leftId, int leftSide, int leftMargin,
         int rightId, int rightSide, int rightMargin, float bias) {
         connect(centerID, LEFT, leftId, leftSide, leftMargin);
         connect(centerID, RIGHT, rightId, rightSide, rightMargin);
@@ -697,7 +709,39 @@ public class ConstraintSet {
         constraint.horizontalBias = bias;
     }
 
-    private void centerVertically(int centerID, int topId, int topSide, int topMargin, int bottomId,
+    /**
+     * Centers the widgets horizontally to the left and right side on another widgets sides.
+     *
+     * @param centerID ID of widget to be centered
+     * @param startId The Id of the widget on the start side (left in non rtl languages)
+     * @param startSide The side of the startId widget to connect to
+     * @param startMargin The margin on the start side
+     * @param endId The Id of the widget on the start side (left in non rtl languages)
+     * @param endSide The side of the endId widget to connect to
+     * @param endMargin The margin on the end side
+     * @param bias The ratio of the space on the start vs end side 0.5 is centered (default)
+     */
+    public void centerHorizontallyRtl(int centerID, int startId, int startSide, int startMargin,
+        int endId, int endSide, int endMargin, float bias) {
+        connect(centerID, START, startId, startSide, startMargin);
+        connect(centerID, END, endId, endSide, endMargin);
+        Constraint constraint = mConstraints.get(centerID);
+        constraint.horizontalBias = bias;
+    }
+
+    /**
+     * Centers the widgets Vertically to the top and bottom side on another widgets sides.
+     *
+     * @param centerID ID of widget to be centered
+     * @param topId The Id of the widget on the top side
+     * @param topSide The side of the leftId widget to connect to
+     * @param topMargin The margin on the top side
+     * @param bottomId The Id of the widget on the bottom side
+     * @param bottomSide The side of the bottomId widget to connect to
+     * @param bottomMargin The margin on the bottom side
+     * @param bias The ratio of the space on the top vs. bottom sides 0.5 is centered (default)
+     */
+    public void centerVertically(int centerID, int topId, int topSide, int topMargin, int bottomId,
         int bottomSide, int bottomMargin, float bias) {
         connect(centerID, TOP, topId, topSide, topMargin);
         connect(centerID, BOTTOM, bottomId, bottomSide, bottomMargin);
@@ -739,15 +783,39 @@ public class ConstraintSet {
     }
 
     /**
-     * Spaces a set of widgets horizontal between the view leftID and rightId.
+     * Spaces a set of widgets horizontal between the view startID and endId.
      * Widgets can be spaced with weights.
      *
-     * @param chainIds widgets to use as a chain
-     * @param weights can be null
-     * @param style set the style of the chain
+     * @param leftId The id of the widget to connect to or PARENT_ID
+     * @param rightId The id of the widget to connect to or PARENT_ID
+     * @param chainIds The widgets in the chain
+     * @param weights The weight to assign to each element in the chain or null
+     * @param style The type of chain
      */
     public void createHorizontalChain(int leftId, int rightId, int[] chainIds, float[] weights,
         int style) {
+        createHorizontalChain(leftId, rightId,chainIds, weights,style, LEFT, RIGHT);
+    }
+
+    /**
+     * Spaces a set of widgets horizontal between the view startID and endId.
+     * Widgets can be spaced with weights.
+     * If connecting to parent
+     *
+     * @param startId The id of the widget to connect to or PARENT_ID
+     * @param endId The id of the widget to connect to or PARENT_ID
+     * @param chainIds The widgets in the chain
+     * @param weights The weight to assign to each element in the chain or null
+     * @param style The type of chain
+     */
+    public void createHorizontalChainRtl(int startId, int endId, int[] chainIds, float[] weights,
+        int style) {
+        createHorizontalChain(startId, endId,chainIds, weights,style, START, END);
+    }
+
+    private void createHorizontalChain(int leftId, int rightId, int[] chainIds, float[] weights,
+        int style, int left, int right) {
+
         if (chainIds.length < 2) {
             throw new IllegalArgumentException("must have 2 or more widgets in a chain");
         }
@@ -758,17 +826,17 @@ public class ConstraintSet {
             get(chainIds[0]).verticalWeight = weights[0];
         }
         get(chainIds[0]).horizontalChainStyle = style;
-        connect(chainIds[0], LEFT, leftId, (leftId == PARENT_ID) ? LEFT : RIGHT, UNSET);
+        connect(chainIds[0], left, leftId, (leftId == PARENT_ID) ? left : right, UNSET);
         for (int i = 1; i < chainIds.length; i++) {
             int chainId = chainIds[i];
-            connect(chainIds[i], LEFT, chainIds[i - 1], RIGHT, UNSET);
-            connect(chainIds[i - 1], RIGHT, chainIds[i], LEFT, UNSET);
+            connect(chainIds[i], left, chainIds[i - 1], right, UNSET);
+            connect(chainIds[i - 1], right, chainIds[i], left, UNSET);
             if (weights != null) {
                 get(chainIds[i]).horizontalWeight = weights[i];
             }
         }
 
-        connect(chainIds[chainIds.length - 1], RIGHT, rightId, (rightId == PARENT_ID) ? RIGHT : LEFT,
+        connect(chainIds[chainIds.length - 1], right, rightId, (rightId == PARENT_ID) ? right : left,
             UNSET);
 
     }
@@ -900,6 +968,21 @@ public class ConstraintSet {
             center(viewId, toView, ConstraintSet.RIGHT, 0, toView, ConstraintSet.LEFT, 0, 0.5f);
         }
     }
+
+    /**
+     * Centers the view horizontally relative to toView's position.
+     *
+     * @param viewId ID of view to center Horizontally
+     * @param toView ID of view to center on (or in)
+     */
+    public void centerHorizontallyRtl(int viewId, int toView) {
+        if (toView == PARENT_ID) {
+            center(viewId, PARENT_ID , ConstraintSet.START, 0, PARENT_ID, ConstraintSet.END, 0, 0.5f);
+        } else {
+            center(viewId, toView, ConstraintSet.END, 0, toView, ConstraintSet.START, 0, 0.5f);
+        }
+    }
+
 
     /**
      * Centers the view vertically relative to toView's position.
@@ -1335,7 +1418,20 @@ public class ConstraintSet {
         if (rightId != PARENT_ID) {
             connect(rightId, LEFT, viewId, RIGHT, 0);
         }
+    }
 
+    /**
+     * Adds a view to a horizontal chain.
+     */
+    public void addToHorizontalChainRTL(int viewId, int leftId, int rightId) {
+        connect(viewId, START, leftId, (leftId == PARENT_ID) ? START : END, 0);
+        connect(viewId, END, rightId, (rightId == PARENT_ID) ? END : START, 0);
+        if (leftId != PARENT_ID) {
+            connect(leftId, END, viewId, START, 0);
+        }
+        if (rightId != PARENT_ID) {
+            connect(rightId, START, viewId, END, 0);
+        }
     }
 
     /**
@@ -1410,10 +1506,31 @@ public class ConstraintSet {
                         connect(rightId, LEFT, constraint.leftToLeft, LEFT, 0);
                     }
                 }
+                clear(viewId, LEFT);
+                clear(viewId, RIGHT);
+            } else {
+
+                int startId = constraint.startToEnd;
+                int endId = constraint.endToStart;
+                if (startId != Constraint.UNSET || endId != Constraint.UNSET) {
+                    if (startId != Constraint.UNSET && endId != Constraint.UNSET) {
+                        // start and end connected to views
+                        connect(startId, END, endId, START, 0);
+                        connect(endId, START, leftId, END, 0);
+                    } else if (leftId != Constraint.UNSET || endId != Constraint.UNSET) {
+                        if (constraint.rightToRight != Constraint.UNSET) {
+                            // left connected to view. right connected to parent
+                            connect(leftId, END, constraint.rightToRight, END, 0);
+                        } else if (constraint.leftToLeft != Constraint.UNSET) {
+                            // right connected to view. left connected to parent
+                            connect(endId, START, constraint.leftToLeft, START, 0);
+                        }
+                    }
+                }
+                clear(viewId, START);
+                clear(viewId, END);
             }
         }
-        clear(viewId, LEFT);
-        clear(viewId, RIGHT);
     }
 
     /**
