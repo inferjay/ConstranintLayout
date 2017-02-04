@@ -65,6 +65,7 @@ public class WidgetsPositioningTest {
                 assertEquals(B.getHeight(), (int) (ratio * B.getWidth()));
                 assertEquals(B.getTop() - A.getTop(), (int) ((A.getHeight() - B.getHeight()) / 2));
                 assertEquals(A.getBottom() - B.getBottom(), (int) ((A.getHeight() - B.getHeight()) / 2));
+                assertEquals(B.getTop() - A.getTop(), A.getBottom() - B.getBottom());
             }
         });
         B.setVerticalBiasPercent(1);
