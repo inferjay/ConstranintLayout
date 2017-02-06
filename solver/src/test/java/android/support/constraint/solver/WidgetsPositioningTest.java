@@ -195,7 +195,7 @@ public class WidgetsPositioningTest {
     @Test
     public void testAddingWidgets() {
         final ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 1000, 1000);
-        root.setDirectResolution(false);
+        root.setOptimizationLevel(ConstraintWidgetContainer.OPTIMIZATION_NONE);
         ArrayList<ConstraintWidget> widgetsA = new ArrayList();
         ArrayList<ConstraintWidget> widgetsB = new ArrayList();
         for (int i = 0; i < 1000; i++) {

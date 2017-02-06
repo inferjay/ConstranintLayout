@@ -27,15 +27,15 @@ public class OptimizationsTest {
 
     @Test
     public void testGuideline() {
-        testVerticalGuideline(false);
-        testVerticalGuideline(true);
-        testHorizontalGuideline(false);
-        testHorizontalGuideline(true);
+        testVerticalGuideline(ConstraintWidgetContainer.OPTIMIZATION_NONE);
+        testVerticalGuideline(ConstraintWidgetContainer.OPTIMIZATION_ALL);
+        testHorizontalGuideline(ConstraintWidgetContainer.OPTIMIZATION_NONE);
+        testHorizontalGuideline(ConstraintWidgetContainer.OPTIMIZATION_ALL);
     }
 
-    public void testVerticalGuideline(boolean directResolution) {
+    public void testVerticalGuideline(int directResolution) {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
-        root.setDirectResolution(directResolution);
+        root.setOptimizationLevel(directResolution);
         ConstraintWidget A = new ConstraintWidget(100, 20);
         Guideline guideline = new Guideline();
         guideline.setOrientation(Guideline.VERTICAL);
@@ -71,9 +71,9 @@ public class OptimizationsTest {
         assertEquals(A.getTop(), 0);
     }
 
-    public void testHorizontalGuideline(boolean directResolution) {
+    public void testHorizontalGuideline(int directResolution) {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
-        root.setDirectResolution(directResolution);
+        root.setOptimizationLevel(directResolution);
         ConstraintWidget A = new ConstraintWidget(100, 20);
         Guideline guideline = new Guideline();
         guideline.setOrientation(Guideline.HORIZONTAL);
@@ -111,13 +111,13 @@ public class OptimizationsTest {
 
     @Test
     public void testDependency() {
-        testDependency(false);
-        testDependency(true);
+        testDependency(ConstraintWidgetContainer.OPTIMIZATION_NONE);
+        testDependency(ConstraintWidgetContainer.OPTIMIZATION_ALL);
     }
 
-    public void testDependency(boolean directResolution) {
+    public void testDependency(int directResolution) {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
-        root.setDirectResolution(directResolution);
+        root.setOptimizationLevel(directResolution);
         ConstraintWidget A = new ConstraintWidget(100, 20);
         ConstraintWidget B = new ConstraintWidget(100, 20);
         ConstraintWidget C = new ConstraintWidget(100, 20);
@@ -149,13 +149,13 @@ public class OptimizationsTest {
 
     @Test
     public void testDependency2() {
-        testDependency2(false);
-        testDependency2(true);
+        testDependency2(ConstraintWidgetContainer.OPTIMIZATION_NONE);
+        testDependency2(ConstraintWidgetContainer.OPTIMIZATION_ALL);
     }
 
-    public void testDependency2(boolean directResolution) {
+    public void testDependency2(int directResolution) {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
-        root.setDirectResolution(directResolution);
+        root.setOptimizationLevel(directResolution);
         ConstraintWidget A = new ConstraintWidget(100, 20);
         ConstraintWidget B = new ConstraintWidget(100, 20);
         ConstraintWidget C = new ConstraintWidget(100, 20);
@@ -187,13 +187,13 @@ public class OptimizationsTest {
 
     @Test
     public void testUnconstrainedDependency() {
-        testUnconstrainedDependency(false);
-        testUnconstrainedDependency(true);
+        testUnconstrainedDependency(ConstraintWidgetContainer.OPTIMIZATION_NONE);
+        testUnconstrainedDependency(ConstraintWidgetContainer.OPTIMIZATION_ALL);
     }
 
-    public void testUnconstrainedDependency(boolean directResolution) {
+    public void testUnconstrainedDependency(int directResolution) {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
-        root.setDirectResolution(directResolution);
+        root.setOptimizationLevel(directResolution);
         ConstraintWidget A = new ConstraintWidget(100, 20);
         ConstraintWidget B = new ConstraintWidget(100, 20);
         ConstraintWidget C = new ConstraintWidget(100, 20);
@@ -227,11 +227,11 @@ public class OptimizationsTest {
 
     @Test
     public void testFullLayout() {
-        testFullLayout(false);
-        testFullLayout(true);
+        testFullLayout(ConstraintWidgetContainer.OPTIMIZATION_NONE);
+        testFullLayout(ConstraintWidgetContainer.OPTIMIZATION_ALL);
     }
 
-    public void testFullLayout(boolean directResolution) {
+    public void testFullLayout(int directResolution) {
         // Horizontal :
         // r <- A
         // r <- B <- C <- D
@@ -242,7 +242,7 @@ public class OptimizationsTest {
         // r <- A <- B <- C <- D <- E
         // r <- F <- G
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
-        root.setDirectResolution(directResolution);
+        root.setOptimizationLevel(directResolution);
         ConstraintWidget A = new ConstraintWidget(100, 20);
         ConstraintWidget B = new ConstraintWidget(100, 20);
         ConstraintWidget C = new ConstraintWidget(100, 20);

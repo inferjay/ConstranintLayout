@@ -31,7 +31,6 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     private static final boolean USE_THREAD = false;
     private static final boolean DEBUG = false;
     private static final boolean USE_SNAPSHOT = true;
-    private static final boolean USE_DIRECT_CHAIN_RESOLUTION = true;
 
     protected LinearSystem mSystem = new LinearSystem();
     protected LinearSystem mBackgroundSystem = null;
@@ -54,8 +53,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     private ConstraintWidget[] mVerticalChainsArray = new ConstraintWidget[4];
     private ConstraintWidget[] mHorizontalChainsArray = new ConstraintWidget[4];
 
-    // If true, we will resolve as much as we can directly, bypassing the solver
-    private boolean mDirectResolution = USE_DIRECT_CHAIN_RESOLUTION;
+    // Optimization levels
+    public static final int OPTIMIZATION_NONE = 1;
+    public static final int OPTIMIZATION_ALL = 2;
+    public static final int OPTIMIZATION_BASIC = 4;
+    public static final int OPTIMIZATION_CHAIN = 8;
+
+    private int mOptimizationLevel = OPTIMIZATION_ALL;
 
     // Internal use.
     private boolean[] flags = new boolean[2];
@@ -97,10 +101,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     /**
      * Resolves the system directly when possible
      *
-     * @param value true to resolve directly, false to use the generic solver
+     * @param value optimization level
      */
-    public void setDirectResolution(boolean value) {
-        mDirectResolution = value;
+    public void setOptimizationLevel(int value) {
+        mOptimizationLevel = value;
     }
 
     /**
@@ -179,7 +183,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     public boolean addChildrenToSolver(LinearSystem system, int group) {
         addToSolver(system, group);
         final int count = mChildren.size();
-        if (mDirectResolution && optimize(system)) {
+        if ((mOptimizationLevel == OPTIMIZATION_ALL
+                || mOptimizationLevel == OPTIMIZATION_BASIC) && optimize(system)) {
             return false;
         }
         for (int i = 0; i < count; i++) {
@@ -225,65 +230,63 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         int dv = 0;
         int dh = 0;
         int n = 0;
-        if (mDirectResolution) {
+        for (int i = 0; i < count; i++) {
+            ConstraintWidget widget = mChildren.get(i);
+            // TODO: we should try to cache some of that
+            widget.mHorizontalResolution = UNKNOWN;
+            widget.mVerticalResolution = UNKNOWN;
+            if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
+                    || widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
+                widget.mHorizontalResolution = SOLVER;
+                widget.mVerticalResolution = SOLVER;
+            }
+        }
+        while (!done) {
+            int prev = dv;
+            int preh = dh;
+            dv = 0;
+            dh = 0;
+            n++;
+            if (DEBUG) {
+                System.out.println("Iteration " + n);
+            }
             for (int i = 0; i < count; i++) {
                 ConstraintWidget widget = mChildren.get(i);
-                // TODO: we should try to cache some of that
-                widget.mHorizontalResolution = UNKNOWN;
-                widget.mVerticalResolution = UNKNOWN;
-                if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
-                        || widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
-                    widget.mHorizontalResolution = SOLVER;
-                    widget.mVerticalResolution = SOLVER;
+                if (widget.mHorizontalResolution == UNKNOWN) {
+                    if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
+                        widget.mHorizontalResolution = SOLVER;
+                    } else {
+                        Optimizer.checkHorizontalSimpleDependency(this, system, widget);
+                    }
+                }
+                if (widget.mVerticalResolution == UNKNOWN) {
+                    if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
+                        widget.mVerticalResolution = SOLVER;
+                    } else {
+                        Optimizer.checkVerticalSimpleDependency(this, system, widget);
+                    }
+                }
+                if (DEBUG) {
+                    System.out.println("[" + i + "]" + widget
+                            + " H: " + widget.mHorizontalResolution
+                            + " V: " + widget.mVerticalResolution);
+                }
+                if (widget.mVerticalResolution == UNKNOWN) {
+                    dv++;
+                }
+                if (widget.mHorizontalResolution == UNKNOWN) {
+                    dh++;
                 }
             }
-            while (!done) {
-                int prev = dv;
-                int preh = dh;
-                dv = 0;
-                dh = 0;
-                n++;
+            if (DEBUG) {
+                System.out.println("dv: " + dv + " dh: " + dh);
+            }
+            if (dv == 0 && dh == 0) {
+                done = true;
+            } else if (prev == dv && preh == dh) {
+                done = true;
                 if (DEBUG) {
-                    System.out.println("Iteration " + n);
-                }
-                for (int i = 0; i < count; i++) {
-                    ConstraintWidget widget = mChildren.get(i);
-                    if (widget.mHorizontalResolution == UNKNOWN) {
-                        if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
-                            widget.mHorizontalResolution = SOLVER;
-                        } else {
-                            Optimizer.checkHorizontalSimpleDependency(this, system, widget);
-                        }
-                    }
-                    if (widget.mVerticalResolution == UNKNOWN) {
-                        if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
-                            widget.mVerticalResolution = SOLVER;
-                        } else {
-                            Optimizer.checkVerticalSimpleDependency(this, system, widget);
-                        }
-                    }
-                    if (DEBUG) {
-                        System.out.println("[" + i + "]" + widget
-                                + " H: " + widget.mHorizontalResolution
-                                + " V: " + widget.mVerticalResolution);
-                    }
-                    if (widget.mVerticalResolution == UNKNOWN) {
-                        dv++;
-                    }
-                    if (widget.mHorizontalResolution == UNKNOWN) {
-                        dh++;
-                    }
-                }
-                if (DEBUG) {
-                    System.out.println("dv: " + dv + " dh: " + dh);
-                }
-                if (dv == 0 && dh == 0) {
-                    done = true;
-                } else if (prev == dv && preh == dh) {
-                    done = true;
-                    if (DEBUG) {
-                        System.out.println("Escape clause");
-                    }
+                    System.out.println("Escape clause");
                 }
             }
         }
@@ -292,21 +295,16 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         int sv = 0;
         for (int i = 0; i < count; i++) {
             ConstraintWidget widget = mChildren.get(i);
-            if (!mDirectResolution) {
-                widget.mHorizontalResolution = SOLVER;
-                widget.mVerticalResolution = SOLVER;
-            } else {
-                if (widget.mHorizontalResolution == SOLVER
-                        || widget.mHorizontalResolution == UNKNOWN) {
-                    sh++;
-                }
-                if (widget.mVerticalResolution == SOLVER
-                        || widget.mVerticalResolution == UNKNOWN) {
-                    sv++;
-                }
+            if (widget.mHorizontalResolution == SOLVER
+                    || widget.mHorizontalResolution == UNKNOWN) {
+                sh++;
+            }
+            if (widget.mVerticalResolution == SOLVER
+                    || widget.mVerticalResolution == UNKNOWN) {
+                sv++;
             }
         }
-        if (mDirectResolution && sh == 0 && sv == 0) {
+        if (sh == 0 && sv == 0) {
             return true;
         }
         return false;
@@ -340,7 +338,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             boolean isChainPacked = first.mHorizontalChainStyle == CHAIN_PACKED;
             ConstraintWidget widget = first;
             boolean isWrapContent = mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT;
-            if (mDirectResolution && USE_DIRECT_CHAIN_RESOLUTION && !flags[FLAG_CHAIN_OPTIMIZE]
+            if ((mOptimizationLevel == OPTIMIZATION_ALL || mOptimizationLevel == OPTIMIZATION_CHAIN) && !flags[FLAG_CHAIN_OPTIMIZE]
                     && widget.mHorizontalChainFixedPosition && !isChainPacked && !isWrapContent
                     && first.mHorizontalChainStyle == CHAIN_SPREAD) {
                 // TODO: implements direct resolution for CHAIN_SPREAD_INSIDE and CHAIN_PACKED
@@ -559,7 +557,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             boolean isChainPacked = first.mVerticalChainStyle == CHAIN_PACKED;
             ConstraintWidget widget = first;
             boolean isWrapContent = mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT;
-            if (mDirectResolution && USE_DIRECT_CHAIN_RESOLUTION && !flags[0]
+            if ((mOptimizationLevel == OPTIMIZATION_ALL || mOptimizationLevel == OPTIMIZATION_CHAIN) && !flags[FLAG_CHAIN_OPTIMIZE]
                     && widget.mVerticalChainFixedPosition && !isChainPacked && !isWrapContent
                     && first.mVerticalChainStyle == CHAIN_SPREAD) {
                 // TODO: implements direct resolution for CHAIN_SPREAD_INSIDE and CHAIN_PACKED

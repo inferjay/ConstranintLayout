@@ -133,7 +133,7 @@ public class XmlBasedTest {
     @Test(dataProvider = "test1")
     public void testSolverXML(String file) {
         parseXML(file);
-        container.setDirectResolution(false);
+        container.setOptimizationLevel(ConstraintWidgetContainer.OPTIMIZATION_NONE);
         int[] perm = new int[boundsMap.size()];
         for (int i = 0; i < perm.length; i++) {
             perm[i] = i;
@@ -161,7 +161,7 @@ public class XmlBasedTest {
     public void testDirectResolutionXML(String file) {
 
         parseXML(file);
-        container.setDirectResolution(true);
+        container.setOptimizationLevel(ConstraintWidgetContainer.OPTIMIZATION_ALL);
         int[] perm = new int[boundsMap.size()];
         for (int i = 0; i < perm.length; i++) {
             perm[i] = i;

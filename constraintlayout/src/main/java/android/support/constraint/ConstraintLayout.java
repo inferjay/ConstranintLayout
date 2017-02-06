@@ -448,6 +448,7 @@ public class ConstraintLayout extends ViewGroup {
                 }
             }
         }
+        mLayoutWidget.setOptimizationLevel(mOptimizationLevel);
     }
 
     /**
@@ -1097,11 +1098,6 @@ public class ConstraintLayout extends ViewGroup {
      */
     protected void solveLinearSystem() {
         Animator.setAnimationEnabled(false);
-        if (mOptimizationLevel == 2) {
-            mLayoutWidget.setDirectResolution(true);
-        } else {
-            mLayoutWidget.setDirectResolution(false);
-        }
         if (SIMPLE_LAYOUT) {
             mLayoutWidget.layout();
         } else {
@@ -1155,10 +1151,13 @@ public class ConstraintLayout extends ViewGroup {
 
     /**
      * @hide
-     * @param value
+     *
+     * Set the optimization level for the layout resolution
+     *
+     * @param level optimization level
      */
-    protected void setDebugDirectResolution(boolean value) {
-        mLayoutWidget.setDirectResolution(value);
+    public void setOptimizationLevel(int level) {
+        mLayoutWidget.setOptimizationLevel(level);
     }
 
     /**

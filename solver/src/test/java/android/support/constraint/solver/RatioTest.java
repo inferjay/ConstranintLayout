@@ -20,8 +20,6 @@ import android.support.constraint.solver.widgets.ConstraintWidget;
 import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-
 import static org.testng.Assert.assertEquals;
 
 public class RatioTest {
@@ -42,9 +40,16 @@ public class RatioTest {
         A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
         A.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
         A.setDimensionRatio("1:1");
-        root.setDirectResolution(false);
+        root.setOptimizationLevel(ConstraintWidgetContainer.OPTIMIZATION_NONE);
         root.layout();
         System.out.println("a) root: " + root + " A: " + A);
+        assertEquals(A.getLeft(), 0);
+        assertEquals(A.getTop(), 0);
+        assertEquals(A.getWidth(), 600);
+        assertEquals(A.getHeight(), 600);
+        root.setOptimizationLevel(ConstraintWidgetContainer.OPTIMIZATION_ALL);
+        root.layout();
+        System.out.println("b) root: " + root + " A: " + A);
         assertEquals(A.getLeft(), 0);
         assertEquals(A.getTop(), 0);
         assertEquals(A.getWidth(), 600);
