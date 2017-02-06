@@ -2036,20 +2036,20 @@ public class ConstraintWidget {
         // Horizontal resolution
         boolean wrapContent = (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)
                 && (this instanceof ConstraintWidgetContainer);
-        if (useHorizontalRatio && mLeft.mTarget != null && mRight.mTarget != null) {
-            SolverVariable begin = system.createObjectVariable(mLeft);
-            SolverVariable end = system.createObjectVariable(mRight);
-            SolverVariable beginTarget = system.createObjectVariable(mLeft.getTarget());
-            SolverVariable endTarget = system.createObjectVariable(mRight.getTarget());
-            system.addGreaterThan(begin, beginTarget, mLeft.getMargin(), SolverVariable.STRENGTH_HIGH);
-            system.addLowerThan(end, endTarget, -1 * mRight.getMargin(), SolverVariable.STRENGTH_HIGH);
-            if (!inHorizontalChain) {
-                system.addCentering(begin, beginTarget, mLeft.getMargin(), mHorizontalBiasPercent, endTarget, end, mRight.getMargin(),
-                  SolverVariable.STRENGTH_HIGHEST);
-            }
-        } else {
-            if (mHorizontalResolution != DIRECT
-                    && (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group))) {
+        if (mHorizontalResolution != DIRECT
+                && (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group))) {
+            if (useHorizontalRatio && mLeft.mTarget != null && mRight.mTarget != null) {
+                SolverVariable begin = system.createObjectVariable(mLeft);
+                SolverVariable end = system.createObjectVariable(mRight);
+                SolverVariable beginTarget = system.createObjectVariable(mLeft.getTarget());
+                SolverVariable endTarget = system.createObjectVariable(mRight.getTarget());
+                system.addGreaterThan(begin, beginTarget, mLeft.getMargin(), SolverVariable.STRENGTH_HIGH);
+                system.addLowerThan(end, endTarget, -1 * mRight.getMargin(), SolverVariable.STRENGTH_HIGH);
+                if (!inHorizontalChain) {
+                    system.addCentering(begin, beginTarget, mLeft.getMargin(), mHorizontalBiasPercent, endTarget, end, mRight.getMargin(),
+                            SolverVariable.STRENGTH_HIGHEST);
+                }
+            } else {
                 applyConstraints(system, wrapContent, horizontalDimensionFixed, mLeft, mRight,
                         mX, mX + width, width, mMinWidth, mHorizontalBiasPercent,
                         useHorizontalRatio, inHorizontalChain);

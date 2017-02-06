@@ -58,7 +58,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     private boolean mDirectResolution = USE_DIRECT_CHAIN_RESOLUTION;
 
     // Internal use.
-    private boolean[] flags = new boolean[1];
+    private boolean[] flags = new boolean[2];
+    private static final int FLAG_CHAIN_OPTIMIZE = 0;
+    private static final int FLAG_CHAIN_DANGLING = 1;
 
     /*-----------------------------------------------------------------------*/
     // Construction
@@ -320,11 +322,25 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         for (int i = 0; i < mHorizontalChainsSize; i++) {
             ConstraintWidget first = mHorizontalChainsArray[i];
             int numMatchConstraints = countMatchConstraintsChainedWidgets(mHorizontalChainsArray[i], HORIZONTAL, flags);
+            if (flags[FLAG_CHAIN_DANGLING]) {
+                int x = first.getDrawX();
+                ConstraintWidget currentWidget = first;
+                while (currentWidget != null) {
+                    system.addEquality(currentWidget.mLeft.mSolverVariable, x);
+                    ConstraintWidget next = currentWidget.mRight.mTarget != null ? currentWidget.mRight.mTarget.mOwner : null;
+                    if (next == null || next.mLeft.mTarget == null || next.mLeft.mTarget.mOwner != currentWidget) {
+                        next = null;
+                    }
+                    x += currentWidget.mLeft.getMargin() + currentWidget.getWidth() + currentWidget.mRight.getMargin();
+                    currentWidget = next;
+                }
+                return;
+            }
             boolean isChainSpread = first.mHorizontalChainStyle == CHAIN_SPREAD;
             boolean isChainPacked = first.mHorizontalChainStyle == CHAIN_PACKED;
             ConstraintWidget widget = first;
             boolean isWrapContent = mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT;
-            if (mDirectResolution && USE_DIRECT_CHAIN_RESOLUTION && !flags[0]
+            if (mDirectResolution && USE_DIRECT_CHAIN_RESOLUTION && !flags[FLAG_CHAIN_OPTIMIZE]
                     && widget.mHorizontalChainFixedPosition && !isChainPacked && !isWrapContent
                     && first.mHorizontalChainStyle == CHAIN_SPREAD) {
                 // TODO: implements direct resolution for CHAIN_SPREAD_INSIDE and CHAIN_PACKED
@@ -525,6 +541,20 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         for (int i = 0; i < mVerticalChainsSize; i++) {
             ConstraintWidget first = mVerticalChainsArray[i];
             int numMatchConstraints = countMatchConstraintsChainedWidgets(mVerticalChainsArray[i], VERTICAL, flags);
+            if (flags[FLAG_CHAIN_DANGLING]) {
+                int y = first.getDrawY();
+                ConstraintWidget currentWidget = first;
+                while (currentWidget != null) {
+                    system.addEquality(currentWidget.mTop.mSolverVariable, y);
+                    ConstraintWidget next = currentWidget.mBottom.mTarget != null ? currentWidget.mBottom.mTarget.mOwner : null;
+                    if (next == null || next.mTop.mTarget == null || next.mTop.mTarget.mOwner != currentWidget) {
+                        next = null;
+                    }
+                    y += currentWidget.mTop.getMargin() + currentWidget.getHeight() + currentWidget.mBottom.getMargin();
+                    currentWidget = next;
+                }
+                return;
+            }
             boolean isChainSpread = first.mVerticalChainStyle == CHAIN_SPREAD;
             boolean isChainPacked = first.mVerticalChainStyle == CHAIN_PACKED;
             ConstraintWidget widget = first;
@@ -1569,18 +1599,20 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      */
     private int countMatchConstraintsChainedWidgets(ConstraintWidget widget, int direction, boolean[] flags) {
         int count = 0;
-        flags[0] = false; // will set to true if the chain is not optimizable
+        flags[FLAG_CHAIN_OPTIMIZE] = false; // will set to true if the chain is not optimizable
+        flags[FLAG_CHAIN_DANGLING] = false; // will set to true if the chain is not connected on one or both endpoints
 
         if (direction == HORIZONTAL) {
             boolean fixedPosition = true;
             ConstraintWidget first = widget;
+            ConstraintWidget last = null;
             if (widget.mLeft.mTarget != null && widget.mLeft.mTarget.mOwner != this) {
                 fixedPosition = false;
             }
             while (widget.mRight.mTarget != null) {
                 if (widget.getVisibility() != GONE && widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                     if (widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
-                        flags[0] = true; // signal that this chain is not optimizable.
+                        flags[FLAG_CHAIN_OPTIMIZE] = true; // signal that this chain is not optimizable.
                     }
                     if (widget.mDimensionRatio <= 0) {
                         if (count + 1 >= mMatchConstraintsChainedWidgets.length) {
@@ -1599,9 +1631,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                     break;
                 }
                 widget = widget.mRight.mTarget.mOwner;
+                last = widget;
             }
             if (widget.mRight.mTarget != null && widget.mRight.mTarget.mOwner != this) {
                 fixedPosition = false;
+            }
+            if (first.mLeft.mTarget == null || last.mRight.mTarget == null) {
+                flags[FLAG_CHAIN_DANGLING] = true;
             }
             // keep track of the endpoints -- if both are fixed (for now, only look if they point to the parent)
             // we can optimize the resolution without passing by the solver
@@ -1609,13 +1645,14 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         } else {
             boolean fixedPosition = true;
             ConstraintWidget first = widget;
+            ConstraintWidget last = null;
             if (widget.mTop.mTarget != null && widget.mTop.mTarget.mOwner != this) {
                 fixedPosition = false;
             }
             while (widget.mBottom.mTarget != null) {
                 if (widget.getVisibility() != GONE && widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                     if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
-                        flags[0] = true; // signal that this chain is not optimizable.
+                        flags[FLAG_CHAIN_OPTIMIZE] = true; // signal that this chain is not optimizable.
                     }
                     if (widget.mDimensionRatio <= 0) {
                         if (count + 1 >= mMatchConstraintsChainedWidgets.length) {
@@ -1634,9 +1671,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                     break;
                 }
                 widget = widget.mBottom.mTarget.mOwner;
+                last = widget;
             }
             if (widget.mBottom.mTarget != null && widget.mBottom.mTarget.mOwner != this) {
                 fixedPosition = false;
+            }
+            if (first.mTop.mTarget == null || last.mBottom.mTarget == null) {
+                flags[FLAG_CHAIN_DANGLING] = true;
             }
             // keep track of the endpoints -- if both are fixed (for now, only look if they point to the parent)
             // we can optimize the resolution without passing by the solver
