@@ -15,9 +15,6 @@
  */
 package android.support.constraint.solver;
 
-import android.support.constraint.solver.LinearEquation;
-import android.support.constraint.solver.LinearSystem;
-
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -31,6 +28,42 @@ public class LinearSystemTest {
     public void setUp() {
         s = new LinearSystem();
         LinearEquation.resetNaming();
+    }
+
+    void add(LinearEquation equation) {
+        ArrayRow row1 = LinearEquation.createRowFromEquation(s, equation);
+        s.addConstraint(row1);
+    }
+
+    void add(LinearEquation equation, int strength) {
+        ArrayRow row1 = LinearEquation.createRowFromEquation(s, equation);
+        SolverVariable e1 = s.createErrorVariable();
+        SolverVariable e2 = s.createErrorVariable();
+        e1.strength = strength;
+        e2.strength = strength;
+        row1.addError(e1, e2);
+        s.addConstraint(row1);
+    }
+
+    @Test
+    public void testPriorityBasic() {
+        add(new LinearEquation(s).var(2, "Xm").equalsTo().var("Xl").plus("Xr"));
+        add(new LinearEquation(s).var("Xl").plus(10).lowerThan().var("Xr"));
+        add(new LinearEquation(s).var("Xl").greaterThan().var(-10));
+        add(new LinearEquation(s).var("Xr").lowerThan().var(100));
+        add(new LinearEquation(s).var("Xm").equalsTo().var(50), 2);
+        add(new LinearEquation(s).var("Xl").equalsTo().var(30), 1);
+        add(new LinearEquation(s).var("Xr").equalsTo().var(60), 0);
+        try {
+            s.minimize();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("Result: ");
+        s.displayReadableRows();
+        assertEquals(s.getValueFor("Xm"), 50.0f);
+        assertEquals(s.getValueFor("Xl"), 30.0f);
+        assertEquals(s.getValueFor("Xr"), 70.0f);
     }
 
     @Test
@@ -90,7 +123,7 @@ public class LinearSystemTest {
         e1.var("W3.left").equalsTo().var(0);
         s.addConstraint(LinearEquation.createRowFromEquation(s, e1));
         s.rebuildGoalFromErrors();
-        assertEquals(s.getGoal().toReadableString(), "0 = 0.0");
+        assertEquals(s.getGoal().toString(), "Goal: ");
         assertEquals(s.getRow(0).toReadableString(), "W3.left = 0.0");
     }
 
@@ -103,7 +136,7 @@ public class LinearSystemTest {
         s.addConstraint(LinearEquation.createRowFromEquation(s, e1));
         s.addConstraint(LinearEquation.createRowFromEquation(s, e2));
         s.rebuildGoalFromErrors();
-        assertEquals(s.getGoal().toReadableString(), "0 = 0.0");
+        assertEquals(s.getGoal().toString(), "Goal: ");
         assertEquals(s.getRow(0).toReadableString(), "W3.left = 0.0");
         assertEquals(s.getRow(1).toReadableString(), "W3.right = 600.0");
     }
@@ -151,7 +184,7 @@ public class LinearSystemTest {
         assertEquals(s.getRow(2).toReadableString(), "Xl = -10.0 + s2");
         assertEquals(s.getRow(3).toReadableString(), "s1 = 100.0 - s2 - s3");
         s.rebuildGoalFromErrors();
-        assertEquals(s.getGoal().toReadableString(), "0 = 0.0");
+        assertEquals(s.getGoal().toString(), "Goal: ");
         try {
             s.minimizeGoal(s.getGoal());
         } catch (Exception e) {

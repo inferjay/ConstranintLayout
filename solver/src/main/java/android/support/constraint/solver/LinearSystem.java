@@ -36,7 +36,7 @@ public class LinearSystem {
     /*
      * Variable counter
      */
-    private int mVariablesID = 0;
+    int mVariablesID = 0;
 
     /*
      * Store a map between name->SolverVariable and SolverVariable->Float for the resolution.
@@ -46,7 +46,7 @@ public class LinearSystem {
     /*
      * The goal that is used when minimizing the system.
      */
-    private ArrayRow mGoal;
+    private Goal mGoal = new Goal();
 
     private int TABLE_SIZE = 32; // default table size for the allocation
     private int mMaxColumns = TABLE_SIZE;
@@ -55,14 +55,16 @@ public class LinearSystem {
     // Used in optimize()
     private boolean[] mAlreadyTestedCandidates = new boolean[TABLE_SIZE];
 
-    private int mNumColumns = 1;
+    int mNumColumns = 1;
     private int mNumRows = 0;
     private int mMaxRows = TABLE_SIZE;
 
-    final private Cache mCache;
+    final Cache mCache;
 
     private SolverVariable[] mPoolVariables = new SolverVariable[POOL_SIZE];
     private int mPoolVariablesCount = 0;
+
+    private ArrayRow[] tempClientsCopy = new ArrayRow[TABLE_SIZE];
 
     public LinearSystem() {
         mRows = new ArrayRow[TABLE_SIZE];
@@ -84,8 +86,7 @@ public class LinearSystem {
         mAlreadyTestedCandidates = new boolean[TABLE_SIZE];
         mMaxColumns = TABLE_SIZE;
         mMaxRows = TABLE_SIZE;
-        releaseGoal();
-        mGoal = null;
+        mGoal.variables.clear();
     }
 
     /**
@@ -98,15 +99,6 @@ public class LinearSystem {
                 mCache.arrayRowPool.release(row);
             }
             mRows[i] = null;
-        }
-    }
-
-    /**
-     * Release the ArrayRow used for the goal back to the pool
-     */
-    private void releaseGoal() {
-        if (mGoal != null) {
-            mCache.arrayRowPool.release(mGoal);
         }
     }
 
@@ -128,8 +120,7 @@ public class LinearSystem {
             mVariables.clear();
         }
         mVariablesID = 0;
-        releaseGoal();
-        mGoal = null;
+        mGoal.variables.clear();
         mNumColumns = 1;
         for (int i = 0; i < mNumRows; i++) {
             mRows[i].used = false;
@@ -223,7 +214,7 @@ public class LinearSystem {
         return variable;
     }
 
-    SolverVariable createErrorVariable() {
+    public SolverVariable createErrorVariable() {
         if (mNumColumns + 1 >= mMaxColumns) {
             increaseTableSize();
         }
@@ -244,9 +235,10 @@ public class LinearSystem {
         SolverVariable variable = mCache.solverVariablePool.acquire();
         if (variable == null) {
             variable = new SolverVariable(type);
+        } else {
+            variable.reset();
+            variable.setType(type);
         }
-        variable.reset();
-        variable.setType(type);
         if (mPoolVariablesCount >= POOL_SIZE) {
             POOL_SIZE *= 2;
             mPoolVariables = Arrays.copyOf(mPoolVariables, POOL_SIZE);
@@ -263,7 +255,7 @@ public class LinearSystem {
      * Simple accessor for the current goal. Used when minimizing the system's goal.
      * @return the current goal.
      */
-    ArrayRow getGoal() { return mGoal; }
+    Goal getGoal() { return mGoal; }
 
     ArrayRow getRow(int n) {
         return mRows[n];
@@ -311,22 +303,9 @@ public class LinearSystem {
      * Rebuild the goal from the errors and slack variables
      */
     void rebuildGoalFromErrors() {
-        if (mGoal != null) {
-            mGoal.reset();
-        } else {
-            mGoal = createRow();
-        }
-        for (int i = 1; i < mNumColumns; i++) {
-            SolverVariable variable = mCache.mIndexedVariables[i];
-            if (variable.mType == SolverVariable.Type.ERROR
-                 /* || variable.mType == SolverVariable.Type.SLACK */) {
-                mGoal.variables.put(variable, 1.f);
-            }
-        }
+        mGoal.updateFromSystem(this);
         if (DEBUG) {
-            System.out.println("system after rebuilding: ");
-            displayReadableRows();
-            System.out.println("rebuilt goal from errors: " + mGoal);
+            System.out.println("GOAL built from errors: " + mGoal);
         }
     }
 
@@ -334,7 +313,6 @@ public class LinearSystem {
      * Minimize the current goal of the system.
      */
     public void minimize() throws Exception {
-        rebuildGoalFromErrors();
         minimizeGoal(mGoal);
     }
 
@@ -342,45 +320,21 @@ public class LinearSystem {
      * Minimize the given goal with the current system.
      * @param goal the goal to minimize.
      */
-    void minimizeGoal(ArrayRow goal) throws Exception {
-        // Update the equation with the variables already defined in the system
-
-        goal.variables.updateFromSystem(goal, mRows);
-        boolean validGoal = goal.hasAtLeastOnePositiveVariable();
-
-        if (!validGoal) {
-            computeValues();
-            return;
-        }
-
+    void minimizeGoal(Goal goal) throws Exception {
+        // First, let's make sure that the system is in Basic Feasible Solved Form (BFS), i.e.
+        // all the constants of the restricted variables should be positive.
+        goal.updateFromSystem(this);
+        enforceBFS(goal);
         if (DEBUG) {
-            System.out.println("Minimize goal " + goal);
+            System.out.println("Goal after enforcing BFS " + goal);
             displayReadableRows();
         }
-
-        try {
-            // First, let's make sure that the system is in Basic Feasible Solved Form (BFS), i.e.
-            // all the constants of the restricted variables should be positive.
-            int tries = enforceBFS(goal);
-            if (DEBUG) {
-                System.out.println("System in BFS ( " + tries + ") " + goal.toReadableString());
-            }
-
-            // The system at this point is supposed to be in Basic Feasible Solved Form (BFS),
-            // so the only thing we have to do here is pivot on any candidates variables in the goal,
-            // i.e. any variables that are negative (as they would decrease the goal's result).
-
-            if (DEBUG) {
-                tries = optimize(goal);
-                System.out.println("Goal minimized ( " + tries + ") " + goal.toReadableString());
-            } else {
-                optimize(goal);
-            }
-            computeValues();
-        } catch (Exception e) {
-            computeValues();
-            throw e;
+        optimize(goal);
+        if (DEBUG) {
+            System.out.println("Goal after optimization " + goal);
+            displayReadableRows();
         }
+        computeValues();
     }
 
     /**
@@ -395,8 +349,6 @@ public class LinearSystem {
             }
         }
     }
-
-    private ArrayRow[] tempClientsCopy = new ArrayRow[32];
 
     /**
      * Add the equation to the system
@@ -481,7 +433,7 @@ public class LinearSystem {
      * @param goal goal to optimize.
      * @return number of iterations.
      */
-    private int optimize(ArrayRow goal) {
+    private int optimize(Goal goal) {
         boolean done = false;
         int tries = 0;
         for (int i = 0; i < mNumColumns; i++) {
@@ -495,7 +447,7 @@ public class LinearSystem {
                 System.out.println("iteration on system " + tries);
             }
 
-            SolverVariable pivotCandidate = goal.variables.getPivotCandidate();
+            SolverVariable pivotCandidate = goal.getPivotCandidate();
             if (DEBUG) {
                 System.out.println("pivot candidate: " + pivotCandidate);
             }
@@ -512,6 +464,9 @@ public class LinearSystem {
             }
 
             if (pivotCandidate != null) {
+                if (DEBUG) {
+                    System.out.println("valid pivot candidate: " + pivotCandidate);
+                }
                 // there's a negative variable in the goal that we can pivot on.
                 // We now need to select which equation of the system we should do
                 // the pivot on.
@@ -524,9 +479,6 @@ public class LinearSystem {
 
                 float min = Float.MAX_VALUE;
                 int pivotRowIndex = -1;
-                int strength = 0;
-
-                float d_j = goal.variables.get(pivotCandidate);
 
                 for (int i = 0; i < mNumRows; i++) {
                     ArrayRow current = mRows[i];
@@ -539,11 +491,10 @@ public class LinearSystem {
                         // the current row does contains the variable
                         // we want to pivot on
                         float a_j = current.variables.get(pivotCandidate);
-                        if (a_j > 0) {
-                            float value = d_j / a_j;
-                            if (pivotCandidate.strength >= strength && value < min) {
+                        if (a_j < 0) {
+                            float value = - current.constantValue / a_j;
+                            if (value < min) {
                                 min = value;
-                                strength = pivotCandidate.strength;
                                 pivotRowIndex = i;
                             }
                         }
@@ -566,9 +517,15 @@ public class LinearSystem {
                         mRows[i].updateRowWithEquation(pivotEquation);
                     }
                     // let's update the goal equation as well
-                    goal.updateRowWithEquation(pivotEquation);
+                    goal.updateFromSystem(this);
                     if (DEBUG) {
                         System.out.println("new goal after pivot: " + goal);
+                        displayReadableRows();
+                    }
+                    try {
+                        enforceBFS(goal);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                     // now that we pivoted, we're going to continue looping on the next goal
                     // columns, until we exhaust all the possibilities of improving the system
@@ -591,7 +548,7 @@ public class LinearSystem {
      * @param goal the row representing the system goal
      * @return number of iterations
      */
-    private int enforceBFS(ArrayRow goal) throws Exception {
+    private int enforceBFS(Goal goal) throws Exception {
         int tries = 0;
         boolean done;
 
@@ -627,7 +584,7 @@ public class LinearSystem {
                     System.out.println("iteration on infeasible system " + tries);
                 }
                 float min = Float.MAX_VALUE;
-                int strength = Integer.MAX_VALUE;
+                int strength = 0;
                 int pivotRowIndex = -1;
                 int pivotColumnIndex = -1;
 
@@ -650,17 +607,17 @@ public class LinearSystem {
                             if (a_j <= 0) {
                                 continue;
                             }
-                            float d_j = goal.variables.get(candidate);
-                            float value = d_j / a_j;
-
                             if (DEBUG) {
                                 System.out.println("candidate for pivot " + candidate);
                             }
-                            if (candidate.strength <= strength && value < min) {
-                                min = value;
-                                pivotRowIndex = i;
-                                pivotColumnIndex = j;
-                                strength = candidate.strength;
+                            for (int k = 0; k < SolverVariable.MAX_STRENGTH; k++) {
+                                float value = candidate.strengthVector[k] / a_j;
+                                if (value < min && k == strength || k > strength) {
+                                    min = value;
+                                    pivotRowIndex = i;
+                                    pivotColumnIndex = j;
+                                    strength = k;
+                                }
                             }
                         }
                     }
@@ -681,10 +638,10 @@ public class LinearSystem {
                         mRows[i].updateRowWithEquation(pivotEquation);
                     }
                     // let's update the goal equation as well
-                    // TODO: might not be necessary here
-                    goal.updateRowWithEquation(pivotEquation);
+                    goal.updateFromSystem(this);
                     if (DEBUG) {
                         System.out.println("new goal after pivot: " + goal);
+                        displayRows();
                     }
                 } else {
                     done = true;
@@ -731,14 +688,14 @@ public class LinearSystem {
     /*--------------------------------------------------------------------------------------------*/
 
     @SuppressWarnings("unused")
-    public void displayRows() {
+    private void displayRows() {
         displaySolverVariables();
         String s = "";
         for (int i = 0; i < mNumRows; i++) {
             s += mRows[i];
             s += "\n";
         }
-        if (mGoal != null) {
+        if (mGoal.variables.size() != 0) {
             s += mGoal + "\n";
         }
         System.out.println(s);
@@ -752,7 +709,7 @@ public class LinearSystem {
             s += "\n";
         }
         if (mGoal != null) {
-            s += mGoal.toReadableString() + "\n";
+            s += mGoal + "\n";
         }
         System.out.println(s);
     }
@@ -767,8 +724,8 @@ public class LinearSystem {
                 s += "\n";
             }
         }
-        if (mGoal != null) {
-            s += mGoal.toReadableString() + "\n";
+        if (mGoal.variables.size() != 0) {
+            s += mGoal + "\n";
         }
         System.out.println(s);
     }

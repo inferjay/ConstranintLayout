@@ -586,7 +586,7 @@ public class ArrayLinkedVariables {
                     // they are already sorted by id
 
                     SolverVariable v = mCache.mIndexedVariables[mArrayIndices[current]];
-                    if (pivot == null || pivot.strength > v.strength) {
+                    if (pivot == null || pivot.strength < v.strength) {
                         pivot = v;
                     }
                 }

@@ -256,8 +256,17 @@ public class ArrayRow {
             variables.put(variableC, -1);
             variables.put(variableD, 1);
             if (marginA > 0 || marginB > 0) {
-                constantValue = - marginA + marginB;
+                constantValue = -marginA + marginB;
             }
+        } else if (bias == 0) {
+            // A = B + m
+            variables.put(variableA, 1);
+            variables.put(variableA, -1);
+            constantValue = marginA;
+        } else if (bias == 1) {
+            variables.put(variableD, 1);
+            variables.put(variableC, -1);
+            constantValue = -marginB;
         } else {
             variables.put(variableA, 1 * (1 - bias));
             variables.put(variableB, -1 * (1 - bias));
@@ -270,7 +279,7 @@ public class ArrayRow {
         return this;
     }
 
-    ArrayRow addError(SolverVariable error1, SolverVariable error2) {
+    public ArrayRow addError(SolverVariable error1, SolverVariable error2) {
         variables.put(error1, 1);
         variables.put(error2, -1);
         return this;

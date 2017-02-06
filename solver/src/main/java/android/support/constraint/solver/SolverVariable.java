@@ -43,6 +43,8 @@ public class SolverVariable {
     public int strength = 0;
     public float computedValue;
 
+    final static int MAX_STRENGTH = 6;
+    float[] strengthVector = new float[MAX_STRENGTH];
     Type mType;
 
     ArrayRow[] mClientEquations = new ArrayRow[8];
@@ -102,6 +104,25 @@ public class SolverVariable {
         if (INTERNAL_DEBUG) {
             mName = getUniqueName(type);
         }
+    }
+
+    void clearStrengths() {
+        for (int i = 0; i < MAX_STRENGTH; i++) {
+            strengthVector[i] = 0;
+        }
+    }
+
+    String strengthsToString() {
+        String representation = this + "[";
+        for (int j = 0; j < strengthVector.length; j++) {
+            representation += strengthVector[j];
+            if (j < strengthVector.length - 1) {
+                representation += ", ";
+            } else {
+                representation += "] ";
+            }
+        }
+        return representation;
     }
 
     void addClientEquation(ArrayRow equation) {

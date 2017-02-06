@@ -55,7 +55,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     private ConstraintWidget[] mHorizontalChainsArray = new ConstraintWidget[4];
 
     // If true, we will resolve as much as we can directly, bypassing the solver
-    private boolean mDirectResolution = true;
+    private boolean mDirectResolution = USE_DIRECT_CHAIN_RESOLUTION;
+
+    // Internal use.
+    private boolean[] flags = new boolean[1];
 
     /*-----------------------------------------------------------------------*/
     // Construction
@@ -316,12 +319,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     private void applyHorizontalChain(LinearSystem system) {
         for (int i = 0; i < mHorizontalChainsSize; i++) {
             ConstraintWidget first = mHorizontalChainsArray[i];
-            int numMatchConstraints = countMatchConstraintsChainedWidgets(mHorizontalChainsArray[i], HORIZONTAL);
+            int numMatchConstraints = countMatchConstraintsChainedWidgets(mHorizontalChainsArray[i], HORIZONTAL, flags);
             boolean isChainSpread = first.mHorizontalChainStyle == CHAIN_SPREAD;
             boolean isChainPacked = first.mHorizontalChainStyle == CHAIN_PACKED;
             ConstraintWidget widget = first;
             boolean isWrapContent = mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT;
-            if (mDirectResolution && USE_DIRECT_CHAIN_RESOLUTION && widget.mHorizontalChainFixedPosition && !isChainPacked && !isWrapContent
+            if (mDirectResolution && USE_DIRECT_CHAIN_RESOLUTION && !flags[0]
+                    && widget.mHorizontalChainFixedPosition && !isChainPacked && !isWrapContent
                     && first.mHorizontalChainStyle == CHAIN_SPREAD) {
                 // TODO: implements direct resolution for CHAIN_SPREAD_INSIDE and CHAIN_PACKED
                 Optimizer.applyDirectResolutionHorizontalChain(this, system, numMatchConstraints, widget);
@@ -398,7 +402,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                                 SolverVariable rightTarget = currentWidget.mParent == next ? next.mRight.mSolverVariable : next.mLeft.mSolverVariable;
                                 if (leftTarget != null && rightTarget != null) {
                                     system.addCentering(left.mSolverVariable, leftTarget, leftMargin, 0.5f,
-                                            rightTarget, right.mSolverVariable, rightMargin, SolverVariable.STRENGTH_HIGH);
+                                            rightTarget, right.mSolverVariable, rightMargin, SolverVariable.STRENGTH_HIGHEST);
                                 }
                             }
                         }
@@ -520,12 +524,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     private void applyVerticalChain(LinearSystem system) {
         for (int i = 0; i < mVerticalChainsSize; i++) {
             ConstraintWidget first = mVerticalChainsArray[i];
-            int numMatchConstraints = countMatchConstraintsChainedWidgets(mVerticalChainsArray[i], VERTICAL);
+            int numMatchConstraints = countMatchConstraintsChainedWidgets(mVerticalChainsArray[i], VERTICAL, flags);
             boolean isChainSpread = first.mVerticalChainStyle == CHAIN_SPREAD;
             boolean isChainPacked = first.mVerticalChainStyle == CHAIN_PACKED;
             ConstraintWidget widget = first;
             boolean isWrapContent = mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT;
-            if (mDirectResolution && USE_DIRECT_CHAIN_RESOLUTION && widget.mVerticalChainFixedPosition && !isChainPacked && !isWrapContent
+            if (mDirectResolution && USE_DIRECT_CHAIN_RESOLUTION && !flags[0]
+                    && widget.mVerticalChainFixedPosition && !isChainPacked && !isWrapContent
                     && first.mVerticalChainStyle == CHAIN_SPREAD) {
                 // TODO: implements direct resolution for CHAIN_SPREAD_INSIDE and CHAIN_PACKED
                 Optimizer.applyDirectResolutionVerticalChain(this, system, numMatchConstraints, widget);
@@ -1562,21 +1567,27 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      * that are set to MATCH_CONSTRAINT, as we need to apply a common behavior to those
      * (we set their dimensions to be equal, minus their margins)
      */
-    private int countMatchConstraintsChainedWidgets(ConstraintWidget widget, int direction) {
+    private int countMatchConstraintsChainedWidgets(ConstraintWidget widget, int direction, boolean[] flags) {
         int count = 0;
+        flags[0] = false; // will set to true if the chain is not optimizable
+
         if (direction == HORIZONTAL) {
             boolean fixedPosition = true;
             ConstraintWidget first = widget;
             if (widget.mLeft.mTarget != null && widget.mLeft.mTarget.mOwner != this) {
                 fixedPosition = false;
             }
-
             while (widget.mRight.mTarget != null) {
                 if (widget.getVisibility() != GONE && widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
-                    if (count + 1 >= mMatchConstraintsChainedWidgets.length) {
-                        mMatchConstraintsChainedWidgets = Arrays.copyOf(mMatchConstraintsChainedWidgets, mMatchConstraintsChainedWidgets.length * 2);
+                    if (widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
+                        flags[0] = true; // signal that this chain is not optimizable.
                     }
-                    mMatchConstraintsChainedWidgets[count++] = widget;
+                    if (widget.mDimensionRatio <= 0) {
+                        if (count + 1 >= mMatchConstraintsChainedWidgets.length) {
+                            mMatchConstraintsChainedWidgets = Arrays.copyOf(mMatchConstraintsChainedWidgets, mMatchConstraintsChainedWidgets.length * 2);
+                        }
+                        mMatchConstraintsChainedWidgets[count++] = widget;
+                    }
                 }
                 if (widget.mRight.mTarget.mOwner.mLeft.mTarget == null) {
                     break;
@@ -1603,10 +1614,15 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             }
             while (widget.mBottom.mTarget != null) {
                 if (widget.getVisibility() != GONE && widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
-                    if (count + 1 >= mMatchConstraintsChainedWidgets.length) {
-                        mMatchConstraintsChainedWidgets = Arrays.copyOf(mMatchConstraintsChainedWidgets, mMatchConstraintsChainedWidgets.length * 2);
+                    if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
+                        flags[0] = true; // signal that this chain is not optimizable.
                     }
-                    mMatchConstraintsChainedWidgets[count++] = widget;
+                    if (widget.mDimensionRatio <= 0) {
+                        if (count + 1 >= mMatchConstraintsChainedWidgets.length) {
+                            mMatchConstraintsChainedWidgets = Arrays.copyOf(mMatchConstraintsChainedWidgets, mMatchConstraintsChainedWidgets.length * 2);
+                        }
+                        mMatchConstraintsChainedWidgets[count++] = widget;
+                    }
                 }
                 if (widget.mBottom.mTarget.mOwner.mTop.mTarget == null) {
                     break;

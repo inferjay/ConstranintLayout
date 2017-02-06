@@ -2030,14 +2030,30 @@ public class ConstraintWidget {
             }
         }
 
+        boolean useHorizontalRatio = useRatio && (dimensionRatioSide == HORIZONTAL
+                                               || dimensionRatioSide == UNKNOWN);
+
         // Horizontal resolution
         boolean wrapContent = (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)
                 && (this instanceof ConstraintWidgetContainer);
-        if (mHorizontalResolution != DIRECT
-          && (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group))) {
-            applyConstraints(system, wrapContent, horizontalDimensionFixed, mLeft, mRight,
-                    mX, mX + width, width, mMinWidth, mHorizontalBiasPercent,
-                    useRatio && dimensionRatioSide == HORIZONTAL, inHorizontalChain);
+        if (useHorizontalRatio && mLeft.mTarget != null && mRight.mTarget != null) {
+            SolverVariable begin = system.createObjectVariable(mLeft);
+            SolverVariable end = system.createObjectVariable(mRight);
+            SolverVariable beginTarget = system.createObjectVariable(mLeft.getTarget());
+            SolverVariable endTarget = system.createObjectVariable(mRight.getTarget());
+            system.addGreaterThan(begin, beginTarget, mLeft.getMargin(), SolverVariable.STRENGTH_HIGH);
+            system.addLowerThan(end, endTarget, -1 * mRight.getMargin(), SolverVariable.STRENGTH_HIGH);
+            if (!inHorizontalChain) {
+                system.addCentering(begin, beginTarget, mLeft.getMargin(), mHorizontalBiasPercent, endTarget, end, mRight.getMargin(),
+                  SolverVariable.STRENGTH_HIGHEST);
+            }
+        } else {
+            if (mHorizontalResolution != DIRECT
+                    && (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group))) {
+                applyConstraints(system, wrapContent, horizontalDimensionFixed, mLeft, mRight,
+                        mX, mX + width, width, mMinWidth, mHorizontalBiasPercent,
+                        useHorizontalRatio, inHorizontalChain);
+            }
         }
 
         if (mVerticalResolution == DIRECT) {
@@ -2047,28 +2063,55 @@ public class ConstraintWidget {
         wrapContent = (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)
                 && (this instanceof ConstraintWidgetContainer);
 
+        boolean useVerticalRatio = useRatio && (dimensionRatioSide == VERTICAL
+                                             || dimensionRatioSide == UNKNOWN);
         if (mBaselineDistance > 0) {
-            ConstraintAnchor end = mBottom;
+            ConstraintAnchor endAnchor = mBottom;
             if (group == ConstraintAnchor.ANY_GROUP || (mBottom.mGroup == group && mBaseline.mGroup == group)) {
-                system.addConstraint(
-                        LinearSystem.createRowEquals(system, bottom, baseline,
-                                height - getBaselineDistance(),
-                                false));
+                system.addEquality(baseline, top, getBaselineDistance(), SolverVariable.STRENGTH_EQUALITY);
             }
+            int originalHeight = height;
             if (mBaseline.mTarget != null) {
                 height = mBaselineDistance;
-                end = mBaseline;
+                endAnchor = mBaseline;
             }
-            if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && end.mGroup == group)) {
-                applyConstraints(system, wrapContent, verticalDimensionFixed,
-                        mTop, end, mY, mY + height, height, mMinHeight, mVerticalBiasPercent,
-                        useRatio && dimensionRatioSide == VERTICAL, inVerticalChain);
+            if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && endAnchor.mGroup == group)) {
+                if (useVerticalRatio && mTop.mTarget != null && mBottom.mTarget != null) {
+                    SolverVariable begin = system.createObjectVariable(mTop);
+                    SolverVariable end = system.createObjectVariable(mBottom);
+                    SolverVariable beginTarget = system.createObjectVariable(mTop.getTarget());
+                    SolverVariable endTarget = system.createObjectVariable(mBottom.getTarget());
+                    system.addGreaterThan(begin, beginTarget, mTop.getMargin(), SolverVariable.STRENGTH_HIGH);
+                    system.addLowerThan(end, endTarget, -1 * mBottom.getMargin(), SolverVariable.STRENGTH_HIGH);
+                    if (!inVerticalChain) {
+                        system.addCentering(begin, beginTarget, mTop.getMargin(), mVerticalBiasPercent, endTarget, end, mBottom.getMargin(),
+                                            SolverVariable.STRENGTH_HIGHEST);
+                    }
+                } else {
+                    applyConstraints(system, wrapContent, verticalDimensionFixed,
+                            mTop, endAnchor, mY, mY + height, height, mMinHeight, mVerticalBiasPercent,
+                            useVerticalRatio, inVerticalChain);
+                    system.addEquality(bottom, top, originalHeight, SolverVariable.STRENGTH_EQUALITY);
+                }
             }
         } else {
             if (group == ConstraintAnchor.ANY_GROUP || (mTop.mGroup == group && mBottom.mGroup == group)) {
-                applyConstraints(system, wrapContent, verticalDimensionFixed,
-                        mTop, mBottom, mY, mY + height, height, mMinHeight, mVerticalBiasPercent,
-                        useRatio && dimensionRatioSide == VERTICAL, inVerticalChain);
+                if (useVerticalRatio && mTop.mTarget != null && mBottom.mTarget != null) {
+                    SolverVariable begin = system.createObjectVariable(mTop);
+                    SolverVariable end = system.createObjectVariable(mBottom);
+                    SolverVariable beginTarget = system.createObjectVariable(mTop.getTarget());
+                    SolverVariable endTarget = system.createObjectVariable(mBottom.getTarget());
+                    system.addGreaterThan(begin, beginTarget, mTop.getMargin(), SolverVariable.STRENGTH_HIGH);
+                    system.addLowerThan(end, endTarget, -1 * mBottom.getMargin(), SolverVariable.STRENGTH_HIGH);
+                    if (!inVerticalChain) {
+                        system.addCentering(begin, beginTarget, mTop.getMargin(), mVerticalBiasPercent, endTarget, end, mBottom.getMargin(),
+                                            SolverVariable.STRENGTH_HIGHEST);
+                    }
+                } else {
+                    applyConstraints(system, wrapContent, verticalDimensionFixed,
+                            mTop, mBottom, mY, mY + height, height, mMinHeight, mVerticalBiasPercent,
+                            useVerticalRatio, inVerticalChain);
+                }
             }
         }
 
@@ -2077,8 +2120,17 @@ public class ConstraintWidget {
             if (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group)) {
                 if (dimensionRatioSide == HORIZONTAL) {
                     system.addConstraint(row.createRowDimensionRatio(right, left, bottom, top, dimensionRatio));
-                } else {
+                } else if (dimensionRatioSide == VERTICAL) {
                     system.addConstraint(row.createRowDimensionRatio(bottom, top, right, left, dimensionRatio));
+                } else {
+                    int strength = SolverVariable.STRENGTH_HIGHEST;
+                    row.createRowDimensionRatio(right, left, bottom, top, dimensionRatio);
+                    SolverVariable error1 = system.createErrorVariable();
+                    SolverVariable error2 = system.createErrorVariable();
+                    error1.strength = strength;
+                    error2.strength = strength;
+                    row.addError(error1, error2);
+                    system.addConstraint(row);
                 }
             }
         }
@@ -2195,12 +2247,8 @@ public class ConstraintWidget {
                     }
                 }
             } else  if (useRatio) {
-                system.addConstraint(LinearSystem
-                        .createRowGreaterThan(system, begin, beginTarget, beginAnchorMargin,
-                                true));
-                system.addConstraint(LinearSystem
-                        .createRowLowerThan(system, end, endTarget, -1 * endAnchorMargin,
-                                true));
+                system.addGreaterThan(begin, beginTarget, beginAnchorMargin, SolverVariable.STRENGTH_HIGH);
+                system.addLowerThan(end, endTarget, -1 * endAnchorMargin, SolverVariable.STRENGTH_HIGH);
                 system.addConstraint(LinearSystem
                         .createRowCentering(system, begin, beginTarget,
                           beginAnchorMargin, bias, endTarget, end, endAnchorMargin, true));
