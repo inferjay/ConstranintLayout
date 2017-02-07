@@ -34,7 +34,7 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 
 import static android.support.constraint.ConstraintLayout.LayoutParams.MATCH_CONSTRAINT;
-import static android.support.constraint.ConstraintLayout.LayoutParams.PARENT_ID;
+import static android.support.constraint.ConstraintLayout.LayoutParams.MATCH_CONSTRAINT_WRAP;
 import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -831,6 +831,10 @@ public class ConstraintLayout extends ViewGroup {
                 widget.setVerticalWeight(layoutParams.verticalWeight);
                 widget.setHorizontalChainStyle(layoutParams.horizontalChainStyle);
                 widget.setVerticalChainStyle(layoutParams.verticalChainStyle);
+                widget.setHorizontalMatchStyle(layoutParams.matchConstraintDefaultWidth,
+                        layoutParams.matchConstraintMinWidth, layoutParams.matchConstraintMaxWidth);
+                widget.setVerticalMatchStyle(layoutParams.matchConstraintDefaultHeight,
+                        layoutParams.matchConstraintMinHeight, layoutParams.matchConstraintMaxHeight);
             }
         }
     }
@@ -873,8 +877,15 @@ public class ConstraintLayout extends ViewGroup {
             int width = params.width;
             int height = params.height;
 
-            // Don't need to measure widgets that are MATCH_CONSTRAINT on both dimensions
-            if (params.horizontalDimensionFixed || params.verticalDimensionFixed) {
+            // Don't need to measure widgets that are MATCH_CONSTRAINT on both dimensions,
+            // unless they are marked as MATCH_CONSTRAINT_WRAP
+            boolean doMeasure =
+                    (params.horizontalDimensionFixed
+                    || params.verticalDimensionFixed)
+                    || (!params.horizontalDimensionFixed && params.matchConstraintDefaultWidth == MATCH_CONSTRAINT_WRAP)
+                    || (!params.verticalDimensionFixed && params.matchConstraintDefaultHeight == MATCH_CONSTRAINT_WRAP);
+
+            if (doMeasure) {
                 final int childWidthMeasureSpec;
                 final int childHeightMeasureSpec;
 
@@ -979,14 +990,19 @@ public class ConstraintLayout extends ViewGroup {
                     continue;
                 }
 
-                int widthSpec = MeasureSpec.makeMeasureSpec(widget.getWidth(), MeasureSpec.EXACTLY);
-                int heightSpec = MeasureSpec.makeMeasureSpec(widget.getHeight(), MeasureSpec.EXACTLY);
+                int widthSpec = 0;
+                int heightSpec = 0;
 
                 ConstraintLayout.LayoutParams params = (LayoutParams) child.getLayoutParams();
                 if (params.width == WRAP_CONTENT) {
                     widthSpec = getChildMeasureSpec(widthMeasureSpec, widthPadding, params.width);
-                } else if (params.height == WRAP_CONTENT) {
+                } else {
+                    widthSpec = MeasureSpec.makeMeasureSpec(widget.getWidth(), MeasureSpec.EXACTLY);
+                }
+                if (params.height == WRAP_CONTENT) {
                     heightSpec = getChildMeasureSpec(heightMeasureSpec, heightPadding, params.height);
+                } else {
+                    heightSpec = MeasureSpec.makeMeasureSpec(widget.getHeight(), MeasureSpec.EXACTLY);
                 }
 
                 // we need to re-measure the child...
@@ -1268,6 +1284,16 @@ public class ConstraintLayout extends ViewGroup {
         public static final int END =  7;
 
         /**
+         * Match constraint style
+         */
+        public static final int MATCH_CONSTRAINT_WRAP = ConstraintWidget.MATCH_CONSTRAINT_WRAP;
+
+        /**
+         * Match constraint style
+         */
+        public static final int MATCH_CONSTRAINT_SPREAD = ConstraintWidget.MATCH_CONSTRAINT_SPREAD;
+
+        /**
          * Chain spread style
          */
         public static final int CHAIN_SPREAD = ConstraintWidget.CHAIN_SPREAD;
@@ -1454,6 +1480,52 @@ public class ConstraintLayout extends ViewGroup {
         public int verticalChainStyle = CHAIN_SPREAD;
 
         /**
+         * Define how the widget horizontal dimension is handled when set to MATCH_CONSTRAINT
+         * <ul>
+         *     <li>{@see MATCH_CONSTRAINT_SPREAD} -- the default. The dimension will expand up to the constraints, minus margins</li>
+         *     <li>{@see MATCH_CONSTRAINT_WRAP} -- The dimension will be the same as WRAP_CONTENT, unless the size ends
+         *     up too large for the constraints; in that case the dimension will expand up to the constraints, minus margins</li>
+         *     This attribute may not be applied if the widget is part of a chain in that dimension.
+         * </ul>
+         */
+        public int matchConstraintDefaultWidth = MATCH_CONSTRAINT_SPREAD;
+
+        /**
+         * Define how the widget vertical dimension is handled when set to MATCH_CONSTRAINT
+         * <ul>
+         *     <li>{@see MATCH_CONSTRAINT_SPREAD} -- the default. The dimension will expand up to the constraints, minus margins</li>
+         *     <li>{@see MATCH_CONSTRAINT_WRAP} -- The dimension will be the same as WRAP_CONTENT, unless the size ends
+         *     up too large for the constraints; in that case the dimension will expand up to the constraints, minus margins</li>
+         *     This attribute may not be applied if the widget is part of a chain in that dimension.
+         * </ul>
+         */
+        public int matchConstraintDefaultHeight = MATCH_CONSTRAINT_SPREAD;
+
+        /**
+         * Specify a minimum width size for the widget. It will only apply if the size of the widget
+         * is set to MATCH_CONSTRAINT. Don't apply if the widget is part of an horizontal chain.
+         */
+        public int matchConstraintMinWidth = 0;
+
+        /**
+         * Specify a minimum height size for the widget. It will only apply if the size of the widget
+         * is set to MATCH_CONSTRAINT. Don't apply if the widget is part of an vertical chain.
+         */
+        public int matchConstraintMinHeight = 0;
+
+        /**
+         * Specify a maximum width size for the widget. It will only apply if the size of the widget
+         * is set to MATCH_CONSTRAINT. Don't apply if the widget is part of an horizontal chain.
+         */
+        public int matchConstraintMaxWidth = 0;
+
+        /**
+         * Specify a maximum height size for the widget. It will only apply if the size of the widget
+         * is set to MATCH_CONSTRAINT. Don't apply if the widget is part of an vertical chain.
+         */
+        public int matchConstraintMaxHeight = 0;
+
+        /**
          * The design time location of the left side of the child.
          * Used at design time for a horizontally unconstrained child.
          */
@@ -1522,6 +1594,12 @@ public class ConstraintLayout extends ViewGroup {
             this.verticalWeight = source.verticalWeight;
             this.horizontalChainStyle = source.horizontalChainStyle;
             this.verticalChainStyle = source.verticalChainStyle;
+            this.matchConstraintDefaultWidth = source.matchConstraintDefaultWidth;
+            this.matchConstraintDefaultHeight = source.matchConstraintDefaultHeight;
+            this.matchConstraintMinWidth = source.matchConstraintMinWidth;
+            this.matchConstraintMaxWidth = source.matchConstraintMaxWidth;
+            this.matchConstraintMinHeight = source.matchConstraintMinHeight;
+            this.matchConstraintMaxHeight = source.matchConstraintMaxHeight;
             this.editorAbsoluteX = source.editorAbsoluteX;
             this.editorAbsoluteY = source.editorAbsoluteY;
             this.orientation = source.orientation;
@@ -1695,6 +1773,18 @@ public class ConstraintLayout extends ViewGroup {
                     horizontalChainStyle = a.getInt(attr, CHAIN_SPREAD);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_chainStyle) {
                     verticalChainStyle = a.getInt(attr, CHAIN_SPREAD);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_default) {
+                    matchConstraintDefaultWidth = a.getInt(attr, MATCH_CONSTRAINT_SPREAD);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_default) {
+                    matchConstraintDefaultHeight = a.getInt(attr, MATCH_CONSTRAINT_SPREAD);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_min) {
+                    matchConstraintMinWidth = a.getDimensionPixelSize(attr, matchConstraintMinWidth);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_max) {
+                    matchConstraintMaxWidth = a.getDimensionPixelSize(attr, matchConstraintMaxWidth);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_min) {
+                    matchConstraintMinHeight = a.getDimensionPixelSize(attr, matchConstraintMinHeight);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_max) {
+                    matchConstraintMaxHeight = a.getDimensionPixelSize(attr, matchConstraintMaxHeight);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_creator) {
                     // Skip
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_creator) {

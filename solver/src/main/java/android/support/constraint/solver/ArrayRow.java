@@ -258,15 +258,16 @@ public class ArrayRow {
             if (marginA > 0 || marginB > 0) {
                 constantValue = -marginA + marginB;
             }
-        } else if (bias == 0) {
+        } else if (bias <= 0) {
             // A = B + m
-            variables.put(variableA, 1);
             variables.put(variableA, -1);
+            variables.put(variableB, 1);
             constantValue = marginA;
-        } else if (bias == 1) {
-            variables.put(variableD, 1);
+        } else if (bias >= 1) {
+            // C = D - m
             variables.put(variableC, -1);
-            constantValue = -marginB;
+            variables.put(variableD, 1);
+            constantValue = marginB;
         } else {
             variables.put(variableA, 1 * (1 - bias));
             variables.put(variableB, -1 * (1 - bias));

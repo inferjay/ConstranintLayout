@@ -472,11 +472,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         if (w.mLeft.mTarget != null) {
                             leftMargin += w.mLeft.mTarget.getMargin();
                         }
-                        system.addEquality(w.mLeft.mSolverVariable, w.mLeft.mTarget.mSolverVariable, leftMargin, SolverVariable.STRENGTH_LOW);
                         int rightMargin = w.mRight.getMargin();
                         if (w.mRight.mTarget != null) {
                             rightMargin += w.mRight.mTarget.getMargin();
                         }
+
+                        system.addEquality(w.mLeft.mSolverVariable, w.mLeft.mTarget.mSolverVariable, leftMargin, SolverVariable.STRENGTH_LOW);
                         system.addEquality(w.mRight.mSolverVariable, w.mRight.mTarget.mSolverVariable, -rightMargin, SolverVariable.STRENGTH_LOW);
                     } else {
                         for (int j = 0; j < numMatchConstraints - 1; j++) {
@@ -512,6 +513,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                                     margin += nextWidget.mRight.mTarget.mOwner.mLeft.getMargin();
                                 }
                                 system.addLowerThan(nextRight, nextWidget.mRight.mTarget.mSolverVariable, -margin, SolverVariable.STRENGTH_MEDIUM);
+                            }
+
+                            if (widget.mMatchConstraintMaxWidth > 0) {
+                                system.addLowerThan(right, left, widget.mMatchConstraintMaxWidth, SolverVariable.STRENGTH_MEDIUM);
                             }
 
                             ArrayRow row = system.createRow();
@@ -946,7 +951,14 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         int w = widget.getWidth();
         int h = widget.getHeight();
         if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
-            w = 0;
+            if (widget.mMatchConstraintDefaultWidth == MATCH_CONSTRAINT_WRAP) {
+                w = Math.max(widget.mMatchConstraintMinWidth, w);
+            } else if (widget.mMatchConstraintMinWidth > 0){
+                w = widget.mMatchConstraintMinWidth;
+                widget.setWidth(w);
+            } else {
+                w = 0;
+            }
             if (widget.mVerticalDimensionBehaviour != DimensionBehaviour.MATCH_CONSTRAINT
                     && widget.mDimensionRatio > 0) {
                 w = (int) (widget.mDimensionRatio * h);
@@ -954,14 +966,20 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             }
         }
         if (widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
-            h = 0;
+            if (widget.mMatchConstraintDefaultHeight == MATCH_CONSTRAINT_WRAP) {
+                h = Math.max(widget.mMatchConstraintMinHeight, h);
+            } else if (widget.mMatchConstraintMinHeight > 0){
+                h = widget.mMatchConstraintMinHeight;
+                widget.setHeight(h);
+            } else {
+                h = 0;
+            }
             if (widget.mHorizontalDimensionBehaviour != DimensionBehaviour.MATCH_CONSTRAINT
                     && widget.mDimensionRatio > 0) {
                 h = (int) (w / widget.mDimensionRatio);
                 widget.setHeight(h);
             }
         }
-
         int distToRight = w;
         int distToLeft = w;
         ConstraintWidget leftWidget = null;
