@@ -344,7 +344,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 // TODO: implements direct resolution for CHAIN_SPREAD_INSIDE and CHAIN_PACKED
                 Optimizer.applyDirectResolutionHorizontalChain(this, system, numMatchConstraints, widget);
             } else { // use the solver
-                if (numMatchConstraints == 0) {
+                if (numMatchConstraints == 0 || isChainPacked) {
                     ConstraintWidget currentWidget = first;
                     ConstraintWidget previousVisibleWidget = null;
                     ConstraintWidget lastWidget = null;
@@ -385,6 +385,11 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                                 margin += previousMargin;
                             }
                             system.addGreaterThan(left.mSolverVariable, left.mTarget.mSolverVariable, margin, SolverVariable.STRENGTH_LOW);
+                            if (currentWidget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
+                                ConstraintAnchor right = currentWidget.mRight;
+                                system.addEquality(right.mSolverVariable, left.mSolverVariable,
+                                  currentWidget.mMatchConstraintMinWidth, SolverVariable.STRENGTH_MEDIUM);
+                            }
                         } else {
                             if (!isChainSpread && isLast && previousVisibleWidget != null) {
                                 if (currentWidget.mRight.mTarget == null) {
@@ -568,7 +573,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 // TODO: implements direct resolution for CHAIN_SPREAD_INSIDE and CHAIN_PACKED
                 Optimizer.applyDirectResolutionVerticalChain(this, system, numMatchConstraints, widget);
             } else { // use the solver
-                if (numMatchConstraints == 0) {
+                if (numMatchConstraints == 0 || isChainPacked) {
                     ConstraintWidget currentWidget = first;
                     ConstraintWidget previousVisibleWidget = null;
                     ConstraintWidget lastWidget = null;
@@ -620,6 +625,11 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             }
                             if (source != null && target != null) {
                                 system.addGreaterThan(source, target, margin, SolverVariable.STRENGTH_LOW);
+                            }
+                            if (currentWidget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
+                                ConstraintAnchor bottom = currentWidget.mBottom;
+                                system.addEquality(bottom.mSolverVariable, source,
+                                        currentWidget.mMatchConstraintMinHeight, SolverVariable.STRENGTH_MEDIUM);
                             }
                         } else {
                             if (!isChainSpread && isLast && previousVisibleWidget != null) {
