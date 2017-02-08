@@ -1069,6 +1069,7 @@ public class ConstraintLayout extends ViewGroup {
         switch (widthMode) {
             case MeasureSpec.AT_MOST: {
                 widthBehaviour = ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
+                desiredWidth = widthSize;
             }
             break;
             case MeasureSpec.UNSPECIFIED: {
@@ -1086,6 +1087,7 @@ public class ConstraintLayout extends ViewGroup {
         switch (heightMode) {
             case MeasureSpec.AT_MOST: {
                 heightBehaviour = ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
+                desiredHeight = heightSize;
             }
             break;
             case MeasureSpec.UNSPECIFIED: {

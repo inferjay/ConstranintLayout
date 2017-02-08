@@ -830,11 +830,11 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             findWrapSize(mChildren);
             if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
                 mHorizontalDimensionBehaviour = DimensionBehaviour.FIXED;
-                setWidth(mWrapWidth);
+                setWidth(Math.min(prew, mWrapWidth));
             }
             if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
                 mVerticalDimensionBehaviour = DimensionBehaviour.FIXED;
-                setHeight(mWrapHeight);
+                setHeight(Math.min(preh, mWrapHeight));
             }
         }
 
@@ -959,6 +959,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             } else {
                 w = 0;
             }
+            if (widget.mMatchConstraintMaxWidth > 0 && widget.mMatchConstraintMaxWidth < w) {
+                w = widget.mMatchConstraintMaxWidth;
+            }
             if (widget.mVerticalDimensionBehaviour != DimensionBehaviour.MATCH_CONSTRAINT
                     && widget.mDimensionRatio > 0) {
                 w = (int) (widget.mDimensionRatio * h);
@@ -973,6 +976,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 widget.setHeight(h);
             } else {
                 h = 0;
+            }
+            if (widget.mMatchConstraintMaxHeight > 0 && widget.mMatchConstraintMaxHeight < h) {
+                h = widget.mMatchConstraintMaxHeight;
             }
             if (widget.mHorizontalDimensionBehaviour != DimensionBehaviour.MATCH_CONSTRAINT
                     && widget.mDimensionRatio > 0) {

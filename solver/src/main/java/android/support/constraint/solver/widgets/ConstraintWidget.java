@@ -69,7 +69,7 @@ public class ConstraintWidget {
     int mMatchConstraintMinWidth = 0;
     int mMatchConstraintMaxWidth = 0;
     int mMatchConstraintMinHeight = 0;
-    private int mMatchConstraintMaxHeight = 0;
+    int mMatchConstraintMaxHeight = 0;
 
     /**
      * Define how the content of a widget should align, if the widget has children
