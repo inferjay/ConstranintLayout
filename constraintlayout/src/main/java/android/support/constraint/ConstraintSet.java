@@ -71,6 +71,16 @@ public class ConstraintSet {
     public static final int WRAP_CONTENT = ConstraintLayout.LayoutParams.WRAP_CONTENT;
 
     /**
+     * How to calculate the size of a view in 0 dp by using its wrap_content size
+     */
+    public static final int MATCH_CONSTRAINT_WRAP = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT_WRAP;
+
+    /**
+     * Calculate the size of a view in 0 dp by reducing the constrains gaps as much as possible
+     */
+    public static final int MATCH_CONSTRAINT_SPREAD = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT_SPREAD;
+
+    /**
      * References the id of the parent.
      * Used in:
      * <ul>
@@ -236,7 +246,14 @@ public class ConstraintSet {
     private static final int TRANSLATION_X = 51;
     private static final int TRANSLATION_Y = 52;
     private static final int TRANSLATION_Z = 53;
-    private static final int UNUSED = 54;
+    private static final int WIDTH_DEFAULT = 54;
+    private static final int HEIGHT_DEFAULT = 55;
+    private static final int WIDTH_MAX = 56;
+    private static final int HEIGHT_MAX = 57;
+    private static final int WIDTH_MIN = 58;
+    private static final int HEIGHT_MIN = 59;
+
+    private static final int UNUSED = 60;
 
     static {
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintLeft_toLeftOf, LEFT_TO_LEFT);
@@ -298,6 +315,12 @@ public class ConstraintSet {
         mapToConstant.append(R.styleable.ConstraintSet_android_translationX, TRANSLATION_X);
         mapToConstant.append(R.styleable.ConstraintSet_android_translationY, TRANSLATION_Y);
         mapToConstant.append(R.styleable.ConstraintSet_android_translationZ, TRANSLATION_Z);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintWidth_default, WIDTH_DEFAULT);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintHeight_default, HEIGHT_DEFAULT);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintWidth_max, WIDTH_MAX);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintHeight_max, HEIGHT_MAX);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintWidth_min, WIDTH_MIN);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintHeight_min, HEIGHT_MIN);
 
         mapToConstant.append(R.styleable.ConstraintSet_android_id, VIEW_ID);
     }
@@ -365,6 +388,12 @@ public class ConstraintSet {
         public float translationX = 0;
         public float translationY = 0;
         public float translationZ = 0;
+        public int widthDefault = UNSET;
+        public int heightDefault = UNSET;
+        public int widthMax = UNSET;
+        public int heightMax = UNSET;
+        public int widthMin = UNSET;
+        public int heightMin = UNSET;
 
         public Constraint clone() {
             Constraint clone = new Constraint();
@@ -427,6 +456,13 @@ public class ConstraintSet {
             clone.translationX = translationX;
             clone.translationY = translationY;
             clone.translationZ = translationZ;
+            clone.widthDefault = widthDefault;
+            clone.heightDefault = heightDefault;
+            clone.widthMax = widthMax;
+            clone.heightMax = heightMax;
+            clone.widthMin = widthMin;
+            clone.heightMin = heightMin;
+
             return clone;
         }
 
@@ -465,6 +501,12 @@ public class ConstraintSet {
             horizontalWeight = param.horizontalWeight;
             verticalChainStyle = param.verticalChainStyle;
             horizontalChainStyle = param.horizontalChainStyle;
+            widthDefault = param.matchConstraintDefaultWidth;
+            heightDefault = param.matchConstraintDefaultHeight;
+            widthMax = param.matchConstraintMaxWidth;
+            heightMax = param.matchConstraintMaxHeight;
+            widthMin = param.matchConstraintMinWidth;
+            heightMin = param.matchConstraintMinHeight;
             int currentapiVersion = android.os.Build.VERSION.SDK_INT;
             if (currentapiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 endMargin = param.getMarginEnd();
@@ -507,7 +549,12 @@ public class ConstraintSet {
             param.horizontalWeight = horizontalWeight;
             param.verticalChainStyle = verticalChainStyle;
             param.horizontalChainStyle = horizontalChainStyle;
-
+            param.matchConstraintDefaultWidth = widthDefault;
+            param.matchConstraintDefaultHeight = heightDefault;
+            param.matchConstraintMaxWidth = widthMax;
+            param.matchConstraintMaxHeight = heightMax;
+            param.matchConstraintMinWidth = widthMin;
+            param.matchConstraintMinHeight = heightMin;
             param.orientation = orientation;
             param.guidePercent = guidePercent;
             param.guideBegin = guideBegin;
@@ -1291,7 +1338,7 @@ public class ConstraintSet {
     /**
      * Adjust the post-layout X translation of a view.
      *
-     * @param viewId ID of view to translation
+     * @param viewId ID of view to translate in X
      * @param translationX the translation in X
      */
     public void setTranslationX(int viewId, float translationX) {
@@ -1301,7 +1348,7 @@ public class ConstraintSet {
     /**
      * Adjust the  post-layout Y translation of a view.
      *
-     * @param viewId ID of view to adjust its translation in Y
+     * @param viewId ID of view to to translate in Y
      * @param translationY the translation in Y
      */
     public void setTranslationY(int viewId, float translationY) {
@@ -1311,7 +1358,7 @@ public class ConstraintSet {
     /**
      * Adjust the post-layout translation of a view.
      *
-     * @param viewId ID of view to adjust its translation in Y
+     * @param viewId ID of view to adjust its translation in X & Y
      * @param translationX the translation in X
      * @param translationY the translation in Y
      */
@@ -1324,7 +1371,7 @@ public class ConstraintSet {
     /**
      * Adjust the translation in Z of a view.
      *
-     * @param viewId ID of view to adjust the
+     * @param viewId ID of view to adjust
      * @param translationZ the translationZ
      */
     public void setTranslationZ(int viewId, float translationZ) {
@@ -1335,7 +1382,7 @@ public class ConstraintSet {
      * Sets the height of the view. It can be a dimension, {@link #WRAP_CONTENT} or {@link
      * #MATCH_CONSTRAINT}.
      *
-     * @param viewId ID of view to adjust it height
+     * @param viewId ID of view to adjust its height
      * @param height the height of the constraint
      */
     public void constrainHeight(int viewId, int height) {
@@ -1346,7 +1393,7 @@ public class ConstraintSet {
      * Sets the width of the view. It can be a dimension, {@link #WRAP_CONTENT} or {@link
      * #MATCH_CONSTRAINT}.
      *
-     * @param viewId ID of view to adjust it height
+     * @param viewId ID of view to adjust its width
      * @param width the width of the view
      */
     public void constrainWidth(int viewId, int width) {
@@ -1354,10 +1401,78 @@ public class ConstraintSet {
     }
 
     /**
+     * Sets the maximum height of the view. It is a dimension, It is only applicable if height is
+     * #MATCH_CONSTRAINT}.
+     *
+     * @param viewId ID of view to adjust it height
+     * @param height the height of the constraint
+     */
+    public void constrainMaxHeight(int viewId, int height) {
+        get(viewId).heightMax = height;
+    }
+
+    /**
+     * Sets the maximum width of the view. It is a dimension, It is only applicable if width is
+     * #MATCH_CONSTRAINT}.
+     *
+     * @param viewId ID of view to adjust its max height
+     * @param width the width of the view
+     */
+    public void constrainMaxWidth(int viewId, int width) {
+        get(viewId).widthMax = width;
+    }
+
+    /**
+     * Sets the height of the view. It is a dimension, It is only applicable if height is
+     * #MATCH_CONSTRAINT}.
+     *
+     * @param viewId ID of view to adjust its min height
+     * @param height the minimum height of the view
+     */
+    public void constrainMinHeight(int viewId, int height) {
+        get(viewId).heightMin = height;
+    }
+
+    /**
+     * Sets the width of the view.  It is a dimension, It is only applicable if width is
+     * #MATCH_CONSTRAINT}.
+     *
+     * @param viewId ID of view to adjust its min height
+     * @param width the minimum width of the view
+     */
+    public void constrainMinWidth(int viewId, int width) {
+        get(viewId).widthMin = width;
+    }
+
+
+    /**
+     * Sets how the height is calculated ether MATCH_CONSTRAINT_WRAP or MATCH_CONSTRAINT_SPREAD.
+     * Default is wrap.
+     *
+     * @param viewId ID of view to adjust its matchConstraintDefaultHeight
+     * @param height MATCH_CONSTRAINT_WRAP or MATCH_CONSTRAINT_SPREAD
+     */
+    public void constrainDefaultHeight(int viewId, int height) {
+        get(viewId).heightDefault = height;
+    }
+
+    /**
+     * Sets how the width is calculated ether MATCH_CONSTRAINT_WRAP or MATCH_CONSTRAINT_SPREAD.
+     * Default is wrap.
+     *
+     * @param viewId ID of view to adjust its matchConstraintDefaultWidth
+     * @param width SPREAD or WRAP
+     */
+    public void constrainDefaultWidth(int viewId, int width) {
+        get(viewId).widthDefault = width;
+    }
+
+
+    /**
      * The child's weight that we can use to distribute the available horizontal space
      * in a chain, if the dimension behaviour is set to MATCH_CONSTRAINT
      *
-     * @param viewId ID of view to adjust it height
+     * @param viewId ID of view to adjust its HorizontalWeight
      * @param weight the weight that we can use to distribute the horizontal space
      */
     public void setHorizontalWeight(int viewId, float weight) {
@@ -1368,7 +1483,7 @@ public class ConstraintSet {
      * The child's weight that we can use to distribute the available horizontal space
      * in a chain, if the dimension behaviour is set to MATCH_CONSTRAINT
      *
-     * @param viewId ID of view to adjust it height
+     * @param viewId ID of view to adjust its VerticalWeight
      * @param weight the weight that we can use to distribute the horizontal space
      */
     public void setVerticalWeight(int viewId, float weight) {
@@ -1383,7 +1498,7 @@ public class ConstraintSet {
      * <li>{@see CHAIN_PACKED} -- the elements of the chain will be packed together. The horizontal
      * bias attribute of the child will then affect the positioning of the packed elements</li> </ul>
      *
-     * @param viewId ID of view to adjust it height
+     * @param viewId ID of view to adjust its HorizontalChainStyle
      * @param chainStyle the weight that we can use to distribute the horizontal space
      */
     public void setHorizontalChainStyle(int viewId, int chainStyle) {
@@ -1399,7 +1514,7 @@ public class ConstraintSet {
      * <li>{@see CHAIN_PACKED} -- the elements of the chain will be packed together. The horizontal
      * bias attribute of the child will then affect the positioning of the packed elements</li> </ul>
      *
-     * @param viewId ID of view to adjust it height
+     * @param viewId ID of view to adjust its VerticalChainStyle
      * @param chainStyle the weight that we can use to distribute the horizontal space
      */
     public void setVerticalChainStyle(int viewId, int chainStyle) {
@@ -1408,6 +1523,10 @@ public class ConstraintSet {
 
     /**
      * Adds a view to a horizontal chain.
+     *
+     * @param viewId view to add
+     * @param leftId view in chain to the left
+     * @param rightId view in chain to the right
      */
     public void addToHorizontalChain(int viewId, int leftId, int rightId) {
         connect(viewId, LEFT, leftId, (leftId == PARENT_ID) ? LEFT : RIGHT, 0);
@@ -1422,6 +1541,10 @@ public class ConstraintSet {
 
     /**
      * Adds a view to a horizontal chain.
+     *
+     * @param viewId view to add
+     * @param leftId view to the start side
+     * @param rightId view to the end side
      */
     public void addToHorizontalChainRTL(int viewId, int leftId, int rightId) {
         connect(viewId, START, leftId, (leftId == PARENT_ID) ? START : END, 0);
@@ -1436,6 +1559,10 @@ public class ConstraintSet {
 
     /**
      * Adds a view to a vertical chain.
+     *
+     * @param viewId view to add to a vertical chain
+     * @param topId view above.
+     * @param bottomId view below
      */
     public void addToVerticalChain(int viewId, int topId, int bottomId) {
         connect(viewId, TOP, topId, (topId == PARENT_ID) ? TOP : BOTTOM, 0);
