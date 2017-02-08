@@ -338,7 +338,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             boolean isChainPacked = first.mHorizontalChainStyle == CHAIN_PACKED;
             ConstraintWidget widget = first;
             boolean isWrapContent = mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT;
-            if ((mOptimizationLevel == OPTIMIZATION_ALL || mOptimizationLevel == OPTIMIZATION_CHAIN) && !flags[FLAG_CHAIN_OPTIMIZE]
+            if ((mOptimizationLevel == OPTIMIZATION_ALL || mOptimizationLevel == OPTIMIZATION_CHAIN) && flags[FLAG_CHAIN_OPTIMIZE]
                     && widget.mHorizontalChainFixedPosition && !isChainPacked && !isWrapContent
                     && first.mHorizontalChainStyle == CHAIN_SPREAD) {
                 // TODO: implements direct resolution for CHAIN_SPREAD_INSIDE and CHAIN_PACKED
@@ -567,7 +567,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             boolean isChainPacked = first.mVerticalChainStyle == CHAIN_PACKED;
             ConstraintWidget widget = first;
             boolean isWrapContent = mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT;
-            if ((mOptimizationLevel == OPTIMIZATION_ALL || mOptimizationLevel == OPTIMIZATION_CHAIN) && !flags[FLAG_CHAIN_OPTIMIZE]
+            if ((mOptimizationLevel == OPTIMIZATION_ALL || mOptimizationLevel == OPTIMIZATION_CHAIN) && flags[FLAG_CHAIN_OPTIMIZE]
                     && widget.mVerticalChainFixedPosition && !isChainPacked && !isWrapContent
                     && first.mVerticalChainStyle == CHAIN_SPREAD) {
                 // TODO: implements direct resolution for CHAIN_SPREAD_INSIDE and CHAIN_PACKED
@@ -1631,7 +1631,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      */
     private int countMatchConstraintsChainedWidgets(ConstraintWidget widget, int direction, boolean[] flags) {
         int count = 0;
-        flags[FLAG_CHAIN_OPTIMIZE] = false; // will set to true if the chain is not optimizable
+        flags[FLAG_CHAIN_OPTIMIZE] = true; // will set to false if the chain is not optimizable
         flags[FLAG_CHAIN_DANGLING] = false; // will set to true if the chain is not connected on one or both endpoints
 
         if (direction == HORIZONTAL) {
@@ -1644,9 +1644,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             while (widget.mRight.mTarget != null) {
                 if (widget.getVisibility() != GONE && widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                     if (widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
-                        flags[FLAG_CHAIN_OPTIMIZE] = true; // signal that this chain is not optimizable.
+                        flags[FLAG_CHAIN_OPTIMIZE] = false; // signal that this chain is not optimizable.
                     }
                     if (widget.mDimensionRatio <= 0) {
+                        flags[FLAG_CHAIN_OPTIMIZE] = false; // signal that this chain is not optimizable.
                         if (count + 1 >= mMatchConstraintsChainedWidgets.length) {
                             mMatchConstraintsChainedWidgets = Arrays.copyOf(mMatchConstraintsChainedWidgets, mMatchConstraintsChainedWidgets.length * 2);
                         }
@@ -1684,9 +1685,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             while (widget.mBottom.mTarget != null) {
                 if (widget.getVisibility() != GONE && widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                     if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
-                        flags[FLAG_CHAIN_OPTIMIZE] = true; // signal that this chain is not optimizable.
+                        flags[FLAG_CHAIN_OPTIMIZE] = false; // signal that this chain is not optimizable.
                     }
                     if (widget.mDimensionRatio <= 0) {
+                        flags[FLAG_CHAIN_OPTIMIZE] = false; // signal that this chain is not optimizable.
                         if (count + 1 >= mMatchConstraintsChainedWidgets.length) {
                             mMatchConstraintsChainedWidgets = Arrays.copyOf(mMatchConstraintsChainedWidgets, mMatchConstraintsChainedWidgets.length * 2);
                         }
