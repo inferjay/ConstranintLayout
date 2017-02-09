@@ -840,11 +840,11 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             findWrapSize(mChildren);
             if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
                 mHorizontalDimensionBehaviour = DimensionBehaviour.FIXED;
-                setWidth(Math.min(prew, mWrapWidth));
+                setWidth(prew > 0 ? Math.min(prew, mWrapWidth) : mWrapWidth);
             }
             if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
                 mVerticalDimensionBehaviour = DimensionBehaviour.FIXED;
-                setHeight(Math.min(preh, mWrapHeight));
+                setHeight(preh > 0 ? Math.min(preh, mWrapHeight) : mWrapHeight);
             }
         }
 

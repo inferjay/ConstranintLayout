@@ -1156,20 +1156,33 @@ public class ConstraintWidget {
     public void setFrame(int left, int top, int right, int bottom) {
         int w = right - left;
         int h = bottom - top;
-        // correct dimensional instability caused by rounding errors
-        if (mHorizontalDimensionBehaviour == DimensionBehaviour.FIXED) {
-            if (w < getWidth()) {
-                w = getWidth();
-            }
-        }
-        if (mVerticalDimensionBehaviour == DimensionBehaviour.FIXED) {
-            if (h < getHeight()) {
-                h = getHeight();
-            }
-        }
+
         mX = left;
         mY = top;
-        setDimension(w, h);
+
+        if (mVisibility == ConstraintWidget.GONE) {
+            mWidth = 0;
+            mHeight = 0;
+            return;
+        }
+
+        // correct dimensional instability caused by rounding errors
+        if (mHorizontalDimensionBehaviour == DimensionBehaviour.FIXED && w < mWidth) {
+            w = mWidth;
+        }
+        if (mVerticalDimensionBehaviour == DimensionBehaviour.FIXED && h < mHeight) {
+            h = mHeight;
+        }
+
+        mWidth = w;
+        mHeight = h;
+
+        if (mHeight < mMinHeight) {
+            mHeight = mMinHeight;
+        }
+        if (mWidth < mMinWidth) {
+            mWidth = mMinWidth;
+        }
     }
 
     /**
