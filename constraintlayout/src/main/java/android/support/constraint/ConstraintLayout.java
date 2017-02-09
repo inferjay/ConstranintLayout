@@ -290,7 +290,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * <h5>Ratio</h5>
  * <p>
  *     You can also define one dimension of a widget as a ratio of the other one. In order to do that, you
- *     need to have the constrained dimension be set to {@code 0dp} (i.e., {@code MATCH_CONSTRAINT}), and set the
+ *     need to have at least one constrained dimension be set to {@code 0dp} (i.e., {@code MATCH_CONSTRAINT}), and set the
  *     attribute {@code layout_constraintDimentionRatio} to a given ratio.
  *     For example:
  *     <pre>
@@ -309,10 +309,14 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * </ul>
  * </p>
  * <p>
- *     You can also use ratio if both dimensions are set to {@code MATCH_CONSTRAINT} (0dp), for example
- *     if one dimension is constrained by two targets (e.g. width is set to 0dp with connections to its parent).
- *     In that case, you need to indicate which side should be constrained, by adding the letter
- *     {@code W} (for constraining the width) or {@code H} (for constraining the height) in front of the ratio, separated
+ *     You can also use ratio if both dimensions are set to {@code MATCH_CONSTRAINT} (0dp). In this case the system sets the
+ *     largest dimensions the satisfies all constraints and maintains the aspect ratio specified. To constrain one specific side
+ *     based on the dimensions of another. You can pre append {@code W,}" or {@code H,} to constrain the width or height
+ *     respectively.
+ *     For example,
+ *     If one dimension is constrained by two targets (e.g. width is 0dp and centered on parent) you can indicate which
+ *     side should be constrained, by adding the letter {@code W} (for constraining the width) or {@code H}
+ *     (for constraining the height) in front of the ratio, separated
  *     by a comma:
  *     <pre>
  *         {@code
@@ -447,6 +451,7 @@ public class ConstraintLayout extends ViewGroup {
                     mConstraintSet.load(getContext(),id);
                 }
             }
+            a.recycle();
         }
         mLayoutWidget.setOptimizationLevel(mOptimizationLevel);
     }
@@ -1171,7 +1176,13 @@ public class ConstraintLayout extends ViewGroup {
      * @hide
      *
      * Set the optimization level for the layout resolution
-     *
+     * The level can be one of:
+     * <ul>
+     * <li>ConstraintWidgetContainer.OPTIMIZATION_NONE</li>
+     * <li>ConstraintWidgetContainer.OPTIMIZATION_ALL</li>
+     * <li>ConstraintWidgetContainer.OPTIMIZATION_BASIC</li>
+     * <li>ConstraintWidgetContainer.OPTIMIZATION_CHAIN  </li>
+     * </ul>
      * @param level optimization level
      */
     public void setOptimizationLevel(int level) {
@@ -1211,7 +1222,7 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     /**
-     * Sets a ConstraintSet object to manage constraints. Constraints set overrides LayoutParams of child views.
+     * Sets a ConstraintSet object to manage constraints. The ConstraintSet overrides LayoutParams of child views.
      * @param set Layout children using ConstraintSet
      */
     public void setConstraintSet(ConstraintSet set) {
@@ -1286,12 +1297,14 @@ public class ConstraintLayout extends ViewGroup {
         public static final int END =  7;
 
         /**
-         * Match constraint style
+         * Set matchConstraintDefault* default to the wrap content size.
+         * Use to set the matchConstraintDefaultWidth and matchConstraintDefaultHeight
          */
         public static final int MATCH_CONSTRAINT_WRAP = ConstraintWidget.MATCH_CONSTRAINT_WRAP;
 
         /**
-         * Match constraint style
+         * Set matchConstraintDefault* spread as much as possible within its constraints.
+         * Use to set the matchConstraintDefaultWidth and matchConstraintDefaultHeight
          */
         public static final int MATCH_CONSTRAINT_SPREAD = ConstraintWidget.MATCH_CONSTRAINT_SPREAD;
 
