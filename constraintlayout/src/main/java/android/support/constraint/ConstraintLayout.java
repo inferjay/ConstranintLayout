@@ -1822,6 +1822,9 @@ public class ConstraintLayout extends ViewGroup {
             isGuideline = false;
             horizontalDimensionFixed = true;
             verticalDimensionFixed = true;
+            if (width == MATCH_PARENT || height == MATCH_PARENT) {
+                throw new IllegalStateException("MATCH_PARENT is not supported in ConstraintLayout");
+            }
             if (width == MATCH_CONSTRAINT || width == MATCH_PARENT) {
                 horizontalDimensionFixed = false;
             }
