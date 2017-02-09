@@ -800,11 +800,15 @@ public class ConstraintSet {
      * Spaces a set of widgets vertically between the view topId and bottomId.
      * Widgets can be spaced with weights.
      *
+     * @param topId The id of the widget to connect to or PARENT_ID
+     * @param topSide the side of the start to connect to
+     * @param bottomId The id of the widget to connect to or PARENT_ID
+     * @param bottomSide the side of the right to connect to
      * @param chainIds widgets to use as a chain
      * @param weights can be null
      * @param style set the style of the chain
      */
-    public void createVerticalChain(int topId, int bottomId, int[] chainIds, float[] weights,
+    public void createVerticalChain(int topId, int topSide, int bottomId, int bottomSide, int[] chainIds, float[] weights,
         int style) {
         if (chainIds.length < 2) {
             throw new IllegalArgumentException("must have 2 or more widgets in a chain");
@@ -817,7 +821,7 @@ public class ConstraintSet {
         }
         get(chainIds[0]).verticalChainStyle = style;
 
-        connect(chainIds[0], TOP, topId, TOP, 0);
+        connect(chainIds[0], TOP, topId, topSide, 0);
         for (int i = 1; i < chainIds.length; i++) {
             int chainId = chainIds[i];
             connect(chainIds[i], TOP, chainIds[i - 1], BOTTOM, 0);
@@ -826,7 +830,7 @@ public class ConstraintSet {
                 get(chainIds[i]).verticalWeight = weights[i];
             }
         }
-        connect(chainIds[chainIds.length - 1], BOTTOM, bottomId, TOP, 0);
+        connect(chainIds[chainIds.length - 1], BOTTOM, bottomId, bottomSide, 0);
     }
 
     /**
@@ -834,33 +838,36 @@ public class ConstraintSet {
      * Widgets can be spaced with weights.
      *
      * @param leftId The id of the widget to connect to or PARENT_ID
+     * @param leftSide the side of the start to connect to
      * @param rightId The id of the widget to connect to or PARENT_ID
+     * @param rightSide the side of the right to connect to
      * @param chainIds The widgets in the chain
      * @param weights The weight to assign to each element in the chain or null
      * @param style The type of chain
      */
-    public void createHorizontalChain(int leftId, int rightId, int[] chainIds, float[] weights,
+    public void createHorizontalChain(int leftId, int leftSide, int rightId, int rightSide, int[] chainIds, float[] weights,
         int style) {
-        createHorizontalChain(leftId, rightId,chainIds, weights,style, LEFT, RIGHT);
+        createHorizontalChain(leftId, leftSide, rightId, rightSide, chainIds, weights, style, LEFT, RIGHT);
     }
 
     /**
      * Spaces a set of widgets horizontal between the view startID and endId.
      * Widgets can be spaced with weights.
-     * If connecting to parent
      *
      * @param startId The id of the widget to connect to or PARENT_ID
+     * @param startSide the side of the start to connect to
      * @param endId The id of the widget to connect to or PARENT_ID
+     * @param endSide the side of the end to connect to
      * @param chainIds The widgets in the chain
      * @param weights The weight to assign to each element in the chain or null
      * @param style The type of chain
      */
-    public void createHorizontalChainRtl(int startId, int endId, int[] chainIds, float[] weights,
+    public void createHorizontalChainRtl(int startId, int startSide, int endId, int endSide, int[] chainIds, float[] weights,
         int style) {
-        createHorizontalChain(startId, endId,chainIds, weights,style, START, END);
+        createHorizontalChain(startId, startSide, endId, endSide, chainIds, weights, style, START, END);
     }
 
-    private void createHorizontalChain(int leftId, int rightId, int[] chainIds, float[] weights,
+    private void createHorizontalChain(int leftId,int leftSide, int rightId, int rightSide, int[] chainIds, float[] weights,
         int style, int left, int right) {
 
         if (chainIds.length < 2) {
@@ -873,7 +880,7 @@ public class ConstraintSet {
             get(chainIds[0]).verticalWeight = weights[0];
         }
         get(chainIds[0]).horizontalChainStyle = style;
-        connect(chainIds[0], left, leftId, (leftId == PARENT_ID) ? left : right, UNSET);
+        connect(chainIds[0], left, leftId, leftSide, UNSET);
         for (int i = 1; i < chainIds.length; i++) {
             int chainId = chainIds[i];
             connect(chainIds[i], left, chainIds[i - 1], right, UNSET);
@@ -883,7 +890,7 @@ public class ConstraintSet {
             }
         }
 
-        connect(chainIds[chainIds.length - 1], right, rightId, (rightId == PARENT_ID) ? right : left,
+        connect(chainIds[chainIds.length - 1], right, rightId, rightSide,
             UNSET);
 
     }
