@@ -836,15 +836,18 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         DimensionBehaviour originalHorizontalDimensionBehaviour = mHorizontalDimensionBehaviour;
         if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT
                 || mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
-            wrap_override = true;
-            findWrapSize(mChildren);
-            if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
-                mHorizontalDimensionBehaviour = DimensionBehaviour.FIXED;
-                setWidth(prew > 0 ? Math.min(prew, mWrapWidth) : mWrapWidth);
-            }
-            if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
-                mVerticalDimensionBehaviour = DimensionBehaviour.FIXED;
-                setHeight(preh > 0 ? Math.min(preh, mWrapHeight) : mWrapHeight);
+            findWrapSize(mChildren, flags);
+            wrap_override = flags[FLAG_CHAIN_OPTIMIZE];
+            // TODO: do the wrap calculation in two separate passes
+            if (wrap_override) {
+                if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
+                    mHorizontalDimensionBehaviour = DimensionBehaviour.FIXED;
+                    setWidth(prew > 0 ? Math.min(prew, mWrapWidth) : mWrapWidth);
+                }
+                if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
+                    mVerticalDimensionBehaviour = DimensionBehaviour.FIXED;
+                    setHeight(preh > 0 ? Math.min(preh, mWrapHeight) : mWrapHeight);
+                }
             }
         }
 
@@ -957,9 +960,15 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      *
      * @param widget
      */
-    public void findWrapRecursive(ConstraintWidget widget) {
+    public void findWrapRecursive(ConstraintWidget widget, boolean[] flags) {
         int w = widget.getWidth();
         int h = widget.getHeight();
+        if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
+                && widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
+                && widget.mDimensionRatio > 0) {
+            flags[FLAG_CHAIN_OPTIMIZE] = false;
+            return;
+        }
         if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
             if (widget.mMatchConstraintDefaultWidth == MATCH_CONSTRAINT_WRAP) {
                 w = Math.max(widget.mMatchConstraintMinWidth, w);
@@ -1020,14 +1029,14 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 rightWidget = widget.mRight.mTarget.mOwner;
                 distToRight += widget.mRight.getMargin();
                 if (!rightWidget.isRoot() && !rightWidget.mWrapVisited) {
-                    findWrapRecursive(rightWidget);
+                    findWrapRecursive(rightWidget, flags);
                 }
             }
             if (widget.mLeft.mTarget != null) {
                 leftWidget = widget.mLeft.mTarget.mOwner;
                 distToLeft += widget.mLeft.getMargin();
                 if (!leftWidget.isRoot() && !leftWidget.mWrapVisited) {
-                    findWrapRecursive(leftWidget);
+                    findWrapRecursive(leftWidget, flags);
                 }
             }
 
@@ -1087,7 +1096,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             if (widget.mBaseline.isConnected()) {
                 ConstraintWidget baseLineWidget = widget.mBaseline.mTarget.getOwner();
                 if (!baseLineWidget.mWrapVisited) {
-                    findWrapRecursive(baseLineWidget);
+                    findWrapRecursive(baseLineWidget, flags);
                 }
                 if (baseLineWidget.mDistToBottom > distToBottom) {
                     distToBottom = baseLineWidget.mDistToBottom;
@@ -1110,19 +1119,16 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 topWidget = widget.mTop.mTarget.getOwner();
                 distToTop += widget.mTop.getMargin();
                 if (!topWidget.isRoot() && !topWidget.mWrapVisited) {
-                    findWrapRecursive(topWidget);
+                    findWrapRecursive(topWidget, flags);
                 }
             }
             if (widget.mBottom.isConnected()) {
                 bottomWidget = widget.mBottom.mTarget.getOwner();
                 distToBottom += widget.mBottom.getMargin();
                 if (!bottomWidget.isRoot() && !bottomWidget.mWrapVisited) {
-                    findWrapRecursive(bottomWidget);
+                    findWrapRecursive(bottomWidget, flags);
                 }
             }
-
-
-            // TODO add center connection logic
 
             if (widget.mTop.mTarget != null && !topWidget.isRoot()) {
                 if (widget.mTop.mTarget.getType() == ConstraintAnchor.Type.TOP) {
@@ -1162,7 +1168,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      *
      * @param children
      */
-    public void findWrapSize(ArrayList<ConstraintWidget> children) {
+    public void findWrapSize(ArrayList<ConstraintWidget> children, boolean[] flags) {
         int maxTopDist = 0;
         int maxLeftDist = 0;
         int maxRightDist = 0;
@@ -1171,13 +1177,17 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         int maxConnectWidth = 0;
         int maxConnectHeight = 0;
         final int size = children.size();
+        flags[FLAG_CHAIN_OPTIMIZE] = true;
         for (int j = 0; j < size; j++) {
             ConstraintWidget widget = children.get(j);
             if (widget.isRoot()) {
                 continue;
             }
             if (!widget.mWrapVisited) {
-                findWrapRecursive(widget);
+                findWrapRecursive(widget, flags);
+            }
+            if (!flags[FLAG_CHAIN_OPTIMIZE]) {
+                return;
             }
             int connectWidth = widget.mDistToLeft + widget.mDistToRight - widget.getWidth();
             int connectHeight = widget.mDistToTop + widget.mDistToBottom - widget.getHeight();
