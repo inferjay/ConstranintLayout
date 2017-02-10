@@ -1293,7 +1293,7 @@ public class ConstraintSet {
      * Adjust the post-layout scale in X of a view.
      *
      * @param viewId ID of view to adjust the scale in X
-     * @param scaleX the the scale in X
+     * @param scaleX the scale in X
      */
     public void setScaleX(int viewId, float scaleX) {
         get(viewId).scaleX = scaleX;

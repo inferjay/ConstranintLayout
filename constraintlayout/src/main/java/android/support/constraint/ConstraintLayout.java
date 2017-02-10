@@ -389,6 +389,7 @@ public class ConstraintLayout extends ViewGroup {
     // after implementing priorities/hierarchy of constraints.
     static final boolean ALLOWS_EMBEDDED = false;
 
+    /** @hide */
     public static final String VERSION="ConstraintLayout-1.0-beta5";
     private static final String TAG = "ConstraintLayout";
     private static final boolean SIMPLE_LAYOUT = true;
@@ -1117,6 +1118,8 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     /**
+     * @hide
+     *
      * Solve the linear system
      */
     protected void solveLinearSystem() {
