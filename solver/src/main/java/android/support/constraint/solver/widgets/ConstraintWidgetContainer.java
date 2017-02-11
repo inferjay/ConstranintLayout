@@ -834,11 +834,17 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         boolean wrap_override = false;
         DimensionBehaviour originalVerticalDimensionBehaviour = mVerticalDimensionBehaviour;
         DimensionBehaviour originalHorizontalDimensionBehaviour = mHorizontalDimensionBehaviour;
-        if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT
-                || mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
+        if (mOptimizationLevel == OPTIMIZATION_ALL
+                && (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT
+                || mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)) {
+            // TODO: do the wrap calculation in two separate passes
             findWrapSize(mChildren, flags);
             wrap_override = flags[FLAG_CHAIN_OPTIMIZE];
-            // TODO: do the wrap calculation in two separate passes
+            if (prew > 0 && preh > 0 && (mWrapWidth > prew || mWrapHeight > preh)) {
+                // TODO: this could be better optimized with a tighter coupling between view measures and
+                // wrap/layout. For now, simply escape to the solver.
+                wrap_override = false;
+            }
             if (wrap_override) {
                 if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
                     mHorizontalDimensionBehaviour = DimensionBehaviour.FIXED;
