@@ -27,6 +27,40 @@ import static org.testng.Assert.assertEquals;
 public class CenterWrapTest {
 
     @Test
+    public void testWrapHeight() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
+        ConstraintWidget TL = new ConstraintWidget(100, 20);
+        ConstraintWidget TRL = new ConstraintWidget(100, 20);
+        ConstraintWidget TBL = new ConstraintWidget(100, 20);
+        ConstraintWidget IMG = new ConstraintWidget(100, 100);
+
+        TL.setDebugName("TL");
+        TRL.setDebugName("TRL");
+        TBL.setDebugName("TBL");
+        IMG.setDebugName("IMG");
+
+        // vertical
+
+        TL.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        TL.connect(ConstraintAnchor.Type.BOTTOM, TBL, ConstraintAnchor.Type.BOTTOM);
+        TRL.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        TRL.connect(ConstraintAnchor.Type.BOTTOM, TBL, ConstraintAnchor.Type.TOP);
+        TBL.connect(ConstraintAnchor.Type.TOP, TRL, ConstraintAnchor.Type.BOTTOM);
+        IMG.connect(ConstraintAnchor.Type.TOP, TBL, ConstraintAnchor.Type.BOTTOM);
+        IMG.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM);
+
+        root.add(TL);
+        root.add(TRL);
+        root.add(TBL);
+        root.add(IMG);
+
+        root.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
+        root.layout();
+        System.out.println("a) root: " + root + " TL: " + TL + " TRL: " + TRL + " TBL: " + TBL + " IMG: " + IMG);
+        assertEquals(root.getHeight(), 140);
+    }
+
+    @Test
     public void testComplexLayout() {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
         ConstraintWidget IMG = new ConstraintWidget(100, 100);

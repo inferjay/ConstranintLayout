@@ -1113,7 +1113,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 // Center connection
                 widget.mTopHasCentered = baseLineWidget.mTopHasCentered
                         || baseLineWidget.mBottomHasCentered
-                        || (baseLineWidget.mTop.mTarget != null && baseLineWidget.mBottom.mTarget != null);
+                        || (baseLineWidget.mTop.mTarget != null && baseLineWidget.mTop.mTarget.mOwner != widget
+                            && baseLineWidget.mBottom.mTarget != null && baseLineWidget.mBottom.mTarget.mOwner != widget);
                 if (widget.mTopHasCentered) {
                     distToTop += distToTop - baseLineWidget.mDistToTop;
                 }
@@ -1144,7 +1145,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 }
                 // Center connection
                 widget.mTopHasCentered = topWidget.mTopHasCentered
-                        || (topWidget.mTop.mTarget != null && topWidget.mBottom.mTarget != null);
+                        || (topWidget.mTop.mTarget != null && topWidget.mTop.mTarget.mOwner != widget
+                            && topWidget.mBottom.mTarget != null && topWidget.mBottom.mTarget.mOwner != widget);
                 if (widget.mTopHasCentered
                         && (topWidget.mBottom.mTarget == null ? true : topWidget.mBottom.mTarget.mOwner != widget)) {
                     distToTop += distToTop - topWidget.mDistToTop;
@@ -1158,7 +1160,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 }
                 // Center connection
                 widget.mBottomHasCentered = bottomWidget.mBottomHasCentered
-                        || (bottomWidget.mTop.mTarget != null && bottomWidget.mBottom.mTarget != null);
+                        || (bottomWidget.mTop.mTarget != null && bottomWidget.mTop.mTarget.mOwner != widget
+                            && bottomWidget.mBottom.mTarget != null
+                            && bottomWidget.mBottom.mTarget.mOwner != widget);
                 if (widget.mBottomHasCentered
                         && (bottomWidget.mTop.mTarget == null ? true : bottomWidget.mTop.mTarget.mOwner != widget)) {
                     distToBottom += distToBottom - bottomWidget.mDistToBottom;
