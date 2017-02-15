@@ -2185,6 +2185,12 @@ public class ConstraintWidget {
                 } else if (dimensionRatioSide == VERTICAL) {
                     system.addConstraint(row.createRowDimensionRatio(bottom, top, right, left, dimensionRatio));
                 } else {
+                    if (mMatchConstraintMinWidth > 0) {
+                        system.addGreaterThan(right, left, mMatchConstraintMinWidth, SolverVariable.STRENGTH_HIGH);
+                    }
+                    if (mMatchConstraintMinHeight > 0) {
+                        system.addGreaterThan(bottom, top, mMatchConstraintMinHeight, SolverVariable.STRENGTH_HIGH);
+                    }
                     int strength = SolverVariable.STRENGTH_HIGHEST;
                     row.createRowDimensionRatio(right, left, bottom, top, dimensionRatio);
                     SolverVariable error1 = system.createErrorVariable();
@@ -2324,7 +2330,7 @@ public class ConstraintWidget {
                         if (matchMaxDimension < dimension) {
                             dimension = matchMaxDimension;
                         } else {
-                            system.addLowerThan(end, begin, matchMaxDimension, SolverVariable.STRENGTH_HIGHEST);
+                            system.addLowerThan(end, begin, matchMaxDimension, SolverVariable.STRENGTH_HIGH);
                         }
                     }
                     system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_HIGH);
@@ -2337,15 +2343,8 @@ public class ConstraintWidget {
                         system.addConstraint(system.createRow().createRowEquals(begin, beginTarget, beginAnchorMargin));
                         system.addConstraint(system.createRow().createRowEquals(end, endTarget, -1 * endAnchorMargin));
                     } else {
-                        if (matchMinDimension > dimension) {
-                            dimension = matchMinDimension;
-                        }
                         if (matchMaxDimension > 0) {
-                            if (matchMaxDimension < dimension) {
-                                dimension = matchMaxDimension;
-                            } else {
-                                system.addLowerThan(end, begin, matchMaxDimension, SolverVariable.STRENGTH_HIGHEST);
-                            }
+                            system.addLowerThan(end, begin, matchMaxDimension, SolverVariable.STRENGTH_HIGH);
                         }
                         system.addGreaterThan(begin, beginTarget, beginAnchorMargin, SolverVariable.STRENGTH_MEDIUM);
                         system.addLowerThan(end, endTarget, -endAnchorMargin, SolverVariable.STRENGTH_MEDIUM);

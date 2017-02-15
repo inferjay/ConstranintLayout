@@ -56,4 +56,36 @@ public class RatioTest {
         assertEquals(A.getHeight(), 600);
     }
 
+    @Test
+    public void testRatioWithMinimum() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 1000, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        root.add(A);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        A.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        A.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM);
+        A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setDimensionRatio("16:9");
+        root.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
+        root.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
+        root.setOptimizationLevel(ConstraintWidgetContainer.OPTIMIZATION_ALL);
+        root.layout();
+        System.out.println("a) root: " + root + " A: " + A);
+        assertEquals(root.getWidth(), 0);
+        assertEquals(root.getHeight(), 0);
+        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 100, 0);
+        root.layout();
+        System.out.println("b) root: " + root + " A: " + A);
+        assertEquals(root.getWidth(), 100);
+        assertEquals(root.getHeight(), 56);
+        A.setVerticalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 100, 0);
+        root.layout();
+        System.out.println("c) root: " + root + " A: " + A);
+        assertEquals(root.getWidth(), 178);
+        assertEquals(root.getHeight(), 100);
+    }
  }
