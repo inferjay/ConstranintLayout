@@ -82,7 +82,7 @@ public class ConstraintWidget {
      * Define how the widget will resize
      */
     public enum DimensionBehaviour {
-        FIXED, WRAP_CONTENT, MATCH_CONSTRAINT
+        FIXED, WRAP_CONTENT, MATCH_CONSTRAINT, MATCH_PARENT
     }
 
     // The anchors available on the widget

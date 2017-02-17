@@ -64,7 +64,7 @@ public class ConstraintAnchor {
     final ConstraintWidget mOwner;
     final Type mType;
     ConstraintAnchor mTarget;
-    int mMargin = 0;
+    public int mMargin = 0;
     int mGoneMargin = UNSET_GONE_MARGIN;
 
     private Strength mStrength = Strength.NONE;

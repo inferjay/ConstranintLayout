@@ -33,9 +33,8 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
-import static android.support.constraint.ConstraintLayout.LayoutParams.MATCH_CONSTRAINT;
-import static android.support.constraint.ConstraintLayout.LayoutParams.MATCH_CONSTRAINT_WRAP;
-import static android.support.constraint.ConstraintLayout.LayoutParams.UNSET;
+import static android.support.constraint.ConstraintLayout.LayoutParams.*;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 /**
@@ -283,7 +282,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *     matching the constraints that are set (see Fig. 7, (a) is wrap_content, (b) is 0dp). If margins are set, they will be taken in account
  *     in the computation (Fig. 7, (c) with 0dp).
  *     <p>
- *         <b>Important: </b> {@code MATCH_PARENT} is not supported for widgets contained in a {@code ConstraintLayout}, though similar behavior can
+ *         <b>Important: </b> {@code MATCH_PARENT} is not recommended for widgets contained in a {@code ConstraintLayout}. Similar behavior can
  *         be defined by using {@code MATCH_CONSTRAINT} with the corresponding left/right or top/bottom constraints being set to {@code "parent"}.
  *     </p>
  * </p>
@@ -390,7 +389,7 @@ public class ConstraintLayout extends ViewGroup {
     static final boolean ALLOWS_EMBEDDED = false;
 
     /** @hide */
-    public static final String VERSION="ConstraintLayout-1.0 final";
+    public static final String VERSION="ConstraintLayout-1.0-beta6";
     private static final String TAG = "ConstraintLayout";
     private static final boolean SIMPLE_LAYOUT = true;
 
@@ -671,7 +670,9 @@ public class ConstraintLayout extends ViewGroup {
                     || (layoutParams.bottomToBottom != UNSET)
                     || (layoutParams.baselineToBaseline != UNSET)
                     || (layoutParams.editorAbsoluteX != UNSET)
-                    || (layoutParams.editorAbsoluteY != UNSET)) {
+                    || (layoutParams.editorAbsoluteY != UNSET)
+                    || (layoutParams.width == MATCH_PARENT)
+                    || (layoutParams.height == MATCH_PARENT)) {
 
                 // Get the left/right constraints resolved for RTL
                 int resolvedLeftToLeft = layoutParams.resolvedLeftToLeft;
@@ -803,31 +804,37 @@ public class ConstraintLayout extends ViewGroup {
                     widget.setVerticalBiasPercent(layoutParams.verticalBias);
                 }
 
+                if (isInEditMode() && ((layoutParams.editorAbsoluteX != UNSET)
+                        || (layoutParams.editorAbsoluteY != UNSET))) {
+                    widget.setOrigin(layoutParams.editorAbsoluteX, layoutParams.editorAbsoluteY);
+                }
+
                 // FIXME: need to agree on the correct magic value for this rather than simply using zero.
                 if (!layoutParams.horizontalDimensionFixed) {
-                    widget.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
-                    widget.setWidth(0);
                     if (layoutParams.width == LayoutParams.MATCH_PARENT) {
-                        widget.setWidth(mLayoutWidget.getWidth());
+                        widget.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_PARENT);
+                        widget.getAnchor(ConstraintAnchor.Type.LEFT).mMargin = layoutParams.leftMargin;
+                        widget.getAnchor(ConstraintAnchor.Type.RIGHT).mMargin = layoutParams.rightMargin;
+                    } else {
+                        widget.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+                        widget.setWidth(0);
                     }
                 } else {
                     widget.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
                     widget.setWidth(layoutParams.width);
                 }
                 if (!layoutParams.verticalDimensionFixed) {
-                    widget.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
-                    widget.setHeight(0);
                     if (layoutParams.height == LayoutParams.MATCH_PARENT) {
-                        widget.setWidth(mLayoutWidget.getHeight());
+                        widget.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_PARENT);
+                        widget.getAnchor(ConstraintAnchor.Type.TOP).mMargin = layoutParams.topMargin;
+                        widget.getAnchor(ConstraintAnchor.Type.BOTTOM).mMargin = layoutParams.bottomMargin;
+                    } else {
+                        widget.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+                        widget.setHeight(0);
                     }
                 } else {
                     widget.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
                     widget.setHeight(layoutParams.height);
-                }
-
-                if (isInEditMode() && ((layoutParams.editorAbsoluteX != UNSET)
-                        || (layoutParams.editorAbsoluteY != UNSET))) {
-                    widget.setOrigin(layoutParams.editorAbsoluteX, layoutParams.editorAbsoluteY);
                 }
 
                 if (layoutParams.dimensionRatio != null) {
@@ -888,21 +895,25 @@ public class ConstraintLayout extends ViewGroup {
             boolean doMeasure =
                     (params.horizontalDimensionFixed
                     || params.verticalDimensionFixed)
-                    || (!params.horizontalDimensionFixed && params.matchConstraintDefaultWidth == MATCH_CONSTRAINT_WRAP)
-                    || (!params.verticalDimensionFixed && params.matchConstraintDefaultHeight == MATCH_CONSTRAINT_WRAP);
+                    || (!params.horizontalDimensionFixed
+                            && (params.matchConstraintDefaultWidth == MATCH_CONSTRAINT_WRAP)
+                                || params.width == MATCH_PARENT)
+                    || (!params.verticalDimensionFixed
+                            && (params.matchConstraintDefaultHeight == MATCH_CONSTRAINT_WRAP
+                                || params.height == MATCH_PARENT));
 
             if (doMeasure) {
                 final int childWidthMeasureSpec;
                 final int childHeightMeasureSpec;
 
-                if (width == MATCH_CONSTRAINT) {
+                if (width == MATCH_CONSTRAINT || width == MATCH_PARENT) {
                     childWidthMeasureSpec = getChildMeasureSpec(parentWidthSpec,
                             widthPadding, LayoutParams.WRAP_CONTENT);
                 } else {
                     childWidthMeasureSpec = getChildMeasureSpec(parentWidthSpec,
                             widthPadding, width);
                 }
-                if (height == MATCH_CONSTRAINT) {
+                if (height == MATCH_CONSTRAINT || height == MATCH_PARENT) {
                     childHeightMeasureSpec = getChildMeasureSpec(parentHeightSpec,
                             heightPadding, LayoutParams.WRAP_CONTENT);
                 } else {
@@ -1825,9 +1836,6 @@ public class ConstraintLayout extends ViewGroup {
             isGuideline = false;
             horizontalDimensionFixed = true;
             verticalDimensionFixed = true;
-            if (width == MATCH_PARENT || height == MATCH_PARENT) {
-                throw new IllegalStateException("MATCH_PARENT is not supported in ConstraintLayout");
-            }
             if (width == MATCH_CONSTRAINT || width == MATCH_PARENT) {
                 horizontalDimensionFixed = false;
             }

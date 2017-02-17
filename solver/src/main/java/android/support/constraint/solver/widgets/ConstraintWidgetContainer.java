@@ -1015,8 +1015,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         int distToLeft = w;
         ConstraintWidget leftWidget = null;
         ConstraintWidget rightWidget = null;
-
         widget.mWrapVisited = true;
+
         if (widget instanceof Guideline) {
             Guideline guideline = (Guideline) widget;
             if (guideline.getOrientation() == ConstraintWidget.VERTICAL) {
@@ -1085,6 +1085,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         int distToBottom = h;
         ConstraintWidget topWidget = null;
         ConstraintWidget bottomWidget = null;
+
         if (widget instanceof Guideline) {
             Guideline guideline = (Guideline) widget;
             if (guideline.getOrientation() == ConstraintWidget.HORIZONTAL) {
@@ -1201,6 +1202,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             }
             int connectWidth = widget.mDistToLeft + widget.mDistToRight - widget.getWidth();
             int connectHeight = widget.mDistToTop + widget.mDistToBottom - widget.getHeight();
+            if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_PARENT) {
+                connectWidth = widget.getWidth() + widget.mLeft.mMargin + widget.mRight.mMargin;
+            }
+            if (widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_PARENT) {
+                connectHeight = widget.getHeight() + widget.mTop.mMargin + widget.mBottom.mMargin;
+            }
+
             maxLeftDist = Math.max(maxLeftDist, widget.mDistToLeft);
             maxRightDist = Math.max(maxRightDist, widget.mDistToRight);
             maxBottomDist = Math.max(maxBottomDist, widget.mDistToBottom);
