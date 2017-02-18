@@ -902,6 +902,9 @@ public class ConstraintLayout extends ViewGroup {
                             && (params.matchConstraintDefaultHeight == MATCH_CONSTRAINT_WRAP
                                 || params.height == MATCH_PARENT));
 
+            boolean didWrapMeasureWidth = false;
+            boolean didWrapMeasureHeight = false;
+
             if (doMeasure) {
                 final int childWidthMeasureSpec;
                 final int childHeightMeasureSpec;
@@ -909,6 +912,7 @@ public class ConstraintLayout extends ViewGroup {
                 if (width == MATCH_CONSTRAINT || width == MATCH_PARENT) {
                     childWidthMeasureSpec = getChildMeasureSpec(parentWidthSpec,
                             widthPadding, LayoutParams.WRAP_CONTENT);
+                    didWrapMeasureWidth = true;
                 } else {
                     childWidthMeasureSpec = getChildMeasureSpec(parentWidthSpec,
                             widthPadding, width);
@@ -916,6 +920,7 @@ public class ConstraintLayout extends ViewGroup {
                 if (height == MATCH_CONSTRAINT || height == MATCH_PARENT) {
                     childHeightMeasureSpec = getChildMeasureSpec(parentHeightSpec,
                             heightPadding, LayoutParams.WRAP_CONTENT);
+                    didWrapMeasureHeight = true;
                 } else {
                     childHeightMeasureSpec = getChildMeasureSpec(parentHeightSpec,
                             heightPadding, height);
@@ -928,6 +933,12 @@ public class ConstraintLayout extends ViewGroup {
 
             widget.setWidth(width);
             widget.setHeight(height);
+            if (didWrapMeasureWidth) {
+                widget.setWrapWidth(width);
+            }
+            if (didWrapMeasureHeight) {
+                widget.setWrapHeight(height);
+            }
 
             if (params.needsBaseline) {
                 int baseline = child.getBaseline();
@@ -994,6 +1005,10 @@ public class ConstraintLayout extends ViewGroup {
 
         if (sizeDependentWidgetsCount > 0) {
             boolean needSolverPass = false;
+            boolean containerWrapWidth = mLayoutWidget.getHorizontalDimensionBehaviour()
+                    == ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
+            boolean containerWrapHeight = mLayoutWidget.getVerticalDimensionBehaviour()
+                    == ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
             for (int i = 0; i < sizeDependentWidgetsCount; i++) {
                 ConstraintWidget widget = mVariableDimensionsWidgets.get(i);
                 if (widget instanceof Guideline) {
@@ -1029,10 +1044,16 @@ public class ConstraintLayout extends ViewGroup {
                 int measuredHeight = child.getMeasuredHeight();
                 if (measuredWidth != widget.getWidth()) {
                     widget.setWidth(measuredWidth);
+                    if (containerWrapWidth && widget.getRight() > mLayoutWidget.getWidth()) {
+                        mLayoutWidget.setWidth(widget.getRight());
+                    }
                     needSolverPass = true;
                 }
                 if (measuredHeight != widget.getHeight()) {
                     widget.setHeight(measuredHeight);
+                    if (containerWrapHeight && widget.getBottom() > mLayoutWidget.getHeight()) {
+                        mLayoutWidget.setHeight(widget.getBottom());
+                    }
                     needSolverPass = true;
                 }
                 if (params.needsBaseline) {

@@ -31,6 +31,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     private static final boolean USE_THREAD = false;
     private static final boolean DEBUG = false;
     private static final boolean USE_SNAPSHOT = true;
+    private static final int MAX_ITERATIONS = 8;
 
     protected LinearSystem mSystem = new LinearSystem();
     protected LinearSystem mBackgroundSystem = null;
@@ -62,9 +63,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     private int mOptimizationLevel = OPTIMIZATION_ALL;
 
     // Internal use.
-    private boolean[] flags = new boolean[2];
+    private boolean[] flags = new boolean[3];
     private static final int FLAG_CHAIN_OPTIMIZE = 0;
     private static final int FLAG_CHAIN_DANGLING = 1;
+    private static final int FLAG_RECOMPUTE_BOUNDS = 2;
 
     /*-----------------------------------------------------------------------*/
     // Construction
@@ -822,12 +824,21 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      *
      * @param system the solver we get the values from.
      */
-    public void updateChildrenFromSolver(LinearSystem system, int group) {
+    public void updateChildrenFromSolver(LinearSystem system, int group, boolean flags[]) {
+        flags[FLAG_RECOMPUTE_BOUNDS] = false;
         updateFromSolver(system, group);
         final int count = mChildren.size();
         for (int i = 0; i < count; i++) {
             ConstraintWidget widget = mChildren.get(i);
             widget.updateFromSolver(system, group);
+            if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
+                && widget.getWidth() < widget.getWrapWidth()) {
+                flags[FLAG_RECOMPUTE_BOUNDS] = true;
+            }
+            if (widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
+                    && widget.getHeight() < widget.getWrapHeight()) {
+                flags[FLAG_RECOMPUTE_BOUNDS] = true;
+            }
         }
     }
 
@@ -936,12 +947,52 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 e.printStackTrace();
             }
             if (needsSolving) {
-                updateChildrenFromSolver(mSystem, ConstraintAnchor.ANY_GROUP);
+                updateChildrenFromSolver(mSystem, ConstraintAnchor.ANY_GROUP, flags);
             } else {
                 updateFromSolver(mSystem, ConstraintAnchor.ANY_GROUP);
+                for (int i = 0; i < count; i++) {
+                    ConstraintWidget widget = mChildren.get(i);
+                    if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
+                        && widget.getWidth() < widget.getWrapWidth()) {
+                        flags[FLAG_RECOMPUTE_BOUNDS] = true;
+                        break;
+                    }
+                    if (widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
+                        && widget.getHeight() < widget.getWrapHeight()) {
+                        flags[FLAG_RECOMPUTE_BOUNDS] = true;
+                        break;
+                    }
+                }
+            }
+            needsSolving = false;
+
+            if (countSolve < MAX_ITERATIONS && flags[FLAG_RECOMPUTE_BOUNDS]) {
+                // let's get the new bounds
+                int maxX = 0;
+                int maxY = 0;
+                for (int i = 0; i < count; i++) {
+                    ConstraintWidget widget = mChildren.get(i);
+                    maxX = Math.max(maxX, widget.mX + widget.getWidth());
+                    maxY = Math.max(maxY, widget.mY + widget.getHeight());
+                }
+                if (originalHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
+                    if (getWidth() < maxX) {
+                        setWidth(maxX);
+                        mHorizontalDimensionBehaviour = DimensionBehaviour.WRAP_CONTENT; // force using the solver
+                        wrap_override = true;
+                        needsSolving = true;
+                    }
+                }
+                if (originalVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
+                    if (getHeight() < maxY) {
+                        setHeight(maxY);
+                        mVerticalDimensionBehaviour = DimensionBehaviour.WRAP_CONTENT; // force using the solver
+                        wrap_override = true;
+                        needsSolving = true;
+                    }
+                }
             }
 
-            needsSolving = false;
             if (!wrap_override) {
                 if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT && prew > 0) {
                     if (getWidth() > prew) {
@@ -961,7 +1012,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 }
             }
         }
-
+        if (DEBUG) {
+            System.out.println("Solved system in " + countSolve + " iterations (" + getWidth() + " x " + getHeight() + ")");
+        }
         if (mParent != null && USE_SNAPSHOT) {
             int width = getWidth();
             int height = getHeight();
