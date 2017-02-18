@@ -179,5 +179,30 @@ public class AdvancedChainTest {
         assertEquals(B.getHeight(), size);
         assertEquals(C.getHeight(), size);
         assertEquals(A.getTop(), gap);
-        assertEquals(root.getHeight() - gap, C.getBottom());    }
+        assertEquals(root.getHeight() - gap, C.getBottom());
+    }
+
+    @Test
+    public void testPacked() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        root.add(A);
+        root.add(B);
+        root.setDebugSolverName(root.getSystem(), "root");
+        A.setDebugSolverName(root.getSystem(), "A");
+        B.setDebugSolverName(root.getSystem(), "B");
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 0);
+        A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT, 0);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT, 0);
+        B.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, 0);
+        int gap = (root.getWidth() - A.getWidth() - B.getWidth()) / 2;
+        int size = 100;
+        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_PACKED);
+        root.layout();
+        System.out.println("       packed) root: " + root + " A: " + A + " B: " + B);
+        assertEquals(A.getWidth(), size);
+        assertEquals(B.getWidth(), size);
+        assertEquals(A.getLeft(), gap);
+    }
 }

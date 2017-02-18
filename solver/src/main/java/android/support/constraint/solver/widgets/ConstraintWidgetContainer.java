@@ -384,11 +384,23 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                                 int previousMargin = previousVisibleWidget.mRight.getMargin();
                                 margin += previousMargin;
                             }
-                            system.addGreaterThan(left.mSolverVariable, left.mTarget.mSolverVariable, margin, SolverVariable.STRENGTH_LOW);
+                            int strength = SolverVariable.STRENGTH_LOW;
+                            if (firstVisibleWidget != currentWidget) {
+                                strength = SolverVariable.STRENGTH_HIGH;
+                            }
+                            system.addGreaterThan(left.mSolverVariable, left.mTarget.mSolverVariable, margin, strength);
                             if (currentWidget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                                 ConstraintAnchor right = currentWidget.mRight;
-                                system.addEquality(right.mSolverVariable, left.mSolverVariable,
-                                  currentWidget.mMatchConstraintMinWidth, SolverVariable.STRENGTH_MEDIUM);
+                                if (currentWidget.mMatchConstraintDefaultWidth == ConstraintWidget.MATCH_CONSTRAINT_WRAP) {
+                                    int dimension = Math.max(currentWidget.mMatchConstraintMinWidth, currentWidget.getWidth());
+                                    system.addEquality(right.mSolverVariable, left.mSolverVariable,
+                                            dimension, SolverVariable.STRENGTH_HIGH);
+                                } else {
+                                    system.addGreaterThan(left.mSolverVariable, left.mTarget.mSolverVariable,
+                                            left.mMargin, SolverVariable.STRENGTH_HIGH);
+                                    system.addLowerThan(right.mSolverVariable, left.mSolverVariable,
+                                            currentWidget.mMatchConstraintMinWidth, SolverVariable.STRENGTH_HIGH);
+                                }
                             }
                         } else {
                             if (!isChainSpread && isLast && previousVisibleWidget != null) {
@@ -436,8 +448,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         SolverVariable leftTarget = first.mLeft.mTarget != null ? first.mLeft.mTarget.mSolverVariable : null;
                         SolverVariable rightTarget = lastWidget.mParent == next ? next.mRight.mSolverVariable : next.mLeft.mSolverVariable;
                         if (leftTarget != null && rightTarget != null) {
+                            system.addLowerThan(right.mSolverVariable, rightTarget, -rightMargin, SolverVariable.STRENGTH_LOW);
                             system.addCentering(left.mSolverVariable, leftTarget, leftMargin, first.mHorizontalBiasPercent,
-                                    rightTarget, right.mSolverVariable, rightMargin, SolverVariable.STRENGTH_HIGH);
+                                    rightTarget, right.mSolverVariable, rightMargin, SolverVariable.STRENGTH_HIGHEST);
                         }
                     }
                 } else {
@@ -482,8 +495,14 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             rightMargin += w.mRight.mTarget.getMargin();
                         }
 
-                        system.addEquality(w.mLeft.mSolverVariable, w.mLeft.mTarget.mSolverVariable, leftMargin, SolverVariable.STRENGTH_LOW);
-                        system.addEquality(w.mRight.mSolverVariable, w.mRight.mTarget.mSolverVariable, -rightMargin, SolverVariable.STRENGTH_LOW);
+                        if (w.mMatchConstraintDefaultWidth == ConstraintWidget.MATCH_CONSTRAINT_WRAP) {
+                            system.addGreaterThan(widget.mLeft.mSolverVariable, widget.mLeft.mTarget.mSolverVariable, leftMargin, SolverVariable.STRENGTH_LOW);
+                            system.addLowerThan(widget.mRight.mSolverVariable, widget.mRight.mTarget.mSolverVariable, -rightMargin, SolverVariable.STRENGTH_LOW);
+                            system.addEquality(widget.mRight.mSolverVariable, widget.mLeft.mSolverVariable, widget.getWidth(), SolverVariable.STRENGTH_MEDIUM);
+                        } else {
+                            system.addEquality(w.mLeft.mSolverVariable, w.mLeft.mTarget.mSolverVariable, leftMargin, SolverVariable.STRENGTH_LOW);
+                            system.addEquality(w.mRight.mSolverVariable, w.mRight.mTarget.mSolverVariable, -rightMargin, SolverVariable.STRENGTH_LOW);
+                        }
                     } else {
                         for (int j = 0; j < numMatchConstraints - 1; j++) {
                             ConstraintWidget current = mMatchConstraintsChainedWidgets[j];
@@ -613,6 +632,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                                 int previousMargin = previousVisibleWidget.mBottom.getMargin();
                                 margin += previousMargin;
                             }
+                            int strength = SolverVariable.STRENGTH_LOW;
+                            if (firstVisibleWidget != currentWidget) {
+                                strength = SolverVariable.STRENGTH_HIGH;
+                            }
                             SolverVariable source = null;
                             SolverVariable target = null;
                             if (top.mTarget != null) {
@@ -624,12 +647,21 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                                 margin -= top.getMargin();
                             }
                             if (source != null && target != null) {
-                                system.addGreaterThan(source, target, margin, SolverVariable.STRENGTH_LOW);
+                                system.addGreaterThan(source, target, margin, strength);
                             }
                             if (currentWidget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                                 ConstraintAnchor bottom = currentWidget.mBottom;
-                                system.addEquality(bottom.mSolverVariable, source,
-                                        currentWidget.mMatchConstraintMinHeight, SolverVariable.STRENGTH_MEDIUM);
+
+                                if (currentWidget.mMatchConstraintDefaultHeight == ConstraintWidget.MATCH_CONSTRAINT_WRAP) {
+                                    int dimension = Math.max(currentWidget.mMatchConstraintMinHeight, currentWidget.getHeight());
+                                    system.addEquality(bottom.mSolverVariable, top.mSolverVariable,
+                                            dimension, SolverVariable.STRENGTH_HIGH);
+                                } else {
+                                    system.addGreaterThan(top.mSolverVariable, top.mTarget.mSolverVariable,
+                                            top.mMargin, SolverVariable.STRENGTH_HIGH);
+                                    system.addLowerThan(bottom.mSolverVariable, top.mSolverVariable,
+                                            currentWidget.mMatchConstraintMinHeight, SolverVariable.STRENGTH_HIGH);
+                                }
                             }
                         } else {
                             if (!isChainSpread && isLast && previousVisibleWidget != null) {
@@ -677,8 +709,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         SolverVariable topTarget = first.mTop.mTarget != null ? first.mTop.mTarget.mSolverVariable : null;
                         SolverVariable bottomTarget = lastWidget.mParent == next ? next.mBottom.mSolverVariable : next.mTop.mSolverVariable;
                         if (topTarget != null && bottomTarget != null) {
+                            system.addLowerThan(bottom.mSolverVariable, bottomTarget, -bottomMargin, SolverVariable.STRENGTH_LOW);
                             system.addCentering(top.mSolverVariable, topTarget, topMargin, first.mVerticalBiasPercent,
-                                    bottomTarget, bottom.mSolverVariable, bottomMargin, SolverVariable.STRENGTH_HIGH);
+                                    bottomTarget, bottom.mSolverVariable, bottomMargin, SolverVariable.STRENGTH_HIGHEST);
                         }
                     }
                 } else {
