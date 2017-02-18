@@ -169,7 +169,8 @@ public class ConstraintWidget {
     boolean mRightHasCentered;
     boolean mTopHasCentered;
     boolean mBottomHasCentered;
-    boolean mWrapVisited;
+    boolean mHorizontalWrapVisited;
+    boolean mVerticalWrapVisited;
 
     // Chain support
     int mHorizontalChainStyle = CHAIN_SPREAD;
@@ -216,7 +217,8 @@ public class ConstraintWidget {
         mVisibility = VISIBLE;
         mDebugName = null;
         mType = null;
-        mWrapVisited = false;
+        mHorizontalWrapVisited = false;
+        mVerticalWrapVisited = false;
         mHorizontalChainStyle = CHAIN_SPREAD;
         mVerticalChainStyle = CHAIN_SPREAD;
         mHorizontalChainFixedPosition = false;
@@ -570,6 +572,42 @@ public class ConstraintWidget {
             return 0;
         }
         return mWidth;
+    }
+
+    public int getOptimizerWrapWidth() {
+        int w = mWidth;
+        if (mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
+            if (mMatchConstraintDefaultWidth == MATCH_CONSTRAINT_WRAP) {
+                w = Math.max(mMatchConstraintMinWidth, w);
+            } else if (mMatchConstraintMinWidth > 0) {
+                w = mMatchConstraintMinWidth;
+                mWidth = w;
+            } else {
+                w = 0;
+            }
+            if (mMatchConstraintMaxWidth > 0 && mMatchConstraintMaxWidth < w) {
+                w = mMatchConstraintMaxWidth;
+            }
+        }
+        return w;
+    }
+
+    public int getOptimizerWrapHeight() {
+        int h = mHeight;
+        if (mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
+            if (mMatchConstraintDefaultHeight == MATCH_CONSTRAINT_WRAP) {
+                h = Math.max(mMatchConstraintMinHeight, h);
+            } else if (mMatchConstraintMinHeight > 0) {
+                h = mMatchConstraintMinHeight;
+                mHeight = h;
+            } else {
+                h = 0;
+            }
+            if (mMatchConstraintMaxHeight > 0 && mMatchConstraintMaxHeight < h) {
+                h = mMatchConstraintMaxHeight;
+            }
+        }
+        return h;
     }
 
     /**

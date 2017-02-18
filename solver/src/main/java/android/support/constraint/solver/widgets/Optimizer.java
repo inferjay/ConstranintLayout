@@ -221,6 +221,35 @@ public class Optimizer {
         }
     }
 
+    static void checkMatchParent(ConstraintWidgetContainer container, LinearSystem system, ConstraintWidget widget) {
+        if (container.mHorizontalDimensionBehaviour != ConstraintWidget.DimensionBehaviour.WRAP_CONTENT
+            && widget.mHorizontalDimensionBehaviour == ConstraintWidget.DimensionBehaviour.MATCH_PARENT) {
+            widget.mLeft.mSolverVariable = system.createObjectVariable(widget.mLeft);
+            widget.mRight.mSolverVariable = system.createObjectVariable(widget.mRight);
+            int left = widget.mLeft.mMargin;
+            int right = container.getWidth() - widget.mRight.mMargin;
+            system.addEquality(widget.mLeft.mSolverVariable, left);
+            system.addEquality(widget.mRight.mSolverVariable, right);
+            widget.setHorizontalDimension(left, right);
+            widget.mHorizontalResolution = ConstraintWidget.DIRECT;
+        }
+        if (container.mVerticalDimensionBehaviour != ConstraintWidget.DimensionBehaviour.WRAP_CONTENT
+            && widget.mVerticalDimensionBehaviour == ConstraintWidget.DimensionBehaviour.MATCH_PARENT) {
+            widget.mTop.mSolverVariable = system.createObjectVariable(widget.mTop);
+            widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
+            int top = widget.mTop.mMargin;
+            int bottom = container.getHeight() - widget.mBottom.mMargin;
+            system.addEquality(widget.mTop.mSolverVariable, top);
+            system.addEquality(widget.mBottom.mSolverVariable, bottom);
+            if (widget.mBaselineDistance > 0 || widget.getVisibility() == ConstraintWidget.GONE) {
+                widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
+                system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
+            }
+            widget.setVerticalDimension(top, bottom);
+            widget.mVerticalResolution = ConstraintWidget.DIRECT;
+        }
+    }
+
     /**
      * Resolve simple dependency directly, without using the equation solver
      *
