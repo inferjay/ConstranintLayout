@@ -102,8 +102,8 @@ public class ConstraintWidget {
     ConstraintWidget mParent = null;
 
     // Dimensions of the widget
-    private int mWidth = 0;
-    private int mHeight = 0;
+    int mWidth = 0;
+    int mHeight = 0;
     protected float mDimensionRatio = 0;
     protected int mDimensionRatioSide = UNKNOWN;
 

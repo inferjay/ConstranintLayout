@@ -967,8 +967,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      * @param widget
      */
     public void findWrapRecursive(ConstraintWidget widget, boolean[] flags) {
-        int w = widget.getWidth();
-        int h = widget.getHeight();
+        int w = widget.mWidth;
+        int h = widget.mHeight;
+
         if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
                 && widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
                 && widget.mDimensionRatio > 0) {
@@ -1077,6 +1078,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             }
 
         }
+        if (widget.getVisibility() == GONE) {
+            distToLeft -= widget.mWidth;
+            distToRight -= widget.mWidth;
+        }
         widget.mDistToLeft = distToLeft;
         widget.mDistToRight = distToRight;
 
@@ -1105,19 +1110,11 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 if (!baseLineWidget.mWrapVisited) {
                     findWrapRecursive(baseLineWidget, flags);
                 }
-                if (baseLineWidget.mDistToBottom > distToBottom) {
-                    distToBottom = baseLineWidget.mDistToBottom;
-                }
-                if (baseLineWidget.mDistToTop > distToTop) {
-                    distToTop = baseLineWidget.mDistToTop;
-                }
-                // Center connection
-                widget.mTopHasCentered = baseLineWidget.mTopHasCentered
-                        || baseLineWidget.mBottomHasCentered
-                        || (baseLineWidget.mTop.mTarget != null && baseLineWidget.mTop.mTarget.mOwner != widget
-                            && baseLineWidget.mBottom.mTarget != null && baseLineWidget.mBottom.mTarget.mOwner != widget);
-                if (widget.mTopHasCentered) {
-                    distToTop += distToTop - baseLineWidget.mDistToTop;
+                distToTop = Math.max(baseLineWidget.mDistToTop - baseLineWidget.mHeight + h, h);
+                distToBottom = Math.max(baseLineWidget.mDistToBottom - baseLineWidget.mHeight + h, h);
+                if (widget.getVisibility() == GONE) {
+                    distToTop -= widget.mHeight;
+                    distToBottom -= widget.mHeight;
                 }
                 widget.mDistToTop = distToTop;
                 widget.mDistToBottom = distToBottom;
@@ -1170,6 +1167,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 }
             }
         }
+        if (widget.getVisibility() == GONE) {
+            distToTop -= widget.mHeight;
+            distToBottom -= widget.mHeight;
+        }
         widget.mDistToTop = distToTop;
         widget.mDistToBottom = distToBottom;
     }
@@ -1207,6 +1208,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             }
             if (widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_PARENT) {
                 connectHeight = widget.getHeight() + widget.mTop.mMargin + widget.mBottom.mMargin;
+            }
+            if (widget.getVisibility() == GONE) {
+                connectWidth = 0;
+                connectHeight = 0;
             }
 
             maxLeftDist = Math.max(maxLeftDist, widget.mDistToLeft);

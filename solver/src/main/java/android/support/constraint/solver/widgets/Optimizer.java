@@ -368,7 +368,7 @@ public class Optimizer {
             int bottom = container.getHeight() - widget.mBottom.mMargin;
             system.addEquality(widget.mTop.mSolverVariable, top);
             system.addEquality(widget.mBottom.mSolverVariable, bottom);
-            if (widget.mBaselineDistance > 0) {
+            if (widget.mBaselineDistance > 0 || widget.getVisibility() == ConstraintWidget.GONE) {
                 widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
                 system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
             }
@@ -395,7 +395,7 @@ public class Optimizer {
                 widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
                 system.addEquality(widget.mTop.mSolverVariable, top);
                 system.addEquality(widget.mBottom.mSolverVariable, bottom);
-                if (widget.mBaselineDistance > 0) {
+                if (widget.mBaselineDistance > 0 || widget.getVisibility() == ConstraintWidget.GONE) {
                     widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
                     system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
                 }
@@ -414,7 +414,7 @@ public class Optimizer {
             widget.mBottom.mSolverVariable = system.createObjectVariable(widget.mBottom);
             system.addEquality(widget.mTop.mSolverVariable, top);
             system.addEquality(widget.mBottom.mSolverVariable, bottom);
-            if (widget.mBaselineDistance > 0) {
+            if (widget.mBaselineDistance > 0 || widget.getVisibility() == ConstraintWidget.GONE) {
                 widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
                 system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
             }
@@ -428,7 +428,7 @@ public class Optimizer {
             int top = bottom - widget.getHeight();
             system.addEquality(widget.mTop.mSolverVariable, top);
             system.addEquality(widget.mBottom.mSolverVariable, bottom);
-            if (widget.mBaselineDistance > 0) {
+            if (widget.mBaselineDistance > 0 || widget.getVisibility() == ConstraintWidget.GONE) {
                 widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
                 system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
             }
@@ -442,7 +442,7 @@ public class Optimizer {
             int bottom = top + widget.getHeight();
             system.addEquality(widget.mTop.mSolverVariable, top);
             system.addEquality(widget.mBottom.mSolverVariable, bottom);
-            if (widget.mBaselineDistance > 0) {
+            if (widget.mBaselineDistance > 0 || widget.getVisibility() == ConstraintWidget.GONE) {
                 widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
                 system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
             }
@@ -456,7 +456,7 @@ public class Optimizer {
             int top = bottom - widget.getHeight();
             system.addEquality(widget.mTop.mSolverVariable, top);
             system.addEquality(widget.mBottom.mSolverVariable, bottom);
-            if (widget.mBaselineDistance > 0) {
+            if (widget.mBaselineDistance > 0 || widget.getVisibility() == ConstraintWidget.GONE) {
                 widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
                 system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
             }
@@ -507,7 +507,7 @@ public class Optimizer {
                     int bottom = top + widget.getHeight();
                     system.addEquality(widget.mTop.mSolverVariable, top);
                     system.addEquality(widget.mBottom.mSolverVariable, bottom);
-                    if (widget.mBaselineDistance > 0) {
+                    if (widget.mBaselineDistance > 0 || widget.getVisibility() == ConstraintWidget.GONE) {
                         widget.mBaseline.mSolverVariable = system.createObjectVariable(widget.mBaseline);
                         system.addEquality(widget.mBaseline.mSolverVariable, top + widget.mBaselineDistance);
                     }
