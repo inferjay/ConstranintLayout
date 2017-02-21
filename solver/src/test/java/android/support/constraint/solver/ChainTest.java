@@ -18,6 +18,7 @@ package android.support.constraint.solver;
 import android.support.constraint.solver.widgets.ConstraintAnchor;
 import android.support.constraint.solver.widgets.ConstraintWidget;
 import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
+import android.support.constraint.solver.widgets.Guideline;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -819,5 +820,103 @@ public class ChainTest {
         D.setVisibility(ConstraintWidget.GONE);
         root.layout();
         System.out.println("b) A: " + A + " B: " + B + " C: " + C + " D: " + D);
+    }
+
+    @Test
+    public void testGonePackChain() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        Guideline guideline = new Guideline();
+        ConstraintWidget D = new ConstraintWidget(100, 20);
+        guideline.setOrientation(Guideline.VERTICAL);
+        guideline.setGuideBegin(200);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        guideline.setDebugName("guideline");
+        D.setDebugName("D");
+        root.add(A);
+        root.add(B);
+        root.add(guideline);
+        root.add(D);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT);
+        B.connect(ConstraintAnchor.Type.RIGHT, guideline, ConstraintAnchor.Type.LEFT);
+        D.connect(ConstraintAnchor.Type.LEFT, guideline, ConstraintAnchor.Type.RIGHT);
+        D.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_PACKED);
+        A.setVisibility(ConstraintWidget.GONE);
+        B.setVisibility(ConstraintWidget.GONE);
+        root.layout();
+        System.out.println("a) A: " + A + " B: " + B + " guideline: " + guideline + " D: " + D);
+        assertEquals(A.getWidth(), 0);
+        assertEquals(B.getWidth(), 0);
+        assertEquals(guideline.getLeft(), 200);
+        assertEquals(D.getLeft(), 350);
+        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_SPREAD);
+        root.layout();
+        System.out.println("b) A: " + A + " B: " + B + " guideline: " + guideline + " D: " + D);
+        assertEquals(A.getWidth(), 0);
+        assertEquals(B.getWidth(), 0);
+        assertEquals(guideline.getLeft(), 200);
+        assertEquals(D.getLeft(), 350);
+        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_SPREAD_INSIDE);
+        root.layout();
+        System.out.println("c) A: " + A + " B: " + B + " guideline: " + guideline + " D: " + D);
+        assertEquals(A.getWidth(), 0);
+        assertEquals(B.getWidth(), 0);
+        assertEquals(guideline.getLeft(), 200);
+        assertEquals(D.getLeft(), 350);
+    }
+
+    @Test
+    public void testVerticalGonePackChain() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        Guideline guideline = new Guideline();
+        ConstraintWidget D = new ConstraintWidget(100, 20);
+        guideline.setOrientation(Guideline.HORIZONTAL);
+        guideline.setGuideBegin(200);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        guideline.setDebugName("guideline");
+        D.setDebugName("D");
+        root.add(A);
+        root.add(B);
+        root.add(guideline);
+        root.add(D);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        A.connect(ConstraintAnchor.Type.BOTTOM, B, ConstraintAnchor.Type.TOP);
+        B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM);
+        B.connect(ConstraintAnchor.Type.BOTTOM, guideline, ConstraintAnchor.Type.TOP);
+        D.connect(ConstraintAnchor.Type.TOP, guideline, ConstraintAnchor.Type.BOTTOM);
+        D.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM);
+        A.setVerticalChainStyle(ConstraintWidget.CHAIN_PACKED);
+        A.setVisibility(ConstraintWidget.GONE);
+        B.setVisibility(ConstraintWidget.GONE);
+        root.layout();
+        System.out.println("a) A: " + A + " B: " + B + " guideline: " + guideline + " D: " + D);
+        assertEquals(A.getHeight(), 0);
+        assertEquals(B.getHeight(), 0);
+        assertEquals(guideline.getTop(), 200);
+        assertEquals(D.getTop(), 390);
+        A.setVerticalChainStyle(ConstraintWidget.CHAIN_SPREAD);
+        root.layout();
+        System.out.println("b) A: " + A + " B: " + B + " guideline: " + guideline + " D: " + D);
+        assertEquals(A.getHeight(), 0);
+        assertEquals(B.getHeight(), 0);
+        assertEquals(guideline.getTop(), 200);
+        assertEquals(D.getTop(), 390);
+        A.setVerticalChainStyle(ConstraintWidget.CHAIN_SPREAD_INSIDE);
+        root.layout();
+        System.out.println("c) A: " + A + " B: " + B + " guideline: " + guideline + " D: " + D);
+        assertEquals(A.getHeight(), 0);
+        assertEquals(B.getHeight(), 0);
+        assertEquals(guideline.getTop(), 200);
+        assertEquals(D.getTop(), 390);
     }
 }

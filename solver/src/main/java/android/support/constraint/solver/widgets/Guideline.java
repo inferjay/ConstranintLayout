@@ -210,27 +210,6 @@ public class Guideline extends ConstraintWidget {
             system.addConstraint(LinearSystem
                     .createRowDimensionPercent(system, guide, parentLeft, parentRight,
                             mRelativePercent, mIsPositionRelaxed));
-            if (mMinimumPosition > 0) {
-//                system.addConstraint(system.createRowGreaterThan(guide, parentLeft, mMinimumPosition, false));
-            }
-        } else {
-            /*
-            float currentValue = mX;
-            if (mOrientation == VERTICAL) {
-                currentValue = mY;
-            }
-            float parentValue = 0;
-            if (mParent != null) {
-                if (mOrientation == HORIZONTAL) {
-                    parentValue = mParent.getWidth();
-                    mHeight = mParent.getHeight();
-                } else if (mOrientation == VERTICAL) {
-                    parentValue = mParent.getHeight();
-                    mWidth = mParent.getWidth();
-                }
-            }
-            addToSolver(system, currentValue, parentValue, mAnchor);
-            */
         }
     }
 

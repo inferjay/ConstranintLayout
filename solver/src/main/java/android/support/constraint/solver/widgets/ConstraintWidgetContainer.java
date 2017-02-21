@@ -343,7 +343,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                     x += currentWidget.mLeft.getMargin() + currentWidget.getWidth() + currentWidget.mRight.getMargin();
                     currentWidget = next;
                 }
-                return;
+                continue;
             }
             boolean isChainSpread = first.mHorizontalChainStyle == CHAIN_SPREAD;
             boolean isChainPacked = first.mHorizontalChainStyle == CHAIN_PACKED;
@@ -362,9 +362,19 @@ public class ConstraintWidgetContainer extends WidgetContainer {
 
                     // First, let's get to the first visible widget...
                     while (currentWidget != null && currentWidget.getVisibility() == GONE) {
-                        system.addEquality(currentWidget.mLeft.mSolverVariable, currentWidget.mLeft.mTarget.mSolverVariable, 0, SolverVariable.STRENGTH_EQUALITY);
-                        system.addEquality(currentWidget.mRight.mSolverVariable, currentWidget.mLeft.mTarget.mSolverVariable, 0, SolverVariable.STRENGTH_EQUALITY);
-                        currentWidget = currentWidget.mRight.mTarget != null ? currentWidget.mRight.mTarget.mOwner : null;
+                        system.addEquality(currentWidget.mLeft.mSolverVariable, currentWidget.mLeft.mTarget.mSolverVariable, 0,
+                                           SolverVariable.STRENGTH_EQUALITY);
+                        system.addEquality(currentWidget.mRight.mSolverVariable, currentWidget.mLeft.mTarget.mSolverVariable, 0,
+                                           SolverVariable.STRENGTH_EQUALITY);
+                        ConstraintWidget next = currentWidget.mRight.mTarget != null ? currentWidget.mRight.mTarget.mOwner : null;
+                        if (next != null && (next instanceof Guideline || next.mLeft.mTarget == null || next.mLeft.mTarget.mOwner != currentWidget)) {
+                            next = null;
+                        }
+                        currentWidget = next;
+                    }
+                    if (currentWidget == null) {
+                        // entire chain is gone...
+                        break;
                     }
                     ConstraintWidget firstVisibleWidget = currentWidget;
 
@@ -591,7 +601,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                     y += currentWidget.mTop.getMargin() + currentWidget.getHeight() + currentWidget.mBottom.getMargin();
                     currentWidget = next;
                 }
-                return;
+                continue;
             }
             boolean isChainSpread = first.mVerticalChainStyle == CHAIN_SPREAD;
             boolean isChainPacked = first.mVerticalChainStyle == CHAIN_PACKED;
@@ -612,7 +622,15 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                     while (currentWidget != null && currentWidget.getVisibility() == GONE) {
                         system.addEquality(currentWidget.mTop.mSolverVariable, currentWidget.mTop.mTarget.mSolverVariable, 0, SolverVariable.STRENGTH_EQUALITY);
                         system.addEquality(currentWidget.mBottom.mSolverVariable, currentWidget.mTop.mTarget.mSolverVariable, 0, SolverVariable.STRENGTH_EQUALITY);
-                        currentWidget = currentWidget.mBottom.mTarget != null ? currentWidget.mBottom.mTarget.mOwner : null;
+                        ConstraintWidget next = currentWidget.mBottom.mTarget != null ? currentWidget.mBottom.mTarget.mOwner : null;
+                        if (next != null && (next instanceof Guideline || next.mTop.mTarget == null || next.mTop.mTarget.mOwner != currentWidget)) {
+                            next = null;
+                        }
+                        currentWidget = next;
+                    }
+                    if (currentWidget == null) {
+                        // entire chain is gone...
+                        break;
                     }
                     ConstraintWidget firstVisibleWidget = currentWidget;
 
