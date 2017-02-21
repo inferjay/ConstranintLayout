@@ -949,11 +949,6 @@ public class ConstraintLayout extends ViewGroup {
         }
     }
 
-    int previousPaddingLeft = -1;
-    int previousPaddingTop = -1;
-    int previousWidthMeasureSpec = -1;
-    int previousHeightMeasureSpec = -1;
-
     /**
      * {@inheritDoc}
      */
@@ -962,27 +957,13 @@ public class ConstraintLayout extends ViewGroup {
         int paddingLeft = getPaddingLeft();
         int paddingTop = getPaddingTop();
 
-        if (previousPaddingLeft == -1
-                || previousPaddingTop == -1
-                || previousHeightMeasureSpec == -1
-                || previousWidthMeasureSpec == -1
-                || previousPaddingLeft != paddingLeft
-                || previousPaddingTop != paddingTop
-                || previousWidthMeasureSpec != widthMeasureSpec
-                || previousHeightMeasureSpec != heightMeasureSpec) {
-            mLayoutWidget.setX(paddingLeft);
-            mLayoutWidget.setY(paddingTop);
-            setSelfDimensionBehaviour(widthMeasureSpec, heightMeasureSpec);
-        }
+        mLayoutWidget.setX(paddingLeft);
+        mLayoutWidget.setY(paddingTop);
+        setSelfDimensionBehaviour(widthMeasureSpec, heightMeasureSpec);
         if (mDirtyHierarchy) {
             mDirtyHierarchy = false;
             updateHierarchy();
         }
-        previousPaddingLeft = paddingLeft;
-        previousPaddingTop = paddingTop;
-        previousWidthMeasureSpec = widthMeasureSpec;
-        previousHeightMeasureSpec = heightMeasureSpec;
-
         internalMeasureChildren(widthMeasureSpec, heightMeasureSpec);
 
         //noinspection PointlessBooleanExpression

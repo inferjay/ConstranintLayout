@@ -866,6 +866,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         int prey = mY;
         int prew = getWidth();
         int preh = getHeight();
+
         if (mParent != null && USE_SNAPSHOT) {
             if (mSnapshot == null) {
                 mSnapshot = new Snapshot(this);
@@ -887,6 +888,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         boolean wrap_override = false;
         DimensionBehaviour originalVerticalDimensionBehaviour = mVerticalDimensionBehaviour;
         DimensionBehaviour originalHorizontalDimensionBehaviour = mHorizontalDimensionBehaviour;
+
         if (mOptimizationLevel == OPTIMIZATION_ALL
                 && (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT
                 || mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)) {
@@ -1282,6 +1284,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             distToTop -= widget.mHeight;
             distToBottom -= widget.mHeight;
         }
+
         widget.mDistToTop = distToTop;
         widget.mDistToBottom = distToBottom;
     }
@@ -1301,6 +1304,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         int maxConnectHeight = 0;
         final int size = children.size();
         flags[FLAG_CHAIN_OPTIMIZE] = true;
+
         for (int j = 0; j < size; j++) {
             ConstraintWidget widget = children.get(j);
             if (widget.isRoot()) {
@@ -1327,7 +1331,6 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 connectWidth = 0;
                 connectHeight = 0;
             }
-
             maxLeftDist = Math.max(maxLeftDist, widget.mDistToLeft);
             maxRightDist = Math.max(maxRightDist, widget.mDistToRight);
             maxBottomDist = Math.max(maxBottomDist, widget.mDistToBottom);
@@ -1339,7 +1342,6 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         mWrapWidth = Math.max(max, maxConnectWidth);
         max = Math.max(maxTopDist, maxBottomDist);
         mWrapHeight = Math.max(max, maxConnectHeight);
-
         for (int j = 0; j < size; j++) {
             ConstraintWidget child = children.get(j);
             child.mHorizontalWrapVisited = false;
