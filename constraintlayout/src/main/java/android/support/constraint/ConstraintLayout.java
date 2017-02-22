@@ -20,7 +20,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
-import android.support.constraint.solver.widgets.Animator;
 import android.support.constraint.solver.widgets.ConstraintAnchor;
 import android.support.constraint.solver.widgets.ConstraintWidget;
 import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
@@ -1143,7 +1142,6 @@ public class ConstraintLayout extends ViewGroup {
      * Solve the linear system
      */
     protected void solveLinearSystem() {
-        Animator.setAnimationEnabled(false);
         if (SIMPLE_LAYOUT) {
             mLayoutWidget.layout();
         } else {

@@ -15,7 +15,6 @@
  */
 package android.support.constraint.solver;
 
-import android.support.constraint.solver.widgets.Animator;
 import android.support.constraint.solver.widgets.ConstraintAnchor;
 import android.support.constraint.solver.widgets.ConstraintWidget;
 import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
@@ -774,7 +773,6 @@ public class WidgetsPositioningTest {
                 w.updateFromSolver(s);
             }
 //            try {
-                Animator.setAnimationEnabled(false);
                 check.run();
 //            } catch (AssertionError e) {
 //                System.out.println("Assertion error: " + e);

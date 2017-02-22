@@ -1672,25 +1672,6 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     }
 
     /**
-     * Returns true if the widget is animating
-     *
-     * @return
-     */
-    @Override
-    public boolean isAnimating() {
-        if (super.isAnimating()) {
-            return true;
-        }
-        for (int i = 0, mChildrenSize = mChildren.size(); i < mChildrenSize; i++) {
-            final ConstraintWidget widget = mChildren.get(i);
-            if (widget.isAnimating()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Indicates if the container knows how to layout its content on its own
      *
      * @return true if the container does the layout, false otherwise

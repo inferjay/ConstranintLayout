@@ -45,8 +45,6 @@ public class ConstraintWidget {
     public static final int MATCH_CONSTRAINT_SPREAD = 0;
     public static final int MATCH_CONSTRAINT_WRAP = 1;
 
-    private Animator mAnimator = new Animator(this);
-
     public static final int UNKNOWN = -1;
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
@@ -493,18 +491,6 @@ public class ConstraintWidget {
     }
 
     /**
-     * Returns true if the widget is animating
-     *
-     * @return
-     */
-    public boolean isAnimating() {
-        if (Animator.doAnimation()) {
-            return mAnimator.isAnimating();
-        }
-        return false;
-    }
-
-    /**
      * Returns a string representation of the ConstraintWidget
      *
      * @return string representation of the widget
@@ -892,13 +878,6 @@ public class ConstraintWidget {
         int top = mY;
         int right = mX + mWidth;
         int bottom = mY + mHeight;
-        if (Animator.doAnimation()) {
-            mAnimator.animate(left, top, right, bottom);
-            left = mAnimator.getCurrentLeft();
-            top = mAnimator.getCurrentTop();
-            right = mAnimator.getCurrentRight();
-            bottom = mAnimator.getCurrentBottom();
-        }
         mDrawX = left;
         mDrawY = top;
         mDrawWidth = right - left;
