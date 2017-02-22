@@ -68,6 +68,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     private static final int FLAG_CHAIN_DANGLING = 1;
     private static final int FLAG_RECOMPUTE_BOUNDS = 2;
 
+    private boolean mWidthMeasuredTooSmall = false;
+    private boolean mHeightMeasuredTooSmall = false;
+
     /*-----------------------------------------------------------------------*/
     // Construction
     /*-----------------------------------------------------------------------*/
@@ -131,6 +134,16 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         mPaddingBottom = 0;
         super.reset();
     }
+
+    /**
+     * Return true if the width given is too small for the content layed out
+     */
+    public boolean isWidthMeasuredTooSmall() { return mWidthMeasuredTooSmall; }
+
+    /**
+     * Return true if the height given is too small for the content layed out
+     */
+    public boolean isHeightMeasuredTooSmall() { return mHeightMeasuredTooSmall; }
 
     /**
      * Set a new ConstraintWidgetContainer containing the list of supplied
@@ -884,6 +897,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         int prey = mY;
         int prew = getWidth();
         int preh = getHeight();
+        mWidthMeasuredTooSmall = false;
+        mHeightMeasuredTooSmall = false;
 
         if (mParent != null && USE_SNAPSHOT) {
             if (mSnapshot == null) {
@@ -921,11 +936,21 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             if (wrap_override) {
                 if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
                     mHorizontalDimensionBehaviour = DimensionBehaviour.FIXED;
-                    setWidth(prew > 0 ? Math.min(prew, mWrapWidth) : mWrapWidth);
+                    if (prew > 0 && prew < mWrapWidth) {
+                        mWidthMeasuredTooSmall = true;
+                        setWidth(prew);
+                    } else {
+                        setWidth(mWrapWidth);
+                    }
                 }
                 if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
                     mVerticalDimensionBehaviour = DimensionBehaviour.FIXED;
-                    setHeight(preh > 0 ? Math.min(preh, mWrapHeight) : mWrapHeight);
+                    if (preh > 0 && preh < mWrapHeight) {
+                        mHeightMeasuredTooSmall = true;
+                        setHeight(preh);
+                    } else {
+                        setHeight(mWrapHeight);
+                    }
                 }
             }
         }
@@ -1016,6 +1041,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             if (!wrap_override) {
                 if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT && prew > 0) {
                     if (getWidth() > prew) {
+                        mWidthMeasuredTooSmall = true;
                         wrap_override = true;
                         mHorizontalDimensionBehaviour = DimensionBehaviour.FIXED;
                         setWidth(prew);
@@ -1024,6 +1050,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 }
                 if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT && preh > 0) {
                     if (getHeight() > preh) {
+                        mHeightMeasuredTooSmall = true;
                         wrap_override = true;
                         mVerticalDimensionBehaviour = DimensionBehaviour.FIXED;
                         setHeight(preh);

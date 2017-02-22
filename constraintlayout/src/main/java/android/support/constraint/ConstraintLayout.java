@@ -1063,7 +1063,15 @@ public class ConstraintLayout extends ViewGroup {
                     childState << MEASURED_HEIGHT_STATE_SHIFT);
             resolvedWidthSize = Math.min(mMaxWidth, resolvedWidthSize);
             resolvedHeightSize = Math.min(mMaxHeight, resolvedHeightSize);
-            setMeasuredDimension(resolvedWidthSize & MEASURED_SIZE_MASK, resolvedHeightSize & MEASURED_SIZE_MASK);
+            resolvedWidthSize &= MEASURED_SIZE_MASK;
+            resolvedHeightSize &= MEASURED_SIZE_MASK;
+            if (mLayoutWidget.isWidthMeasuredTooSmall()) {
+                resolvedWidthSize |= MEASURED_STATE_TOO_SMALL;
+            }
+            if (mLayoutWidget.isHeightMeasuredTooSmall()) {
+                resolvedHeightSize |= MEASURED_STATE_TOO_SMALL;
+            }
+            setMeasuredDimension(resolvedWidthSize, resolvedHeightSize);
         } else {
             setMeasuredDimension(androidLayoutWidth, androidLayoutHeight);
         }
@@ -1083,7 +1091,6 @@ public class ConstraintLayout extends ViewGroup {
         int desiredWidth = 0;
         int desiredHeight = 0;
 
-        // TODO: investigate measure too small (check MeasureSpec)
         ViewGroup.LayoutParams params = getLayoutParams();
         switch (widthMode) {
             case MeasureSpec.AT_MOST: {
