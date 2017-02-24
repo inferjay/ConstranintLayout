@@ -464,7 +464,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                                     // just in case we are dealing with a chain with only one visible element...
                                     leftTarget = first.mLeft.mTarget != null ? first.mLeft.mTarget.mSolverVariable : null;
                                 }
-                                SolverVariable rightTarget = currentWidget.mParent == next ? next.mRight.mSolverVariable : next.mLeft.mSolverVariable;
+                                SolverVariable rightTarget = next.mLeft.mSolverVariable;
+                                if (isLast) {
+                                    rightTarget = lastWidget.mRight.mTarget != null ? lastWidget.mRight.mTarget.mSolverVariable : null;
+                                }
                                 if (leftTarget != null && rightTarget != null) {
                                     system.addCentering(left.mSolverVariable, leftTarget, leftMargin, 0.5f,
                                             rightTarget, right.mSolverVariable, rightMargin, SolverVariable.STRENGTH_HIGHEST);
@@ -480,7 +483,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         int leftMargin = left.getMargin();
                         int rightMargin = right.getMargin();
                         SolverVariable leftTarget = first.mLeft.mTarget != null ? first.mLeft.mTarget.mSolverVariable : null;
-                        SolverVariable rightTarget = lastWidget.mParent == next ? next.mRight.mSolverVariable : next.mLeft.mSolverVariable;
+                        SolverVariable rightTarget = next.mLeft.mSolverVariable;
+                        if (isLast) {
+                            rightTarget = lastWidget.mRight.mTarget != null ? lastWidget.mRight.mTarget.mSolverVariable : null;
+                        }
                         if (leftTarget != null && rightTarget != null) {
                             system.addLowerThan(right.mSolverVariable, rightTarget, -rightMargin, SolverVariable.STRENGTH_LOW);
                             system.addCentering(left.mSolverVariable, leftTarget, leftMargin, first.mHorizontalBiasPercent,
@@ -733,10 +739,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                                     // just in case we are dealing with a chain with only one visible element...
                                     topTarget = first.mTop.mTarget != null ? first.mTop.mTarget.mSolverVariable : null;
                                 }
-                                SolverVariable bottomTarget = currentWidget.mParent == next ? next.mBottom.mSolverVariable : next.mTop.mSolverVariable;
+                                SolverVariable bottomTarget = next.mTop.mSolverVariable;
+                                if (isLast) {
+                                    bottomTarget = lastWidget.mBottom.mTarget != null ? lastWidget.mBottom.mTarget.mSolverVariable : null;
+                                }
                                 if (topTarget != null && bottomTarget != null) {
                                     system.addCentering(top.mSolverVariable, topTarget, topMargin, 0.5f,
-                                            bottomTarget, bottom.mSolverVariable, bottomMargin, SolverVariable.STRENGTH_HIGH);
+                                            bottomTarget, bottom.mSolverVariable, bottomMargin, SolverVariable.STRENGTH_HIGHEST);
                                 }
                             }
                         }
@@ -749,7 +758,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         int topMargin = top.getMargin();
                         int bottomMargin = bottom.getMargin();
                         SolverVariable topTarget = first.mTop.mTarget != null ? first.mTop.mTarget.mSolverVariable : null;
-                        SolverVariable bottomTarget = lastWidget.mParent == next ? next.mBottom.mSolverVariable : next.mTop.mSolverVariable;
+                        SolverVariable bottomTarget = next.mTop.mSolverVariable;
+                        if (isLast) {
+                            bottomTarget = lastWidget.mBottom.mTarget != null ? lastWidget.mBottom.mTarget.mSolverVariable : null;
+                        }
                         if (topTarget != null && bottomTarget != null) {
                             system.addLowerThan(bottom.mSolverVariable, bottomTarget, -bottomMargin, SolverVariable.STRENGTH_LOW);
                             system.addCentering(top.mSolverVariable, topTarget, topMargin, first.mVerticalBiasPercent,
