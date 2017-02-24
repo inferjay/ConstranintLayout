@@ -1025,16 +1025,18 @@ public class ConstraintLayout extends ViewGroup {
                 if (measuredWidth != widget.getWidth()) {
                     widget.setWidth(measuredWidth);
                     if (containerWrapWidth && widget.getRight() > mLayoutWidget.getWidth()) {
-                        mLayoutWidget.setWidth(widget.getRight()
-                                + widget.getAnchor(ConstraintAnchor.Type.RIGHT).getMargin());
+                        int w = widget.getRight()
+                                + widget.getAnchor(ConstraintAnchor.Type.RIGHT).getMargin();
+                        mLayoutWidget.setWidth(Math.max(mMinWidth, w));
                     }
                     needSolverPass = true;
                 }
                 if (measuredHeight != widget.getHeight()) {
                     widget.setHeight(measuredHeight);
                     if (containerWrapHeight && widget.getBottom() > mLayoutWidget.getHeight()) {
-                        mLayoutWidget.setHeight(widget.getBottom()
-                                + widget.getAnchor(ConstraintAnchor.Type.BOTTOM).getMargin());
+                        int h = widget.getBottom()
+                                + widget.getAnchor(ConstraintAnchor.Type.BOTTOM).getMargin();
+                        mLayoutWidget.setHeight(Math.max(mMinHeight, h));
                     }
                     needSolverPass = true;
                 }
@@ -1130,12 +1132,14 @@ public class ConstraintLayout extends ViewGroup {
             }
         }
 
-        mLayoutWidget.setMinWidth(mMinWidth);
-        mLayoutWidget.setMinHeight(mMinHeight);
+        mLayoutWidget.setMinWidth(0);
+        mLayoutWidget.setMinHeight(0);
         mLayoutWidget.setHorizontalDimensionBehaviour(widthBehaviour);
         mLayoutWidget.setWidth(desiredWidth);
         mLayoutWidget.setVerticalDimensionBehaviour(heightBehaviour);
         mLayoutWidget.setHeight(desiredHeight);
+        mLayoutWidget.setMinWidth(mMinWidth);
+        mLayoutWidget.setMinHeight(mMinHeight);
     }
 
     /**

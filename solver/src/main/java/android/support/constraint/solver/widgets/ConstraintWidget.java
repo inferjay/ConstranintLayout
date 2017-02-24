@@ -128,8 +128,8 @@ public class ConstraintWidget {
     int mBaselineDistance = 0;
 
     // Minimum sizes for the widget
-    private int mMinWidth;
-    private int mMinHeight;
+    protected int mMinWidth;
+    protected int mMinHeight;
 
     // Wrap content sizes for the widget
     private int mWrapWidth;

@@ -1032,6 +1032,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                     maxX = Math.max(maxX, widget.mX + widget.getWidth());
                     maxY = Math.max(maxY, widget.mY + widget.getHeight());
                 }
+                maxX = Math.max(mMinWidth, maxX);
+                maxY = Math.max(mMinHeight, maxY);
                 if (originalHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
                     if (getWidth() < maxX) {
                         setWidth(maxX);
@@ -1075,8 +1077,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             System.out.println("Solved system in " + countSolve + " iterations (" + getWidth() + " x " + getHeight() + ")");
         }
         if (mParent != null && USE_SNAPSHOT) {
-            int width = getWidth();
-            int height = getHeight();
+            int width = Math.max(mMinWidth, getWidth());
+            int height = Math.max(mMinHeight, getHeight());
             // Let's restore our state...
             mSnapshot.applyTo(this);
             setWidth(width + mPaddingLeft + mPaddingRight);
@@ -1396,9 +1398,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             maxConnectHeight = Math.max(maxConnectHeight, connectHeight);
         }
         int max = Math.max(maxLeftDist, maxRightDist);
-        mWrapWidth = Math.max(max, maxConnectWidth);
+        mWrapWidth = Math.max(mMinWidth, Math.max(max, maxConnectWidth));
         max = Math.max(maxTopDist, maxBottomDist);
-        mWrapHeight = Math.max(max, maxConnectHeight);
+        mWrapHeight = Math.max(mMinHeight, Math.max(max, maxConnectHeight));
         for (int j = 0; j < size; j++) {
             ConstraintWidget child = children.get(j);
             child.mHorizontalWrapVisited = false;
