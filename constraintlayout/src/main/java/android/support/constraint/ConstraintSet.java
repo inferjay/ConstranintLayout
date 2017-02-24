@@ -1010,6 +1010,108 @@ public class ConstraintSet {
     }
 
     /**
+     * Create a constraint between two widgets.
+     *
+     * @param startID the ID of the widget to be constrained
+     * @param startSide the side of the widget to constrain
+     * @param endID the id of the widget to constrain to
+     * @param endSide the side of widget to constrain to
+     */
+    public void connect(int startID, int startSide, int endID, int endSide) {
+        if (!mConstraints.containsKey(startID)) {
+            mConstraints.put(startID, new Constraint());
+        }
+        Constraint constraint = mConstraints.get(startID);
+        switch (startSide) {
+            case LEFT:
+                if (endSide == LEFT) {
+                    constraint.leftToLeft = endID;
+                    constraint.leftToRight = Constraint.UNSET;
+                } else if (endSide == RIGHT) {
+                    constraint.leftToRight = endID;
+                    constraint.leftToLeft = Constraint.UNSET;
+                } else {
+                    throw new IllegalArgumentException("left to " + sideToString(endSide) + " undefined");
+                }
+                break;
+            case RIGHT:
+                if (endSide == LEFT) {
+                    constraint.rightToLeft = endID;
+                    constraint.rightToRight = Constraint.UNSET;
+
+                } else if (endSide == RIGHT) {
+                    constraint.rightToRight = endID;
+                    constraint.rightToLeft = Constraint.UNSET;
+                } else {
+                    throw new IllegalArgumentException("right to " + sideToString(endSide) + " undefined");
+                }
+                break;
+            case TOP:
+                if (endSide == TOP) {
+                    constraint.topToTop = endID;
+                    constraint.topToBottom = Constraint.UNSET;
+                    constraint.baselineToBaseline = Constraint.UNSET;
+                } else if (endSide == BOTTOM) {
+                    constraint.topToBottom = endID;
+                    constraint.topToTop = Constraint.UNSET;
+                    constraint.baselineToBaseline = Constraint.UNSET;
+                } else {
+                    throw new IllegalArgumentException("right to " + sideToString(endSide) + " undefined");
+                }
+                break;
+            case BOTTOM:
+                if (endSide == BOTTOM) {
+                    constraint.bottomToBottom = endID;
+                    constraint.bottomToTop = Constraint.UNSET;
+                    constraint.baselineToBaseline = Constraint.UNSET;
+                } else if (endSide == TOP) {
+                    constraint.bottomToTop = endID;
+                    constraint.bottomToBottom = Constraint.UNSET;
+                    constraint.baselineToBaseline = Constraint.UNSET;
+                } else {
+                    throw new IllegalArgumentException("right to " + sideToString(endSide) + " undefined");
+                }
+                break;
+            case BASELINE:
+                if (endSide == BASELINE) {
+                    constraint.baselineToBaseline = endID;
+                    constraint.bottomToBottom = Constraint.UNSET;
+                    constraint.bottomToTop = Constraint.UNSET;
+                    constraint.topToTop = Constraint.UNSET;
+                    constraint.topToBottom = Constraint.UNSET;
+                } else {
+                    throw new IllegalArgumentException("right to " + sideToString(endSide) + " undefined");
+                }
+                break;
+            case START:
+                if (endSide == START) {
+                    constraint.startToStart = endID;
+                    constraint.startToEnd = Constraint.UNSET;
+                } else if (endSide == END) {
+                    constraint.startToEnd = endID;
+                    constraint.startToStart = Constraint.UNSET;
+                } else {
+                    throw new IllegalArgumentException("right to " + sideToString(endSide) + " undefined");
+                }
+                break;
+            case END:
+                if (endSide == END) {
+                    constraint.endToEnd = endID;
+                    constraint.endToStart = Constraint.UNSET;
+                } else if (endSide == START) {
+                    constraint.endToStart = endID;
+                    constraint.endToEnd = Constraint.UNSET;
+                } else {
+                    throw new IllegalArgumentException("right to " + sideToString(endSide) + " undefined");
+                }
+                break;
+            default:
+                throw new IllegalArgumentException(
+                    sideToString(startSide) + " to " + sideToString(endSide) + " unknown");
+        }
+    }
+
+    /**
      * Centers the view horizontally relative to toView's position.
      *
      * @param viewId ID of view to center Horizontally
