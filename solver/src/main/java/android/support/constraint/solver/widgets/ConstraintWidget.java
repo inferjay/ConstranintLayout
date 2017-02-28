@@ -177,6 +177,8 @@ public class ConstraintWidget {
     boolean mVerticalChainFixedPosition;
     float mHorizontalWeight = 0;
     float mVerticalWeight = 0;
+    ConstraintWidget mHorizontalNextWidget = null;
+    ConstraintWidget mVerticalNextWidget = null;
 
     // TODO: see if we can make this simpler
     public void reset() {
