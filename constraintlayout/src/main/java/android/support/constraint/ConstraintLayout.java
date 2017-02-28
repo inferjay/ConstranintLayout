@@ -1102,11 +1102,7 @@ public class ConstraintLayout extends ViewGroup {
             }
             break;
             case MeasureSpec.UNSPECIFIED: {
-                if (params.width > 0) {
-                    desiredWidth = Math.min(mMaxWidth, params.width);
-                } else {
-                    widthBehaviour = ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
-                }
+                widthBehaviour = ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
             }
             break;
             case MeasureSpec.EXACTLY: {
@@ -1120,11 +1116,7 @@ public class ConstraintLayout extends ViewGroup {
             }
             break;
             case MeasureSpec.UNSPECIFIED: {
-                if (params.height > 0) {
-                    desiredHeight = Math.min(mMaxHeight, params.height);
-                } else {
-                    heightBehaviour = ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
-                }
+                heightBehaviour = ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
             }
             break;
             case MeasureSpec.EXACTLY: {

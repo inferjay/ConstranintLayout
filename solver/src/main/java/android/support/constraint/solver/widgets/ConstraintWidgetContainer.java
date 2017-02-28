@@ -1191,6 +1191,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         } else if (!(widget.mRight.isConnected() || (widget.mLeft.isConnected()))) {
             distToLeft += widget.getX();
         } else {
+            if (widget.mRight.mTarget != null && widget.mLeft.mTarget != null
+                    && ((widget.mRight.mTarget == widget.mLeft.mTarget)
+                        || ((widget.mRight.mTarget.mOwner == widget.mLeft.mTarget.mOwner)
+                            && (widget.mRight.mTarget.mOwner != widget.mParent)))) {
+                flags[FLAG_CHAIN_OPTIMIZE] = false;
+                return;
+            }
             if (widget.mRight.mTarget != null) {
                 rightWidget = widget.mRight.mTarget.mOwner;
                 distToRight += widget.mRight.getMargin();
@@ -1280,6 +1287,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         } else if (!(widget.mBaseline.mTarget != null || widget.mTop.mTarget != null || widget.mBottom.mTarget != null)) {
             distToTop += widget.getY();
         } else {
+            if (widget.mBottom.mTarget != null && widget.mTop.mTarget != null
+                    && ((widget.mBottom.mTarget == widget.mTop.mTarget)
+                        || ((widget.mBottom.mTarget.mOwner == widget.mTop.mTarget.mOwner)
+                            && (widget.mBottom.mTarget.mOwner != widget.mParent)))) {
+                flags[FLAG_CHAIN_OPTIMIZE] = false;
+                return;
+            }
             if (widget.mBaseline.isConnected()) {
                 ConstraintWidget baseLineWidget = widget.mBaseline.mTarget.getOwner();
                 if (!baseLineWidget.mVerticalWrapVisited) {
