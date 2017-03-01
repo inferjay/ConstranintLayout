@@ -1830,7 +1830,7 @@ public class ConstraintLayout extends ViewGroup {
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBaseline_creator) {
                     // Skip
                 } else {
-                    Log.w(TAG, "Unknown attribute 0x" + Integer.toHexString(attr));
+                    // Skip
                 }
             }
             a.recycle();
