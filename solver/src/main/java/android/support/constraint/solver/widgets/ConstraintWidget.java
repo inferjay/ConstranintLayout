@@ -1117,7 +1117,11 @@ public class ConstraintWidget {
      * @param w minimum width
      */
     public void setMinWidth(int w) {
-        mMinWidth = w;
+        if (w < 0) {
+            mMinWidth = 0;
+        } else {
+            mMinWidth = w;
+        }
     }
 
     /**
@@ -1126,7 +1130,11 @@ public class ConstraintWidget {
      * @param h minimum height
      */
     public void setMinHeight(int h) {
-        mMinHeight = h;
+        if (h < 0) {
+            mMinHeight = 0;
+        } else {
+            mMinHeight = h;
+        }
     }
 
     /**
