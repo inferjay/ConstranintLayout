@@ -29,9 +29,12 @@ import java.util.Arrays;
 public class ConstraintWidgetContainer extends WidgetContainer {
 
     private static final boolean USE_THREAD = false;
-    private static final boolean DEBUG = false;
     private static final boolean USE_SNAPSHOT = true;
     private static final int MAX_ITERATIONS = 8;
+
+    private static final boolean DEBUG = false;
+    private static final boolean DEBUG_OPTIMIZE = false;
+    private static final boolean DEBUG_LAYOUT = false;
 
     protected LinearSystem mSystem = new LinearSystem();
     protected LinearSystem mBackgroundSystem = null;
@@ -279,7 +282,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             dv = 0;
             dh = 0;
             n++;
-            if (DEBUG) {
+            if (DEBUG_OPTIMIZE) {
                 System.out.println("Iteration " + n);
             }
             for (int i = 0; i < count; i++) {
@@ -298,7 +301,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         Optimizer.checkVerticalSimpleDependency(this, system, widget);
                     }
                 }
-                if (DEBUG) {
+                if (DEBUG_OPTIMIZE) {
                     System.out.println("[" + i + "]" + widget
                             + " H: " + widget.mHorizontalResolution
                             + " V: " + widget.mVerticalResolution);
@@ -310,14 +313,14 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                     dh++;
                 }
             }
-            if (DEBUG) {
+            if (DEBUG_OPTIMIZE) {
                 System.out.println("dv: " + dv + " dh: " + dh);
             }
             if (dv == 0 && dh == 0) {
                 done = true;
             } else if (prev == dv && preh == dh) {
                 done = true;
-                if (DEBUG) {
+                if (DEBUG_OPTIMIZE) {
                     System.out.println("Escape clause");
                 }
             }
@@ -913,8 +916,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     public void layout() {
         int prex = mX;
         int prey = mY;
-        int prew = getWidth();
-        int preh = getHeight();
+        int prew = Math.max(0, getWidth());
+        int preh = Math.max(0, getHeight());
         mWidthMeasuredTooSmall = false;
         mHeightMeasuredTooSmall = false;
 
@@ -940,12 +943,18 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         DimensionBehaviour originalVerticalDimensionBehaviour = mVerticalDimensionBehaviour;
         DimensionBehaviour originalHorizontalDimensionBehaviour = mHorizontalDimensionBehaviour;
 
+        if (DEBUG_LAYOUT) {
+            System.out.println("layout with prew: " + prew + " preh: " + preh);
+        }
         if (mOptimizationLevel == OPTIMIZATION_ALL
                 && (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT
                 || mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)) {
             // TODO: do the wrap calculation in two separate passes
             findWrapSize(mChildren, flags);
             wrap_override = flags[FLAG_CHAIN_OPTIMIZE];
+            if (DEBUG_LAYOUT) {
+                System.out.println("layout with wrap width: " + mWrapWidth + " wrap height: " + mWrapHeight + " wrap override? " + wrap_override);
+            }
             if (prew > 0 && preh > 0 && (mWrapWidth > prew || mWrapHeight > preh)) {
                 // TODO: this could be better optimized with a tighter coupling between view measures and
                 // wrap/layout. For now, simply escape to the solver.
@@ -1042,6 +1051,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 maxY = Math.max(mMinHeight, maxY);
                 if (originalHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
                     if (getWidth() < maxX) {
+                        if (DEBUG_LAYOUT) {
+                            System.out.println("layout override width from " + getWidth() + " vs " + maxX);
+                        }
                         setWidth(maxX);
                         mHorizontalDimensionBehaviour = DimensionBehaviour.WRAP_CONTENT; // force using the solver
                         wrap_override = true;
@@ -1050,6 +1062,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 }
                 if (originalVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
                     if (getHeight() < maxY) {
+                        if (DEBUG_LAYOUT) {
+                            System.out.println("layout override height from " + getHeight() + " vs " + maxY);
+                        }
                         setHeight(maxY);
                         mVerticalDimensionBehaviour = DimensionBehaviour.WRAP_CONTENT; // force using the solver
                         wrap_override = true;
@@ -1060,6 +1075,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
 
             int width = Math.max(mMinWidth, getWidth());
             if (width > getWidth()) {
+                if (DEBUG_LAYOUT) {
+                    System.out.println("layout override 2, width from " + getWidth() + " vs " + width);
+                }
                 setWidth(width);
                 mHorizontalDimensionBehaviour = DimensionBehaviour.FIXED;
                 wrap_override = true;
@@ -1067,6 +1085,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             }
             int height = Math.max(mMinHeight, getHeight());
             if (height > getHeight()) {
+                if (DEBUG_LAYOUT) {
+                    System.out.println("layout override 2, height from " + getHeight() + " vs " + height);
+                }
                 setHeight(height);
                 mVerticalDimensionBehaviour = DimensionBehaviour.FIXED;
                 wrap_override = true;
@@ -1076,6 +1097,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             if (!wrap_override) {
                 if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT && prew > 0) {
                     if (getWidth() > prew) {
+                        if (DEBUG_LAYOUT) {
+                            System.out.println("layout override 3, width from " + getWidth() + " vs " + prew);
+                        }
                         mWidthMeasuredTooSmall = true;
                         wrap_override = true;
                         mHorizontalDimensionBehaviour = DimensionBehaviour.FIXED;
@@ -1085,6 +1109,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 }
                 if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT && preh > 0) {
                     if (getHeight() > preh) {
+                        if (DEBUG_LAYOUT) {
+                            System.out.println("layout override 3, height from " + getHeight() + " vs " + preh);
+                        }
                         mHeightMeasuredTooSmall = true;
                         wrap_override = true;
                         mVerticalDimensionBehaviour = DimensionBehaviour.FIXED;
@@ -1094,7 +1121,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 }
             }
         }
-        if (DEBUG) {
+        if (DEBUG_LAYOUT) {
             System.out.println("Solved system in " + countSolve + " iterations (" + getWidth() + " x " + getHeight() + ")");
         }
         if (mParent != null && USE_SNAPSHOT) {
