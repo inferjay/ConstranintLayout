@@ -425,6 +425,13 @@ public class ConstraintLayout extends ViewGroup {
         init(attrs);
     }
 
+    @Override
+    public void setId(int id) {
+        mChildrenByIds.remove(getId());
+        super.setId(id);
+        mChildrenByIds.put(getId(), this);
+    }
+
     private void init(AttributeSet attrs) {
         mLayoutWidget.setCompanionWidget(this);
         mChildrenByIds.put(getId(), this);
