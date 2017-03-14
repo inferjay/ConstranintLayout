@@ -291,6 +291,7 @@ public class ConstraintTableLayout extends ConstraintWidgetContainer {
      *
      * @return array of guidelines
      */
+    @Override
     public ArrayList<Guideline> getVerticalGuidelines() {
         return mVerticalGuidelines;
     }
@@ -300,6 +301,7 @@ public class ConstraintTableLayout extends ConstraintWidgetContainer {
      *
      * @return array of guidelines
      */
+    @Override
     public ArrayList<Guideline> getHorizontalGuidelines() {
         return mHorizontalGuidelines;
     }
