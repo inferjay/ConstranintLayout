@@ -10,6 +10,16 @@
     <attr name="layout_constraintGuide_percent" format="float"/>
     <!-- Constrains the left edge of this view to the left edge of the given view ID. -->
 
+    <!-- Indicate the type of barrier -->
+    <attr name="barrierDirection" format="enum">
+        <enum name="left" value="0"/>
+        <enum name="right" value="1"/>
+        <enum name="top" value="2"/>
+        <enum name="bottom" value="3"/>
+        <enum name="start" value="5"/>
+        <enum name="end" value="6"/>
+    </attr>
+
     <attr name="layout_constraintLeft_toLeftOf" format="reference|enum">
         <enum name="parent" value="0"/>
     </attr>
@@ -155,6 +165,7 @@
         <attr name="layout_optimizationLevel"/>
 
         <attr name="constraintSet"/>
+        <attr name="barrierDirection"/>
         <attr name="layout_constraintGuide_begin"/>
         <attr name="layout_constraintGuide_end"/>
         <attr name="layout_constraintGuide_percent"/>

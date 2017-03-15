@@ -94,6 +94,8 @@ public class ConstraintWidget {
     ConstraintAnchor mCenterY = new ConstraintAnchor(this, ConstraintAnchor.Type.CENTER_Y);
     ConstraintAnchor mCenter = new ConstraintAnchor(this, ConstraintAnchor.Type.CENTER);
 
+    protected ConstraintAnchor[] mListAnchors = { mLeft, mRight, mTop, mBottom, mBaseline };
+
     protected ArrayList<ConstraintAnchor> mAnchors = new ArrayList<>();
 
     // Parent of this widget
@@ -105,10 +107,10 @@ public class ConstraintWidget {
     protected float mDimensionRatio = 0;
     protected int mDimensionRatioSide = UNKNOWN;
 
-    private int mSolverLeft = 0;
-    private int mSolverTop = 0;
-    private int mSolverRight = 0;
-    private int mSolverBottom = 0;
+    protected int mSolverLeft = 0;
+    protected int mSolverTop = 0;
+    protected int mSolverRight = 0;
+    protected int mSolverBottom = 0;
 
     // Origin of the widget
     protected int mX = 0;

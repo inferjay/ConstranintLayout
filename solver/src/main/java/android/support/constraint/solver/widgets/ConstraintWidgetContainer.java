@@ -275,6 +275,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 widget.mHorizontalResolution = SOLVER;
                 widget.mVerticalResolution = SOLVER;
             }
+            if (widget instanceof Barrier) {
+                widget.mHorizontalResolution = SOLVER;
+                widget.mVerticalResolution = SOLVER;
+            }
         }
         while (!done) {
             int prev = dv;

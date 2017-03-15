@@ -502,6 +502,9 @@ public class ConstraintLayout extends ViewGroup {
                 widget = layoutParams.widget;
             }
         }
+        if (view instanceof Helper) {
+            ((Helper) view).validateParams();
+        }
         mChildrenByIds.put(view.getId(), view);
         mDirtyHierarchy = true;
     }
@@ -655,6 +658,9 @@ public class ConstraintLayout extends ViewGroup {
                 mVariableDimensionsWidgets.add(widget);
             }
 
+            if (child instanceof Helper) {
+                ((Helper) child).update(this);
+            }
             if (layoutParams.isGuideline) {
                 Guideline guideline = (Guideline) widget;
                 if (layoutParams.guideBegin != -1) {
@@ -870,7 +876,7 @@ public class ConstraintLayout extends ViewGroup {
         }
     }
 
-    private final ConstraintWidget getViewWidget(View view) {
+    public final ConstraintWidget getViewWidget(View view) {
         if (view == this) {
             return mLayoutWidget;
         }
@@ -1165,13 +1171,13 @@ public class ConstraintLayout extends ViewGroup {
         for (int i = 0; i < widgetsCount; i++) {
             final View child = getChildAt(i);
             LayoutParams params = (LayoutParams) child.getLayoutParams();
-            if (child.getVisibility() == GONE && !params.isGuideline && !isInEditMode) {
+            ConstraintWidget widget = params.widget;
+
+            if (child.getVisibility() == GONE && !params.isGuideline && !isInEditMode && !(child instanceof Helper)) {
                 // If we are in edit mode, let's layout the widget so that they are at "the right place"
                 // visually in the editor (as we get our positions from layoutlib)
                 continue;
             }
-
-            ConstraintWidget widget = params.widget;
 
             int l = widget.getDrawX();
             int t = widget.getDrawY();
