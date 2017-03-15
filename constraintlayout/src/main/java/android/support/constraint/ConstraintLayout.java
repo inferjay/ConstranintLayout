@@ -25,12 +25,13 @@ import android.support.constraint.solver.widgets.ConstraintWidget;
 import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
 import android.support.constraint.solver.widgets.Guideline;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import static android.support.constraint.ConstraintLayout.LayoutParams.*;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -394,6 +395,9 @@ public class ConstraintLayout extends ViewGroup {
 
     SparseArray<View> mChildrenByIds = new SparseArray<>();
 
+    // This array keep a list of helpers objects if they are present
+    private ArrayList<ConstraintHelper> mConstraintHelpers = new ArrayList<>(4);
+
     // This array will keep a list of the widget with one or two dimensions that are
     // set to MATCH_CONSTRAINT (i.e. they depend on the solver result, not from
     // WRAP_CONTENT or a fixed dimension)
@@ -499,11 +503,16 @@ public class ConstraintLayout extends ViewGroup {
                 layoutParams.widget = new Guideline();
                 layoutParams.isGuideline = true;
                 ((Guideline) layoutParams.widget).setOrientation(layoutParams.orientation);
-                widget = layoutParams.widget;
             }
         }
-        if (view instanceof Helper) {
-            ((Helper) view).validateParams();
+        if (view instanceof ConstraintHelper) {
+            ConstraintHelper helper = (ConstraintHelper) view;
+            helper.validateParams();
+            LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+            layoutParams.isHelper = true;
+            if (!mConstraintHelpers.contains(helper)) {
+                mConstraintHelpers.add(helper);
+            }
         }
         mChildrenByIds.put(view.getId(), view);
         mDirtyHierarchy = true;
@@ -519,6 +528,7 @@ public class ConstraintLayout extends ViewGroup {
         }
         mChildrenByIds.remove(view.getId());
         mLayoutWidget.remove(getViewWidget(view));
+        mConstraintHelpers.remove(view);
         mDirtyHierarchy = true;
     }
 
@@ -636,20 +646,34 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     private void setChildrenConstraints() {
+        final boolean isInEditMode = isInEditMode();
+
         if (mConstraintSet != null) {
             mConstraintSet.applyToInternal(this);
         }
         final int count = getChildCount();
         mLayoutWidget.removeAllChildren();
+
+        final int helperCount = mConstraintHelpers.size();
+        if (helperCount > 0) {
+            for (int i = 0; i < helperCount; i++) {
+                ConstraintHelper helper = mConstraintHelpers.get(i);
+                helper.updatePreLayout(this);
+            }
+        }
+
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             ConstraintWidget widget = getViewWidget(child);
             if (widget == null) {
                 continue;
             }
-
             final LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
-            widget.reset();
+            if (layoutParams.helped) {
+                layoutParams.helped = false;
+            } else {
+                widget.reset();
+            }
             widget.setVisibility(child.getVisibility());
             widget.setCompanionWidget(child);
             mLayoutWidget.add(widget);
@@ -658,9 +682,6 @@ public class ConstraintLayout extends ViewGroup {
                 mVariableDimensionsWidgets.add(widget);
             }
 
-            if (child instanceof Helper) {
-                ((Helper) child).update(this);
-            }
             if (layoutParams.isGuideline) {
                 Guideline guideline = (Guideline) widget;
                 if (layoutParams.guideBegin != -1) {
@@ -816,7 +837,7 @@ public class ConstraintLayout extends ViewGroup {
                     widget.setVerticalBiasPercent(layoutParams.verticalBias);
                 }
 
-                if (isInEditMode() && ((layoutParams.editorAbsoluteX != UNSET)
+                if (isInEditMode && ((layoutParams.editorAbsoluteX != UNSET)
                         || (layoutParams.editorAbsoluteY != UNSET))) {
                     widget.setOrigin(layoutParams.editorAbsoluteX, layoutParams.editorAbsoluteY);
                 }
@@ -896,6 +917,9 @@ public class ConstraintLayout extends ViewGroup {
             LayoutParams params = (LayoutParams) child.getLayoutParams();
             ConstraintWidget widget = params.widget;
             if (params.isGuideline) {
+                continue;
+            }
+            if (params.isHelper) {
                 continue;
             }
 
@@ -1168,12 +1192,21 @@ public class ConstraintLayout extends ViewGroup {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         final int widgetsCount = getChildCount();
         final boolean isInEditMode = isInEditMode();
+        if (isInEditMode) {
+            final int helperCount = mConstraintHelpers.size();
+            if (helperCount > 0) {
+                for (int i = 0; i < helperCount; i++) {
+                    ConstraintHelper helper = mConstraintHelpers.get(i);
+                    helper.updatePostLayout(this);
+                }
+            }
+        }
         for (int i = 0; i < widgetsCount; i++) {
             final View child = getChildAt(i);
             LayoutParams params = (LayoutParams) child.getLayoutParams();
             ConstraintWidget widget = params.widget;
 
-            if (child.getVisibility() == GONE && !params.isGuideline && !isInEditMode && !(child instanceof Helper)) {
+            if (child.getVisibility() == GONE && !params.isGuideline && !isInEditMode && !(child instanceof ConstraintHelper)) {
                 // If we are in edit mode, let's layout the widget so that they are at "the right place"
                 // visually in the editor (as we get our positions from layoutlib)
                 continue;
@@ -1259,6 +1292,16 @@ public class ConstraintLayout extends ViewGroup {
      */
     public void setConstraintSet(ConstraintSet set) {
         mConstraintSet = set;
+    }
+
+    /**
+     * Return a direct child view by its id if it exists
+     *
+     * @param id the view id
+     * @return the child view, can return null
+     */
+    public View getViewById(int id) {
+        return mChildrenByIds.get(id);
     }
 
     /**
@@ -1378,7 +1421,7 @@ public class ConstraintLayout extends ViewGroup {
         /**
          * Constrains the left side of a child to the right side of a target child (contains the target child id).
          */
-       public int leftToRight = UNSET;
+        public int leftToRight = UNSET;
 
         /**
          * Constrains the right side of a child to the left side of a target child (contains the target child id).
@@ -1592,6 +1635,7 @@ public class ConstraintLayout extends ViewGroup {
 
         boolean needsBaseline = false;
         boolean isGuideline = false;
+        boolean isHelper = false;
 
         int resolvedLeftToLeft = UNSET;
         int resolvedLeftToRight = UNSET;
@@ -1602,6 +1646,8 @@ public class ConstraintLayout extends ViewGroup {
         float resolvedHorizontalBias = 0.5f;
 
         ConstraintWidget widget = new ConstraintWidget();
+
+        public boolean helped = false;
 
         /**
          * Create a LayoutParams base on an existing layout Params

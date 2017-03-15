@@ -21,6 +21,7 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.os.Build;
+import android.support.constraint.solver.widgets.ConstraintWidget;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +31,7 @@ import java.util.Arrays;
 /**
  * A barrier is positioned relative to multiple widgets
  */
-public class Barrier extends View implements Helper {
+public class Barrier extends ConstraintHelper {
 
     public static final int LEFT = android.support.constraint.solver.widgets.Barrier.LEFT;
     public static final int RIGHT = android.support.constraint.solver.widgets.Barrier.RIGHT;
@@ -42,8 +43,6 @@ public class Barrier extends View implements Helper {
     private int mIndicatedType = LEFT;
     private int mResolvedType = LEFT;
 
-    private int[] mIds = new int[32];
-    private int mCount = 0;
     private android.support.constraint.solver.widgets.Barrier mBarrier = new android.support.constraint.solver.widgets.Barrier();
 
     public Barrier(Context context) {
@@ -117,61 +116,8 @@ public class Barrier extends View implements Helper {
                 }
             }
         }
+        mHelperWidget = mBarrier;
         validateParams();
-    }
-
-    public void validateParams() {
-        ViewGroup.LayoutParams params = getLayoutParams();
-        if (params instanceof ConstraintLayout.LayoutParams) {
-            ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) params;
-            layoutParams.widget = mBarrier;
-        }
-    }
-
-    @Override
-    public void setTag(int tag, Object value) {
-        if (value != null && value instanceof String && ((String) value).equalsIgnoreCase("true")) {
-            if (mCount + 1 > mIds.length) {
-                mIds = Arrays.copyOf(mIds, mIds.length * 2);
-            }
-            mIds[mCount] = tag;
-            mCount++;
-        }
-    }
-
-    /**
-     * {@hide
-     */
-    @Override
-    public void setVisibility(int visibility) {
-        // Nothing
-    }
-
-    /**
-     * {@hide
-     */
-    @Override
-    public void draw(Canvas canvas) {
-        // Nothing
-    }
-
-    /**
-     * {@hide
-     */
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        setMeasuredDimension(0, 0);
-    }
-
-    public void update(ConstraintLayout container) {
-        mBarrier.removeAllIds();
-        for (int i = 0; i < mCount; i++) {
-            int id = mIds[i];
-            View view = container.findViewById(id);
-            if (view != null) {
-                mBarrier.add(container.getViewWidget(view));
-            }
-        }
     }
 
 }

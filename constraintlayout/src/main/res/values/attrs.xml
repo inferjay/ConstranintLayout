@@ -20,6 +20,9 @@
         <enum name="end" value="6"/>
     </attr>
 
+    <!-- Let a chain helper be rtl or not -->
+    <attr name="chainUseRtl" format="boolean"/>
+
     <attr name="layout_constraintLeft_toLeftOf" format="reference|enum">
         <enum name="parent" value="0"/>
     </attr>
@@ -166,6 +169,8 @@
 
         <attr name="constraintSet"/>
         <attr name="barrierDirection"/>
+        <attr name="chainUseRtl"/>
+
         <attr name="layout_constraintGuide_begin"/>
         <attr name="layout_constraintGuide_end"/>
         <attr name="layout_constraintGuide_percent"/>

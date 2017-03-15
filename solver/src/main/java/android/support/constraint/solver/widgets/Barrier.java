@@ -24,7 +24,7 @@ import java.util.Arrays;
 /**
  * A Barrier takes multiple widgets
  */
-public class Barrier extends ConstraintWidget {
+public class Barrier extends Helper {
 
     public static final int LEFT = 0;
     public static final int RIGHT = 1;
@@ -32,31 +32,9 @@ public class Barrier extends ConstraintWidget {
     public static final int BOTTOM = 3;
 
     private int mBarrierType = LEFT;
-    private ConstraintWidget[] mWidgets = new ConstraintWidget[4];
-    private int mWidgetsCount = 0;
 
     public void setBarrierType(int barrierType) {
         mBarrierType = barrierType;
-    }
-
-    /**
-     * Add a widget to the barrier
-     *
-     * @param widget a widget
-     */
-    public void add(ConstraintWidget widget) {
-        if (mWidgetsCount + 1 > mWidgets.length) {
-            mWidgets = Arrays.copyOf(mWidgets, mWidgets.length * 2);
-        }
-        mWidgets[mWidgetsCount] = widget;
-        mWidgetsCount++;
-    }
-
-    /**
-     * Reset the widgets list contained by this helper
-     */
-    public void removeAllIds() {
-        mWidgetsCount = 0;
     }
 
     /**
