@@ -414,6 +414,8 @@ public class ConstraintLayout extends ViewGroup {
     private int mOptimizationLevel = 2; // all
     private ConstraintSet mConstraintSet = null;
 
+    private String mTitle;
+
     public ConstraintLayout(Context context) {
         super(context);
         init(null);
@@ -436,6 +438,14 @@ public class ConstraintLayout extends ViewGroup {
         mChildrenByIds.put(getId(), this);
     }
 
+    public void setTitle(String title) {
+        mTitle = title;
+    }
+
+    public String getTitle() {
+        return mTitle;
+    }
+
     private void init(AttributeSet attrs) {
         mLayoutWidget.setCompanionWidget(this);
         mChildrenByIds.put(getId(), this);
@@ -455,6 +465,8 @@ public class ConstraintLayout extends ViewGroup {
                     mMaxHeight = a.getDimensionPixelOffset(attr, mMaxHeight);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_optimizationLevel) {
                     mOptimizationLevel = a.getInt(attr, mOptimizationLevel);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_title) {
+                    mTitle = a.getString(attr);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_constraintSet) {
                     int id = a.getResourceId(attr, 0);
                     mConstraintSet = new ConstraintSet();
@@ -916,10 +928,7 @@ public class ConstraintLayout extends ViewGroup {
             }
             LayoutParams params = (LayoutParams) child.getLayoutParams();
             ConstraintWidget widget = params.widget;
-            if (params.isGuideline) {
-                continue;
-            }
-            if (params.isHelper) {
+            if (params.isGuideline || params.isHelper) {
                 continue;
             }
 
@@ -1028,11 +1037,12 @@ public class ConstraintLayout extends ViewGroup {
                     == ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
             for (int i = 0; i < sizeDependentWidgetsCount; i++) {
                 ConstraintWidget widget = mVariableDimensionsWidgets.get(i);
-                if (widget instanceof Guideline) {
-                    continue;
-                }
                 View child = (View) widget.getCompanionWidget();
                 if (child == null) {
+                    continue;
+                }
+                ConstraintLayout.LayoutParams params = (LayoutParams) child.getLayoutParams();
+                if (params.isHelper || params.isGuideline) {
                     continue;
                 }
                 if (child.getVisibility() == View.GONE) {
@@ -1042,7 +1052,6 @@ public class ConstraintLayout extends ViewGroup {
                 int widthSpec = 0;
                 int heightSpec = 0;
 
-                ConstraintLayout.LayoutParams params = (LayoutParams) child.getLayoutParams();
                 if (params.width == WRAP_CONTENT) {
                     widthSpec = getChildMeasureSpec(widthMeasureSpec, widthPadding, params.width);
                 } else {
@@ -1206,7 +1215,7 @@ public class ConstraintLayout extends ViewGroup {
             LayoutParams params = (LayoutParams) child.getLayoutParams();
             ConstraintWidget widget = params.widget;
 
-            if (child.getVisibility() == GONE && !params.isGuideline && !isInEditMode && !(child instanceof ConstraintHelper)) {
+            if (child.getVisibility() == GONE && !params.isGuideline && !params.isHelper && !isInEditMode) {
                 // If we are in edit mode, let's layout the widget so that they are at "the right place"
                 // visually in the editor (as we get our positions from layoutlib)
                 continue;

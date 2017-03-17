@@ -63,7 +63,6 @@ public class Chain extends ConstraintHelper {
         chainParams.validate();
 
         int chainId = getId();
-        int layoutDirection = getLayoutDirection();
         if (chainParams.orientation == ConstraintLayout.LayoutParams.VERTICAL) {
             chainParams.width = ConstraintLayout.LayoutParams.MATCH_PARENT;
             for (int i = 0; i < mCount; i++) {
@@ -92,6 +91,10 @@ public class Chain extends ConstraintHelper {
             }
         } else {
             chainParams.height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+            int layoutDirection = 0;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                layoutDirection = getLayoutDirection();
+            }
             for (int i = 0; i < mCount; i++) {
                 int id = mIds[i];
                 View view = container.getViewById(id);
@@ -132,12 +135,12 @@ public class Chain extends ConstraintHelper {
                     previousParams = params;
                 }
             }
-            for (int i = 0; i < mCount; i++) {
-                int id = mIds[i];
-                View view = container.getViewById(id);
-                if (view != null) {
-                    params = (ConstraintLayout.LayoutParams) view.getLayoutParams();
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                for (int i = 0; i < mCount; i++) {
+                    int id = mIds[i];
+                    View view = container.getViewById(id);
+                    if (view != null) {
+                        params = (ConstraintLayout.LayoutParams) view.getLayoutParams();
                         params.resolveLayoutDirection(layoutDirection);
                     }
                 }
