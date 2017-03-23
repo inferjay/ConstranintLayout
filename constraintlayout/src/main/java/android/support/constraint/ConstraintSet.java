@@ -2060,7 +2060,7 @@ public class ConstraintSet {
                     break;
                 case ELEVATION:
                     c.applyElevation = true;
-                    c.elevation = a.getFloat(attr, c.elevation);
+                    c.elevation = a.getDimension(attr, c.elevation);
                     break;
                 case ROTATION_X:
                     c.rotationX = a.getFloat(attr, c.rotationX);
@@ -2081,13 +2081,13 @@ public class ConstraintSet {
                     c.transformPivotY = a.getFloat(attr, c.transformPivotY);
                     break;
                 case TRANSLATION_X:
-                    c.translationX = a.getFloat(attr, c.translationX);
+                    c.translationX = a.getDimension(attr, c.translationX);
                     break;
                 case TRANSLATION_Y:
-                    c.translationY = a.getFloat(attr, c.translationY);
+                    c.translationY = a.getDimension(attr, c.translationY);
                     break;
                 case TRANSLATION_Z:
-                    c.translationZ = a.getFloat(attr, c.translationZ);
+                    c.translationZ = a.getDimension(attr, c.translationZ);
                     break;
                 case VERTICAL_WEIGHT:
                     c.verticalWeight = a.getFloat(attr, c.verticalWeight);
