@@ -507,7 +507,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             if (currentWidget.mRight.mTarget.mOwner.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                                 strength = SolverVariable.STRENGTH_MEDIUM;
                             }
-                            system.addLowerThan(currentWidget.mRight.mSolverVariable, currentWidget.mRight.mTarget.mSolverVariable, -margin, strength);
+                            SolverVariable rightTarget = currentWidget.mRight.mTarget.mSolverVariable;
+                            if (currentWidget == mChainEnds[CHAIN_LAST_VISIBLE]) {
+                                rightTarget = mChainEnds[CHAIN_LAST].mRight.mTarget.mSolverVariable;
+                                strength = SolverVariable.STRENGTH_HIGH;
+                            }
+                            system.addLowerThan(currentWidget.mRight.mSolverVariable, rightTarget, -margin, strength);
                         } else {
                             totalWeights += currentWidget.mHorizontalWeight;
                             int margin = 0;
@@ -775,7 +780,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             if (currentWidget.mBottom.mTarget.mOwner.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                                 strength = SolverVariable.STRENGTH_MEDIUM;
                             }
-                            system.addLowerThan(currentWidget.mBottom.mSolverVariable, currentWidget.mBottom.mTarget.mSolverVariable, -margin, strength);
+                            SolverVariable bottomTarget = currentWidget.mBottom.mTarget.mSolverVariable;
+                            if (currentWidget == mChainEnds[CHAIN_LAST_VISIBLE]) {
+                                bottomTarget = mChainEnds[CHAIN_LAST].mBottom.mTarget.mSolverVariable;
+                                strength = SolverVariable.STRENGTH_HIGH;
+                            }
+                            system.addLowerThan(currentWidget.mBottom.mSolverVariable, bottomTarget, -margin, strength);
                         } else {
                             totalWeights += currentWidget.mVerticalWeight;
                             int margin = 0;

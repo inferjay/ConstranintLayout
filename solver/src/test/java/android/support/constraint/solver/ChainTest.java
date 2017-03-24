@@ -202,6 +202,20 @@ public class ChainTest {
         assertEquals(B.getWidth(), C.getWidth());
         assertEquals(B.getWidth(), (root.getWidth() - A.getWidth() - 3*marginL - 3*marginR) / 2, 1);
         checkPositions(A, B, C);
+        // A == 0dp, B & C == 100, C is gone
+        A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setWidth(100);
+        B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
+        B.setWidth(100);
+        C.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
+        C.setWidth(100);
+        C.setVisibility(ConstraintWidget.GONE);
+        root.layout();
+        System.out.println("h) A: " + A + " B: " + B + " C: " + C);
+        assertEquals(A.getWidth(), 632);
+        assertEquals(B.getWidth(), 100);
+        assertEquals(C.getWidth(), 0);
+        checkPositions(A, B, C);
     }
 
     private void checkPositions(ConstraintWidget A, ConstraintWidget B, ConstraintWidget C) {
@@ -313,6 +327,20 @@ public class ChainTest {
         assertEquals(A.getHeight(), 20);
         assertEquals(B.getHeight(), C.getHeight());
         assertEquals(B.getHeight(), (root.getHeight() - A.getHeight() - 3*marginT - 3*marginB) / 2, 1);
+        checkVerticalPositions(A, B, C);
+        // A == 0dp, B & C == 20, C is gone
+        A.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setHeight(20);
+        B.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
+        B.setHeight(20);
+        C.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
+        C.setHeight(20);
+        C.setVisibility(ConstraintWidget.GONE);
+        root.layout();
+        System.out.println("h) A: " + A + " B: " + B + " C: " + C);
+        assertEquals(A.getHeight(), 512);
+        assertEquals(B.getHeight(), 20);
+        assertEquals(C.getHeight(), 0);
         checkVerticalPositions(A, B, C);
     }
 
