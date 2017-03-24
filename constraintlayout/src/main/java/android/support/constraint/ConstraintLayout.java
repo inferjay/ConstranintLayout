@@ -1956,16 +1956,21 @@ public class ConstraintLayout extends ViewGroup {
             boolean isRtl = (View.LAYOUT_DIRECTION_RTL == getLayoutDirection());
             // Post JB MR1, if start/end are defined, they take precedence over left/right
             if (isRtl) {
+                boolean startEndDefined = false;
                 if (startToEnd != UNSET) {
                     resolvedRightToLeft = startToEnd;
+                    startEndDefined = true;
                 } else if (startToStart != UNSET) {
                     resolvedRightToRight = startToStart;
+                    startEndDefined = true;
                 }
                 if (endToStart != UNSET) {
                     resolvedLeftToRight = endToStart;
+                    startEndDefined = true;
                 }
                 if (endToEnd != UNSET) {
                     resolvedLeftToLeft = endToEnd;
+                    startEndDefined = true;
                 }
                 if (goneStartMargin != UNSET) {
                     resolveGoneRightMargin = goneStartMargin;
@@ -1973,7 +1978,9 @@ public class ConstraintLayout extends ViewGroup {
                 if (goneEndMargin != UNSET) {
                     resolveGoneLeftMargin = goneEndMargin;
                 }
-                resolvedHorizontalBias = 1 - horizontalBias;
+                if (startEndDefined) {
+                    resolvedHorizontalBias = 1 - horizontalBias;
+                }
             } else {
                 if (startToEnd != UNSET) {
                     resolvedLeftToRight = startToEnd;
