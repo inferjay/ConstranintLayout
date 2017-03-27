@@ -252,8 +252,9 @@ public class ConstraintSet {
     private static final int HEIGHT_MAX = 57;
     private static final int WIDTH_MIN = 58;
     private static final int HEIGHT_MIN = 59;
+    private static final int ROTATION = 60;
 
-    private static final int UNUSED = 60;
+    private static final int UNUSED = 61;
 
     static {
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintLeft_toLeftOf, LEFT_TO_LEFT);
@@ -308,6 +309,7 @@ public class ConstraintSet {
         mapToConstant.append(R.styleable.ConstraintSet_android_elevation, ELEVATION);
         mapToConstant.append(R.styleable.ConstraintSet_android_rotationX, ROTATION_X);
         mapToConstant.append(R.styleable.ConstraintSet_android_rotationY, ROTATION_Y);
+        mapToConstant.append(R.styleable.ConstraintSet_android_rotation, ROTATION);
         mapToConstant.append(R.styleable.ConstraintSet_android_scaleX, SCALE_X);
         mapToConstant.append(R.styleable.ConstraintSet_android_scaleY, SCALE_Y);
         mapToConstant.append(R.styleable.ConstraintSet_android_transformPivotX, TRANSFORM_PIVOT_X);
@@ -379,6 +381,7 @@ public class ConstraintSet {
         public float alpha = 1;
         public boolean applyElevation = false;
         public float elevation = 0;
+        public float rotation = 0;
         public float rotationX = 0;
         public float rotationY = 0;
         public float scaleX = 1;
@@ -447,6 +450,7 @@ public class ConstraintSet {
             clone.alpha = alpha;
             clone.applyElevation = applyElevation;
             clone.elevation = elevation;
+            clone.rotation = rotation;
             clone.rotationX = rotationX;
             clone.rotationY = rotationY;
             clone.scaleX = scaleX;
@@ -613,6 +617,7 @@ public class ConstraintSet {
             constraint.visibility = view.getVisibility();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 constraint.alpha = view.getAlpha();
+                constraint.rotation = view.getRotation();
                 constraint.rotationX = view.getRotationX();
                 constraint.rotationY = view.getRotationY();
                 constraint.scaleX = view.getScaleX();
@@ -661,6 +666,7 @@ public class ConstraintSet {
                 view.setVisibility(constraint.visibility);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                     view.setAlpha(constraint.alpha);
+                    view.setRotation(constraint.rotation);
                     view.setRotationX(constraint.rotationX);
                     view.setRotationY(constraint.rotationY);
                     view.setScaleX(constraint.scaleX);
@@ -1370,6 +1376,15 @@ public class ConstraintSet {
         get(viewId).elevation = elevation;
         get(viewId).applyElevation = true;
     }
+    /**
+     * Adjust the post-layout rotation about the Z axis of a view.
+     *
+     * @param viewId ID of view to adjust th X rotation
+     * @param rotationX the rotation about the X axis
+     */
+    public void setRotation(int viewId, float rotation) {
+        get(viewId).rotation = rotation;
+    }
 
     /**
      * Adjust the post-layout rotation about the X axis of a view.
@@ -2062,6 +2077,8 @@ public class ConstraintSet {
                     c.applyElevation = true;
                     c.elevation = a.getDimension(attr, c.elevation);
                     break;
+                case ROTATION:
+                    c.rotation = a.getFloat(attr,c.rotation);
                 case ROTATION_X:
                     c.rotationX = a.getFloat(attr, c.rotationX);
                     break;
