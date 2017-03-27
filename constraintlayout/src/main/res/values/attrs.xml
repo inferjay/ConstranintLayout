@@ -225,6 +225,7 @@
         <attr name="android:visibility"/>
         <attr name="android:alpha"/>
         <attr name="android:elevation"/>
+        <attr name="android:rotation"/>
         <attr name="android:rotationX"/>
         <attr name="android:rotationY"/>
         <attr name="android:scaleX"/>
