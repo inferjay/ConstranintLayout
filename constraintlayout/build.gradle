@@ -77,7 +77,7 @@ task makeJavadocs(type: Javadoc, dependsOn: project.configurations.doclava) {
         docDir = "javadoc-online"
         options.addStringOption("toroot", "/")
         options.addStringOption("hdf", "android.whichdoc online")
-        options.addStringOption("hdf", "dac true")
+        options.addStringOption("hdf", "dac")
         options.addBooleanOption("devsite", true)
         options.addBooleanOption("constraintSupportRef", true)
     }
