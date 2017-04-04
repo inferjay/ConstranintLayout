@@ -392,6 +392,7 @@ public class ConstraintLayout extends ViewGroup {
     public static final String VERSION="ConstraintLayout-1.1.0";
     private static final String TAG = "ConstraintLayout";
     private static final boolean SIMPLE_LAYOUT = true;
+    private static final boolean USE_CONSTRAINTS_HELPER = true;
 
     SparseArray<View> mChildrenByIds = new SparseArray<>();
 
@@ -659,11 +660,20 @@ public class ConstraintLayout extends ViewGroup {
 
     private void setChildrenConstraints() {
         final boolean isInEditMode = isInEditMode();
-
+        
+        final int count = getChildCount();
+        if (USE_CONSTRAINTS_HELPER) {
+            for (int i = 0; i < count; i++) {
+                final View child = getChildAt(i);
+                if (child instanceof Constraints) {
+                    mConstraintSet = ((Constraints) child).getConstraintSet();
+                }
+            }
+        }
         if (mConstraintSet != null) {
             mConstraintSet.applyToInternal(this);
         }
-        final int count = getChildCount();
+
         mLayoutWidget.removeAllChildren();
 
         final int helperCount = mConstraintHelpers.size();

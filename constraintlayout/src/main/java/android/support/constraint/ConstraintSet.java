@@ -470,6 +470,23 @@ public class ConstraintSet {
             return clone;
         }
 
+        private void fillFromConstraints(int viewId, Constraints.LayoutParams param) {
+            fillFrom(viewId, param);
+            alpha = param.alpha;
+            rotation = param.rotation;
+            rotationX = param.rotationX;
+            rotationY = param.rotationY;
+            scaleX = param.scaleX;
+            scaleY = param.scaleY;
+            transformPivotX = param.transformPivotX;
+            transformPivotY = param.transformPivotY;
+            translationX = param.translationX;
+            translationY = param.translationY;
+            translationZ = param.translationZ;
+            elevation = param.elevation;
+            applyElevation = param.applyElevation;
+        }
+
         private void fillFrom(int viewId, ConstraintLayout.LayoutParams param) {
             mViewId = viewId;
             leftToLeft = param.leftToLeft;
@@ -511,6 +528,7 @@ public class ConstraintSet {
             heightMax = param.matchConstraintMaxHeight;
             widthMin = param.matchConstraintMinWidth;
             heightMin = param.matchConstraintMinHeight;
+
             int currentapiVersion = android.os.Build.VERSION.SDK_INT;
             if (currentapiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 endMargin = param.getMarginEnd();
@@ -635,6 +653,30 @@ public class ConstraintSet {
             }
         }
     }
+
+    /**
+     * Copy the layout parameters of a ConstraintLayout.
+     *
+     * @param constraints The ConstraintLayout to be copied
+     */
+    public void clone(Constraints constraints) {
+        int count = constraints.getChildCount();
+        mConstraints.clear();
+        for (int i = 0; i < count; i++) {
+            View view = constraints.getChildAt(i);
+            Constraints.LayoutParams param = (Constraints.LayoutParams) view.getLayoutParams();
+
+            int id = view.getId();
+            if (!mConstraints.containsKey(id)) {
+                mConstraints.put(id, new Constraint());
+            }
+            Constraint constraint = mConstraints.get(id);
+            constraint.fillFromConstraints(id, param);
+
+
+        }
+    }
+
 
     /**
      * Apply the constraints to a ConstraintLayout.
