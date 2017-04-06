@@ -23,6 +23,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 
 /**
  * This defines the internally defined Constraint set
@@ -143,14 +144,15 @@ public class Constraints extends ViewGroup {
   public ConstraintSet getConstraintSet() {
     if (myConstraintSet == null) {
       myConstraintSet = new ConstraintSet();
-      myConstraintSet.clone(this);
     }
+    // TODO -- could be more efficient...
+    myConstraintSet.clone(this);
     return myConstraintSet;
   }
 
 
   @Override
   protected void onLayout(boolean changed, int l, int t, int r, int b) {
-
+    // do nothing
   }
 }

@@ -18,6 +18,7 @@ package android.support.constraint;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.support.constraint.solver.widgets.ConstraintAnchor;
@@ -416,6 +417,7 @@ public class ConstraintLayout extends ViewGroup {
     private ConstraintSet mConstraintSet = null;
 
     private String mTitle;
+    private int mConstraintSetId = -1;
 
     public ConstraintLayout(Context context) {
         super(context);
@@ -470,8 +472,13 @@ public class ConstraintLayout extends ViewGroup {
                     mTitle = a.getString(attr);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_constraintSet) {
                     int id = a.getResourceId(attr, 0);
-                    mConstraintSet = new ConstraintSet();
-                    mConstraintSet.load(getContext(),id);
+                    try {
+                        mConstraintSet = new ConstraintSet();
+                        mConstraintSet.load(getContext(), id);
+                    } catch (Resources.NotFoundException e) {
+                        mConstraintSet = null;
+                    }
+                    mConstraintSetId = id;
                 }
             }
             a.recycle();
@@ -662,10 +669,10 @@ public class ConstraintLayout extends ViewGroup {
         final boolean isInEditMode = isInEditMode();
         
         final int count = getChildCount();
-        if (USE_CONSTRAINTS_HELPER) {
+        if (USE_CONSTRAINTS_HELPER && mConstraintSetId != -1) {
             for (int i = 0; i < count; i++) {
                 final View child = getChildAt(i);
-                if (child instanceof Constraints) {
+                if (child.getId() == mConstraintSetId && child instanceof Constraints) {
                     mConstraintSet = ((Constraints) child).getConstraintSet();
                 }
             }

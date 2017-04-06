@@ -672,11 +672,8 @@ public class ConstraintSet {
             }
             Constraint constraint = mConstraints.get(id);
             constraint.fillFromConstraints(id, param);
-
-
         }
     }
-
 
     /**
      * Apply the constraints to a ConstraintLayout.
