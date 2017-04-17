@@ -75,11 +75,11 @@ task makeJavadocs(type: Javadoc, dependsOn: project.configurations.doclava) {
     def docDir = "javadoc-offline"
     if (project.hasProperty("online")) {
         docDir = "javadoc-online"
+        options.addStringOption("dac_libraryroot", "android/support/constraint/")
+        options.addStringOption("dac_dataname", "CONSTRAINT_DATA")
         options.addStringOption("toroot", "/")
-        options.addStringOption("hdf", "android.whichdoc online")
         options.addStringOption("hdf", "dac")
         options.addBooleanOption("devsite", true)
-        options.addBooleanOption("constraintSupportRef", true)
     }
 
     title = null
