@@ -85,8 +85,10 @@ public class SolverVariable {
             case ERROR: {
                 return "e" + uniqueId;
             }
+            case UNKNOWN:
+                return "V" + uniqueId;
         }
-        return "V" + uniqueId;
+        throw new AssertionError(type.name());
     }
 
     /**

@@ -130,8 +130,14 @@ public class Guideline extends ConstraintWidget {
                 }
             }
             break;
+            case BASELINE:
+            case CENTER:
+            case CENTER_X:
+            case CENTER_Y:
+            case NONE:
+                return null;
         }
-        return null;
+        throw new AssertionError(anchorType.name());
     }
 
     @Override

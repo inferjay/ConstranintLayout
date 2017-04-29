@@ -1583,6 +1583,11 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             anchor = widget.mBaseline;
                         }
                         break;
+                        case CENTER:
+                        case CENTER_X:
+                        case CENTER_Y:
+                        case NONE:
+                            break;
                     }
                     ConstraintAnchor target = anchor.mTarget;
                     if (target == null) {

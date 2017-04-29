@@ -313,8 +313,13 @@ public class ConstraintAnchor {
                 }
                 return isCompatible;
             }
+            case BASELINE:
+            case CENTER_X:
+            case CENTER_Y:
+            case NONE:
+                return false;
         }
-        return false;
+        throw new AssertionError(mType.name());
     }
 
     /**
@@ -329,8 +334,14 @@ public class ConstraintAnchor {
             case TOP:
             case BOTTOM:
                 return true;
+            case BASELINE:
+            case CENTER:
+            case CENTER_X:
+            case CENTER_Y:
+            case NONE:
+                return false;
         }
-        return false;
+        throw new AssertionError(mType.name());
     }
 
     /**
@@ -360,8 +371,10 @@ public class ConstraintAnchor {
             case BASELINE: {
                 return target == Type.TOP || target == Type.BOTTOM || target == Type.CENTER_Y || target == Type.BASELINE;
             }
+            case NONE:
+                return false;
         }
-        return false;
+        throw new AssertionError(mType.name());
     }
 
     /**
@@ -406,8 +419,14 @@ public class ConstraintAnchor {
             case CENTER:
             case CENTER_X:
                 return false;
+            case CENTER_Y:
+            case TOP:
+            case BOTTOM:
+            case BASELINE:
+            case NONE:
+                return true;
         }
-        return true;
+        throw new AssertionError(mType.name());
     }
 
     /**
@@ -444,8 +463,9 @@ public class ConstraintAnchor {
             case CENTER_Y: return 1;
             case BASELINE: return 2;
             case CENTER: return 3;
+            case NONE: return 0;
         }
-        return 0;
+        throw new AssertionError(mType.name());
     }
 
     /**
@@ -465,8 +485,9 @@ public class ConstraintAnchor {
             case TOP: return 2;
             case BOTTOM: return 2;
             case CENTER: return 2;
+            case NONE: return 0;
         }
-        return 0;
+        throw new AssertionError(mType.name());
     }
 
     /**
@@ -526,8 +547,12 @@ public class ConstraintAnchor {
                     default: return false;
                 }
             }
+            case BASELINE:
+            case CENTER:
+            case NONE:
+                return false;
         }
-        return false;
+        throw new AssertionError(mType.name());
     }
 
     /**
@@ -620,7 +645,13 @@ public class ConstraintAnchor {
             case BOTTOM: {
                 return mOwner.mTop;
             }
+            case BASELINE:
+            case CENTER:
+            case CENTER_X:
+            case CENTER_Y:
+            case NONE:
+                return null;
         }
-        return null;
+        throw new AssertionError(mType.name());
     }
 }

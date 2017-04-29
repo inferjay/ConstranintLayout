@@ -869,6 +869,12 @@ public class ConstraintWidget {
                 mBottom.mGoneMargin = goneMargin;
             }
             break;
+            case BASELINE:
+            case CENTER:
+            case CENTER_X:
+            case CENTER_Y:
+            case NONE:
+                break;
         }
     }
 
@@ -1821,8 +1827,10 @@ public class ConstraintWidget {
             case CENTER: {
                 return mCenter;
             }
+            case NONE:
+                return null;
         }
-        return null;
+        throw new AssertionError(anchorType.name());
     }
 
     /**
