@@ -47,6 +47,7 @@ public class Barrier extends ConstraintHelper {
     private int mResolvedType = LEFT;
     private Context myContext;
     private android.support.constraint.solver.widgets.Barrier mBarrier = new android.support.constraint.solver.widgets.Barrier();
+    private String mReferenceIds;
 
     public Barrier(Context context) {
         super(context);
@@ -88,19 +89,45 @@ public class Barrier extends ConstraintHelper {
         if (myContext == null) {
             return;
         }
-        int tag = getResources().getIdentifier(idString, "id", myContext.getPackageName());
-        if (tag != 0) {
-            setTag(tag, null);
-            Log.v("Barrier","adding tag "+tag);
-        } else {
-            Log.w("Barrier", "Could not fine id of \""+idString+"\"");
+        int tag = 0;
+        try {
+            Class res = R.id.class;
+            Field field = res.getField(idString);
+            tag = field.getInt(null);
+        }
+        catch (Exception e) {
+            // Do nothing
+        }
+        if (tag == 0) {
+            tag = myContext.getResources().getIdentifier(idString, "id", myContext.getPackageName());
+        }
+        if (tag == 0 && isInEditMode() && getParent() instanceof ConstraintLayout) {
+            ConstraintLayout constraintLayout = (ConstraintLayout) getParent();
+            Object value = constraintLayout.getDesignInformation(0, idString);
+            if (value != null && value instanceof Integer) {
+                tag = (Integer) value;
+            }
         }
 
+        if (tag != 0) {
+            setTag(tag, null);
+        } else {
+            Log.w("Barrier", "Could not find id of \""+idString+"\"");
+        }
+    }
+
+    public void updatePreLayout(ConstraintLayout container) {
+        if (isInEditMode()) {
+            setIds(mReferenceIds);
+        }
+        super.updatePreLayout(container);
     }
 
     public void setIds(String idList) {
+        if (idList == null) {
+            return;
+        }
         int begin = 0;
-        int len = idList.length();
         while (true) {
             int end = idList.indexOf(',', begin);
             if (end == -1) {
@@ -157,7 +184,8 @@ public class Barrier extends ConstraintHelper {
                     setType(a.getInt(attr, LEFT));
                 }
                 if (attr == R.styleable.ConstraintLayout_Layout_constraint_referenced_ids) {
-                    setIds(a.getString(attr));
+                    mReferenceIds = a.getString(attr);
+                    setIds(mReferenceIds);
                 }
             }
         }

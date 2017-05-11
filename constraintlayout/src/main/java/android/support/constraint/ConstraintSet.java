@@ -26,7 +26,7 @@ import android.support.constraint.ConstraintLayout.LayoutParams;
 import android.util.*;
 import android.view.LayoutInflater;
 import android.view.View;
-import java.lang.reflect.InvocationTargetException;
+
 import java.util.Arrays;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -401,7 +401,7 @@ public class ConstraintSet {
         public int heightMin = UNSET;
         public int mBarrierDirection = UNSET;
         public int mHelperType = UNSET;
-        public int []mRefrenceIds;
+        public int [] mReferenceIds;
 
         public Constraint clone() {
             Constraint clone = new Constraint();
@@ -473,8 +473,8 @@ public class ConstraintSet {
             clone.heightMin = heightMin;
             clone.mBarrierDirection = mBarrierDirection;
             clone.mHelperType = mHelperType;
-            if (mRefrenceIds != null) {
-                clone.mRefrenceIds = Arrays.copyOf(mRefrenceIds, mRefrenceIds.length);
+            if (mReferenceIds != null) {
+                clone.mReferenceIds = Arrays.copyOf(mReferenceIds, mReferenceIds.length);
             }
             return clone;
         }
@@ -485,7 +485,7 @@ public class ConstraintSet {
                 mHelperType = BARRIER_TYPE;
                 Barrier barrier = (Barrier)helper;
                 mBarrierDirection = barrier.getType();
-                mRefrenceIds = barrier.getReferencedIds();
+                mReferenceIds = barrier.getReferencedIds();
             }
         }
 
@@ -726,7 +726,7 @@ public class ConstraintSet {
                         case BARRIER_TYPE:
                             Barrier barrier = (Barrier) view;
                             barrier.setId(id);
-                            barrier.setReferencedIds(constraint.mRefrenceIds);
+                            barrier.setReferencedIds(constraint.mReferenceIds);
                             barrier.setType(constraint.mBarrierDirection);
                             ConstraintLayout.LayoutParams param = constraintLayout
                                 .generateDefaultLayoutParams();
@@ -767,7 +767,7 @@ public class ConstraintSet {
                     case BARRIER_TYPE:
                         Barrier barrier = new Barrier(constraintLayout.getContext());
                         barrier.setId(id);
-                        barrier.setReferencedIds(constraint.mRefrenceIds);
+                        barrier.setReferencedIds(constraint.mReferenceIds);
                         barrier.setType(constraint.mBarrierDirection);
                         ConstraintLayout.LayoutParams param = constraintLayout
                             .generateDefaultLayoutParams();
@@ -1899,7 +1899,7 @@ public class ConstraintSet {
         constraint.mHelperType = BARRIER_TYPE;
         constraint.mBarrierDirection = direction;
         constraint.mIsGuideline = false;
-        constraint.mRefrenceIds = referenced;
+        constraint.mReferenceIds = referenced;
     }
 
     /**

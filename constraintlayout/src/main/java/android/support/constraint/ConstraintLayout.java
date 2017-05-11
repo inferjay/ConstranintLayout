@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import static android.support.constraint.ConstraintLayout.LayoutParams.*;
@@ -419,6 +420,44 @@ public class ConstraintLayout extends ViewGroup {
     private String mTitle;
     private int mConstraintSetId = -1;
 
+    private HashMap<String, Integer> mDesignIds = new HashMap<>();
+
+    /**
+     * @hide
+     */
+    public final static int DESIGN_INFO_ID = 0;
+
+    /**
+     * @hide
+     */
+    public void setDesignInformation(int type, Object value1, Object value2) {
+        if (type == DESIGN_INFO_ID && value1 instanceof String && value2 instanceof Integer) {
+            if (mDesignIds == null) {
+                mDesignIds = new HashMap<>();
+            }
+            String name = (String) value1;
+            int index = name.indexOf("/");
+            if (index != -1) {
+                name = name.substring(index + 1);
+            }
+            int id = (Integer) value2;
+            mDesignIds.put(name, id);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public Object getDesignInformation(int type, Object value) {
+        if (type == DESIGN_INFO_ID && value instanceof String) {
+            String name = (String) value;
+            if (mDesignIds != null && mDesignIds.containsKey(name)) {
+                return mDesignIds.get(name);
+            }
+        }
+        return null;
+    }
+
     public ConstraintLayout(Context context) {
         super(context);
         init(null);
@@ -667,8 +706,19 @@ public class ConstraintLayout extends ViewGroup {
 
     private void setChildrenConstraints() {
         final boolean isInEditMode = isInEditMode();
-        
+
         final int count = getChildCount();
+        if (isInEditMode) {
+            // In design mode, let's make sure we keep track of the ids; in Studio, a build step
+            // might not have been done yet, so asking the system for ids can break. So to be safe,
+            // we save the current ids, which helpers can ask for.
+            for (int i = 0; i < count; i++) {
+                final View view = getChildAt(i);
+                String IdAsString = getResources().getResourceName(view.getId());
+                setDesignInformation(DESIGN_INFO_ID, IdAsString, view.getId());
+            }
+        }
+
         if (USE_CONSTRAINTS_HELPER && mConstraintSetId != -1) {
             for (int i = 0; i < count; i++) {
                 final View child = getChildAt(i);
