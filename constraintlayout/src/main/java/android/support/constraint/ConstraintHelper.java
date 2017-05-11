@@ -40,6 +40,24 @@ public abstract class ConstraintHelper extends View {
         }
     }
 
+    /**
+     * Helpers typically reference a collection of ids
+     * @return ids referenced
+     */
+    public int[] getReferencedIds() {
+        return Arrays.copyOf(mIds, mCount);
+    }
+
+    /**
+     * Helpers typically reference a collection of ids
+     * @return ids referenced
+     */
+    public void setReferencedIds(int[] ids) {
+        for (int i = 0; i < ids.length; i++) {
+            setTag(ids[i], null);
+        }
+    }
+
     @Override
     public void setTag(int tag, Object value) {
         if (mCount + 1 > mIds.length) {

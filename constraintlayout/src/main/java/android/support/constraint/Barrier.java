@@ -18,14 +18,17 @@ package android.support.constraint;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.os.Build;
 import android.support.constraint.solver.widgets.ConstraintWidget;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 
 /**
@@ -42,36 +45,75 @@ public class Barrier extends ConstraintHelper {
 
     private int mIndicatedType = LEFT;
     private int mResolvedType = LEFT;
-
+    private Context myContext;
     private android.support.constraint.solver.widgets.Barrier mBarrier = new android.support.constraint.solver.widgets.Barrier();
 
     public Barrier(Context context) {
         super(context);
         super.setVisibility(View.GONE);
+        myContext = context;
         init(null);
     }
 
     public Barrier(Context context, AttributeSet attrs) {
         super(context, attrs);
         super.setVisibility(View.GONE);
+        myContext = context;
         init(attrs);
+
     }
 
     public Barrier(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         super.setVisibility(View.GONE);
+        myContext = context;
         init(attrs);
     }
 
     public Barrier(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr);
         super.setVisibility(View.GONE);
+        myContext = context;
         init(attrs);
+    }
+
+    public int getType() {
+        return mIndicatedType;
+    }
+
+    public void addID(String idString) {
+        if (idString == null) {
+            return;
+        }
+        if (myContext == null) {
+            return;
+        }
+        int tag = getResources().getIdentifier(idString, "id", myContext.getPackageName());
+        if (tag != 0) {
+            setTag(tag, null);
+            Log.v("Barrier","adding tag "+tag);
+        } else {
+            Log.w("Barrier", "Could not fine id of \""+idString+"\"");
+        }
+
+    }
+
+    public void setIds(String idList) {
+        int begin = 0;
+        int len = idList.length();
+        while (true) {
+            int end = idList.indexOf(',', begin);
+            if (end == -1) {
+                addID(idList.substring(begin));
+                break;
+            }
+            addID(idList.substring(begin, end));
+            begin = end + 1;
+        }
     }
 
     /**
      * Set the barrier type
-     * @param type
      */
     public void setType(int type) {
         mIndicatedType = type;
@@ -113,6 +155,9 @@ public class Barrier extends ConstraintHelper {
                 int attr = a.getIndex(i);
                 if (attr == R.styleable.ConstraintLayout_Layout_barrierDirection) {
                     setType(a.getInt(attr, LEFT));
+                }
+                if (attr == R.styleable.ConstraintLayout_Layout_constraint_referenced_ids) {
+                    setIds(a.getString(attr));
                 }
             }
         }

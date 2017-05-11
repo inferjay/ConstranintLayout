@@ -26,6 +26,8 @@ import android.support.constraint.ConstraintLayout.LayoutParams;
 import android.util.*;
 import android.view.LayoutInflater;
 import android.view.View;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -189,6 +191,7 @@ public class ConstraintSet {
 
     private static final boolean DEBUG = false;
     private static final int[] VISIBILITY_FLAGS = new int[]{VISIBLE, INVISIBLE, GONE};
+    private static final int BARRIER_TYPE = 1;
 
     private HashMap<Integer, Constraint> mConstraints = new HashMap<Integer, Constraint>();
 
@@ -328,7 +331,6 @@ public class ConstraintSet {
     }
 
     private static class Constraint {
-
         boolean mIsGuideline = false;
         public int mWidth;
         public int mHeight;
@@ -397,6 +399,9 @@ public class ConstraintSet {
         public int heightMax = UNSET;
         public int widthMin = UNSET;
         public int heightMin = UNSET;
+        public int mBarrierDirection = UNSET;
+        public int mHelperType = UNSET;
+        public int []mRefrenceIds;
 
         public Constraint clone() {
             Constraint clone = new Constraint();
@@ -466,8 +471,22 @@ public class ConstraintSet {
             clone.heightMax = heightMax;
             clone.widthMin = widthMin;
             clone.heightMin = heightMin;
-
+            clone.mBarrierDirection = mBarrierDirection;
+            clone.mHelperType = mHelperType;
+            if (mRefrenceIds != null) {
+                clone.mRefrenceIds = Arrays.copyOf(mRefrenceIds, mRefrenceIds.length);
+            }
             return clone;
+        }
+
+        private void fillFromConstraints(ConstraintHelper helper, int viewId, Constraints.LayoutParams param) {
+            fillFromConstraints(viewId,param);
+            if (helper instanceof Barrier) {
+                mHelperType = BARRIER_TYPE;
+                Barrier barrier = (Barrier)helper;
+                mBarrierDirection = barrier.getType();
+                mRefrenceIds = barrier.getReferencedIds();
+            }
         }
 
         private void fillFromConstraints(int viewId, Constraints.LayoutParams param) {
@@ -671,6 +690,10 @@ public class ConstraintSet {
                 mConstraints.put(id, new Constraint());
             }
             Constraint constraint = mConstraints.get(id);
+            if (view instanceof ConstraintHelper) {
+                ConstraintHelper helper = (ConstraintHelper) view;
+                constraint.fillFromConstraints(helper, id, param);
+            }
             constraint.fillFromConstraints(id, param);
         }
     }
@@ -686,7 +709,7 @@ public class ConstraintSet {
     }
 
     /**
-     *
+     * Used to set constraints when used by constraint layout
      */
     void applyToInternal(ConstraintLayout constraintLayout) {
         int count = constraintLayout.getChildCount();
@@ -698,6 +721,20 @@ public class ConstraintSet {
             if (mConstraints.containsKey(id)) {
                 used.remove(id);
                 Constraint constraint = mConstraints.get(id);
+                if (constraint.mHelperType != UNSET) {
+                    switch (constraint.mHelperType) {
+                        case BARRIER_TYPE:
+                            Barrier barrier = (Barrier) view;
+                            barrier.setId(id);
+                            barrier.setReferencedIds(constraint.mRefrenceIds);
+                            barrier.setType(constraint.mBarrierDirection);
+                            ConstraintLayout.LayoutParams param = constraintLayout
+                                .generateDefaultLayoutParams();
+                            constraint.applyTo(param);
+                            break;
+
+                    }
+                }
                 ConstraintLayout.LayoutParams param = (ConstraintLayout.LayoutParams) view
                     .getLayoutParams();
                 constraint.applyTo(param);
@@ -725,6 +762,21 @@ public class ConstraintSet {
         }
         for (Integer id : used) {
             Constraint constraint = mConstraints.get(id);
+            if (constraint.mHelperType != UNSET) {
+                switch (constraint.mHelperType) {
+                    case BARRIER_TYPE:
+                        Barrier barrier = new Barrier(constraintLayout.getContext());
+                        barrier.setId(id);
+                        barrier.setReferencedIds(constraint.mRefrenceIds);
+                        barrier.setType(constraint.mBarrierDirection);
+                        ConstraintLayout.LayoutParams param = constraintLayout
+                            .generateDefaultLayoutParams();
+                        constraint.applyTo(param);
+                        constraintLayout.addView(barrier, param);
+                        break;
+
+                }
+            }
             if (constraint.mIsGuideline) {
                 Guideline g = new Guideline(constraintLayout.getContext());
                 g.setId(id);
@@ -1419,7 +1471,7 @@ public class ConstraintSet {
      * Adjust the post-layout rotation about the Z axis of a view.
      *
      * @param viewId ID of view to adjust th X rotation
-     * @param rotationX the rotation about the X axis
+     * @param rotation the rotation about the X axis
      */
     public void setRotation(int viewId, float rotation) {
         get(viewId).rotation = rotation;
@@ -1836,6 +1888,21 @@ public class ConstraintSet {
     }
 
     /**
+     * Creates a ConstraintLayout Barrier object.
+     *
+     * @param id
+     * @param direction Barrier.{LEFT,RIGHT,TOP,BOTTOM,START,END}
+     * @param referenced
+     */
+    public void createBarrier(int id, int direction, int... referenced) {
+        Constraint constraint = get(id);
+        constraint.mHelperType = BARRIER_TYPE;
+        constraint.mBarrierDirection = direction;
+        constraint.mIsGuideline = false;
+        constraint.mRefrenceIds = referenced;
+    }
+
+    /**
      * Set the guideline's distance form the top or left edge.
      *
      * @param guidelineID ID of the guideline
@@ -1872,6 +1939,9 @@ public class ConstraintSet {
         get(guidelineID).guideBegin = Constraint.UNSET;
     }
 
+    public void setBarrierType(int id, int type) {
+
+    }
     private Constraint get(int id) {
         if (!mConstraints.containsKey(id)) {
             mConstraints.put(id, new Constraint());
