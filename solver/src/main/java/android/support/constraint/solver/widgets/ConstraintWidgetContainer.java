@@ -1252,6 +1252,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             distToLeft += widget.getX();
         } else {
             if (widget.mRight.mTarget != null && widget.mLeft.mTarget != null
+                && widget.mIsWidthWrapContent
+                && widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
+                flags[FLAG_USE_OPTIMIZE] = false;
+                return;
+            }
+            if (widget.mRight.mTarget != null && widget.mLeft.mTarget != null
                     && ((widget.mRight.mTarget == widget.mLeft.mTarget)
                         || ((widget.mRight.mTarget.mOwner == widget.mLeft.mTarget.mOwner)
                             && (widget.mRight.mTarget.mOwner != widget.mParent)))) {
@@ -1350,6 +1356,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         } else if (!(widget.mBaseline.mTarget != null || widget.mTop.mTarget != null || widget.mBottom.mTarget != null)) {
             distToTop += widget.getY();
         } else {
+            if (widget.mBottom.mTarget != null && widget.mTop.mTarget != null
+                && widget.mIsHeightWrapContent
+                && widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
+                flags[FLAG_USE_OPTIMIZE] = false;
+                return;
+            }
             if (widget.mBottom.mTarget != null && widget.mTop.mTarget != null
                     && ((widget.mBottom.mTarget == widget.mTop.mTarget)
                         || ((widget.mBottom.mTarget.mOwner == widget.mTop.mTarget.mOwner)
@@ -1450,9 +1462,6 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         try {
             for (int j = 0; j < size; j++) {
                 ConstraintWidget widget = children.get(j);
-                System.out.println("in find wrap, looking at child " + j + " widget visited? "
-                    + widget.mHorizontalWrapVisited
-                    + " - " + widget.mVerticalWrapVisited);
                 if (widget.isRoot()) {
                     continue;
                 }

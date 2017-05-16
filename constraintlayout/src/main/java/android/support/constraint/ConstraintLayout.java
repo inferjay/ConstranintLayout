@@ -31,9 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 
 import static android.support.constraint.ConstraintLayout.LayoutParams.*;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -1043,6 +1041,8 @@ public class ConstraintLayout extends ViewGroup {
                 }
                 child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
 
+                widget.setWidthWrapContent(width == WRAP_CONTENT);
+                widget.setHeightWrapContent(height == WRAP_CONTENT);
                 width = child.getMeasuredWidth();
                 height = child.getMeasuredHeight();
             }

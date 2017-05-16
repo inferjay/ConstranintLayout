@@ -68,6 +68,8 @@ public class ConstraintWidget {
     int mMatchConstraintMaxWidth = 0;
     int mMatchConstraintMinHeight = 0;
     int mMatchConstraintMaxHeight = 0;
+    boolean mIsWidthWrapContent;
+    boolean mIsHeightWrapContent;
 
     /**
      * Define how the content of a widget should align, if the widget has children
@@ -409,6 +411,37 @@ public class ConstraintWidget {
     public void setParent(ConstraintWidget widget) {
         mParent = widget;
     }
+
+    /**
+     * Keep track of wrap_content for width
+     * @param widthWrapContent
+     */
+    public void setWidthWrapContent(boolean widthWrapContent) {
+        this.mIsWidthWrapContent = widthWrapContent;
+    }
+
+    /**
+     * Returns true if width is set to wrap_content
+     * @return
+     */
+    public boolean isWidthWrapContent() {
+        return mIsWidthWrapContent;
+    }
+
+    /**
+     * Keep track of wrap_content for height
+     * @param heightWrapContent
+     */
+    public void setHeightWrapContent(boolean heightWrapContent) {
+        this.mIsHeightWrapContent = heightWrapContent;
+    }
+
+    /**
+     * Returns true if height is set to wrap_content
+     * @return
+     */
+    public boolean isHeightWrapContent() { return mIsHeightWrapContent; }
+
 
     /**
      * Returns the type string if set
