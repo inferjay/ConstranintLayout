@@ -67,7 +67,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
 
     // Internal use.
     private boolean[] flags = new boolean[3];
-    private static final int FLAG_CHAIN_OPTIMIZE = 0;
+    private static final int FLAG_USE_OPTIMIZE = 0; // simple enough to use optimizer
     private static final int FLAG_CHAIN_DANGLING = 1;
     private static final int FLAG_RECOMPUTE_BOUNDS = 2;
 
@@ -381,7 +381,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             boolean isChainPacked = first.mHorizontalChainStyle == CHAIN_PACKED;
             ConstraintWidget widget = first;
             boolean isWrapContent = mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT;
-            if ((mOptimizationLevel == OPTIMIZATION_ALL || mOptimizationLevel == OPTIMIZATION_CHAIN) && flags[FLAG_CHAIN_OPTIMIZE]
+            if ((mOptimizationLevel == OPTIMIZATION_ALL || mOptimizationLevel == OPTIMIZATION_CHAIN) && flags[FLAG_USE_OPTIMIZE]
                     && widget.mHorizontalChainFixedPosition && !isChainPacked && !isWrapContent
                     && first.mHorizontalChainStyle == CHAIN_SPREAD) {
                 // TODO: implements direct resolution for CHAIN_SPREAD_INSIDE and CHAIN_PACKED
@@ -642,7 +642,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             boolean isChainPacked = first.mVerticalChainStyle == CHAIN_PACKED;
             ConstraintWidget widget = first;
             boolean isWrapContent = mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT;
-            if ((mOptimizationLevel == OPTIMIZATION_ALL || mOptimizationLevel == OPTIMIZATION_CHAIN) && flags[FLAG_CHAIN_OPTIMIZE]
+            if ((mOptimizationLevel == OPTIMIZATION_ALL || mOptimizationLevel == OPTIMIZATION_CHAIN) && flags[FLAG_USE_OPTIMIZE]
                     && widget.mVerticalChainFixedPosition && !isChainPacked && !isWrapContent
                     && first.mVerticalChainStyle == CHAIN_SPREAD) {
                 // TODO: implements direct resolution for CHAIN_SPREAD_INSIDE and CHAIN_PACKED
@@ -958,14 +958,15 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         DimensionBehaviour originalHorizontalDimensionBehaviour = mHorizontalDimensionBehaviour;
 
         if (DEBUG_LAYOUT) {
-            System.out.println("layout with prew: " + prew + " preh: " + preh);
+            System.out.println("layout with prew: " + prew + " (" + mHorizontalDimensionBehaviour
+                + ") preh: " + preh + " (" + mVerticalDimensionBehaviour + ")");
         }
         if (mOptimizationLevel == OPTIMIZATION_ALL
                 && (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT
                 || mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)) {
             // TODO: do the wrap calculation in two separate passes
             findWrapSize(mChildren, flags);
-            wrap_override = flags[FLAG_CHAIN_OPTIMIZE];
+            wrap_override = flags[FLAG_USE_OPTIMIZE];
             if (DEBUG_LAYOUT) {
                 System.out.println("layout with wrap width: " + mWrapWidth + " wrap height: " + mWrapHeight + " wrap override? " + wrap_override);
             }
@@ -1212,7 +1213,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
                 && widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
                 && widget.mDimensionRatio > 0) {
-            flags[FLAG_CHAIN_OPTIMIZE] = false;
+            flags[FLAG_USE_OPTIMIZE] = false;
             return;
         }
         int w = widget.getOptimizerWrapWidth();
@@ -1220,7 +1221,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
             if (widget.mVerticalDimensionBehaviour != DimensionBehaviour.MATCH_CONSTRAINT
                     && widget.mDimensionRatio > 0) {
-                flags[FLAG_CHAIN_OPTIMIZE] = false;
+                flags[FLAG_USE_OPTIMIZE] = false;
                 return;
                 // TODO: support ratio
                 // w = (int) (widget.mDimensionRatio * h);
@@ -1242,6 +1243,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                     distToLeft = guideline.getRelativeBegin();
                 } else if (guideline.getRelativeEnd() != Guideline.UNKNOWN) {
                     distToRight = guideline.getRelativeEnd();
+                } else if (guideline.getRelativePercent() != Guideline.UNKNOWN) {
+                    flags[FLAG_USE_OPTIMIZE] = false;
+                    return;
                 }
             }
         } else if (!(widget.mRight.isConnected() || (widget.mLeft.isConnected()))) {
@@ -1251,7 +1255,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                     && ((widget.mRight.mTarget == widget.mLeft.mTarget)
                         || ((widget.mRight.mTarget.mOwner == widget.mLeft.mTarget.mOwner)
                             && (widget.mRight.mTarget.mOwner != widget.mParent)))) {
-                flags[FLAG_CHAIN_OPTIMIZE] = false;
+                flags[FLAG_USE_OPTIMIZE] = false;
                 return;
             }
             if (widget.mRight.mTarget != null) {
@@ -1313,7 +1317,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         if (widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
             if (widget.mHorizontalDimensionBehaviour != DimensionBehaviour.MATCH_CONSTRAINT
                     && widget.mDimensionRatio > 0) {
-                flags[FLAG_CHAIN_OPTIMIZE] = false;
+                flags[FLAG_USE_OPTIMIZE] = false;
                 return;
                 // TODO: support ratio
                 // h = (int) (w / widget.mDimensionRatio);
@@ -1338,6 +1342,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                     distToTop = guideline.getRelativeBegin();
                 } else if (guideline.getRelativeEnd() != Guideline.UNKNOWN) {
                     distToBottom = guideline.getRelativeEnd();
+                } else if (guideline.getRelativePercent() != Guideline.UNKNOWN) {
+                    flags[FLAG_USE_OPTIMIZE] = false;
+                    return;
                 }
             }
         } else if (!(widget.mBaseline.mTarget != null || widget.mTop.mTarget != null || widget.mBottom.mTarget != null)) {
@@ -1347,7 +1354,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                     && ((widget.mBottom.mTarget == widget.mTop.mTarget)
                         || ((widget.mBottom.mTarget.mOwner == widget.mTop.mTarget.mOwner)
                             && (widget.mBottom.mTarget.mOwner != widget.mParent)))) {
-                flags[FLAG_CHAIN_OPTIMIZE] = false;
+                flags[FLAG_USE_OPTIMIZE] = false;
                 return;
             }
             if (widget.mBaseline.isConnected()) {
@@ -1438,53 +1445,63 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         int maxConnectWidth = 0;
         int maxConnectHeight = 0;
         final int size = children.size();
-        flags[FLAG_CHAIN_OPTIMIZE] = true;
+        flags[FLAG_USE_OPTIMIZE] = true;
 
-        for (int j = 0; j < size; j++) {
-            ConstraintWidget widget = children.get(j);
-            if (widget.isRoot()) {
-                continue;
+        try {
+            for (int j = 0; j < size; j++) {
+                ConstraintWidget widget = children.get(j);
+                System.out.println("in find wrap, looking at child " + j + " widget visited? "
+                    + widget.mHorizontalWrapVisited
+                    + " - " + widget.mVerticalWrapVisited);
+                if (widget.isRoot()) {
+                    continue;
+                }
+                if (!widget.mHorizontalWrapVisited) {
+                    findHorizontalWrapRecursive(widget, flags);
+                }
+                if (!flags[FLAG_USE_OPTIMIZE]) {
+                    return;
+                }
+                if (!widget.mVerticalWrapVisited) {
+                    findVerticalWrapRecursive(widget, flags);
+                }
+                if (!flags[FLAG_USE_OPTIMIZE]) {
+                    return;
+                }
+                int connectWidth = widget.mDistToLeft + widget.mDistToRight - widget.getWidth();
+                int connectHeight = widget.mDistToTop + widget.mDistToBottom - widget.getHeight();
+                if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_PARENT) {
+                    connectWidth = widget.getWidth() + widget.mLeft.mMargin + widget.mRight.mMargin;
+                }
+                if (widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_PARENT) {
+                    connectHeight =
+                        widget.getHeight() + widget.mTop.mMargin + widget.mBottom.mMargin;
+                }
+                if (widget.getVisibility() == GONE) {
+                    connectWidth = 0;
+                    connectHeight = 0;
+                }
+                maxLeftDist = Math.max(maxLeftDist, widget.mDistToLeft);
+                maxRightDist = Math.max(maxRightDist, widget.mDistToRight);
+                maxBottomDist = Math.max(maxBottomDist, widget.mDistToBottom);
+                maxTopDist = Math.max(maxTopDist, widget.mDistToTop);
+                maxConnectWidth = Math.max(maxConnectWidth, connectWidth);
+                maxConnectHeight = Math.max(maxConnectHeight, connectHeight);
             }
-            if (!widget.mHorizontalWrapVisited) {
-                findHorizontalWrapRecursive(widget, flags);
+            int max = Math.max(maxLeftDist, maxRightDist);
+            mWrapWidth = Math.max(mMinWidth, Math.max(max, maxConnectWidth));
+            max = Math.max(maxTopDist, maxBottomDist);
+            mWrapHeight = Math.max(mMinHeight, Math.max(max, maxConnectHeight));
+        } finally {
+            for (int j = 0; j < size; j++) {
+                ConstraintWidget child = children.get(j);
+                child.mHorizontalWrapVisited = false;
+                child.mVerticalWrapVisited = false;
+                child.mLeftHasCentered = false;
+                child.mRightHasCentered = false;
+                child.mTopHasCentered = false;
+                child.mBottomHasCentered = false;
             }
-            if (!widget.mVerticalWrapVisited) {
-                findVerticalWrapRecursive(widget, flags);
-            }
-            if (!flags[FLAG_CHAIN_OPTIMIZE]) {
-                return;
-            }
-            int connectWidth = widget.mDistToLeft + widget.mDistToRight - widget.getWidth();
-            int connectHeight = widget.mDistToTop + widget.mDistToBottom - widget.getHeight();
-            if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_PARENT) {
-                connectWidth = widget.getWidth() + widget.mLeft.mMargin + widget.mRight.mMargin;
-            }
-            if (widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_PARENT) {
-                connectHeight = widget.getHeight() + widget.mTop.mMargin + widget.mBottom.mMargin;
-            }
-            if (widget.getVisibility() == GONE) {
-                connectWidth = 0;
-                connectHeight = 0;
-            }
-            maxLeftDist = Math.max(maxLeftDist, widget.mDistToLeft);
-            maxRightDist = Math.max(maxRightDist, widget.mDistToRight);
-            maxBottomDist = Math.max(maxBottomDist, widget.mDistToBottom);
-            maxTopDist = Math.max(maxTopDist, widget.mDistToTop);
-            maxConnectWidth = Math.max(maxConnectWidth, connectWidth);
-            maxConnectHeight = Math.max(maxConnectHeight, connectHeight);
-        }
-        int max = Math.max(maxLeftDist, maxRightDist);
-        mWrapWidth = Math.max(mMinWidth, Math.max(max, maxConnectWidth));
-        max = Math.max(maxTopDist, maxBottomDist);
-        mWrapHeight = Math.max(mMinHeight, Math.max(max, maxConnectHeight));
-        for (int j = 0; j < size; j++) {
-            ConstraintWidget child = children.get(j);
-            child.mHorizontalWrapVisited = false;
-            child.mVerticalWrapVisited = false;
-            child.mLeftHasCentered = false;
-            child.mRightHasCentered = false;
-            child.mTopHasCentered = false;
-            child.mBottomHasCentered = false;
         }
     }
 
@@ -1903,7 +1920,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      */
     private int countMatchConstraintsChainedWidgets(LinearSystem system, ConstraintWidget[] chainEnds, ConstraintWidget widget, int direction, boolean[] flags) {
         int count = 0;
-        flags[FLAG_CHAIN_OPTIMIZE] = true; // will set to false if the chain is not optimizable
+        flags[FLAG_USE_OPTIMIZE] = true; // will set to false if the chain is not optimizable
         flags[FLAG_CHAIN_DANGLING] = false; // will set to true if the chain is not connected on one or both endpoints
         chainEnds[CHAIN_FIRST] = null;
         chainEnds[CHAIN_FIRST_VISIBLE] = null;
@@ -1939,10 +1956,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 }
                 if (widget.getVisibility() != GONE && widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                     if (widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
-                        flags[FLAG_CHAIN_OPTIMIZE] = false; // signal that this chain is not optimizable.
+                        flags[FLAG_USE_OPTIMIZE] = false; // signal that this chain is not optimizable.
                     }
                     if (widget.mDimensionRatio <= 0) {
-                        flags[FLAG_CHAIN_OPTIMIZE] = false; // signal that this chain is not optimizable.
+                        flags[FLAG_USE_OPTIMIZE] = false; // signal that this chain is not optimizable.
                         if (count + 1 >= mMatchConstraintsChainedWidgets.length) {
                             mMatchConstraintsChainedWidgets = Arrays.copyOf(mMatchConstraintsChainedWidgets, mMatchConstraintsChainedWidgets.length * 2);
                         }
@@ -2004,10 +2021,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 }
                 if (widget.getVisibility() != GONE && widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
                     if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
-                        flags[FLAG_CHAIN_OPTIMIZE] = false; // signal that this chain is not optimizable.
+                        flags[FLAG_USE_OPTIMIZE] = false; // signal that this chain is not optimizable.
                     }
                     if (widget.mDimensionRatio <= 0) {
-                        flags[FLAG_CHAIN_OPTIMIZE] = false; // signal that this chain is not optimizable.
+                        flags[FLAG_USE_OPTIMIZE] = false; // signal that this chain is not optimizable.
                         if (count + 1 >= mMatchConstraintsChainedWidgets.length) {
                             mMatchConstraintsChainedWidgets = Arrays.copyOf(mMatchConstraintsChainedWidgets, mMatchConstraintsChainedWidgets.length * 2);
                         }
