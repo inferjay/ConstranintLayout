@@ -714,8 +714,12 @@ public class ConstraintLayout extends ViewGroup {
             // we save the current ids, which helpers can ask for.
             for (int i = 0; i < count; i++) {
                 final View view = getChildAt(i);
-                String IdAsString = getResources().getResourceName(view.getId());
-                setDesignInformation(DESIGN_INFO_ID, IdAsString, view.getId());
+                try {
+                    String IdAsString = getResources().getResourceName(view.getId());
+                    setDesignInformation(DESIGN_INFO_ID, IdAsString, view.getId());
+                } catch (Resources.NotFoundException e) {
+                    // nothing
+                }
             }
         }
 
@@ -1072,6 +1076,8 @@ public class ConstraintLayout extends ViewGroup {
         mLayoutWidget.setX(paddingLeft);
         mLayoutWidget.setY(paddingTop);
         setSelfDimensionBehaviour(widthMeasureSpec, heightMeasureSpec);
+        int startingWidth = mLayoutWidget.getWidth();
+        int startingHeight = mLayoutWidget.getHeight();
         if (mDirtyHierarchy) {
             mDirtyHierarchy = false;
             updateHierarchy();
@@ -1102,6 +1108,8 @@ public class ConstraintLayout extends ViewGroup {
                     == ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
             boolean containerWrapHeight = mLayoutWidget.getVerticalDimensionBehaviour()
                     == ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
+            int minWidth = Math.max(mLayoutWidget.getWidth(), mMinWidth);
+            int minHeight = Math.max(mLayoutWidget.getHeight(), mMinHeight);
             for (int i = 0; i < sizeDependentWidgetsCount; i++) {
                 ConstraintWidget widget = mVariableDimensionsWidgets.get(i);
                 View child = (View) widget.getCompanionWidget();
@@ -1137,19 +1145,19 @@ public class ConstraintLayout extends ViewGroup {
                 int measuredHeight = child.getMeasuredHeight();
                 if (measuredWidth != widget.getWidth()) {
                     widget.setWidth(measuredWidth);
-                    if (containerWrapWidth && widget.getRight() > mLayoutWidget.getWidth()) {
+                    if (containerWrapWidth && widget.getRight() > minWidth) {
                         int w = widget.getRight()
                                 + widget.getAnchor(ConstraintAnchor.Type.RIGHT).getMargin();
-                        mLayoutWidget.setWidth(Math.max(mMinWidth, w));
+                        minWidth = Math.max(minWidth, w);
                     }
                     needSolverPass = true;
                 }
                 if (measuredHeight != widget.getHeight()) {
                     widget.setHeight(measuredHeight);
-                    if (containerWrapHeight && widget.getBottom() > mLayoutWidget.getHeight()) {
+                    if (containerWrapHeight && widget.getBottom() > minHeight) {
                         int h = widget.getBottom()
                                 + widget.getAnchor(ConstraintAnchor.Type.BOTTOM).getMargin();
-                        mLayoutWidget.setHeight(Math.max(mMinHeight, h));
+                        minHeight = Math.max(minHeight, h);
                     }
                     needSolverPass = true;
                 }
@@ -1166,7 +1174,33 @@ public class ConstraintLayout extends ViewGroup {
                 }
             }
             if (needSolverPass) {
+                mLayoutWidget.setWidth(startingWidth);
+                mLayoutWidget.setHeight(startingHeight);
                 solveLinearSystem();
+                needSolverPass = false;
+                if (mLayoutWidget.getWidth() < minWidth) {
+                    mLayoutWidget.setWidth(minWidth);
+                    needSolverPass = true;
+                }
+                if (mLayoutWidget.getHeight() < minHeight) {
+                    mLayoutWidget.setHeight(minHeight);
+                    needSolverPass = true;
+                }
+                if (needSolverPass) {
+                    solveLinearSystem();
+                }
+            }
+            for (int i = 0; i < sizeDependentWidgetsCount; i++) {
+                ConstraintWidget widget = mVariableDimensionsWidgets.get(i);
+                View child = (View) widget.getCompanionWidget();
+                if (child == null) {
+                    continue;
+                }
+                if (child.getWidth() != widget.getWidth() || child.getHeight() != widget.getHeight()) {
+                    int widthSpec = MeasureSpec.makeMeasureSpec(widget.getWidth(), MeasureSpec.EXACTLY);
+                    int heightSpec = MeasureSpec.makeMeasureSpec(widget.getHeight(), MeasureSpec.EXACTLY);
+                    child.measure(widthSpec, heightSpec);
+                }
             }
         }
 
