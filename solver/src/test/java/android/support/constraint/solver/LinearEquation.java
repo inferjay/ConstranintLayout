@@ -113,7 +113,8 @@ class LinearEquation {
             EquationVariable v = eq.get(i);
             SolverVariable sv = v.getSolverVariable();
             if (sv != null) {
-                row.variables.put(sv, v.getAmount().toFloat());
+                float previous = row.variables.get(sv);
+                row.variables.put(sv, previous + v.getAmount().toFloat());
             } else {
                 row.constantValue = v.getAmount().toFloat();
             }

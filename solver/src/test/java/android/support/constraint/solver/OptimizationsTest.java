@@ -15,10 +15,7 @@
  */
 package android.support.constraint.solver;
 
-import android.support.constraint.solver.widgets.ConstraintAnchor;
-import android.support.constraint.solver.widgets.ConstraintWidget;
-import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
-import android.support.constraint.solver.widgets.Guideline;
+import android.support.constraint.solver.widgets.*;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -27,10 +24,10 @@ public class OptimizationsTest {
 
     @Test
     public void testGuideline() {
-        testVerticalGuideline(ConstraintWidgetContainer.OPTIMIZATION_NONE);
-        testVerticalGuideline(ConstraintWidgetContainer.OPTIMIZATION_ALL);
-        testHorizontalGuideline(ConstraintWidgetContainer.OPTIMIZATION_NONE);
-        testHorizontalGuideline(ConstraintWidgetContainer.OPTIMIZATION_ALL);
+        testVerticalGuideline(Optimizer.OPTIMIZATION_NONE);
+        testVerticalGuideline(Optimizer.OPTIMIZATION_ALL);
+        testHorizontalGuideline(Optimizer.OPTIMIZATION_NONE);
+        testHorizontalGuideline(Optimizer.OPTIMIZATION_ALL);
     }
 
     public void testVerticalGuideline(int directResolution) {
@@ -111,8 +108,8 @@ public class OptimizationsTest {
 
     @Test
     public void testDependency() {
-        testDependency(ConstraintWidgetContainer.OPTIMIZATION_NONE);
-        testDependency(ConstraintWidgetContainer.OPTIMIZATION_ALL);
+        testDependency(Optimizer.OPTIMIZATION_NONE);
+        testDependency(Optimizer.OPTIMIZATION_ALL);
     }
 
     public void testDependency(int directResolution) {
@@ -149,8 +146,8 @@ public class OptimizationsTest {
 
     @Test
     public void testDependency2() {
-        testDependency2(ConstraintWidgetContainer.OPTIMIZATION_NONE);
-        testDependency2(ConstraintWidgetContainer.OPTIMIZATION_ALL);
+        testDependency2(Optimizer.OPTIMIZATION_NONE);
+        testDependency2(Optimizer.OPTIMIZATION_ALL);
     }
 
     public void testDependency2(int directResolution) {
@@ -187,8 +184,8 @@ public class OptimizationsTest {
 
     @Test
     public void testUnconstrainedDependency() {
-        testUnconstrainedDependency(ConstraintWidgetContainer.OPTIMIZATION_NONE);
-        testUnconstrainedDependency(ConstraintWidgetContainer.OPTIMIZATION_ALL);
+        testUnconstrainedDependency(Optimizer.OPTIMIZATION_NONE);
+        testUnconstrainedDependency(Optimizer.OPTIMIZATION_ALL);
     }
 
     public void testUnconstrainedDependency(int directResolution) {
@@ -227,8 +224,8 @@ public class OptimizationsTest {
 
     @Test
     public void testFullLayout() {
-        testFullLayout(ConstraintWidgetContainer.OPTIMIZATION_NONE);
-        testFullLayout(ConstraintWidgetContainer.OPTIMIZATION_ALL);
+        testFullLayout(Optimizer.OPTIMIZATION_NONE);
+        testFullLayout(Optimizer.OPTIMIZATION_ALL);
     }
 
     public void testFullLayout(int directResolution) {

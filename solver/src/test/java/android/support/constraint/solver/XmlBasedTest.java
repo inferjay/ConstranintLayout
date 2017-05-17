@@ -15,10 +15,7 @@
  */
 package android.support.constraint.solver;
 
-import android.support.constraint.solver.widgets.ConstraintAnchor;
-import android.support.constraint.solver.widgets.ConstraintWidget;
-import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
-import android.support.constraint.solver.widgets.Guideline;
+import android.support.constraint.solver.widgets.*;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.xml.sax.Attributes;
@@ -133,7 +130,7 @@ public class XmlBasedTest {
     @Test(dataProvider = "test1")
     public void testSolverXML(String file) {
         parseXML(file);
-        container.setOptimizationLevel(ConstraintWidgetContainer.OPTIMIZATION_NONE);
+        container.setOptimizationLevel(Optimizer.OPTIMIZATION_NONE);
         int[] perm = new int[boundsMap.size()];
         for (int i = 0; i < perm.length; i++) {
             perm[i] = i;
@@ -161,7 +158,7 @@ public class XmlBasedTest {
     public void testDirectResolutionXML(String file) {
 
         parseXML(file);
-        container.setOptimizationLevel(ConstraintWidgetContainer.OPTIMIZATION_ALL);
+        container.setOptimizationLevel(Optimizer.OPTIMIZATION_ALL);
         int[] perm = new int[boundsMap.size()];
         for (int i = 0; i < perm.length; i++) {
             perm[i] = i;

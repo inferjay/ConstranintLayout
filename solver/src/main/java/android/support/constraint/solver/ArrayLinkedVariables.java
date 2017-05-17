@@ -127,6 +127,10 @@ public class ArrayLinkedVariables {
             if (!mDidFillOnce) {
                 // only increment mLast if we haven't done the first filling pass
                 mLast++;
+                if (mLast >= mArrayIndices.length) {
+                    mDidFillOnce = true;
+                    mLast = mArrayIndices.length-1;
+                }
             }
             return;
         }
@@ -197,6 +201,10 @@ public class ArrayLinkedVariables {
         if (currentSize >= mArrayIndices.length) {
             mDidFillOnce = true;
         }
+        if (mLast >= mArrayIndices.length) {
+            mDidFillOnce = true;
+            mLast = mArrayIndices.length-1;
+        }
     }
 
     /**
@@ -222,6 +230,10 @@ public class ArrayLinkedVariables {
             if (!mDidFillOnce) {
                 // only increment mLast if we haven't done the first filling pass
                 mLast++;
+                if (mLast >= mArrayIndices.length) {
+                    mDidFillOnce = true;
+                    mLast = mArrayIndices.length-1;
+                }
             }
             return;
         }
@@ -439,16 +451,37 @@ public class ArrayLinkedVariables {
         }
     }
 
+    private boolean isNew(SolverVariable variable, LinearSystem system) {
+        for (int i = 0; i < system.mNumRows; i++) {
+            ArrayRow row = system.mRows[i];
+            if (row.hasVariable(variable)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
-     * Return a candidate for a pivot variable
+     * Pick a subject variable out of the existing ones.
+     * - if a variable is unrestricted
+     * - or if it's a negative new variable (not found elsewhere)
+     * - otherwise we return null
      *
-     * @return a candidate variable we can pivot on
+     * @return a candidate variable we can pivot on or null if not found
      */
-    SolverVariable pickPivotCandidate() {
+    SolverVariable chooseSubject(LinearSystem system) {
+        // if unrestricted, pick it
+        // if restricted, needs to be < 0 and new
+        //
         SolverVariable restrictedCandidate = null;
         SolverVariable unrestrictedCandidate = null;
+        float unrestrictedCandidateAmount = 0;
+        float restrictedCandidateAmount = 0;
+        boolean unrestrictedCandidateIsNew = false;
+        boolean restrictedCandidateIsNew = false;
         int current = mHead;
         int counter = 0;
+        float candidateAmount = 0;
         while (current != NONE && counter < currentSize) {
             float amount = mArrayValues[current];
             float epsilon = 0.001f;
@@ -463,16 +496,36 @@ public class ArrayLinkedVariables {
                     amount = 0;
                 }
             }
-            if (amount != 0) {
-                SolverVariable variable = mCache.mIndexedVariables[mArrayIndices[current]];
-                if (variable.mType == SolverVariable.Type.UNRESTRICTED) {
-                    if (amount < 0) {
-                        return variable;
-                    } else if (unrestrictedCandidate == null) {
-                        unrestrictedCandidate = variable;
+            SolverVariable variable = mCache.mIndexedVariables[mArrayIndices[current]];
+            if (variable.mType == SolverVariable.Type.UNRESTRICTED) {
+                if (unrestrictedCandidate == null) {
+                    unrestrictedCandidate = variable;
+                    unrestrictedCandidateAmount = amount;
+                    unrestrictedCandidateIsNew = isNew(variable, system);
+                } else if (unrestrictedCandidateAmount > amount) {
+                    unrestrictedCandidate = variable;
+                    unrestrictedCandidateAmount = amount;
+                    unrestrictedCandidateIsNew = isNew(variable, system);
+                } else if (!unrestrictedCandidateIsNew && isNew(variable, system)) {
+                    unrestrictedCandidate = variable;
+                    unrestrictedCandidateAmount = amount;
+                    unrestrictedCandidateIsNew = true;
+                }
+            } else if (unrestrictedCandidate == null) {
+                if (amount < 0) {
+                    if (restrictedCandidate == null) {
+                        restrictedCandidate = variable;
+                        restrictedCandidateAmount = amount;
+                        restrictedCandidateIsNew = isNew(variable, system);
+                    } else if (restrictedCandidateAmount > amount) {
+                        restrictedCandidate = variable;
+                        restrictedCandidateAmount = amount;
+                        restrictedCandidateIsNew = isNew(variable, system);
+                    } else if (!restrictedCandidateIsNew && isNew(variable, system)) {
+                        restrictedCandidate = variable;
+                        restrictedCandidateAmount = amount;
+                        restrictedCandidateIsNew = true;
                     }
-                } else if (amount < 0 && (restrictedCandidate == null || variable.strength < restrictedCandidate.strength)) {
-                    restrictedCandidate = variable;
                 }
             }
             current = mArrayNextIndices[current]; counter++;
@@ -571,6 +624,7 @@ public class ArrayLinkedVariables {
     }
 
     /**
+     * TODO: check if still needed
      * Return a pivot candidate
      * @return return a variable we can pivot on
      */
@@ -595,6 +649,33 @@ public class ArrayLinkedVariables {
             return pivot;
         }
         return candidate;
+    }
+
+    SolverVariable getPivotCandidate(boolean[] avoid, SolverVariable exclude) {
+        int current = mHead;
+        int counter = 0;
+        SolverVariable pivot = null;
+        float value = 0;
+        while (current != NONE && counter < currentSize) {
+            if (mArrayValues[current] < 0) {
+                // We can return the first negative candidate as in ArrayLinkedVariables
+                // they are already sorted by id
+
+                SolverVariable v = mCache.mIndexedVariables[mArrayIndices[current]];
+                if (!((avoid != null && avoid[v.id]) || (v == exclude))) {
+                    if (v.mType == SolverVariable.Type.SLACK
+                            || v.mType == SolverVariable.Type.ERROR) {
+                        float currentValue = mArrayValues[current];
+                        if (currentValue < value) {
+                            value = currentValue;
+                            pivot = v;
+                        }
+                    }
+                }
+            }
+            current = mArrayNextIndices[current]; counter++;
+        }
+        return pivot;
     }
 
     /**

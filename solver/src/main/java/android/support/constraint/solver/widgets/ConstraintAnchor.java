@@ -16,6 +16,7 @@
 package android.support.constraint.solver.widgets;
 
 import android.support.constraint.solver.Cache;
+import android.support.constraint.solver.LinearSystem;
 import android.support.constraint.solver.SolverVariable;
 
 import java.util.ArrayList;
@@ -73,6 +74,56 @@ public class ConstraintAnchor {
     SolverVariable mSolverVariable;
     int mGroup = ANY_GROUP;
 
+    // -----------------------------------------------
+    // Direct resolution management (experimental)
+    // -----------------------------------------------
+
+    boolean isResolved = false;
+    int resolvedValue = -1;
+    ConstraintAnchor resolvedAnchor = null;
+
+    void resolve(LinearSystem system, int value, ConstraintAnchor anchor) {
+        if (mSolverVariable == null) {
+            mSolverVariable = system.createObjectVariable(this);
+        }
+        isResolved = true;
+        resolvedValue = value;
+        resolvedAnchor = anchor;
+    }
+
+    void addResolvedValue(LinearSystem system) {
+        if (mSolverVariable == null) {
+            mSolverVariable = system.createObjectVariable(this);
+        }
+        if (resolvedAnchor == null) {
+            system.addEquality(mSolverVariable, resolvedValue);
+        } else {
+            SolverVariable v = system.createObjectVariable(resolvedAnchor);
+            system.addEquality(mSolverVariable, v, resolvedValue, SolverVariable.STRENGTH_FIXED);
+        }
+    }
+
+    ConstraintAnchor findResolvedAnchor(int margin[]) {
+        ConstraintAnchor target = mTarget;
+        margin[0] = getMargin();
+        ConstraintAnchor lastTarget = mTarget;
+        if (mTarget.isResolved) {
+            lastTarget = mTarget.resolvedAnchor;
+            margin[0] = mTarget.resolvedValue;
+        } else {
+            while (target != null) {
+                lastTarget = target;
+                if (target.mTarget != null) {
+                    margin[0] += target.getMargin();
+                }
+                target = target.mTarget;
+            }
+        }
+        return lastTarget;
+    }
+
+    // -----------------------------------------------
+
     /**
      * Constructor
      * @param owner the widget owner of this anchor.
@@ -94,7 +145,7 @@ public class ConstraintAnchor {
      */
     public void resetSolverVariable(Cache cache) {
         if (mSolverVariable == null) {
-            mSolverVariable = new SolverVariable(SolverVariable.Type.UNRESTRICTED);
+            mSolverVariable = new SolverVariable(SolverVariable.Type.UNRESTRICTED, null);
         } else {
             mSolverVariable.reset();
         }

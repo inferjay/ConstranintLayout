@@ -20,6 +20,9 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Build;
 import android.support.constraint.solver.widgets.ConstraintAnchor;
 import android.support.constraint.solver.widgets.ConstraintWidget;
@@ -393,6 +396,7 @@ public class ConstraintLayout extends ViewGroup {
     private static final String TAG = "ConstraintLayout";
     private static final boolean SIMPLE_LAYOUT = true;
     private static final boolean USE_CONSTRAINTS_HELPER = true;
+    private static final boolean DEBUG = false;
 
     SparseArray<View> mChildrenByIds = new SparseArray<>();
 
@@ -703,7 +707,7 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     private void setChildrenConstraints() {
-        final boolean isInEditMode = isInEditMode();
+        final boolean isInEditMode = DEBUG || isInEditMode();
 
         final int count = getChildCount();
         if (isInEditMode) {
@@ -715,6 +719,7 @@ public class ConstraintLayout extends ViewGroup {
                 try {
                     String IdAsString = getResources().getResourceName(view.getId());
                     setDesignInformation(DESIGN_INFO_ID, IdAsString, view.getId());
+                    getTargetWidget(view.getId()).setDebugName(IdAsString);
                 } catch (Resources.NotFoundException e) {
                     // nothing
                 }
@@ -1118,7 +1123,7 @@ public class ConstraintLayout extends ViewGroup {
 
         // let's solve the linear system.
         if (getChildCount() > 0) {
-            solveLinearSystem(); // first pass
+            solveLinearSystem("First pass");
         }
         int childState = 0;
 
@@ -1169,6 +1174,7 @@ public class ConstraintLayout extends ViewGroup {
 
                 int measuredWidth = child.getMeasuredWidth();
                 int measuredHeight = child.getMeasuredHeight();
+
                 if (measuredWidth != widget.getWidth()) {
                     widget.setWidth(measuredWidth);
                     if (containerWrapWidth && widget.getRight() > minWidth) {
@@ -1202,7 +1208,7 @@ public class ConstraintLayout extends ViewGroup {
             if (needSolverPass) {
                 mLayoutWidget.setWidth(startingWidth);
                 mLayoutWidget.setHeight(startingHeight);
-                solveLinearSystem();
+                solveLinearSystem("2nd pass");
                 needSolverPass = false;
                 if (mLayoutWidget.getWidth() < minWidth) {
                     mLayoutWidget.setWidth(minWidth);
@@ -1213,7 +1219,7 @@ public class ConstraintLayout extends ViewGroup {
                     needSolverPass = true;
                 }
                 if (needSolverPass) {
-                    solveLinearSystem();
+                    solveLinearSystem("3rd pass");
                 }
             }
             for (int i = 0; i < sizeDependentWidgetsCount; i++) {
@@ -1312,7 +1318,7 @@ public class ConstraintLayout extends ViewGroup {
      *
      * Solve the linear system
      */
-    protected void solveLinearSystem() {
+    protected void solveLinearSystem(String reason) {
         if (SIMPLE_LAYOUT) {
             mLayoutWidget.layout();
         } else {
@@ -1369,6 +1375,7 @@ public class ConstraintLayout extends ViewGroup {
                     b -= dy;
                 }
             }
+
             child.layout(l, t, r, b);
             if (child instanceof Placeholder) {
                 Placeholder holder = (Placeholder) child;
@@ -1446,6 +1453,48 @@ public class ConstraintLayout extends ViewGroup {
      */
     public View getViewById(int id) {
         return mChildrenByIds.get(id);
+    }
+
+    @Override
+    public void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        if (DEBUG || isInEditMode()) {
+            final int count = getChildCount();
+            float cw = getWidth();
+            float ch = getHeight();
+            float ow = 1080;
+            float oh = 1920;
+            for (int i = 0; i < count; i++) {
+                View child = getChildAt(i);
+                if (child.getVisibility() == GONE) {
+                    continue;
+                }
+                Object tag = child.getTag();
+                if (tag != null && tag instanceof String) {
+                    String coordinates = (String) tag;
+                    String[] split = coordinates.split(",");
+                    if (split.length == 4) {
+                        int x = Integer.parseInt(split[0]);
+                        int y = Integer.parseInt(split[1]);
+                        int w = Integer.parseInt(split[2]);
+                        int h = Integer.parseInt(split[3]);
+                        x = (int) ((x / ow) * cw);
+                        y = (int) ((y / oh) * ch);
+                        w = (int) ((w / ow) * cw);
+                        h = (int) ((h / oh) * ch);
+                        Paint paint = new Paint();
+                        paint.setColor(Color.RED);
+                        canvas.drawLine(x, y, x + w, y, paint);
+                        canvas.drawLine(x + w, y, x + w, y + h, paint);
+                        canvas.drawLine(x + w, y + h, x, y + h, paint);
+                        canvas.drawLine(x, y + h, x, y, paint);
+                        paint.setColor(Color.GREEN);
+                        canvas.drawLine(x, y, x + w, y + h, paint);
+                        canvas.drawLine(x, y + h, x + w, y, paint);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -1809,6 +1858,12 @@ public class ConstraintLayout extends ViewGroup {
         float resolvedHorizontalBias = 0.5f;
 
         ConstraintWidget widget = new ConstraintWidget();
+
+        public void reset() {
+            if (widget != null) {
+                widget.reset();
+            }
+        }
 
         public boolean helped = false;
 

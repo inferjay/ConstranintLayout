@@ -16,14 +16,16 @@
 
 package android.support.constraint.solver;
 
-public class ArrayRow {
+import static android.support.constraint.solver.SolverVariable.*;
+
+public class ArrayRow implements LinearSystem.Row {
     private static final boolean DEBUG = false;
 
     SolverVariable variable = null;
     float constantValue = 0;
     boolean used = false;
 
-    final ArrayLinkedVariables variables;
+    public final ArrayLinkedVariables variables;
 
     boolean isSimpleDefinition = false;
 
@@ -180,6 +182,12 @@ public class ArrayRow {
         return this;
     }
 
+    public ArrayRow createRowGreaterThan(SolverVariable a, int b, SolverVariable slack) {
+        constantValue = b;
+        variables.put(a, -1);
+        return this;
+    }
+
     public ArrayRow createRowLowerThan(SolverVariable variableA, SolverVariable variableB,
                                        SolverVariable slack, int margin) {
         boolean inverse = false;
@@ -280,9 +288,9 @@ public class ArrayRow {
         return this;
     }
 
-    public ArrayRow addError(SolverVariable error1, SolverVariable error2) {
-        variables.put(error1, 1);
-        variables.put(error2, -1);
+    public ArrayRow addError(LinearSystem system, int strength) {
+        variables.put(system.createErrorVariable(strength, "ep"), 1);
+        variables.put(system.createErrorVariable(strength, "em"), -1);
         return this;
     }
 
@@ -341,14 +349,31 @@ public class ArrayRow {
         }
     }
 
-    void pickRowVariable() {
-        SolverVariable pivotCandidate = variables.pickPivotCandidate();
-        if (pivotCandidate != null) {
+    /**
+     * Pick a subject variable out of the existing ones.
+     * - if a variable is unrestricted
+     * - or if it's a negative new variable (not found elsewhere)
+     * - otherwise we have to add a new additional variable
+     *
+     * @return true if we added an extra variable to the system
+     */
+    boolean chooseSubject(LinearSystem system) {
+        boolean addedExtra = false;
+        SolverVariable pivotCandidate = variables.chooseSubject(system);
+        if (pivotCandidate == null) {
+            // need to add extra variable
+            addedExtra = true;
+        } else {
             pivot(pivotCandidate);
         }
         if (variables.currentSize == 0) {
             isSimpleDefinition = true;
         }
+        return addedExtra;
+    }
+
+    SolverVariable  pickPivot(SolverVariable exclude) {
+        return variables.getPivotCandidate(null, exclude);
     }
 
     void pivot(SolverVariable v) {
@@ -365,6 +390,110 @@ public class ArrayRow {
         }
         constantValue = constantValue / amount;
         variables.divideByAmount(amount);
+    }
+
+    // Row compatibility
+
+    @Override
+    public SolverVariable getSubject(LinearSystem system) {
+        return variables.chooseSubject(system);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return (variable == null && constantValue == 0 && variables.currentSize == 0);
+    }
+
+    @Override
+    public SolverVariable getPivotCandidate(LinearSystem system, boolean[] avoid) {
+        return variables.getPivotCandidate(avoid, null);
+    }
+
+    @Override
+    public void updateFromSystem(LinearSystem system) {
+        for (int i = 0; i < system.mNumRows; i++) {
+            ArrayRow r = system.mRows[i];
+            if (r != this) {
+                updateRowWithEquation(r);
+            }
+        }
+    }
+
+    @Override
+    public void initFromSystemErrors(LinearSystem system) {
+        variables.clear();
+        for (int i = 1; i < system.mNumColumns; i++) {
+            SolverVariable variable = system.mCache.mIndexedVariables[i];
+            for (int j = 0; j < MAX_STRENGTH; j++) {
+                variable.strengthVector[j] = 0;
+            }
+            variable.strengthVector[variable.strength] = 1;
+            if (variable.mType != SolverVariable.Type.ERROR
+                     /* && variable.mType != SolverVariable.Type.SLACK */) {
+                continue;
+            }
+            float weight = 1;
+            if (variable.strength == STRENGTH_LOW) {
+                weight = 1;
+            } else if (variable.strength == STRENGTH_MEDIUM) {
+                weight = 1E3F;
+            } else if (variable.strength == STRENGTH_HIGH) {
+                weight = 1E6F;
+            } else if (variable.strength == STRENGTH_HIGHEST) {
+                weight = 1E9F;
+            } else if (variable.strength == STRENGTH_EQUALITY) {
+                weight = 1E12F;
+            }
+            variables.add(variable, weight);
+        }
+        System.out.println("Row initialized from errors: " + this);
+    }
+
+    @Override
+    public void clear() {
+        variables.clear();
+        variable = null;
+        constantValue = 0;
+    }
+
+    /**
+     * Used to initiate a goal from a given row (to see if we can remove an extra var)
+     * @param row
+     */
+    @Override
+    public void initFromRow(LinearSystem.Row row) {
+        if (row instanceof ArrayRow) {
+            ArrayRow copiedRow = (ArrayRow) row;
+            variable = null;
+            variables.clear();
+            for (int i = 0; i < copiedRow.variables.currentSize; i++) {
+                SolverVariable var = copiedRow.variables.getVariable(i);
+                float val = copiedRow.variables.getVariableValue(i);
+                variables.add(var, val);
+            }
+        }
+    }
+
+    @Override
+    public void addError(SolverVariable error) {
+        float weight = 1;
+        if (error.strength == STRENGTH_LOW) {
+            weight = 1F;
+        } else if (error.strength == STRENGTH_MEDIUM) {
+            weight = 1E3F;
+        } else if (error.strength == STRENGTH_HIGH) {
+            weight = 1E6F;
+        } else if (error.strength == STRENGTH_HIGHEST) {
+            weight = 1E9F;
+        } else if (error.strength == STRENGTH_EQUALITY) {
+            weight = 1E12F;
+        }
+        variables.put(error, weight);
+    }
+
+    @Override
+    public SolverVariable getKey() {
+        return variable;
     }
 
 }

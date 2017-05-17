@@ -20,6 +20,8 @@ import android.support.constraint.solver.SolverVariable;
 
 import java.util.ArrayList;
 
+import static android.support.constraint.solver.widgets.ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
+
 /**
  * Guideline
  */
@@ -196,22 +198,27 @@ public class Guideline extends ConstraintWidget {
         }
         ConstraintAnchor begin = parent.getAnchor(ConstraintAnchor.Type.LEFT);
         ConstraintAnchor end = parent.getAnchor(ConstraintAnchor.Type.RIGHT);
+        boolean parentWrapContent = mParent != null ? mParent.mListDimensionBehaviors[DIMENSION_HORIZONTAL] == WRAP_CONTENT : false;
         if (mOrientation == HORIZONTAL) {
             begin = parent.getAnchor(ConstraintAnchor.Type.TOP);
             end = parent.getAnchor(ConstraintAnchor.Type.BOTTOM);
+            parentWrapContent = mParent != null ? mParent.mListDimensionBehaviors[DIMENSION_VERTICAL] == WRAP_CONTENT : false;
         }
         if (mRelativeBegin != -1) {
             SolverVariable guide = system.createObjectVariable(mAnchor);
             SolverVariable parentLeft = system.createObjectVariable(begin);
-            system.addConstraint(
-                    LinearSystem
-                            .createRowEquals(system, guide, parentLeft, mRelativeBegin, false));
+            system.addEquality(guide, parentLeft, mRelativeBegin, SolverVariable.STRENGTH_FIXED);
+            if (parentWrapContent) {
+                system.addGreaterThan(system.createObjectVariable(end), guide, 0, SolverVariable.STRENGTH_EQUALITY);
+            }
         } else if (mRelativeEnd != -1) {
             SolverVariable guide = system.createObjectVariable(mAnchor);
             SolverVariable parentRight = system.createObjectVariable(end);
-            system.addConstraint(
-                    LinearSystem
-                            .createRowEquals(system, guide, parentRight, -mRelativeEnd, false));
+            system.addEquality(guide, parentRight, -mRelativeEnd, SolverVariable.STRENGTH_FIXED);
+            if (parentWrapContent) {
+                system.addGreaterThan(guide, system.createObjectVariable(begin), 0, SolverVariable.STRENGTH_EQUALITY);
+                system.addGreaterThan(parentRight, guide, 0, SolverVariable.STRENGTH_EQUALITY);
+            }
         } else if (mRelativePercent != -1) {
             SolverVariable guide = system.createObjectVariable(mAnchor);
             SolverVariable parentLeft = system.createObjectVariable(begin);

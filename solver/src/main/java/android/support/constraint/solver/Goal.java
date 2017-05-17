@@ -23,7 +23,7 @@ import static android.support.constraint.solver.SolverVariable.MAX_STRENGTH;
 /**
  * Represents a goal to minimize
  */
-public class Goal {
+public class Goal implements LinearSystem.Row {
 
     ArrayList<SolverVariable> variables = new ArrayList<>();
 
@@ -31,9 +31,11 @@ public class Goal {
      * Return a SolverVariable that is a good pivot candidate
      * (higher strength variable of negative value)
      *
+     * @param avoid if not null, will skip the given variable
+     *
      * @return pivot candidate
      */
-    SolverVariable getPivotCandidate() {
+    public SolverVariable getPivotCandidate(LinearSystem system, boolean[] avoid) {
         final int count = variables.size();
         SolverVariable candidate = null;
         int strength = 0;
@@ -41,15 +43,17 @@ public class Goal {
         //noinspection ForLoopReplaceableByForEach
         for (int i = 0; i < count; i++) {
             SolverVariable element = variables.get(i);
+            if (avoid[element.id]) {
+                continue;
+            }
             for (int k = MAX_STRENGTH - 1; k >= 0; k--) {
                 float value = element.strengthVector[k];
-                if (candidate == null && value < 0 && (k >= strength)) {
+                if (value > 0) {
+                    break;
+                }
+                if (value < 0 && (k > strength || candidate == null)) {
                     strength = k;
                     candidate = element;
-                }
-                if (value > 0 && k > strength) {
-                    strength = k;
-                    candidate = null;
                 }
             }
         }
@@ -62,7 +66,7 @@ public class Goal {
      *
      * @param system the linear system we initialize from
      */
-    private void initFromSystemErrors(LinearSystem system) {
+    public void initFromSystemErrors(LinearSystem system) {
         variables.clear();
         for (int i = 1; i < system.mNumColumns; i++) {
             SolverVariable variable = system.mCache.mIndexedVariables[i];
@@ -70,11 +74,43 @@ public class Goal {
                 variable.strengthVector[j] = 0;
             }
             variable.strengthVector[variable.strength] = 1;
-            if (variable.mType != SolverVariable.Type.ERROR) {
+            if (variable.mType != SolverVariable.Type.ERROR
+                     /* && variable.mType != SolverVariable.Type.SLACK */) {
                 continue;
             }
             variables.add(variable);
         }
+        System.out.println("Original goal: " + this);
+    }
+
+    @Override
+    public void clear() {
+        variables.clear();
+    }
+
+    @Override
+    public void initFromRow(LinearSystem.Row row) {
+        updateFromRow((ArrayRow) row);
+    }
+
+    @Override
+    public void addError(SolverVariable error) {
+        // nothing
+    }
+
+    @Override
+    public SolverVariable getKey() {
+        return null;
+    }
+
+    @Override
+    public SolverVariable getSubject(LinearSystem system) {
+        return null;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
     }
 
     /**
@@ -82,8 +118,7 @@ public class Goal {
      *
      * @param system the linear system we update from
      */
-    void updateFromSystem(LinearSystem system) {
-        initFromSystemErrors(system);
+    public void updateFromSystem(LinearSystem system) {
         final int count = variables.size();
         for (int i = 0; i < count; i++) {
             SolverVariable element = variables.get(i);
@@ -109,6 +144,26 @@ public class Goal {
         }
     }
 
+    void updateFromRow(ArrayRow row) {
+        variables.clear();
+        SolverVariable variable = row.variable;
+        for (int j = 0; j < MAX_STRENGTH; j++) {
+            variable.strengthVector[j] = 0;
+        }
+        variable.strengthVector[0] = -1; //variable.strength] = value;
+        variables.add(row.variable);
+        for (int i = 0; i < row.variables.currentSize; i++) {
+            variable = row.variables.getVariable(i);
+            for (int j = 0; j < MAX_STRENGTH; j++) {
+                variable.strengthVector[j] = 0;
+            }
+            float value = row.variables.getVariableValue(i);
+            variable.strengthVector[0] = value; //variable.strength] = value;
+            variables.add(variable);
+        }
+        System.out.println("Goal from row: " + this);
+    }
+
     /**
      * String representation of the goal
      *
@@ -122,6 +177,7 @@ public class Goal {
         for (int i = 0; i < count; i++) {
             SolverVariable element = variables.get(i);
             representation += element.strengthsToString();
+            representation += "\n      ";
         }
         return representation;
     }

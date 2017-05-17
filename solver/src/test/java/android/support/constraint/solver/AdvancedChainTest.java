@@ -200,6 +200,7 @@ public class AdvancedChainTest {
         int size = 100;
         A.setHorizontalChainStyle(ConstraintWidget.CHAIN_PACKED);
         root.layout();
+        root.setOptimizationLevel(0);
         System.out.println("       packed) root: " + root + " A: " + A + " B: " + B);
         assertEquals(A.getWidth(), size);
         assertEquals(B.getWidth(), size);

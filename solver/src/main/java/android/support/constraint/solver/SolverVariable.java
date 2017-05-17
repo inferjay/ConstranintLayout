@@ -18,12 +18,14 @@ package android.support.constraint.solver;
 
 import java.util.Arrays;
 
+import static android.support.constraint.solver.LinearSystem.FULL_DEBUG;
+
 /**
  * Represents a given variable used in the {@link LinearSystem linear expression solver}.
  */
 public class SolverVariable {
 
-    private static final boolean INTERNAL_DEBUG = false;
+    private static final boolean INTERNAL_DEBUG = FULL_DEBUG;
 
     @SuppressWarnings("WeakerAccess")
     public static final int STRENGTH_NONE = 0;
@@ -33,7 +35,12 @@ public class SolverVariable {
     @SuppressWarnings("WeakerAccess")
     public static final int STRENGTH_HIGHEST = 4;
     public static final int STRENGTH_EQUALITY = 5;
+    public static final int STRENGTH_FIXED = 6;
 
+    private static int uniqueSlackId = 1;
+    private static int uniqueErrorId = 1;
+    private static int uniqueUnrestrictedId = 1;
+    private static int uniqueConstantId = 1;
     private static int uniqueId = 1;
 
     private String mName;
@@ -43,7 +50,7 @@ public class SolverVariable {
     public int strength = 0;
     public float computedValue;
 
-    final static int MAX_STRENGTH = 6;
+    final static int MAX_STRENGTH = 7;
     float[] strengthVector = new float[MAX_STRENGTH];
     Type mType;
 
@@ -76,17 +83,23 @@ public class SolverVariable {
         UNKNOWN
     }
 
-    private static String getUniqueName(Type type) {
-        uniqueId++;
+    static void increaseErrorId() {
+        uniqueErrorId++;
+    }
+
+    private static String getUniqueName(Type type, String prefix) {
+        if (prefix != null) {
+            return prefix + uniqueErrorId;
+        }
         switch (type) {
-            case UNRESTRICTED: return "U" + uniqueId;
-            case CONSTANT: return "C" + uniqueId;
-            case SLACK: return "S" + uniqueId;
+            case UNRESTRICTED: return "U" + ++uniqueUnrestrictedId;
+            case CONSTANT: return "C" + ++uniqueConstantId;
+            case SLACK: return "S" + ++uniqueSlackId;
             case ERROR: {
-                return "e" + uniqueId;
+                return "e" + ++uniqueErrorId;
             }
             case UNKNOWN:
-                return "V" + uniqueId;
+                return "V" + ++uniqueId;
         }
         throw new AssertionError(type.name());
     }
@@ -101,10 +114,10 @@ public class SolverVariable {
         mType = type;
     }
 
-    public SolverVariable(Type type) {
+    public SolverVariable(Type type, String prefix) {
         mType = type;
         if (INTERNAL_DEBUG) {
-            mName = getUniqueName(type);
+            //mName = getUniqueName(type, prefix);
         }
     }
 
@@ -116,14 +129,31 @@ public class SolverVariable {
 
     String strengthsToString() {
         String representation = this + "[";
+        boolean negative = false;
+        boolean empty = true;
         for (int j = 0; j < strengthVector.length; j++) {
             representation += strengthVector[j];
+            if (strengthVector[j] > 0) {
+                negative = false;
+            } else if (strengthVector[j] < 0) {
+                negative = true;
+            }
+            if (strengthVector[j] != 0) {
+                empty = false;
+            }
             if (j < strengthVector.length - 1) {
                 representation += ", ";
             } else {
                 representation += "] ";
             }
         }
+        if (negative) {
+            representation += " (-)";
+        }
+        if (empty) {
+            representation += " (*)";
+        }
+        // representation += " {id: " + id + "}";
         return representation;
     }
 
@@ -177,10 +207,10 @@ public class SolverVariable {
     }
 
     public void setName(String name) { mName = name; }
-    public void setType(Type type) {
+    public void setType(Type type, String prefix) {
         mType = type;
         if (INTERNAL_DEBUG && mName == null) {
-            mName = getUniqueName(type);
+            mName = getUniqueName(type, prefix);
         }
     }
 

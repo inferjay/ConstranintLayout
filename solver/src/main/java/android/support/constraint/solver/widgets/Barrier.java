@@ -61,19 +61,19 @@ public class Barrier extends Helper {
             SolverVariable target = system.createObjectVariable(mWidgets[i].mListAnchors[mBarrierType]);
             mWidgets[i].mListAnchors[mBarrierType].mSolverVariable = target;
             if (mBarrierType == LEFT || mBarrierType == TOP) {
-                system.addLowerThan(position.mSolverVariable, target, 0, SolverVariable.STRENGTH_NONE);
+                system.addLowerBarrier(position.mSolverVariable, target);
             } else {
-                system.addGreaterThan(position.mSolverVariable, target,  0, SolverVariable.STRENGTH_NONE);
+                system.addGreaterBarrier(position.mSolverVariable, target);
             }
         }
         if (mBarrierType == LEFT) {
-            system.addEquality(mRight.mSolverVariable, mLeft.mSolverVariable, 0, SolverVariable.STRENGTH_EQUALITY);
+            system.addEquality(mRight.mSolverVariable, mLeft.mSolverVariable, 0, SolverVariable.STRENGTH_FIXED);
         } else if (mBarrierType == RIGHT) {
-            system.addEquality(mLeft.mSolverVariable, mRight.mSolverVariable, 0, SolverVariable.STRENGTH_EQUALITY);
+            system.addEquality(mLeft.mSolverVariable, mRight.mSolverVariable, 0, SolverVariable.STRENGTH_FIXED);
         } else if (mBarrierType == TOP) {
-            system.addEquality(mBottom.mSolverVariable, mTop.mSolverVariable, 0, SolverVariable.STRENGTH_EQUALITY);
+            system.addEquality(mBottom.mSolverVariable, mTop.mSolverVariable, 0, SolverVariable.STRENGTH_FIXED);
         } else if (mBarrierType == BOTTOM) {
-            system.addEquality(mTop.mSolverVariable, mBottom.mSolverVariable, 0, SolverVariable.STRENGTH_EQUALITY);
+            system.addEquality(mTop.mSolverVariable, mBottom.mSolverVariable, 0, SolverVariable.STRENGTH_FIXED);
         }
     }
 }

@@ -1,9 +1,6 @@
 package android.support.constraint.solver;
 
-import android.support.constraint.solver.widgets.Barrier;
-import android.support.constraint.solver.widgets.ConstraintAnchor;
-import android.support.constraint.solver.widgets.ConstraintWidget;
-import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
+import android.support.constraint.solver.widgets.*;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -42,7 +39,7 @@ public class BarrierTest {
         barrier.add(A);
         barrier.add(B);
 
-        root.setOptimizationLevel(ConstraintWidgetContainer.OPTIMIZATION_NONE);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_NONE);
         root.layout();
 
         System.out.println("A: " + A + " B: " + B + " barrier: " + barrier);
