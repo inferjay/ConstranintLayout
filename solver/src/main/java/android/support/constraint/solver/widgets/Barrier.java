@@ -61,9 +61,9 @@ public class Barrier extends Helper {
             SolverVariable target = system.createObjectVariable(mWidgets[i].mListAnchors[mBarrierType]);
             mWidgets[i].mListAnchors[mBarrierType].mSolverVariable = target;
             if (mBarrierType == LEFT || mBarrierType == TOP) {
-                system.addLowerThan(position.mSolverVariable, target, 0, SolverVariable.STRENGTH_EQUALITY);
+                system.addLowerThan(position.mSolverVariable, target, 0, SolverVariable.STRENGTH_NONE);
             } else {
-                system.addGreaterThan(position.mSolverVariable, target,  0, SolverVariable.STRENGTH_EQUALITY);
+                system.addGreaterThan(position.mSolverVariable, target,  0, SolverVariable.STRENGTH_NONE);
             }
         }
         if (mBarrierType == LEFT) {

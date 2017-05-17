@@ -19,6 +19,8 @@ import android.support.constraint.solver.*;
 
 import java.util.ArrayList;
 
+import static android.support.constraint.solver.widgets.ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
+
 /**
  * Implements a constraint Widget model supporting constraints relations between other widgets.
  * <p>
@@ -61,6 +63,8 @@ public class ConstraintWidget {
     // Support for direct resolution
     public int mHorizontalResolution = UNKNOWN;
     public int mVerticalResolution = UNKNOWN;
+
+    private static final int WRAP = -2;
 
     int mMatchConstraintDefaultWidth = MATCH_CONSTRAINT_SPREAD;
     int mMatchConstraintDefaultHeight = MATCH_CONSTRAINT_SPREAD;
@@ -1680,14 +1684,14 @@ public class ConstraintWidget {
         }
         if (getHorizontalDimensionBehaviour() == ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT) {
             if (getWidth() == getWrapWidth()) {
-                setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
+                setHorizontalDimensionBehaviour(WRAP_CONTENT);
             } else if (getWidth() > getMinWidth()) {
                 setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
             }
         }
         if (getVerticalDimensionBehaviour() == ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT) {
             if (getHeight() == getWrapHeight()) {
-                setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
+                setVerticalDimensionBehaviour(WRAP_CONTENT);
             } else if (getHeight() > getMinHeight()) {
                 setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
             }
@@ -1891,7 +1895,7 @@ public class ConstraintWidget {
      */
     public void setHorizontalDimensionBehaviour(DimensionBehaviour behaviour) {
         mHorizontalDimensionBehaviour = behaviour;
-        if (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
+        if (mHorizontalDimensionBehaviour == WRAP_CONTENT) {
             setWidth(mWrapWidth);
         }
     }
@@ -1903,7 +1907,7 @@ public class ConstraintWidget {
      */
     public void setVerticalDimensionBehaviour(DimensionBehaviour behaviour) {
         mVerticalDimensionBehaviour = behaviour;
-        if (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT) {
+        if (mVerticalDimensionBehaviour == WRAP_CONTENT) {
             setHeight(mWrapHeight);
         }
     }
@@ -2052,7 +2056,7 @@ public class ConstraintWidget {
             //   not be contained in the parent)
 
             if (mParent.getHorizontalDimensionBehaviour()
-                    == DimensionBehaviour.WRAP_CONTENT && !inHorizontalChain) {
+                    == WRAP_CONTENT && !inHorizontalChain) {
                 if (mLeft.mTarget == null ||
                         mLeft.mTarget.mOwner != mParent) {
                     SolverVariable parentLeft = system.createObjectVariable(mParent.mLeft);
@@ -2077,7 +2081,7 @@ public class ConstraintWidget {
             }
 
             if (mParent.getVerticalDimensionBehaviour()
-                    == DimensionBehaviour.WRAP_CONTENT && !inVerticalChain) {
+                    == WRAP_CONTENT && !inVerticalChain) {
                 if (mTop.mTarget == null ||
                         mTop.mTarget.mOwner != mParent) {
                     SolverVariable parentTop = system.createObjectVariable(mParent.mTop);
@@ -2166,7 +2170,7 @@ public class ConstraintWidget {
                 || dimensionRatioSide == UNKNOWN);
 
         // Horizontal resolution
-        boolean wrapContent = (mHorizontalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)
+        boolean wrapContent = (mHorizontalDimensionBehaviour == WRAP_CONTENT)
                 && (this instanceof ConstraintWidgetContainer);
         if (mHorizontalResolution != DIRECT
                 && (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group))) {
@@ -2192,7 +2196,7 @@ public class ConstraintWidget {
             return;
         }
         // Vertical Resolution
-        wrapContent = (mVerticalDimensionBehaviour == DimensionBehaviour.WRAP_CONTENT)
+        wrapContent = (mVerticalDimensionBehaviour == WRAP_CONTENT)
                 && (this instanceof ConstraintWidgetContainer);
 
         boolean useVerticalRatio = useRatio && (dimensionRatioSide == VERTICAL
@@ -2302,6 +2306,13 @@ public class ConstraintWidget {
             dimension = 0;
             dimensionFixed = true;
         }
+        if (matchMinDimension == WRAP) {
+            matchMinDimension = dimension;
+        }
+        if (matchMaxDimension == WRAP) {
+            matchMaxDimension = dimension;
+        }
+        dimension = Math.max(dimension, matchMinDimension);
         if (beginTarget == null && endTarget == null) {
             system.addConstraint(system.createRow().createRowEquals(begin, beginPosition));
             if (!useRatio) {
@@ -2415,6 +2426,9 @@ public class ConstraintWidget {
                     } else {
                         if (matchMaxDimension > 0) {
                             system.addLowerThan(end, begin, matchMaxDimension, SolverVariable.STRENGTH_HIGH);
+                        }
+                        if (matchMinDimension > 0) {
+                            system.addGreaterThan(end, begin, matchMinDimension, SolverVariable.STRENGTH_MEDIUM);
                         }
                         system.addGreaterThan(begin, beginTarget, beginAnchorMargin, SolverVariable.STRENGTH_MEDIUM);
                         system.addLowerThan(end, endTarget, -endAnchorMargin, SolverVariable.STRENGTH_MEDIUM);

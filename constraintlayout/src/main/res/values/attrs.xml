@@ -153,10 +153,13 @@
         <enum name="wrap" value="1"/>
     </attr>
 
-    <attr name="layout_constraintWidth_min" format="dimension"/>
-    <attr name="layout_constraintWidth_max" format="dimension"/>
-    <attr name="layout_constraintHeight_percent" format="float"/>
     <attr name="content" format="reference"/>
+    <attr name="layout_constraintWidth_min" format="dimension|enum">
+        <enum name="wrap" value="-2"/>
+    </attr>
+    <attr name="layout_constraintWidth_max" format="dimension|enum">
+        <enum name="wrap" value="-2"/>
+    </attr>
 
     <!-- Specify the style of match constraint -->
     <attr name="layout_constraintHeight_default">
@@ -164,8 +167,12 @@
         <enum name="wrap" value="1"/>
     </attr>
 
-    <attr name="layout_constraintHeight_min" format="dimension"/>
-    <attr name="layout_constraintHeight_max" format="dimension"/>
+    <attr name="layout_constraintHeight_min" format="dimension|enum">
+        <enum name="wrap" value="-2"/>
+    </attr>
+    <attr name="layout_constraintHeight_max" format="dimension|enum">
+        <enum name="wrap" value="-2"/>
+    </attr>
 
     <declare-styleable name="ConstraintLayout_Layout">
         <attr name="android:orientation"/>
