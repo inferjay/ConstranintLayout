@@ -155,6 +155,8 @@
 
     <attr name="layout_constraintWidth_min" format="dimension"/>
     <attr name="layout_constraintWidth_max" format="dimension"/>
+    <attr name="layout_constraintHeight_percent" format="float"/>
+    <attr name="content" format="reference"/>
 
     <!-- Specify the style of match constraint -->
     <attr name="layout_constraintHeight_default">
@@ -178,6 +180,7 @@
         <attr name="constraint_referenced_ids"/>
         <attr name="chainUseRtl"/>
         <attr name="title"/>
+        <attr name="content"/>
 
         <attr name="layout_constraintGuide_begin"/>
         <attr name="layout_constraintGuide_end"/>

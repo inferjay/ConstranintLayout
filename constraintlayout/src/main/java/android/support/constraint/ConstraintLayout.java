@@ -742,7 +742,13 @@ public class ConstraintLayout extends ViewGroup {
                 helper.updatePreLayout(this);
             }
         }
-
+        // TODO refactor into an updatePreLayout interface
+        for (int i = 0; i < count; i++) {
+            View child = getChildAt(i);
+            if (child instanceof Placeholder) {
+                ((Placeholder) child).updatePreLayout(this);
+            }
+        }
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             ConstraintWidget widget = getViewWidget(child);
@@ -750,12 +756,16 @@ public class ConstraintLayout extends ViewGroup {
                 continue;
             }
             final LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
+            layoutParams.validate();
             if (layoutParams.helped) {
                 layoutParams.helped = false;
             } else {
                 widget.reset();
             }
             widget.setVisibility(child.getVisibility());
+            if (layoutParams.isInPlaceholder) {
+                widget.setVisibility(View.GONE);
+            }
             widget.setCompanionWidget(child);
             mLayoutWidget.add(widget);
 
@@ -1063,6 +1073,20 @@ public class ConstraintLayout extends ViewGroup {
                 }
             }
         }
+        for (int i = 0; i < widgetsCount; i++) {
+            final View child = getChildAt(i);
+            if (child instanceof Placeholder) {
+                ((Placeholder) child).updatePostMeasure(this);
+            }
+        }
+        // TODO refactor into an updatePostMeasure interface
+        final int helperCount = mConstraintHelpers.size();
+        if (helperCount > 0) {
+            for (int i = 0; i < helperCount; i++) {
+                ConstraintHelper helper = mConstraintHelpers.get(i);
+                helper.updatePostMeasure(this);
+            }
+        }
     }
 
     /**
@@ -1321,7 +1345,9 @@ public class ConstraintLayout extends ViewGroup {
                 // visually in the editor (as we get our positions from layoutlib)
                 continue;
             }
-
+            if (params.isInPlaceholder) {
+                continue;
+            }
             int l = widget.getDrawX();
             int t = widget.getDrawY();
             int r = l + widget.getWidth();
@@ -1344,6 +1370,14 @@ public class ConstraintLayout extends ViewGroup {
                 }
             }
             child.layout(l, t, r, b);
+            if (child instanceof Placeholder) {
+                Placeholder holder = (Placeholder) child;
+                View content = holder.getContent();
+                if (content != null) {
+                    content.setVisibility(VISIBLE);
+                    content.layout(l, t, r, b);
+                }
+            }
         }
     }
 
@@ -1746,6 +1780,7 @@ public class ConstraintLayout extends ViewGroup {
         boolean needsBaseline = false;
         boolean isGuideline = false;
         boolean isHelper = false;
+        boolean isInPlaceholder = false;
 
         int resolvedLeftToLeft = UNSET;
         int resolvedLeftToRight = UNSET;

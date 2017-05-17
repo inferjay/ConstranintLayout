@@ -128,6 +128,9 @@ public abstract class ConstraintHelper extends View {
         }
     }
 
+    public void updatePostMeasure(ConstraintLayout container) {
+        // Do nothing
+    }
     public void updatePostLayout(ConstraintLayout container) {
         // Do nothing
     }
