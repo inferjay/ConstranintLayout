@@ -969,9 +969,11 @@ public class ConstraintLayout extends ViewGroup {
                 widget.setHorizontalChainStyle(layoutParams.horizontalChainStyle);
                 widget.setVerticalChainStyle(layoutParams.verticalChainStyle);
                 widget.setHorizontalMatchStyle(layoutParams.matchConstraintDefaultWidth,
-                        layoutParams.matchConstraintMinWidth, layoutParams.matchConstraintMaxWidth);
+                        layoutParams.matchConstraintMinWidth, layoutParams.matchConstraintMaxWidth,
+                        layoutParams.matchConstraintPercentWidth);
                 widget.setVerticalMatchStyle(layoutParams.matchConstraintDefaultHeight,
-                        layoutParams.matchConstraintMinHeight, layoutParams.matchConstraintMaxHeight);
+                        layoutParams.matchConstraintMinHeight, layoutParams.matchConstraintMaxHeight,
+                        layoutParams.matchConstraintPercentHeight);
             }
         }
     }
@@ -1528,6 +1530,12 @@ public class ConstraintLayout extends ViewGroup {
         public static final int MATCH_CONSTRAINT_SPREAD = ConstraintWidget.MATCH_CONSTRAINT_SPREAD;
 
         /**
+         * Set matchConstraintDefault* percent to be based on a percent of another dimension (by default, the parent)
+         * Use to set the matchConstraintDefaultWidth and matchConstraintDefaultHeight
+         */
+        public static final int MATCH_CONSTRAINT_PERCENT = ConstraintWidget.MATCH_CONSTRAINT_PERCENT;
+
+        /**
          * Chain spread style
          */
         public static final int CHAIN_SPREAD = ConstraintWidget.CHAIN_SPREAD;
@@ -1720,6 +1728,7 @@ public class ConstraintLayout extends ViewGroup {
          *     <li>{@see MATCH_CONSTRAINT_WRAP} -- The dimension will be the same as WRAP_CONTENT, unless the size ends
          *     up too large for the constraints; in that case the dimension will expand up to the constraints, minus margins</li>
          *     This attribute may not be applied if the widget is part of a chain in that dimension.
+         *     <li>{@see MATCH_CONSTRAINT_PERCENT} -- The dimension will be a percent of another widget (by default, the parent)</li>
          * </ul>
          */
         public int matchConstraintDefaultWidth = MATCH_CONSTRAINT_SPREAD;
@@ -1731,6 +1740,7 @@ public class ConstraintLayout extends ViewGroup {
          *     <li>{@see MATCH_CONSTRAINT_WRAP} -- The dimension will be the same as WRAP_CONTENT, unless the size ends
          *     up too large for the constraints; in that case the dimension will expand up to the constraints, minus margins</li>
          *     This attribute may not be applied if the widget is part of a chain in that dimension.
+         *     <li>{@see MATCH_CONSTRAINT_PERCENT} -- The dimension will be a percent of another widget (by default, the parent)</li>
          * </ul>
          */
         public int matchConstraintDefaultHeight = MATCH_CONSTRAINT_SPREAD;
@@ -1758,6 +1768,16 @@ public class ConstraintLayout extends ViewGroup {
          * is set to MATCH_CONSTRAINT. Don't apply if the widget is part of an vertical chain.
          */
         public int matchConstraintMaxHeight = 0;
+
+        /**
+         * Specify the percentage when using the match constraint percent mode. From 0 to 1.
+         */
+        public float matchConstraintPercentWidth = 1;
+
+        /**
+         * Specify the percentage when using the match constraint percent mode. From 0 to 1.
+         */
+        public float matchConstraintPercentHeight = 1;
 
         /**
          * The design time location of the left side of the child.
@@ -2019,10 +2039,14 @@ public class ConstraintLayout extends ViewGroup {
                     matchConstraintMinWidth = a.getDimensionPixelSize(attr, matchConstraintMinWidth);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_max) {
                     matchConstraintMaxWidth = a.getDimensionPixelSize(attr, matchConstraintMaxWidth);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_percent) {
+                    matchConstraintPercentWidth = a.getFloat(attr, matchConstraintPercentWidth);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_min) {
                     matchConstraintMinHeight = a.getDimensionPixelSize(attr, matchConstraintMinHeight);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_max) {
                     matchConstraintMaxHeight = a.getDimensionPixelSize(attr, matchConstraintMaxHeight);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_percent) {
+                    matchConstraintPercentHeight = a.getFloat(attr, matchConstraintPercentHeight);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_creator) {
                     // Skip
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_creator) {
