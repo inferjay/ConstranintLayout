@@ -113,7 +113,12 @@ public class Placeholder extends View {
     }
 
     mContentId = id;
-    ((View) getParent()).findViewById(id).setVisibility(GONE);
+    if (id != ConstraintLayout.LayoutParams.UNSET) {
+      View v = ((View) getParent()).findViewById(id);
+      if (v != null) {
+        v.setVisibility(GONE);
+      }
+    }
   }
 
   public void updatePostMeasure(ConstraintLayout container) {
