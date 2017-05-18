@@ -389,7 +389,7 @@ public class ConstraintLayout extends ViewGroup {
     static final boolean ALLOWS_EMBEDDED = false;
 
     /** @hide */
-    public static final String VERSION="ConstraintLayout-1.1.0";
+    public static final String VERSION="ConstraintLayout-1.1.0-beta1";
     private static final String TAG = "ConstraintLayout";
     private static final boolean SIMPLE_LAYOUT = true;
     private static final boolean USE_CONSTRAINTS_HELPER = true;
