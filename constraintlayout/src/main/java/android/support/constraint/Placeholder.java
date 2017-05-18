@@ -19,6 +19,9 @@ package android.support.constraint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -77,7 +80,23 @@ public class Placeholder extends View {
 
   public void onDraw(Canvas canvas) {
     if (isInEditMode()) {
-      canvas.drawARGB(255, 100, 100, 100);
+      canvas.drawRGB(223, 223, 223);
+      Paint paint = new Paint();
+      paint.setARGB(255, 210, 210, 210);
+      paint.setTextAlign(Paint.Align.CENTER);
+      paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
+
+      Rect r = new Rect();
+      canvas.getClipBounds(r);
+      paint.setTextSize(r.height());
+      int cHeight = r.height();
+      int cWidth = r.width();
+      paint.setTextAlign(Paint.Align.LEFT);
+      String text = "?";
+      paint.getTextBounds(text, 0, text.length(), r);
+      float x = cWidth / 2f - r.width() / 2f - r.left;
+      float y = cHeight / 2f + r.height() / 2f - r.bottom;
+      canvas.drawText(text, x, y, paint);
     }
   }
 
