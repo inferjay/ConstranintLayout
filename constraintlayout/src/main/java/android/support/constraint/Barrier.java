@@ -45,98 +45,25 @@ public class Barrier extends ConstraintHelper {
 
     private int mIndicatedType = LEFT;
     private int mResolvedType = LEFT;
-    private Context myContext;
-    private android.support.constraint.solver.widgets.Barrier mBarrier = new android.support.constraint.solver.widgets.Barrier();
-    private String mReferenceIds;
+    private android.support.constraint.solver.widgets.Barrier mBarrier;
 
     public Barrier(Context context) {
         super(context);
         super.setVisibility(View.GONE);
-        myContext = context;
-        init(null);
     }
 
     public Barrier(Context context, AttributeSet attrs) {
         super(context, attrs);
         super.setVisibility(View.GONE);
-        myContext = context;
-        init(attrs);
-
     }
 
     public Barrier(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         super.setVisibility(View.GONE);
-        myContext = context;
-        init(attrs);
-    }
-
-    public Barrier(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr);
-        super.setVisibility(View.GONE);
-        myContext = context;
-        init(attrs);
     }
 
     public int getType() {
         return mIndicatedType;
-    }
-
-    public void addID(String idString) {
-        if (idString == null) {
-            return;
-        }
-        if (myContext == null) {
-            return;
-        }
-        int tag = 0;
-        try {
-            Class res = R.id.class;
-            Field field = res.getField(idString);
-            tag = field.getInt(null);
-        }
-        catch (Exception e) {
-            // Do nothing
-        }
-        if (tag == 0) {
-            tag = myContext.getResources().getIdentifier(idString, "id", myContext.getPackageName());
-        }
-        if (tag == 0 && isInEditMode() && getParent() instanceof ConstraintLayout) {
-            ConstraintLayout constraintLayout = (ConstraintLayout) getParent();
-            Object value = constraintLayout.getDesignInformation(0, idString);
-            if (value != null && value instanceof Integer) {
-                tag = (Integer) value;
-            }
-        }
-
-        if (tag != 0) {
-            setTag(tag, null);
-        } else {
-            Log.w("Barrier", "Could not find id of \""+idString+"\"");
-        }
-    }
-
-    public void updatePreLayout(ConstraintLayout container) {
-        if (isInEditMode()) {
-            setIds(mReferenceIds);
-        }
-        super.updatePreLayout(container);
-    }
-
-    public void setIds(String idList) {
-        if (idList == null) {
-            return;
-        }
-        int begin = 0;
-        while (true) {
-            int end = idList.indexOf(',', begin);
-            if (end == -1) {
-                addID(idList.substring(begin));
-                break;
-            }
-            addID(idList.substring(begin, end));
-            begin = end + 1;
-        }
     }
 
     /**
@@ -174,7 +101,10 @@ public class Barrier extends ConstraintHelper {
         mBarrier.setBarrierType(mResolvedType);
     }
 
-    private void init(AttributeSet attrs) {
+    @Override
+    protected void init(AttributeSet attrs) {
+        super.init(attrs);
+        mBarrier = new android.support.constraint.solver.widgets.Barrier();
         if (attrs != null) {
             TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.ConstraintLayout_Layout);
             final int N = a.getIndexCount();
@@ -182,10 +112,6 @@ public class Barrier extends ConstraintHelper {
                 int attr = a.getIndex(i);
                 if (attr == R.styleable.ConstraintLayout_Layout_barrierDirection) {
                     setType(a.getInt(attr, LEFT));
-                }
-                if (attr == R.styleable.ConstraintLayout_Layout_constraint_referenced_ids) {
-                    mReferenceIds = a.getString(attr);
-                    setIds(mReferenceIds);
                 }
             }
         }

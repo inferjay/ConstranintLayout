@@ -6,54 +6,42 @@ import android.util.AttributeSet;
 import android.view.View;
 
 /**
- * Control the visibility of the referenced views
+ * Control the visibility and elevation of the referenced views
  */
-public class Layer extends ConstraintHelper {
+public class Group extends ConstraintHelper {
 
-    private String mTitle;
-
-    public Layer(Context context) {
+    public Group(Context context) {
         super(context);
     }
 
-    public Layer(Context context, AttributeSet attrs) {
+    public Group(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public Layer(Context context, AttributeSet attrs, int defStyleAttr) {
+    public Group(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
-    private void init(AttributeSet attrs) {
-        if (attrs != null) {
-            TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.ConstraintLayout_Layout);
-            final int N = a.getIndexCount();
-            for (int i = 0; i < N; i++) {
-                int attr = a.getIndex(i);
-                if (attr == R.styleable.ConstraintLayout_Layout_title) {
-                    mTitle = a.getString(attr);
-                }
-            }
-        }
+    protected void init(AttributeSet attrs) {
+        super.init(attrs);
         mUseViewMeasure = false;
-    }
-
-    public void setTitle(String title) {
-        mTitle = title;
-    }
-
-    public String getTitle() {
-        return mTitle;
     }
 
     @Override
     public void updatePreLayout(ConstraintLayout container) {
         int visibility = getVisibility();
+        float elevation = 0;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            elevation = getElevation();
+        }
         for (int i = 0; i < mCount; i++) {
             int id = mIds[i];
             View view = container.getViewById(id);
             if (view != null) {
                 view.setVisibility(visibility);
+                if (elevation > 0 && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    view.setElevation(elevation);
+                }
             }
         }
     }

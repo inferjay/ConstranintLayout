@@ -1328,13 +1328,11 @@ public class ConstraintLayout extends ViewGroup {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         final int widgetsCount = getChildCount();
         final boolean isInEditMode = isInEditMode();
-        if (isInEditMode) {
-            final int helperCount = mConstraintHelpers.size();
-            if (helperCount > 0) {
-                for (int i = 0; i < helperCount; i++) {
-                    ConstraintHelper helper = mConstraintHelpers.get(i);
-                    helper.updatePostLayout(this);
-                }
+        final int helperCount = mConstraintHelpers.size();
+        if (helperCount > 0) {
+            for (int i = 0; i < helperCount; i++) {
+                ConstraintHelper helper = mConstraintHelpers.get(i);
+                helper.updatePostLayout(this);
             }
         }
         for (int i = 0; i < widgetsCount; i++) {
@@ -2036,15 +2034,43 @@ public class ConstraintLayout extends ViewGroup {
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_default) {
                     matchConstraintDefaultHeight = a.getInt(attr, MATCH_CONSTRAINT_SPREAD);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_min) {
-                    matchConstraintMinWidth = a.getDimensionPixelSize(attr, matchConstraintMinWidth);
+                    try {
+                        matchConstraintMinWidth = a.getDimensionPixelSize(attr, matchConstraintMinWidth);
+                    } catch (android.view.InflateException e) {
+                        int value = a.getInt(attr, matchConstraintMinWidth);
+                        if (value == WRAP_CONTENT) {
+                            matchConstraintMinWidth = WRAP_CONTENT;
+                        }
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_max) {
-                    matchConstraintMaxWidth = a.getDimensionPixelSize(attr, matchConstraintMaxWidth);
+                    try {
+                        matchConstraintMaxWidth = a.getDimensionPixelSize(attr, matchConstraintMaxWidth);
+                    } catch (android.view.InflateException e) {
+                        int value = a.getInt(attr, matchConstraintMaxWidth);
+                        if (value == WRAP_CONTENT) {
+                            matchConstraintMaxWidth = WRAP_CONTENT;
+                        }
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_percent) {
                     matchConstraintPercentWidth = a.getFloat(attr, matchConstraintPercentWidth);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_min) {
-                    matchConstraintMinHeight = a.getDimensionPixelSize(attr, matchConstraintMinHeight);
+                    try {
+                        matchConstraintMinHeight = a.getDimensionPixelSize(attr, matchConstraintMinHeight);
+                    } catch (android.view.InflateException e) {
+                        int value = a.getInt(attr, matchConstraintMinHeight);
+                        if (value == WRAP_CONTENT) {
+                            matchConstraintMinHeight = WRAP_CONTENT;
+                        }
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_max) {
-                    matchConstraintMaxHeight = a.getDimensionPixelSize(attr, matchConstraintMaxHeight);
+                    try {
+                        matchConstraintMaxHeight = a.getDimensionPixelSize(attr, matchConstraintMaxHeight);
+                    } catch (android.view.InflateException e) {
+                        int value = a.getInt(attr, matchConstraintMaxHeight);
+                        if (value == WRAP_CONTENT) {
+                            matchConstraintMaxHeight = WRAP_CONTENT;
+                        }
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_percent) {
                     matchConstraintPercentHeight = a.getFloat(attr, matchConstraintPercentHeight);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_creator) {

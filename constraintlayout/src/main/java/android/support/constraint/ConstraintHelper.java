@@ -1,11 +1,14 @@
 package android.support.constraint;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 
 /**
@@ -16,27 +19,40 @@ public abstract class ConstraintHelper extends View {
     protected int[] mIds = new int[32];
     protected int mCount = 0;
 
+    protected Context myContext;
     protected android.support.constraint.solver.widgets.Helper mHelperWidget = null;
     protected boolean mUseViewMeasure = false;
+    private String mReferenceIds;
 
     public ConstraintHelper(Context context) {
         super(context);
-        if (!isInEditMode()) {
-            super.setVisibility(View.GONE);
-        }
+        myContext = context;
+        init(null);
     }
 
     public ConstraintHelper(Context context, AttributeSet attrs) {
         super(context, attrs);
-        if (!isInEditMode()) {
-            super.setVisibility(View.GONE);
-        }
+        myContext = context;
+        init(attrs);
     }
 
     public ConstraintHelper(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        if (!isInEditMode()) {
-            super.setVisibility(View.GONE);
+        myContext = context;
+        init(attrs);
+    }
+
+    protected void init(AttributeSet attrs) {
+        if (attrs != null) {
+            TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.ConstraintLayout_Layout);
+            final int N = a.getIndexCount();
+            for (int i = 0; i < N; i++) {
+                int attr = a.getIndex(i);
+                if (attr == R.styleable.ConstraintLayout_Layout_constraint_referenced_ids) {
+                    mReferenceIds = a.getString(attr);
+                    setIds(mReferenceIds);
+                }
+            }
         }
     }
 
@@ -65,14 +81,6 @@ public abstract class ConstraintHelper extends View {
         }
         mIds[mCount] = tag;
         mCount++;
-    }
-
-    /**
-     * {@hide
-     */
-    @Override
-    public void setVisibility(int visibility) {
-        // Nothing
     }
 
     /**
@@ -109,12 +117,67 @@ public abstract class ConstraintHelper extends View {
         }
     }
 
+    private void addID(String idString) {
+        if (idString == null) {
+            return;
+        }
+        if (myContext == null) {
+            return;
+        }
+        idString = idString.trim();
+        int tag = 0;
+        try {
+            Class res = R.id.class;
+            Field field = res.getField(idString);
+            tag = field.getInt(null);
+        }
+        catch (Exception e) {
+            // Do nothing
+        }
+        if (tag == 0) {
+            tag = myContext.getResources().getIdentifier(idString, "id",
+                    myContext.getPackageName());
+        }
+        if (tag == 0 && isInEditMode() && getParent() instanceof ConstraintLayout) {
+            ConstraintLayout constraintLayout = (ConstraintLayout) getParent();
+            Object value = constraintLayout.getDesignInformation(0, idString);
+            if (value != null && value instanceof Integer) {
+                tag = (Integer) value;
+            }
+        }
+
+        if (tag != 0) {
+            setTag(tag, null);
+        } else {
+            Log.w("ConstraintHelper", "Could not find id of \""+idString+"\"");
+        }
+    }
+
+    private void setIds(String idList) {
+        if (idList == null) {
+            return;
+        }
+        int begin = 0;
+        while (true) {
+            int end = idList.indexOf(',', begin);
+            if (end == -1) {
+                addID(idList.substring(begin));
+                break;
+            }
+            addID(idList.substring(begin, end));
+            begin = end + 1;
+        }
+    }
+
     /**
      * Allows a helper a chance to updatePreLayout its internal object or set up connections for the pointed elements
      *
      * @param container
      */
     public void updatePreLayout(ConstraintLayout container) {
+        if (isInEditMode()) {
+            setIds(mReferenceIds);
+        }
         if (mHelperWidget == null) {
             return;
         }
