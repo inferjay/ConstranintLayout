@@ -151,6 +151,7 @@
     <attr name="layout_constraintWidth_default">
         <enum name="spread" value="0"/>
         <enum name="wrap" value="1"/>
+        <enum name="percent" value="2"/>
     </attr>
 
     <attr name="content" format="reference"/>
@@ -160,11 +161,13 @@
     <attr name="layout_constraintWidth_max" format="dimension|enum">
         <enum name="wrap" value="-2"/>
     </attr>
+    <attr name="layout_constraintWidth_percent" format="float"/>
 
     <!-- Specify the style of match constraint -->
     <attr name="layout_constraintHeight_default">
         <enum name="spread" value="0"/>
         <enum name="wrap" value="1"/>
+        <enum name="percent" value="2"/>
     </attr>
 
     <attr name="layout_constraintHeight_min" format="dimension|enum">
@@ -173,6 +176,7 @@
     <attr name="layout_constraintHeight_max" format="dimension|enum">
         <enum name="wrap" value="-2"/>
     </attr>
+    <attr name="layout_constraintHeight_percent" format="float"/>
 
     <declare-styleable name="ConstraintLayout_Layout">
         <attr name="android:orientation"/>
@@ -217,8 +221,10 @@
         <attr name="layout_constraintHeight_default" />
         <attr name="layout_constraintWidth_min" />
         <attr name="layout_constraintWidth_max" />
+        <attr name="layout_constraintWidth_percent" />
         <attr name="layout_constraintHeight_min" />
         <attr name="layout_constraintHeight_max" />
+        <attr name="layout_constraintHeight_percent" />
         <attr name="layout_constraintLeft_creator"/>
         <attr name="layout_constraintTop_creator" />
         <attr name="layout_constraintRight_creator"/>
@@ -286,8 +292,10 @@
         <attr name="layout_constraintHeight_default" />
         <attr name="layout_constraintWidth_min" />
         <attr name="layout_constraintWidth_max" />
+        <attr name="layout_constraintWidth_percent" />
         <attr name="layout_constraintHeight_min" />
         <attr name="layout_constraintHeight_max" />
+        <attr name="layout_constraintHeight_percent" />
         <attr name="layout_constraintLeft_creator"/>
         <attr name="layout_constraintTop_creator" />
         <attr name="layout_constraintRight_creator"/>

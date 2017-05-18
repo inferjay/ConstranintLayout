@@ -1216,6 +1216,11 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             flags[FLAG_USE_OPTIMIZE] = false;
             return;
         }
+        if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
+                && widget.mMatchConstraintDefaultWidth == ConstraintWidget.MATCH_CONSTRAINT_PERCENT) {
+            flags[FLAG_USE_OPTIMIZE] = false;
+            return;
+        }
         int w = widget.getOptimizerWrapWidth();
 
         if (widget.mHorizontalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT) {
@@ -1329,6 +1334,11 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 // h = (int) (w / widget.mDimensionRatio);
                 // widget.setHeight(h);
             }
+        }
+        if (widget.mVerticalDimensionBehaviour == DimensionBehaviour.MATCH_CONSTRAINT
+                && widget.mMatchConstraintDefaultHeight == ConstraintWidget.MATCH_CONSTRAINT_PERCENT) {
+            flags[FLAG_USE_OPTIMIZE] = false;
+            return;
         }
 
         int h = widget.getOptimizerWrapHeight();
