@@ -32,7 +32,9 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 
 /**
- * A barrier is positioned relative to multiple widgets
+ * A Barrier is a Line on a Constraint Layout that takes multiple widgets and aligns
+ * to the most extreme widget on the specified side.
+ * e.g. A left barrier will align to the left of all the contained views.
  */
 public class Barrier extends ConstraintHelper {
 

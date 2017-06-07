@@ -154,6 +154,12 @@
         <enum name="percent" value="2"/>
     </attr>
 
+    <!-- Specify the visibility of a placeholder -->
+    <attr name="emptyVisibility"  >
+        <enum name="gone" value="0"/>
+        <enum name="invisible" value="1"/>
+    </attr>
+
     <attr name="content" format="reference"/>
     <attr name="layout_constraintWidth_min" format="dimension|enum">
         <enum name="wrap" value="-2"/>
@@ -178,6 +184,11 @@
     </attr>
     <attr name="layout_constraintHeight_percent" format="float"/>
 
+    <declare-styleable name="ConstraintLayout_placeholder">
+        <attr name="emptyVisibility"/>
+        <attr name="content"/>
+    </declare-styleable>
+
     <declare-styleable name="ConstraintLayout_Layout">
         <attr name="android:orientation"/>
         <attr name="android:minWidth"/>
@@ -191,7 +202,6 @@
         <attr name="constraint_referenced_ids"/>
         <attr name="chainUseRtl"/>
         <attr name="title"/>
-        <attr name="content"/>
 
         <attr name="layout_constraintGuide_begin"/>
         <attr name="layout_constraintGuide_end"/>

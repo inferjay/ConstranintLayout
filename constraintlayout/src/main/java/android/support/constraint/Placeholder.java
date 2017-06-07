@@ -26,13 +26,19 @@ import android.util.AttributeSet;
 import android.view.View;
 
 /**
- * Placeholder provides a virtual object which can render an existing object
+ * Placeholder provides a virtual object which can position an existing object.
+ * When the id of another view is set on a placeholder (using setContent())
+ * the placeholder effectively becomes the content view. If the content view exist on the
+ * screen it is treated as gone from its original location.
+ *
+ * The ContentView is positioned using the layout of the parameters of the Placeholder.
+ *
  */
 public class Placeholder extends View {
 
   private int mContentId = -1;
   private View mContent = null;
-  private int mDefaultVisibility = View.INVISIBLE;
+  private int mEmptyVisibility = View.INVISIBLE;
 
   public Placeholder(Context context) {
     super(context);
@@ -55,24 +61,44 @@ public class Placeholder extends View {
   }
 
   private void init(AttributeSet attrs) {
-    super.setVisibility(mDefaultVisibility);
+    super.setVisibility(mEmptyVisibility);
     mContentId = -1;
     if (attrs != null) {
-      TypedArray a = getContext()
-          .obtainStyledAttributes(attrs, R.styleable.ConstraintLayout_Layout);
+      TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.ConstraintLayout_placeholder);
       final int N = a.getIndexCount();
       for (int i = 0; i < N; i++) {
         int attr = a.getIndex(i);
-        if (attr == R.styleable.ConstraintLayout_Layout_content) {
+        if (attr == R.styleable.ConstraintLayout_placeholder_content) {
           mContentId = a.getResourceId(attr, mContentId);
+        } else {
+          if (attr == R.styleable.ConstraintLayout_placeholder_emptyVisibility) {
+            mEmptyVisibility = a.getInt(attr, mEmptyVisibility);
+          }
         }
       }
     }
   }
 
-  public void setDefaultVisibility(int visibility) {
-    mDefaultVisibility = visibility;
+
+  /**
+   * Sets the visibility of placeholder when not containing objects typically gone or invisible.
+   * This can be important as it affects behaviour of surrounding components.
+   *
+   * @param visibility
+   */
+  public void setEmptyVisibility(int visibility) {
+    mEmptyVisibility = visibility;
   }
+
+  /**
+   * gets the behaviour of a placeholder when it contains no view;
+   *
+   * @return
+   */
+  public int getEmptyVisibility() {
+    return mEmptyVisibility;
+  }
+
 
   public View getContent() {
     return mContent;
@@ -104,7 +130,7 @@ public class Placeholder extends View {
     if (mContentId == -1) {
       ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) getLayoutParams();
       if (!isInEditMode()) {
-        setVisibility(mDefaultVisibility);
+        setVisibility(mEmptyVisibility);
       }
 
     }
