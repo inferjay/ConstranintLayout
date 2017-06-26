@@ -2213,4 +2213,9 @@ public class ConstraintLayout extends ViewGroup {
         super.requestLayout();
         mDirtyHierarchy = true;
     }
+
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return false;
+    }
 }
