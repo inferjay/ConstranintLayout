@@ -79,14 +79,14 @@ public class RatioTest {
         System.out.println("a) root: " + root + " A: " + A);
         assertEquals(root.getWidth(), 0);
         assertEquals(root.getHeight(), 0);
-        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 100, 0);
+        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 100, 0, 1f);
         root.setWidth(0);
         root.setHeight(0);
         root.layout();
         System.out.println("b) root: " + root + " A: " + A);
         assertEquals(root.getWidth(), 100);
         assertEquals(root.getHeight(), 56);
-        A.setVerticalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 100, 0);
+        A.setVerticalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 100, 0, 1f);
         root.setWidth(0);
         root.setHeight(0);
         root.layout();

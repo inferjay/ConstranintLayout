@@ -40,7 +40,7 @@ public class MatchConstraintTest {
         A.connect(ConstraintAnchor.Type.LEFT, guidelineA, ConstraintAnchor.Type.LEFT);
         A.connect(ConstraintAnchor.Type.RIGHT, guidelineB, ConstraintAnchor.Type.RIGHT);
         A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
-        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 150, 200);
+        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 150, 200, 1f);
         root.add(A);
         root.layout();
         assertEquals(root.getWidth(), 800);
@@ -52,7 +52,7 @@ public class MatchConstraintTest {
         assertEquals(A.getWidth(), 150);
         System.out.println("b) root: " + root + " guideA: " + guidelineA + " A: " + A + " guideB: " + guidelineB);
 
-        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_WRAP, 150, 200);
+        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_WRAP, 150, 200, 1f);
         root.layout();
         assertEquals(root.getWidth(), 350);
         assertEquals(A.getWidth(), 150);
@@ -70,13 +70,13 @@ public class MatchConstraintTest {
         System.out.println("e) root: " + root + " guideA: " + guidelineA + " A: " + A + " guideB: " + guidelineB);
 
         A.setWidth(700);
-        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 150, 0);
+        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 150, 0, 1f);
         root.layout();
         assertEquals(root.getWidth(), 800);
         assertEquals(A.getWidth(), 600);
         System.out.println("f) root: " + root + " guideA: " + guidelineA + " A: " + A + " guideB: " + guidelineB);
         A.setWidth(700);
-        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_WRAP, 150, 0);
+        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_WRAP, 150, 0, 1f);
         root.layout();
         assertEquals(root.getWidth(), 800);
         assertEquals(A.getWidth(), 600);
@@ -89,7 +89,7 @@ public class MatchConstraintTest {
         assertEquals(A.getWidth(), 700);
         System.out.println("h) root: " + root + " guideA: " + guidelineA + " A: " + A + " guideB: " + guidelineB);
         A.setWidth(700);
-        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 150, 0);
+        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 150, 0, 1f);
         root.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
         root.layout();
         assertEquals(root.getWidth(), 350);
@@ -139,7 +139,7 @@ public class MatchConstraintTest {
         assertEquals(C.getLeft() - A.getRight(), B.getLeft() - C.getRight());
 
         C.setWidth(144);
-        C.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_WRAP, 0, 0);
+        C.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_WRAP, 0, 0, 1f);
         root.layout();
         System.out.println("c) A: " + A + " B: " + B + " C: " + C);
         assertEquals(A.getWidth(), 100);
@@ -150,7 +150,7 @@ public class MatchConstraintTest {
         assertEquals(C.getLeft() - A.getRight(), B.getLeft() - C.getRight());
 
         C.setWidth(1000);
-        C.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_WRAP, 0, 0);
+        C.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_WRAP, 0, 0, 1f);
         root.layout();
         System.out.println("d) A: " + A + " B: " + B + " C: " + C);
         assertEquals(A.getWidth(), 100);
