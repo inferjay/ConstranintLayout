@@ -1856,6 +1856,8 @@ public class ConstraintLayout extends ViewGroup {
             this.matchConstraintMaxWidth = source.matchConstraintMaxWidth;
             this.matchConstraintMinHeight = source.matchConstraintMinHeight;
             this.matchConstraintMaxHeight = source.matchConstraintMaxHeight;
+            this.matchConstraintPercentHeight = source.matchConstraintPercentHeight;
+            this.matchConstraintPercentWidth = source.matchConstraintPercentWidth;
             this.editorAbsoluteX = source.editorAbsoluteX;
             this.editorAbsoluteY = source.editorAbsoluteY;
             this.orientation = source.orientation;
