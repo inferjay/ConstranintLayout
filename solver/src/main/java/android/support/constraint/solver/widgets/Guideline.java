@@ -191,7 +191,7 @@ public class Guideline extends ConstraintWidget {
     }
 
     @Override
-    public void addToSolver(LinearSystem system, int group) {
+    public void addToSolver(LinearSystem system) {
         ConstraintWidgetContainer parent = (ConstraintWidgetContainer) getParent();
         if (parent == null) {
             return;
@@ -230,7 +230,7 @@ public class Guideline extends ConstraintWidget {
     }
 
     @Override
-    public void updateFromSolver(LinearSystem system, int group) {
+    public void updateFromSolver(LinearSystem system) {
         if (getParent() == null) {
             return;
         }

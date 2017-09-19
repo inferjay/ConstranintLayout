@@ -29,7 +29,6 @@ import static android.support.constraint.solver.widgets.ConstraintWidget.Dimensi
  */
 public class ConstraintWidgetContainer extends WidgetContainer {
 
-    private static final boolean USE_THREAD = false;
     private static final boolean USE_SNAPSHOT = true;
     private static final int MAX_ITERATIONS = 8;
 
@@ -37,11 +36,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     private static final boolean DEBUG_LAYOUT = false;
 
     protected LinearSystem mSystem = new LinearSystem();
-    protected LinearSystem mBackgroundSystem = null;
 
     private Snapshot mSnapshot;
-
-    static boolean ALLOW_ROOT_GROUP = true;
 
     int mWrapWidth;
     int mWrapHeight;
@@ -120,9 +116,6 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     @Override
     public void reset() {
         mSystem.reset();
-        if (USE_THREAD && mBackgroundSystem != null) {
-            mBackgroundSystem.reset();
-        }
         mPaddingLeft = 0;
         mPaddingRight = 0;
         mPaddingTop = 0;
@@ -192,14 +185,14 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      *
      * @param system the solver we want to add the widget to
      */
-    public boolean addChildrenToSolver(LinearSystem system, int group) {
+    public boolean addChildrenToSolver(LinearSystem system) {
         if (DEBUG) {
             System.out.println("\n#######################################");
             System.out.println("##    ADD CHILDREN TO SOLVER  (" + mDebugSolverPassCount + ") ##");
             System.out.println("#######################################\n");
             mDebugSolverPassCount++;
         }
-        addToSolver(system, group);
+        addToSolver(system);
         final int count = mChildren.size();
         boolean setMatchParent = true;
 
@@ -222,7 +215,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 if (verticalBehaviour == DimensionBehaviour.WRAP_CONTENT) {
                     widget.setVerticalDimensionBehaviour(DimensionBehaviour.FIXED);
                 }
-                widget.addToSolver(system, group);
+                widget.addToSolver(system);
                 if (horizontalBehaviour == DimensionBehaviour.WRAP_CONTENT) {
                     widget.setHorizontalDimensionBehaviour(horizontalBehaviour);
                 }
@@ -233,7 +226,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 if (setMatchParent) {
                     Optimizer.checkMatchParent(this, system, widget);
                 }
-                widget.addToSolver(system, group);
+                widget.addToSolver(system);
             }
         }
         if (mHorizontalChainsSize > 0) {
@@ -250,13 +243,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      *
      * @param system the solver we get the values from.
      */
-    public void updateChildrenFromSolver(LinearSystem system, int group, boolean flags[]) {
+    public void updateChildrenFromSolver(LinearSystem system, boolean flags[]) {
         flags[Optimizer.FLAG_RECOMPUTE_BOUNDS] = false;
-        updateFromSolver(system, group);
+        updateFromSolver(system);
         final int count = mChildren.size();
         for (int i = 0; i < count; i++) {
             ConstraintWidget widget = mChildren.get(i);
-            widget.updateFromSolver(system, group);
+            widget.updateFromSolver(system);
             if (widget.mListDimensionBehaviors[DIMENSION_HORIZONTAL] == DimensionBehaviour.MATCH_CONSTRAINT
                 && widget.getWidth() < widget.getWrapWidth()) {
                 flags[Optimizer.FLAG_RECOMPUTE_BOUNDS] = true;
@@ -395,7 +388,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                         }
                     }
                 }
-                needsSolving = addChildrenToSolver(mSystem, ConstraintAnchor.ANY_GROUP);
+                needsSolving = addChildrenToSolver(mSystem);
                 if (needsSolving) {
                     mSystem.minimize();
                 }
@@ -404,9 +397,9 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 System.out.println("EXCEPTION : " + e);
             }
             if (needsSolving) {
-                updateChildrenFromSolver(mSystem, ConstraintAnchor.ANY_GROUP, Optimizer.flags);
+                updateChildrenFromSolver(mSystem, Optimizer.flags);
             } else {
-                updateFromSolver(mSystem, ConstraintAnchor.ANY_GROUP);
+                updateFromSolver(mSystem);
                 for (int i = 0; i < count; i++) {
                     ConstraintWidget widget = mChildren.get(i);
                     if (widget.mListDimensionBehaviors[DIMENSION_HORIZONTAL] == DimensionBehaviour.MATCH_CONSTRAINT
@@ -527,327 +520,6 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             mListDimensionBehaviors[DIMENSION_VERTICAL] = originalVerticalDimensionBehaviour;
         }
         resetSolverVariables(mSystem.getCache());
-        if (this == getRootConstraintContainer()) {
-            updateDrawPosition();
-        }
-    }
-
-    /**
-     * set the anchor to the group value if it less than my current group value
-     * True if i was able to set it.
-     * recurse to other if you were set.
-     *
-     * @param anchor
-     * @return
-     */
-    static int setGroup(ConstraintAnchor anchor, int group) {
-        int oldGroup = anchor.mGroup;
-        if (anchor.mOwner.getParent() == null) {
-            return group;
-        }
-        if (oldGroup <= group) {
-            return oldGroup;
-        }
-
-        anchor.mGroup = group;
-        ConstraintAnchor opposite = anchor.getOpposite();
-        ConstraintAnchor target = anchor.mTarget;
-
-        group = (opposite != null) ? setGroup(opposite, group) : group;
-        group = (target != null) ? setGroup(target, group) : group;
-        group = (opposite != null) ? setGroup(opposite, group) : group;
-
-        anchor.mGroup = group;
-
-        return group;
-    }
-
-    public int layoutFindGroupsSimple() {
-        final int size = mChildren.size();
-        for (int j = 0; j < size; j++) {
-            ConstraintWidget widget = mChildren.get(j);
-            widget.mLeft.mGroup = 0;
-            widget.mRight.mGroup = 0;
-            widget.mTop.mGroup = 1;
-            widget.mBottom.mGroup = 1;
-            widget.mBaseline.mGroup = 1;
-        }
-        return 2;
-    }
-
-    /**
-     * Find groups
-     */
-    public int layoutFindGroups() {
-        ConstraintAnchor.Type[] dir = {
-                ConstraintAnchor.Type.LEFT, ConstraintAnchor.Type.RIGHT, ConstraintAnchor.Type.TOP,
-                ConstraintAnchor.Type.BASELINE, ConstraintAnchor.Type.BOTTOM
-        };
-
-        int label = 1;
-        final int size = mChildren.size();
-        for (int j = 0; j < size; j++) {
-            ConstraintWidget widget = mChildren.get(j);
-            ConstraintAnchor anchor = null;
-
-            anchor = widget.mLeft;
-            if (anchor.mTarget != null) {
-                if (setGroup(anchor, label) == label) {
-                    label++;
-                }
-            } else {
-                anchor.mGroup = ConstraintAnchor.ANY_GROUP;
-            }
-
-            anchor = widget.mTop;
-            if (anchor.mTarget != null) {
-                if (setGroup(anchor, label) == label) {
-                    label++;
-                }
-            } else {
-                anchor.mGroup = ConstraintAnchor.ANY_GROUP;
-            }
-
-            anchor = widget.mRight;
-            if (anchor.mTarget != null) {
-                if (setGroup(anchor, label) == label) {
-                    label++;
-                }
-            } else {
-                anchor.mGroup = ConstraintAnchor.ANY_GROUP;
-            }
-
-            anchor = widget.mBottom;
-            if (anchor.mTarget != null) {
-                if (setGroup(anchor, label) == label) {
-                    label++;
-                }
-            } else {
-                anchor.mGroup = ConstraintAnchor.ANY_GROUP;
-            }
-
-            anchor = widget.mBaseline;
-            if (anchor.mTarget != null) {
-                if (setGroup(anchor, label) == label) {
-                    label++;
-                }
-            } else {
-                anchor.mGroup = ConstraintAnchor.ANY_GROUP;
-            }
-        }
-        boolean notDone = true;
-        int count = 0;
-        int fix = 0;
-
-        // This cleans up the misses of the previous step
-        // It is a brute force algorithm that is related to bubble sort O(N*Log(N))
-        while (notDone) {
-            notDone = false;
-            count++;
-            for (int j = 0; j < size; j++) {
-                ConstraintWidget widget = mChildren.get(j);
-                for (int i = 0; i < dir.length; i++) {
-                    ConstraintAnchor.Type type = dir[i];
-                    ConstraintAnchor anchor = null;
-                    switch (type) {
-                        case LEFT: {
-                            anchor = widget.mLeft;
-                        }
-                        break;
-                        case TOP: {
-                            anchor = widget.mTop;
-                        }
-                        break;
-                        case RIGHT: {
-                            anchor = widget.mRight;
-                        }
-                        break;
-                        case BOTTOM: {
-                            anchor = widget.mBottom;
-                        }
-                        break;
-                        case BASELINE: {
-                            anchor = widget.mBaseline;
-                        }
-                        break;
-                        case CENTER:
-                        case CENTER_X:
-                        case CENTER_Y:
-                        case NONE:
-                            break;
-                    }
-                    ConstraintAnchor target = anchor.mTarget;
-                    if (target == null) {
-                        continue;
-                    }
-
-                    if (target.mOwner.getParent() != null && target.mGroup != anchor.mGroup) {
-                        target.mGroup = anchor.mGroup = (anchor.mGroup > target.mGroup) ? target.mGroup : anchor.mGroup;
-                        fix++;
-                        notDone = true;
-                    }
-
-                    ConstraintAnchor opposite = target.getOpposite();
-                    if (opposite != null && opposite.mGroup != anchor.mGroup) {
-                        opposite.mGroup = anchor.mGroup = (anchor.mGroup > opposite.mGroup) ? opposite.mGroup : anchor.mGroup;
-                        fix++;
-                        notDone = true;
-                    }
-                }
-            }
-        }
-
-        // This remaps the groups to a compact range
-        int index = 0;
-        int[] table = new int[mChildren.size() * dir.length + 1];
-        Arrays.fill(table, -1);
-        for (int j = 0; j < size; j++) {
-            ConstraintWidget widget = mChildren.get(j);
-            ConstraintAnchor anchor = null;
-
-            anchor = widget.mLeft;
-            if (anchor.mGroup != ConstraintAnchor.ANY_GROUP) {
-                int g = anchor.mGroup;
-                if (table[g] == -1) {
-                    table[g] = index++;
-                }
-                anchor.mGroup = table[g];
-            }
-
-            anchor = widget.mTop;
-            if (anchor.mGroup != ConstraintAnchor.ANY_GROUP) {
-                int g = anchor.mGroup;
-                if (table[g] == -1) {
-                    table[g] = index++;
-                }
-                anchor.mGroup = table[g];
-            }
-
-            anchor = widget.mRight;
-            if (anchor.mGroup != ConstraintAnchor.ANY_GROUP) {
-                int g = anchor.mGroup;
-                if (table[g] == -1) {
-                    table[g] = index++;
-                }
-                anchor.mGroup = table[g];
-            }
-
-            anchor = widget.mBottom;
-            if (anchor.mGroup != ConstraintAnchor.ANY_GROUP) {
-                int g = anchor.mGroup;
-                if (table[g] == -1) {
-                    table[g] = index++;
-                }
-                anchor.mGroup = table[g];
-            }
-
-            anchor = widget.mBaseline;
-            if (anchor.mGroup != ConstraintAnchor.ANY_GROUP) {
-                int g = anchor.mGroup;
-                if (table[g] == -1) {
-                    table[g] = index++;
-                }
-                anchor.mGroup = table[g];
-            }
-        }
-        return index;
-    }
-
-    /**
-     * Layout by groups
-     */
-    public void layoutWithGroup(int numOfGroups) {
-        int prex = mX;
-        int prey = mY;
-        if (mParent != null && USE_SNAPSHOT) {
-            if (mSnapshot == null) {
-                mSnapshot = new Snapshot(this);
-            }
-            mSnapshot.updateFrom(this);
-            // We clear ourselves of external anchors as
-            // well as repositioning us to (0, 0)
-            // before inserting us in the solver, so that our
-            // children's positions get computed relative to us.
-            mX = 0;
-            mY = 0;
-            resetAnchors();
-            resetSolverVariables(mSystem.getCache());
-        } else {
-            mX = 0;
-            mY = 0;
-        }
-        // Before we solve our system, we should call layout() on any
-        // of our children that is a container.
-        final int count = mChildren.size();
-        for (int i = 0; i < count; i++) {
-            ConstraintWidget widget = mChildren.get(i);
-            if (widget instanceof WidgetContainer) {
-                ((WidgetContainer) widget).layout();
-            }
-        }
-
-        mLeft.mGroup = 0;
-        mRight.mGroup = 0;
-        mTop.mGroup = 1;
-        mBottom.mGroup = 1;
-        mSystem.reset();
-        if (USE_THREAD) {
-            if (mBackgroundSystem == null) {
-                mBackgroundSystem = new LinearSystem();
-            } else {
-                mBackgroundSystem.reset();
-            }
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        addToSolver(mBackgroundSystem, 1);
-                        mBackgroundSystem.minimize();
-                        updateFromSolver(mBackgroundSystem, 1);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            thread.start();
-            try {
-                addToSolver(mSystem, 0);
-                mSystem.minimize();
-                updateFromSolver(mSystem, 0);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            updateFromSolver(mSystem, ConstraintAnchor.APPLY_GROUP_RESULTS);
-        } else {
-            for (int i = 0; i < numOfGroups; i++) {
-                try {
-                    addToSolver(mSystem, i);
-                    mSystem.minimize();
-                    updateFromSolver(mSystem, i);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                updateFromSolver(mSystem, ConstraintAnchor.APPLY_GROUP_RESULTS);
-            }
-        }
-
-        if (mParent != null && USE_SNAPSHOT) {
-            int width = getWidth();
-            int height = getHeight();
-            // Let's restore our state...
-            mSnapshot.applyTo(this);
-            setWidth(width);
-            setHeight(height);
-        } else {
-            mX = prex;
-            mY = prey;
-        }
-
         if (this == getRootConstraintContainer()) {
             updateDrawPosition();
         }

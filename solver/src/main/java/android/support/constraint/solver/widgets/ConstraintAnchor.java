@@ -33,12 +33,6 @@ public class ConstraintAnchor {
     private static final boolean ALLOW_BINARY = false;
 
     /**
-     * group management
-     */
-    public static final int ANY_GROUP = Integer.MAX_VALUE;
-    public static final int APPLY_GROUP_RESULTS = -2;
-
-    /**
      * Define the type of anchor
      */
     public enum Type { NONE, LEFT, TOP, RIGHT, BOTTOM, BASELINE, CENTER, CENTER_X, CENTER_Y }
@@ -72,7 +66,6 @@ public class ConstraintAnchor {
     private ConnectionType mConnectionType = ConnectionType.RELAXED;
     private int mConnectionCreator = USER_CREATOR;
     SolverVariable mSolverVariable;
-    int mGroup = ANY_GROUP;
 
     // -----------------------------------------------
     // Direct resolution management (experimental)
@@ -149,22 +142,6 @@ public class ConstraintAnchor {
         } else {
             mSolverVariable.reset();
         }
-    }
-
-    /**
-     * Setter for the group the anchor belongs to
-     * @param group
-     */
-    public void setGroup(int group) {
-        mGroup = group;
-    }
-
-    /**
-     * Getter for the group the anchor belongs to
-     * @return
-     */
-    public int getGroup() {
-        return mGroup;
     }
 
     /**

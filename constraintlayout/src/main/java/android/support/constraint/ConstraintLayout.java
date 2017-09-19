@@ -1319,12 +1319,10 @@ public class ConstraintLayout extends ViewGroup {
      * Solve the linear system
      */
     protected void solveLinearSystem(String reason) {
-        if (SIMPLE_LAYOUT) {
-            mLayoutWidget.layout();
-        } else {
-            int groups = mLayoutWidget.layoutFindGroupsSimple();
-            mLayoutWidget.layoutWithGroup(groups);
+        if (DEBUG) {
+            System.out.println("solve <" + reason + ">");
         }
+        mLayoutWidget.layout();
     }
 
     /**

@@ -43,7 +43,7 @@ public class Barrier extends Helper {
      * @param system the solver we want to add the widget to
      */
     @Override
-    public void addToSolver(LinearSystem system, int group) {
+    public void addToSolver(LinearSystem system) {
         ConstraintAnchor position;
         mListAnchors[LEFT] = mLeft;
         mListAnchors[TOP] = mTop;

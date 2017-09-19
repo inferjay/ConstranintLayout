@@ -59,7 +59,7 @@ public class ConstraintHorizontalLayout extends ConstraintWidgetContainer {
      * @param system the solver we want to add the widget to
      */
     @Override
-    public void addToSolver(LinearSystem system, int group) {
+    public void addToSolver(LinearSystem system) {
         if (mChildren.size() != 0) {
             ConstraintWidget previous = this;
             for (int i = 0, mChildrenSize = mChildren.size(); i < mChildrenSize; i++) {
@@ -88,7 +88,7 @@ public class ConstraintHorizontalLayout extends ConstraintWidgetContainer {
                         ConstraintAnchor.Type.RIGHT, 0, strength);
             }
         }
-        super.addToSolver(system, group);
+        super.addToSolver(system);
     }
 
 }

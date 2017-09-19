@@ -307,16 +307,6 @@ public class ConstraintWidget {
     }
 
     /**
-     * Reset the anchors' group
-     */
-    public void resetGroups() {
-        final int numAnchors = mAnchors.size();
-        for (int i = 0; i < numAnchors; i++) {
-            mAnchors.get(i).mGroup = ConstraintAnchor.ANY_GROUP;
-        }
-    }
-
-    /**
      * Add all the anchors to the mAnchors array
      */
     private void addAnchors() {
@@ -2026,42 +2016,23 @@ public class ConstraintWidget {
     // Constraints
     /*-----------------------------------------------------------------------*/
 
-    public void addToSolver(LinearSystem system) {
-        addToSolver(system, ConstraintAnchor.ANY_GROUP);
-    }
-
     /**
      * Add this widget to the solver
      *
      * @param system the solver we want to add the widget to
      */
-    public void addToSolver(LinearSystem system, int group) {
+    public void addToSolver(LinearSystem system) {
         if (LinearSystem.FULL_DEBUG) {
             System.out.println("\n----------------------------------------------");
             System.out.println("-- adding " + getDebugName() + " to the solver");
             System.out.println("----------------------------------------------\n");
         }
 
-        SolverVariable left = null;
-        SolverVariable right = null;
-        SolverVariable top = null;
-        SolverVariable bottom = null;
-        SolverVariable baseline = null;
-        if (group == ConstraintAnchor.ANY_GROUP || mLeft.mGroup == group) {
-            left = system.createObjectVariable(mLeft);
-        }
-        if (group == ConstraintAnchor.ANY_GROUP || mRight.mGroup == group) {
-            right = system.createObjectVariable(mRight);
-        }
-        if (group == ConstraintAnchor.ANY_GROUP || mTop.mGroup == group) {
-            top = system.createObjectVariable(mTop);
-        }
-        if (group == ConstraintAnchor.ANY_GROUP || mBottom.mGroup == group) {
-            bottom = system.createObjectVariable(mBottom);
-        }
-        if (group == ConstraintAnchor.ANY_GROUP || mBaseline.mGroup == group) {
-            baseline = system.createObjectVariable(mBaseline);
-        }
+        SolverVariable left = system.createObjectVariable(mLeft);
+        SolverVariable right = system.createObjectVariable(mRight);
+        SolverVariable top = system.createObjectVariable(mTop);
+        SolverVariable bottom = system.createObjectVariable(mBottom);
+        SolverVariable baseline = system.createObjectVariable(mBaseline);
 
         boolean inHorizontalChain = false;
         boolean inVerticalChain = false;
@@ -2142,8 +2113,7 @@ public class ConstraintWidget {
         boolean wrapContent = (mListDimensionBehaviors[DIMENSION_HORIZONTAL] == WRAP_CONTENT)
                 && (this instanceof ConstraintWidgetContainer);
 
-        if (mHorizontalResolution != DIRECT
-                && (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group))) {
+        if (mHorizontalResolution != DIRECT) {
             SolverVariable parentMax = mParent != null ? system.createObjectVariable(mParent.mRight) : null;
             SolverVariable parentMin = mParent != null ? system.createObjectVariable(mParent.mLeft) : null;
                 applyConstraints(system, horizontalParentWrapContent, parentMin, parentMax, mListDimensionBehaviors[DIMENSION_HORIZONTAL], wrapContent,
@@ -2167,33 +2137,30 @@ public class ConstraintWidget {
 
         boolean useVerticalRatio = useRatio && (mResolvedDimensionRatioSide == VERTICAL
                 || mResolvedDimensionRatioSide == UNKNOWN);
-        if (group == ConstraintAnchor.ANY_GROUP || (mBaseline.mGroup == group) || (mTop.mGroup == group && mBottom.mGroup == group)) {
-            boolean applyPosition = true;
-            if (mBaselineDistance > 0) {
-                system.addEquality(baseline, top, getBaselineDistance(), SolverVariable.STRENGTH_FIXED);
-                if (mBaseline.mTarget != null) {
-                    SolverVariable baselineTarget = system.createObjectVariable(mBaseline.mTarget);
-                    int baselineMargin = 0; // for now at least, baseline don't have margins
-                    system.addEquality(baseline, baselineTarget, baselineMargin, SolverVariable.STRENGTH_FIXED);
-                    applyPosition = false;
-                }
+
+        boolean applyPosition = true;
+        if (mBaselineDistance > 0) {
+            system.addEquality(baseline, top, getBaselineDistance(), SolverVariable.STRENGTH_FIXED);
+            if (mBaseline.mTarget != null) {
+                SolverVariable baselineTarget = system.createObjectVariable(mBaseline.mTarget);
+                int baselineMargin = 0; // for now at least, baseline don't have margins
+                system.addEquality(baseline, baselineTarget, baselineMargin, SolverVariable.STRENGTH_FIXED);
+                applyPosition = false;
             }
-            SolverVariable parentMax = mParent != null ? system.createObjectVariable(mParent.mBottom) : null;
-            SolverVariable parentMin = mParent != null ? system.createObjectVariable(mParent.mTop) : null;
-            applyConstraints(system, verticalParentWrapContent, parentMin, parentMax, mListDimensionBehaviors[DIMENSION_VERTICAL],
-                    wrapContent, mTop, mBottom, mY, height,
-                    mMinHeight, mVerticalBiasPercent, useVerticalRatio, inVerticalChain,
-                    mMatchConstraintDefaultHeight, mMatchConstraintMinHeight, mMatchConstraintMaxHeight, mMatchConstraintPercentHeight, applyPosition);
         }
+        SolverVariable parentMax = mParent != null ? system.createObjectVariable(mParent.mBottom) : null;
+        SolverVariable parentMin = mParent != null ? system.createObjectVariable(mParent.mTop) : null;
+        applyConstraints(system, verticalParentWrapContent, parentMin, parentMax, mListDimensionBehaviors[DIMENSION_VERTICAL],
+                wrapContent, mTop, mBottom, mY, height,
+                mMinHeight, mVerticalBiasPercent, useVerticalRatio, inVerticalChain,
+                mMatchConstraintDefaultHeight, mMatchConstraintMinHeight, mMatchConstraintMaxHeight, mMatchConstraintPercentHeight, applyPosition);
 
         if (useRatio) {
-            if (group == ConstraintAnchor.ANY_GROUP || (mLeft.mGroup == group && mRight.mGroup == group)) {
-                int strength = SolverVariable.STRENGTH_FIXED;
-                if (mResolvedDimensionRatioSide == VERTICAL) {
-                    system.addRatio(bottom, top, right, left, mResolvedDimensionRatio, strength);
-                } else {
-                    system.addRatio(right, left, bottom, top, mResolvedDimensionRatio, strength);
-                }
+            int strength = SolverVariable.STRENGTH_FIXED;
+            if (mResolvedDimensionRatioSide == VERTICAL) {
+                system.addRatio(bottom, top, right, left, mResolvedDimensionRatio, strength);
+            } else {
+                system.addRatio(right, left, bottom, top, mResolvedDimensionRatio, strength);
             }
         }
 
@@ -2478,37 +2445,11 @@ public class ConstraintWidget {
      *
      * @param system the solver we get the values from.
      */
-    public void updateFromSolver(LinearSystem system, int group) {
-        if (group == ConstraintAnchor.ANY_GROUP) {
-            int left = system.getObjectVariableValue(mLeft);
-            int top = system.getObjectVariableValue(mTop);
-            int right = system.getObjectVariableValue(mRight);
-            int bottom = system.getObjectVariableValue(mBottom);
-            setFrame(left, top, right, bottom);
-        } else if (group == ConstraintAnchor.APPLY_GROUP_RESULTS) {
-            setFrame(mSolverLeft, mSolverTop, mSolverRight, mSolverBottom);
-        } else {
-            if (mLeft.mGroup == group) {
-                mSolverLeft = system.getObjectVariableValue(mLeft);
-            }
-            if (mTop.mGroup == group) {
-                mSolverTop = system.getObjectVariableValue(mTop);
-            }
-            if (mRight.mGroup == group) {
-                mSolverRight = system.getObjectVariableValue(mRight);
-            }
-            if (mBottom.mGroup == group) {
-                mSolverBottom = system.getObjectVariableValue(mBottom);
-            }
-        }
-    }
-
-    /**
-     * @hidden
-     * Used in test
-     * @param system
-     */
     public void updateFromSolver(LinearSystem system) {
-        updateFromSolver(system, ConstraintAnchor.ANY_GROUP);
+        int left = system.getObjectVariableValue(mLeft);
+        int top = system.getObjectVariableValue(mTop);
+        int right = system.getObjectVariableValue(mRight);
+        int bottom = system.getObjectVariableValue(mBottom);
+        setFrame(left, top, right, bottom);
     }
 }
