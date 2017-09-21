@@ -71,23 +71,37 @@ public class ConstraintAnchor {
     // Direct resolution management (experimental)
     // -----------------------------------------------
 
-    boolean isResolved = false;
-    int resolvedValue = -1;
+    public static final int UNRESOLVED = 0;
+    public static final int RESOLVED = 1;
+    public static final int SOLVER = 2;
+    public int resolutionStatus = UNRESOLVED;
+    public int resolvedValue = -1;
     ConstraintAnchor resolvedAnchor = null;
+
+    String getResolutionStatus() {
+        String status = "";
+        if (resolutionStatus == UNRESOLVED) {
+           status = "{unresolved}";
+        } else if (resolutionStatus == RESOLVED) {
+            status = "**RESOLVED**";
+        } else if (resolutionStatus == SOLVER) {
+            status = "SOLVER";
+        }
+        status += " val: " + resolvedValue + " anchor: " + resolvedAnchor;
+        return status;
+    }
 
     void resolve(LinearSystem system, int value, ConstraintAnchor anchor) {
         if (mSolverVariable == null) {
             mSolverVariable = system.createObjectVariable(this);
         }
-        isResolved = true;
+        resolutionStatus = RESOLVED;
         resolvedValue = value;
         resolvedAnchor = anchor;
     }
 
     void addResolvedValue(LinearSystem system) {
-        if (mSolverVariable == null) {
-            mSolverVariable = system.createObjectVariable(this);
-        }
+        mSolverVariable = system.createObjectVariable(this);
         if (resolvedAnchor == null) {
             system.addEquality(mSolverVariable, resolvedValue);
         } else {
@@ -100,16 +114,23 @@ public class ConstraintAnchor {
         ConstraintAnchor target = mTarget;
         margin[0] = getMargin();
         ConstraintAnchor lastTarget = mTarget;
-        if (mTarget.isResolved) {
+        if (lastTarget.resolutionStatus == SOLVER) {
+            return lastTarget;
+        }
+        if (mTarget.resolutionStatus == RESOLVED) {
             lastTarget = mTarget.resolvedAnchor;
-            margin[0] = mTarget.resolvedValue;
+            margin[0] += mTarget.resolvedValue;
         } else {
             while (target != null) {
                 lastTarget = target;
                 if (target.mTarget != null) {
                     margin[0] += target.getMargin();
                 }
-                target = target.mTarget;
+                if (target.mTarget != null && target.mTarget.mTarget != target) {
+                    target = target.mTarget;
+                } else {
+                    target = null;
+                }
             }
         }
         return lastTarget;

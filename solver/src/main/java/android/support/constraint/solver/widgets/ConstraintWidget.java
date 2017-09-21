@@ -130,14 +130,6 @@ public class ConstraintWidget {
     protected float mDimensionRatio = 0;
     protected int mDimensionRatioSide = UNKNOWN;
 
-    // Experimental
-    protected int[] mSolverResult = { 0, 0, 0, 0 };
-
-    protected int mSolverLeft = 0;
-    protected int mSolverTop = 0;
-    protected int mSolverRight = 0;
-    protected int mSolverBottom = 0;
-
     // Origin of the widget
     protected int mX = 0;
     protected int mY = 0;
@@ -2256,6 +2248,13 @@ public class ConstraintWidget {
                                   int beginPosition, int dimension, int minDimension,
                                   float bias, boolean useRatio, boolean inChain, int matchConstraintDefault,
                                   int matchMinDimension, int matchMaxDimension, float matchPercentDimension, boolean applyPosition) {
+        if (beginAnchor.resolutionStatus == ConstraintAnchor.RESOLVED
+                && endAnchor.resolutionStatus == ConstraintAnchor.RESOLVED) {
+            beginAnchor.addResolvedValue(system);
+            endAnchor.addResolvedValue(system);
+            return;
+        }
+
         SolverVariable begin = system.createObjectVariable(beginAnchor);
         SolverVariable end = system.createObjectVariable(endAnchor);
         SolverVariable beginTarget = system.createObjectVariable(beginAnchor.getTarget());

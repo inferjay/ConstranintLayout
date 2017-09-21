@@ -53,7 +53,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     ConstraintWidget[] mVerticalChainsArray = new ConstraintWidget[4];
     ConstraintWidget[] mHorizontalChainsArray = new ConstraintWidget[4];
 
-    private int mOptimizationLevel = Optimizer.OPTIMIZATION_NONE;
+    private int mOptimizationLevel = Optimizer.OPTIMIZATION_ALL;
 
     // Internal -- used to keep track of first/last visible/invisible widgets
     // TODO: we could save the array by using the children array and simply store the indexes.
@@ -196,8 +196,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         final int count = mChildren.size();
         boolean setMatchParent = true;
 
-        if (false && (mOptimizationLevel == Optimizer.OPTIMIZATION_ALL
-                || mOptimizationLevel == Optimizer.OPTIMIZATION_BASIC)) {
+        if (mOptimizationLevel == Optimizer.OPTIMIZATION_ALL
+                || mOptimizationLevel == Optimizer.OPTIMIZATION_BASIC) {
             if (Optimizer.optimize(system, this)) {
                 return false; // all work is done
             }

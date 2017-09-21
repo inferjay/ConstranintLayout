@@ -40,7 +40,8 @@ public class Optimizer {
     static final int FLAG_RECOMPUTE_BOUNDS = 2;
 
     private static final boolean DEBUG_OPTIMIZE = false;
-    private static final boolean OPTIMIZE_2 = false;
+    private static final boolean TRACE_OPTIMIZE = false;
+    private static final boolean NEW_OPTIMIZER = true;
 
     /**
      * Implements a direct resolution of chain constraints without using the solver
@@ -584,78 +585,210 @@ public class Optimizer {
         int dh = 0;
         int n = 0;
 
-        if (OPTIMIZE_2) {
+        if (NEW_OPTIMIZER) {
+            boolean horizontalParentWrap = container.mListDimensionBehaviors[ConstraintWidget.DIMENSION_HORIZONTAL] == DimensionBehaviour.WRAP_CONTENT;
+            boolean verticalParentWrap = container.mListDimensionBehaviors[ConstraintWidget.DIMENSION_VERTICAL] == DimensionBehaviour.WRAP_CONTENT;
+
             for (int i = 0; i < count; i++) {
                 ConstraintWidget widget = container.mChildren.get(i);
-                for (int j = 0; j < 4; j++) {
-                    widget.mListAnchors[j].isResolved = false;
-                    if (widget.mListAnchors[j].mTarget == container.mListAnchors[j]) {
-                        if (j == ConstraintWidget.ANCHOR_LEFT || j == ConstraintWidget.ANCHOR_TOP) {
-                            widget.mListAnchors[j].resolve(system, widget.mListAnchors[j].getMargin(), null);
-                        } else if (j == ConstraintWidget.ANCHOR_RIGHT && container.mListDimensionBehaviors[ConstraintWidget.HORIZONTAL] != ConstraintWidget.DimensionBehaviour.WRAP_CONTENT) {
-                            widget.mListAnchors[j].resolve(system, widget.mListAnchors[j].getMargin() + container.mWidth, null);
-                        } else if (j == ConstraintWidget.ANCHOR_BOTTOM && container.mListDimensionBehaviors[ConstraintWidget.VERTICAL] != ConstraintWidget.DimensionBehaviour.WRAP_CONTENT) {
-                            widget.mListAnchors[j].resolve(system, widget.mListAnchors[j].getMargin() + container.mHeight, null);
-                        } else {
-                            widget.mListAnchors[j].resolve(system, widget.mListAnchors[j].getMargin(), container.mListAnchors[j]);
+                if (horizontalParentWrap) {
+                    widget.mLeft.resolutionStatus = ConstraintAnchor.SOLVER;
+                    widget.mRight.resolutionStatus = ConstraintAnchor.SOLVER;
+                } else {
+                    widget.mLeft.resolutionStatus = ConstraintAnchor.UNRESOLVED;
+                    widget.mRight.resolutionStatus = ConstraintAnchor.UNRESOLVED;
+                }
+                if (verticalParentWrap) {
+                    widget.mTop.resolutionStatus = ConstraintAnchor.SOLVER;
+                    widget.mBottom.resolutionStatus = ConstraintAnchor.SOLVER;
+                    widget.mBaseline.resolutionStatus = ConstraintAnchor.SOLVER;
+                } else {
+                    widget.mTop.resolutionStatus = ConstraintAnchor.UNRESOLVED;
+                    widget.mBottom.resolutionStatus = ConstraintAnchor.UNRESOLVED;
+                    widget.mBaseline.resolutionStatus = ConstraintAnchor.UNRESOLVED;
+                }
+            }
+
+            for (int i = 0; i < count; i++) {
+                ConstraintWidget widget = container.mChildren.get(i);
+
+                // check horizontal
+
+                ConstraintAnchor begin = widget.mListAnchors[0];
+                ConstraintAnchor end = widget.mListAnchors[1];
+
+                boolean parentWrap = horizontalParentWrap;
+
+                if (begin.resolutionStatus == ConstraintAnchor.UNRESOLVED && end.resolutionStatus == ConstraintAnchor.UNRESOLVED) {
+                    if (begin.mTarget != null && end.mTarget != null) {
+                        if (!parentWrap && begin.mTarget == container.mLeft && end.mTarget == container.mRight) {
+                            if (widget.mListDimensionBehaviors[ConstraintWidget.DIMENSION_HORIZONTAL] == DimensionBehaviour.FIXED) {
+                                float space = container.mWidth - widget.mWidth - begin.getMargin() - end.getMargin();
+                                int beginSpace = (int) (space * widget.mHorizontalBiasPercent + 0.5f) + begin.getMargin();
+                                begin.resolve(system, beginSpace, null);
+                                end.resolve(system, beginSpace + widget.mWidth, null);
+                            }
                         }
+                    } else if (begin.mTarget != null && begin.mTarget == container.mLeft) {
+                        begin.resolve(system, begin.getMargin(), null);
+                    } else if (end.mTarget != null && end.mTarget == container.mRight) {
+                        end.resolve(system, container.mWidth - end.getMargin(), null);
                     }
                 }
-            }
 
-            for (int i = 0; i < count; i++) {
-                ConstraintWidget widget = container.mChildren.get(i);
-                if (widget.mListDimensionBehaviors[ConstraintWidget.HORIZONTAL] == ConstraintWidget.DimensionBehaviour.FIXED) {
-                    if (widget.mListAnchors[ConstraintWidget.ANCHOR_LEFT].isResolved && !widget.mListAnchors[ConstraintWidget.ANCHOR_RIGHT].isResolved) {
-                        widget.mListAnchors[ConstraintWidget.ANCHOR_RIGHT].resolve(system, widget.mWidth, widget.mListAnchors[ConstraintWidget.ANCHOR_LEFT]);
-                    } else if (!widget.mListAnchors[ConstraintWidget.ANCHOR_LEFT].isResolved && widget.mListAnchors[ConstraintWidget.ANCHOR_RIGHT].isResolved) {
-                        widget.mListAnchors[ConstraintWidget.ANCHOR_LEFT].resolve(system, -widget.mWidth, widget.mListAnchors[ConstraintWidget.ANCHOR_RIGHT]);
-                    }
-                }
-                if (widget.mListDimensionBehaviors[ConstraintWidget.VERTICAL] == ConstraintWidget.DimensionBehaviour.FIXED) {
-                    if (widget.mListAnchors[ConstraintWidget.ANCHOR_TOP].isResolved && !widget.mListAnchors[ConstraintWidget.ANCHOR_BOTTOM].isResolved) {
-                        widget.mListAnchors[ConstraintWidget.ANCHOR_BOTTOM].resolve(system, widget.mHeight, widget.mListAnchors[ConstraintWidget.ANCHOR_TOP]);
-                    } else if (!widget.mListAnchors[ConstraintWidget.ANCHOR_TOP].isResolved && widget.mListAnchors[ConstraintWidget.ANCHOR_BOTTOM].isResolved) {
-                        widget.mListAnchors[ConstraintWidget.ANCHOR_TOP].resolve(system, -widget.mHeight, widget.mListAnchors[ConstraintWidget.ANCHOR_BOTTOM]);
-                    }
-                }
-            }
+                begin = widget.mListAnchors[2];
+                end = widget.mListAnchors[3];
+                parentWrap = verticalParentWrap;
 
-            for (int i = 0; i < count; i++) {
-                ConstraintWidget widget = container.mChildren.get(i);
-                for (int j = 0; j < 4; j++) {
-                    if (!widget.mListAnchors[j].isResolved) {
-                        // try to solve it
-                        int[] margin = { 0 };
-                        ConstraintAnchor anchor = widget.mListAnchors[j].findResolvedAnchor(margin);
-                        if (anchor != null) {
-                            widget.mListAnchors[j].resolve(system, margin[0], anchor);
+                if (begin.resolutionStatus == ConstraintAnchor.UNRESOLVED && end.resolutionStatus == ConstraintAnchor.UNRESOLVED) {
+                    if (begin.mTarget != null && end.mTarget != null) {
+                        if (!parentWrap && begin.mTarget == container.mTop && end.mTarget == container.mBottom) {
+                            if (widget.mListDimensionBehaviors[ConstraintWidget.DIMENSION_VERTICAL] == DimensionBehaviour.FIXED) {
+                                float space = container.mHeight - widget.mHeight - begin.getMargin() - end.getMargin();
+                                int beginSpace = (int) (space * widget.mVerticalBiasPercent + 0.5f) + begin.getMargin();
+                                begin.resolve(system, beginSpace, null);
+                                end.resolve(system, beginSpace + widget.mHeight, null);
+                            }
                         }
-                    }
-                }
-            }
-            boolean resolved = false;
-            for (int i = 0; i < count; i++) {
-                ConstraintWidget widget = container.mChildren.get(i);
-                for (int j = 0; j < 4; j++) {
-                    if (widget.mListAnchors[j].isResolved) {
-                        widget.mListAnchors[j].addResolvedValue(system);
-                    } else {
-                        resolved = true;
+                    } else if (begin.mTarget != null && begin.mTarget == container.mTop) {
+                        begin.resolve(system, begin.getMargin(), null);
+                    } else if (end.mTarget != null && end.mTarget == container.mBottom) {
+                        end.resolve(system, container.mHeight - end.getMargin(), null);
                     }
                 }
             }
 
-            if (resolved) {
+            if (DEBUG_OPTIMIZE) {
+                System.out.println("post root resolution:");
                 for (int i = 0; i < count; i++) {
                     ConstraintWidget widget = container.mChildren.get(i);
-                    widget.mSolverLeft = widget.mLeft.resolvedValue;
-                    widget.mSolverTop = widget.mTop.resolvedValue;
-                    widget.mSolverRight = widget.mRight.resolvedValue;
-                    widget.mSolverBottom = widget.mBottom.resolvedValue;
+                    System.out.println("widget " + widget + " resolution left: " + widget.mLeft.getResolutionStatus() + " -> " + widget.mLeft);
+                    System.out.println("widget " + widget + " resolution right: " + widget.mRight.getResolutionStatus() + " -> " + widget.mRight);
+                    System.out.println("widget " + widget + " resolution top: " + widget.mTop.getResolutionStatus() + " -> " + widget.mTop);
+                    System.out.println("widget " + widget + " resolution bottom: " + widget.mBottom.getResolutionStatus() + " -> " + widget.mBottom);
+                    System.out.println("widget " + widget + " resolution baseline: " + widget.mBaseline.getResolutionStatus() + " -> " + widget.mBaseline);
+                }
+                System.out.println("post root resolution done");
+            }
+
+            for (int i = 0; i < count; i++) {
+                ConstraintWidget widget = container.mChildren.get(i);
+                boolean fixedDimension = widget.mListDimensionBehaviors[ConstraintWidget.HORIZONTAL] == DimensionBehaviour.FIXED
+                        || widget.mListDimensionBehaviors[ConstraintWidget.HORIZONTAL] == DimensionBehaviour.WRAP_CONTENT;
+                if (fixedDimension) {
+                    ConstraintAnchor left = widget.mListAnchors[ConstraintWidget.ANCHOR_LEFT];
+                    ConstraintAnchor right = widget.mListAnchors[ConstraintWidget.ANCHOR_RIGHT];
+                    if (left.resolutionStatus == ConstraintAnchor.RESOLVED && right.resolutionStatus == ConstraintAnchor.UNRESOLVED) {
+                        if (left.resolvedAnchor == null) {
+                            right.resolve(system, left.resolvedValue + widget.getWidth(), null);
+                        } else {
+                            right.resolve(system, widget.getWidth(), left);
+                        }
+                    } else if (left.resolutionStatus == ConstraintAnchor.UNRESOLVED && right.resolutionStatus == ConstraintAnchor.RESOLVED) {
+                        if (right.resolvedAnchor == null) {
+                            left.resolve(system, right.resolvedValue - widget.getWidth(), null);
+                        } else {
+                            left.resolve(system, -widget.getWidth(), right);
+                        }
+                    }
+                }
+                fixedDimension = widget.mListDimensionBehaviors[ConstraintWidget.VERTICAL] == DimensionBehaviour.FIXED
+                        || widget.mListDimensionBehaviors[ConstraintWidget.VERTICAL] == DimensionBehaviour.WRAP_CONTENT;
+                if (fixedDimension) {
+                    ConstraintAnchor top = widget.mTop;
+                    ConstraintAnchor bottom = widget.mBottom;
+                    if (top.resolutionStatus == ConstraintAnchor.RESOLVED && bottom.resolutionStatus == ConstraintAnchor.UNRESOLVED) {
+                        if (top.resolvedAnchor == null) {
+                            bottom.resolve(system, top.resolvedValue + widget.getHeight(), null);
+                        } else {
+                            bottom.resolve(system, widget.getHeight(), top);
+                        }
+                    } else if (top.resolutionStatus == ConstraintAnchor.UNRESOLVED && bottom.resolutionStatus == ConstraintAnchor.RESOLVED) {
+                        if (bottom.resolvedAnchor == null) {
+                            top.resolve(system, bottom.resolvedValue - widget.getHeight(), null);
+                        } else {
+                            top.resolve(system, -widget.getHeight(), bottom);
+                        }
+                    }
                 }
             }
-            return resolved;
+
+            // TODO: implement resolution for center connections
+            // for (int i = 0; i < count; i++) {
+            //     ConstraintWidget widget = container.mChildren.get(i);
+            //     for (int j = 0; j < 5; j++) {
+            //         ConstraintAnchor anchor = widget.mListAnchors[j];
+            //         ConstraintAnchor anchorTarget = anchor.getTarget();
+            //         if (anchor.resolutionStatus == ConstraintAnchor.UNRESOLVED && anchorTarget != null && anchorTarget.mTarget != anchor) {
+            //             // try to solve it
+            //             int[] margin = { anchor.getMargin() };
+            //             ConstraintAnchor a = widget.mListAnchors[j].findResolvedAnchor(margin);
+            //             if (a != null && a.resolutionStatus == ConstraintAnchor.RESOLVED) {
+            //                 widget.mListAnchors[j].resolve(system, margin[0], a);
+            //             }
+            //         }
+            //     }
+            // }
+
+            if (DEBUG_OPTIMIZE) {
+                for (int i = 0; i < count; i++) {
+                    ConstraintWidget widget = container.mChildren.get(i);
+                    System.out.println("widget " + widget + " resolution left: " + widget.mLeft.getResolutionStatus() + " -> " + widget.mLeft);
+                    System.out.println("widget " + widget + " resolution right: " + widget.mRight.getResolutionStatus() + " -> " + widget.mRight);
+                    System.out.println("widget " + widget + " resolution top: " + widget.mTop.getResolutionStatus() + " -> " + widget.mTop);
+                    System.out.println("widget " + widget + " resolution bottom: " + widget.mBottom.getResolutionStatus() + " -> " + widget.mBottom);
+                    System.out.println("widget " + widget + " resolution baseline: " + widget.mBaseline.getResolutionStatus() + " -> " + widget.mBaseline);
+                }
+            }
+
+            if (TRACE_OPTIMIZE) {
+                int solverAnchors = 0;
+                int resolvedAnchors = 0;
+                for (int i = 0; i < count; i++) {
+                    ConstraintWidget widget = container.mChildren.get(i);
+                    for (int j = 0; j < 5; j++) {
+                        ConstraintAnchor anchor = widget.mListAnchors[j];
+                        if (!anchor.isConnected()) {
+                            continue;
+                        }
+                        if (anchor.resolutionStatus == ConstraintAnchor.RESOLVED) {
+                            resolvedAnchors++;
+                        } else {
+                            solverAnchors++;
+                        }
+                    }
+                }
+                System.out.println("We had " + resolvedAnchors + " / " + solverAnchors);
+            }
+
+            for (int i = 0; i < count; i++) {
+                ConstraintWidget widget = container.mChildren.get(i);
+                if (widget.mLeft.resolutionStatus != ConstraintAnchor.RESOLVED) {
+                    return false;
+                }
+                if (widget.mRight.resolutionStatus != ConstraintAnchor.RESOLVED) {
+                    return false;
+                }
+                if (widget.mTop.resolutionStatus != ConstraintAnchor.RESOLVED) {
+                    return false;
+                }
+                if (widget.mBottom.resolutionStatus != ConstraintAnchor.RESOLVED) {
+                    return false;
+                }
+            }
+
+            if (DEBUG_OPTIMIZE) {
+                System.out.println("\n=> All widgets have been directly resolved, go to the solver\n");
+            }
+            for (int i = 0; i < count; i++) {
+                ConstraintWidget widget = container.mChildren.get(i);
+                int left = widget.mLeft.resolvedValue;
+                int top = widget.mTop.resolvedValue;
+                int right = widget.mRight.resolvedValue;
+                int bottom = widget.mBottom.resolvedValue;
+                widget.setFrame(left, top, right, bottom);
+            }
+            return true;
         }
 
         for (int i = 0; i < count; i++) {

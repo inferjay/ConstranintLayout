@@ -107,6 +107,56 @@ public class OptimizationsTest {
     }
 
     @Test
+    public void testBasicCentering() {
+        testBasicCentering(Optimizer.OPTIMIZATION_NONE);
+        testBasicCentering(Optimizer.OPTIMIZATION_ALL);
+    }
+
+    public void testBasicCentering(int directResolution) {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        root.setOptimizationLevel(directResolution);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        root.add(A);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 10);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 10);
+        A.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, 10);
+        A.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, 10);
+        root.layout();
+        System.out.println("res: " + directResolution + " root: " + root + " A: " + A);
+        assertEquals(A.getLeft(), 250);
+        assertEquals(A.getTop(), 290);
+    }
+
+    @Test
+    public void testPercent() {
+        testPercent(Optimizer.OPTIMIZATION_NONE);
+        testPercent(Optimizer.OPTIMIZATION_ALL);
+    }
+
+    public void testPercent(int directResolution) {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        root.setOptimizationLevel(directResolution);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        root.add(A);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 10);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 10);
+        A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_PERCENT, 0, 0, 0.5f);
+        A.setVerticalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_PERCENT, 0, 0, 0.5f);
+        root.layout();
+        System.out.println("res: " + directResolution + " root: " + root + " A: " + A);
+        assertEquals(A.getLeft(), 10);
+        assertEquals(A.getTop(), 10);
+        assertEquals(A.getWidth(), 300);
+        assertEquals(A.getHeight(), 300);
+    }
+
+    @Test
     public void testDependency() {
         testDependency(Optimizer.OPTIMIZATION_NONE);
         testDependency(Optimizer.OPTIMIZATION_ALL);
@@ -118,6 +168,7 @@ public class OptimizationsTest {
         ConstraintWidget A = new ConstraintWidget(100, 20);
         ConstraintWidget B = new ConstraintWidget(100, 20);
         ConstraintWidget C = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
         A.setDebugName("A");
         B.setDebugName("B");
         C.setDebugName("C");
@@ -180,6 +231,130 @@ public class OptimizationsTest {
         assertEquals(B.getTop(), 560);
         assertEquals(C.getLeft(), 12);
         assertEquals(C.getTop(), 540);
+    }
+
+    @Test
+    public void testDependency3() {
+        testDependency3(Optimizer.OPTIMIZATION_NONE);
+        testDependency3(Optimizer.OPTIMIZATION_ALL);
+    }
+
+    public void testDependency3(int directResolution) {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        root.setOptimizationLevel(directResolution);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        C.setDebugName("C");
+        root.add(A);
+        root.add(B);
+        root.add(C);
+        A.setBaselineDistance(8);
+        B.setBaselineDistance(8);
+        C.setBaselineDistance(8);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 10);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 20);
+        B.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 30);
+        B.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, 60);
+        B.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, 10);
+        C.connect(ConstraintAnchor.Type.BOTTOM, B, ConstraintAnchor.Type.TOP);
+        C.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.RIGHT, 20);
+        root.layout();
+        System.out.println("res: " + directResolution + " root: " + root
+                + " A: " + A + " B: " + B + " C: " + C);
+        assertEquals(A.getLeft(), 10);
+        assertEquals(A.getTop(), 20);
+        assertEquals(B.getLeft(), 260);
+        assertEquals(B.getTop(), 520);
+        assertEquals(C.getLeft(), 380);
+        assertEquals(C.getTop(), 500);
+    }
+
+    @Test
+    public void testDependency4() {
+        testDependency4(Optimizer.OPTIMIZATION_NONE);
+        testDependency4(Optimizer.OPTIMIZATION_ALL);
+    }
+
+    public void testDependency4(int directResolution) {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        root.setOptimizationLevel(directResolution);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        root.add(A);
+        root.add(B);
+        A.setBaselineDistance(8);
+        B.setBaselineDistance(8);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 10);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 20);
+        A.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, 10);
+        A.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, 20);
+        B.connect(ConstraintAnchor.Type.RIGHT, A, ConstraintAnchor.Type.RIGHT, 30);
+        B.connect(ConstraintAnchor.Type.BOTTOM, A, ConstraintAnchor.Type.BOTTOM, 60);
+        root.layout();
+        System.out.println("res: " + directResolution + " root: " + root
+                + " A: " + A + " B: " + B);
+        assertEquals(A.getLeft(), 250);
+        assertEquals(A.getTop(), 290);
+        assertEquals(B.getLeft(), 220);
+        assertEquals(B.getTop(), 230);
+    }
+
+    @Test
+    public void testDependency5() {
+        testDependency5(Optimizer.OPTIMIZATION_NONE);
+        testDependency5(Optimizer.OPTIMIZATION_ALL);
+    }
+
+    public void testDependency5(int directResolution) {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        root.setOptimizationLevel(directResolution);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        ConstraintWidget D = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        C.setDebugName("C");
+        D.setDebugName("D");
+        root.add(A);
+        root.add(B);
+        root.add(C);
+        root.add(D);
+        A.setBaselineDistance(8);
+        B.setBaselineDistance(8);
+        C.setBaselineDistance(8);
+        D.setBaselineDistance(8);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 10);
+        A.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, 10);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 20);
+        A.connect(ConstraintAnchor.Type.BOTTOM, B, ConstraintAnchor.Type.TOP);
+        B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM);
+        B.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        B.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+        B.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, 10);
+        C.connect(ConstraintAnchor.Type.TOP, B, ConstraintAnchor.Type.BOTTOM);
+        C.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.RIGHT, 20);
+        D.connect(ConstraintAnchor.Type.TOP, C, ConstraintAnchor.Type.BOTTOM);
+        D.connect(ConstraintAnchor.Type.RIGHT, C, ConstraintAnchor.Type.RIGHT, 20);
+        root.layout();
+        System.out.println("res: " + directResolution + " root: " + root
+                + " A: " + A + " B: " + B + " C: " + C + " D: " + D);
+        assertEquals(A.getLeft(), 250);
+        assertEquals(A.getTop(), 197);
+        assertEquals(B.getLeft(), 250);
+        assertEquals(B.getTop(), 393);
+        assertEquals(C.getLeft(), 230);
+        assertEquals(C.getTop(), 413);
+        assertEquals(D.getLeft(), 210);
+        assertEquals(D.getTop(), 433);
     }
 
     @Test
