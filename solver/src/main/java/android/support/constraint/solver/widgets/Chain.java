@@ -337,7 +337,7 @@ class Chain {
                     strength = SolverVariable.STRENGTH_HIGHEST;
                 }
                 system.addGreaterThan(begin.mSolverVariable, begin.mTarget.mSolverVariable,
-                        begin.mMargin, SolverVariable.STRENGTH_FIXED);
+                        begin.getMargin(), SolverVariable.STRENGTH_FIXED);
                 system.addEquality(begin.mSolverVariable, begin.mTarget.mSolverVariable, margin, strength);
                 if (currentWidget.mListDimensionBehaviors[dimensionOffset] == ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT) {
                     ConstraintAnchor end = currentWidget.mListAnchors[offset + 1];
@@ -437,17 +437,20 @@ class Chain {
             ConstraintAnchor end = lastWidget.mListAnchors[offset + 1];
             int beginMargin = begin.getMargin();
             int endMargin = end.getMargin();
-            SolverVariable leftTarget = first.mListAnchors[offset].mTarget != null ? first.mListAnchors[offset].mTarget.mSolverVariable : null;
-            SolverVariable rightTarget = lastWidget.mListAnchors[offset + 1].mTarget != null ? lastWidget.mListAnchors[offset + 1].mTarget.mSolverVariable : null;
-            if (leftTarget != null && rightTarget != null) {
+            if (lastWidget.getVisibility() == ConstraintWidget.GONE) {
+                endMargin = previousVisibleWidget.mListAnchors[offset + 1].getMargin();
+            }
+            SolverVariable beginTarget = first.mListAnchors[offset].mTarget != null ? first.mListAnchors[offset].mTarget.mSolverVariable : null;
+            SolverVariable endTarget = lastWidget.mListAnchors[offset + 1].mTarget != null ? lastWidget.mListAnchors[offset + 1].mTarget.mSolverVariable : null;
+            if (beginTarget != null && endTarget != null) {
                 float bias = 0.5f;
                 if (orientation == ConstraintWidget.HORIZONTAL) {
                     bias = first.mHorizontalBiasPercent;
                 } else {
                     bias = first.mVerticalBiasPercent;
                 }
-                system.addCentering(begin.mSolverVariable, leftTarget, beginMargin, bias,
-                        rightTarget, end.mSolverVariable, endMargin, SolverVariable.STRENGTH_HIGHEST);
+                system.addCentering(begin.mSolverVariable, beginTarget, beginMargin, bias,
+                        endTarget, end.mSolverVariable, endMargin, SolverVariable.STRENGTH_HIGHEST);
             }
         }
     }

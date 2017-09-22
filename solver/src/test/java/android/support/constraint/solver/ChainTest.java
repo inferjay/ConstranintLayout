@@ -1023,4 +1023,74 @@ public class ChainTest {
         assertEquals(B.getWidth(), 280);
         assertEquals(C.getWidth(), 0);
     }
+
+    @Test
+    public void testVerticalGoneChain() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        ArrayList<ConstraintWidget> widgets = new ArrayList<ConstraintWidget>();
+        widgets.add(A);
+        widgets.add(B);
+        widgets.add(root);
+        root.add(A);
+        root.add(B);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 16);
+        A.connect(ConstraintAnchor.Type.BOTTOM, B, ConstraintAnchor.Type.TOP);
+        A.getAnchor(ConstraintAnchor.Type.BOTTOM).setGoneMargin(16);
+        B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM);
+        B.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, 16);
+        A.setVerticalChainStyle(ConstraintWidget.CHAIN_PACKED);
+        root.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
+        root.layout();
+        System.out.println("a) root: " + root + " A: " + A + " B: " + B);
+        assertEquals(A.getHeight(), B.getHeight(), 1);
+        assertEquals(A.getTop() - root.getTop(), root.getBottom() - B.getBottom(), 1);
+        assertEquals(A.getBottom(), B.getTop());
+
+        B.setVisibility(ConstraintWidget.GONE);
+        root.layout();
+        System.out.println("b) root: " + root + " A: " + A + " B: " + B);
+        assertEquals(A.getTop() - root.getTop(), root.getBottom() - A.getBottom());
+        assertEquals(root.getHeight(), 52);
+    }
+
+    @Test
+    public void testVerticalGoneChain2() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        C.setDebugName("C");
+        root.add(A);
+        root.add(B);
+        root.add(C);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 16);
+        A.connect(ConstraintAnchor.Type.BOTTOM, B, ConstraintAnchor.Type.TOP);
+        B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM);
+        B.connect(ConstraintAnchor.Type.BOTTOM, C, ConstraintAnchor.Type.TOP);
+        B.getAnchor(ConstraintAnchor.Type.TOP).setGoneMargin(16);
+        B.getAnchor(ConstraintAnchor.Type.BOTTOM).setGoneMargin(16);
+        C.connect(ConstraintAnchor.Type.TOP, B, ConstraintAnchor.Type.BOTTOM);
+        C.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, 16);
+        A.setVerticalChainStyle(ConstraintWidget.CHAIN_PACKED);
+        root.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
+        root.layout();
+        System.out.println("a) root: " + root + " A: " + A + " B: " + B + " C: " + C);
+        assertEquals(A.getTop() - root.getTop(), root.getBottom() - C.getBottom(), 1);
+        assertEquals(A.getBottom(), B.getTop());
+
+        A.setVisibility(ConstraintWidget.GONE);
+        C.setVisibility(ConstraintWidget.GONE);
+        root.layout();
+        System.out.println("b) root: " + root + " A: " + A + " B: " + B + " C: " + C);
+        assertEquals(B.getTop() - root.getTop(), root.getBottom() - B.getBottom());
+        assertEquals(root.getHeight(), 52);
+    }
 }
