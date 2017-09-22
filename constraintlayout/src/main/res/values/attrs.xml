@@ -154,6 +154,10 @@
         <enum name="percent" value="2"/>
     </attr>
 
+    <!-- explicitely enforces constraints in case of WRAP -->
+    <attr name="layout_constrainedWidth" format="boolean"/>
+    <attr name="layout_constrainedHeight" format="boolean"/>
+
     <!-- Specify the visibility of a placeholder -->
     <attr name="emptyVisibility"  >
         <enum name="gone" value="0"/>
@@ -225,6 +229,8 @@
         <attr name="layout_goneMarginBottom"/>
         <attr name="layout_goneMarginStart" />
         <attr name="layout_goneMarginEnd" />
+        <attr name="layout_constrainedWidth" />
+        <attr name="layout_constrainedHeight" />
         <attr name="layout_constraintHorizontal_bias"/>
         <attr name="layout_constraintVertical_bias" />
         <attr name="layout_constraintWidth_default" />
@@ -296,6 +302,8 @@
         <attr name="layout_goneMarginBottom"/>
         <attr name="layout_goneMarginStart" />
         <attr name="layout_goneMarginEnd" />
+        <attr name="layout_constrainedWidth" />
+        <attr name="layout_constrainedHeight" />
         <attr name="layout_constraintHorizontal_bias"/>
         <attr name="layout_constraintVertical_bias" />
         <attr name="layout_constraintWidth_default" />

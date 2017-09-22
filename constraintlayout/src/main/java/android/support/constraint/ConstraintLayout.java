@@ -394,7 +394,7 @@ public class ConstraintLayout extends ViewGroup {
     /** @hide */
     public static final String VERSION="ConstraintLayout-1.1.0-beta2";
     private static final String TAG = "ConstraintLayout";
-    private static final boolean SIMPLE_LAYOUT = true;
+
     private static final boolean USE_CONSTRAINTS_HELPER = true;
     private static final boolean DEBUG = false;
 
@@ -1045,6 +1045,9 @@ public class ConstraintLayout extends ViewGroup {
                             widthPadding, LayoutParams.WRAP_CONTENT);
                     didWrapMeasureWidth = true;
                 } else {
+                    if (width == WRAP_CONTENT) {
+                        didWrapMeasureWidth = true;
+                    }
                     childWidthMeasureSpec = getChildMeasureSpec(parentWidthSpec,
                             widthPadding, width);
                 }
@@ -1053,6 +1056,9 @@ public class ConstraintLayout extends ViewGroup {
                             heightPadding, LayoutParams.WRAP_CONTENT);
                     didWrapMeasureHeight = true;
                 } else {
+                    if (height == WRAP_CONTENT) {
+                        didWrapMeasureHeight = true;
+                    }
                     childHeightMeasureSpec = getChildMeasureSpec(parentHeightSpec,
                             heightPadding, height);
                 }
@@ -1066,6 +1072,7 @@ public class ConstraintLayout extends ViewGroup {
 
             widget.setWidth(width);
             widget.setHeight(height);
+
             if (didWrapMeasureWidth) {
                 widget.setWrapWidth(width);
             }
@@ -1158,12 +1165,12 @@ public class ConstraintLayout extends ViewGroup {
                 int widthSpec = 0;
                 int heightSpec = 0;
 
-                if (params.width == WRAP_CONTENT) {
+                if (params.width == WRAP_CONTENT && params.horizontalDimensionFixed) {
                     widthSpec = getChildMeasureSpec(widthMeasureSpec, widthPadding, params.width);
                 } else {
                     widthSpec = MeasureSpec.makeMeasureSpec(widget.getWidth(), MeasureSpec.EXACTLY);
                 }
-                if (params.height == WRAP_CONTENT) {
+                if (params.height == WRAP_CONTENT && params.verticalDimensionFixed) {
                     heightSpec = getChildMeasureSpec(heightMeasureSpec, heightPadding, params.height);
                 } else {
                     heightSpec = MeasureSpec.makeMeasureSpec(widget.getHeight(), MeasureSpec.EXACTLY);
@@ -1372,6 +1379,9 @@ public class ConstraintLayout extends ViewGroup {
                     r -= dx;
                     b -= dy;
                 }
+            }
+            if (DEBUG) {
+                System.out.println("layout " + child + " -> " + widget);
             }
 
             child.layout(l, t, r, b);
@@ -1770,7 +1780,8 @@ public class ConstraintLayout extends ViewGroup {
          * Define how the widget horizontal dimension is handled when set to MATCH_CONSTRAINT
          * <ul>
          *     <li>{@see MATCH_CONSTRAINT_SPREAD} -- the default. The dimension will expand up to the constraints, minus margins</li>
-         *     <li>{@see MATCH_CONSTRAINT_WRAP} -- The dimension will be the same as WRAP_CONTENT, unless the size ends
+         *     <li>{@see MATCH_CONSTRAINT_WRAP} -- DEPRECATED -- use instead WRAP_CONTENT and constrainedWidth=true<br>
+         *         The dimension will be the same as WRAP_CONTENT, unless the size ends
          *     up too large for the constraints; in that case the dimension will expand up to the constraints, minus margins</li>
          *     This attribute may not be applied if the widget is part of a chain in that dimension.
          *     <li>{@see MATCH_CONSTRAINT_PERCENT} -- The dimension will be a percent of another widget (by default, the parent)</li>
@@ -1782,7 +1793,8 @@ public class ConstraintLayout extends ViewGroup {
          * Define how the widget vertical dimension is handled when set to MATCH_CONSTRAINT
          * <ul>
          *     <li>{@see MATCH_CONSTRAINT_SPREAD} -- the default. The dimension will expand up to the constraints, minus margins</li>
-         *     <li>{@see MATCH_CONSTRAINT_WRAP} -- The dimension will be the same as WRAP_CONTENT, unless the size ends
+         *     <li>{@see MATCH_CONSTRAINT_WRAP} -- DEPRECATED -- use instead WRAP_CONTENT and constrainedHeight=true<br>
+         *         The dimension will be the same as WRAP_CONTENT, unless the size ends
          *     up too large for the constraints; in that case the dimension will expand up to the constraints, minus margins</li>
          *     This attribute may not be applied if the widget is part of a chain in that dimension.
          *     <li>{@see MATCH_CONSTRAINT_PERCENT} -- The dimension will be a percent of another widget (by default, the parent)</li>
@@ -1837,6 +1849,24 @@ public class ConstraintLayout extends ViewGroup {
         public int editorAbsoluteY = UNSET;
 
         public int orientation = UNSET;
+
+        /**
+         * Specify if the horizontal dimension is constrained in case both left & right constraints are set
+         * and the widget dimension is not a fixed dimension. By default, if a widget is set to WRAP_CONTENT,
+         * we will treat that dimension as a fixed dimension, meaning the dimension will not change regardless
+         * of constraints. Setting this attribute to true allows the dimension to change in order to respect
+         * constraints.
+         */
+        public boolean constrainedWidth = false;
+
+        /**
+         * Specify if the vertical dimension is constrained in case both top & bottom constraints are set
+         * and the widget dimension is not a fixed dimension. By default, if a widget is set to WRAP_CONTENT,
+         * we will treat that dimension as a fixed dimension, meaning the dimension will not change regardless
+         * of constraints. Setting this attribute to true allows the dimension to change in order to respect
+         * constraints.
+         */
+        public boolean constrainedHeight = false;
 
         // Internal use only
         boolean horizontalDimensionFixed = true;
@@ -1903,6 +1933,8 @@ public class ConstraintLayout extends ViewGroup {
             this.verticalWeight = source.verticalWeight;
             this.horizontalChainStyle = source.horizontalChainStyle;
             this.verticalChainStyle = source.verticalChainStyle;
+            this.constrainedWidth = source.constrainedWidth;
+            this.constrainedHeight = source.constrainedHeight;
             this.matchConstraintDefaultWidth = source.matchConstraintDefaultWidth;
             this.matchConstraintDefaultHeight = source.matchConstraintDefaultHeight;
             this.matchConstraintMinWidth = source.matchConstraintMinWidth;
@@ -2084,10 +2116,23 @@ public class ConstraintLayout extends ViewGroup {
                     horizontalChainStyle = a.getInt(attr, CHAIN_SPREAD);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_chainStyle) {
                     verticalChainStyle = a.getInt(attr, CHAIN_SPREAD);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constrainedWidth) {
+                    constrainedWidth = a.getBoolean(attr, constrainedWidth);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constrainedHeight) {
+                    constrainedHeight = a.getBoolean(attr, constrainedHeight);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_default) {
                     matchConstraintDefaultWidth = a.getInt(attr, MATCH_CONSTRAINT_SPREAD);
+                    System.out.println("matchConstraintDefault width: " + matchConstraintDefaultWidth);
+                    if (matchConstraintDefaultWidth == MATCH_CONSTRAINT_WRAP) {
+                        System.err.println("layout_constraintWidth_default=\"wrap\" is deprecated." +
+                                "\nUse layout_width=\"WRAP_CONTENT\" and layout_constrainedWidth\"=true\" instead.");
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_default) {
                     matchConstraintDefaultHeight = a.getInt(attr, MATCH_CONSTRAINT_SPREAD);
+                    if (matchConstraintDefaultHeight == MATCH_CONSTRAINT_WRAP) {
+                        System.err.println("layout_constraintHeight_default=\"wrap\" is deprecated." +
+                                "\nUse layout_height=\"WRAP_CONTENT\" and layout_constrainedHeight\"=true\" instead.");
+                    }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_min) {
                     try {
                         matchConstraintMinWidth = a.getDimensionPixelSize(attr, matchConstraintMinWidth);
@@ -2150,11 +2195,33 @@ public class ConstraintLayout extends ViewGroup {
             isGuideline = false;
             horizontalDimensionFixed = true;
             verticalDimensionFixed = true;
+            if (width == WRAP_CONTENT && constrainedWidth) {
+                horizontalDimensionFixed = false;
+                matchConstraintDefaultWidth = MATCH_CONSTRAINT_WRAP;
+            }
+            if (height == WRAP_CONTENT && constrainedHeight) {
+                verticalDimensionFixed = false;
+                matchConstraintDefaultHeight = MATCH_CONSTRAINT_WRAP;
+            }
             if (width == MATCH_CONSTRAINT || width == MATCH_PARENT) {
                 horizontalDimensionFixed = false;
+                // We have to reset LayoutParams width/height to WRAP_CONTENT here, as some widgets like TextView
+                // will use the layout params directly as a hint to know if they need to request a layout
+                // when their content change (e.g. during setTextView)
+                if (width == MATCH_CONSTRAINT && matchConstraintDefaultWidth == MATCH_CONSTRAINT_WRAP) {
+                    width = WRAP_CONTENT;
+                    constrainedWidth = true;
+                }
             }
             if (height == MATCH_CONSTRAINT || height == MATCH_PARENT) {
                 verticalDimensionFixed = false;
+                // We have to reset LayoutParams width/height to WRAP_CONTENT here, as some widgets like TextView
+                // will use the layout params directly as a hint to know if they need to request a layout
+                // when their content change (e.g. during setTextView)
+                if (height == MATCH_CONSTRAINT && matchConstraintDefaultHeight == MATCH_CONSTRAINT_WRAP) {
+                    height = WRAP_CONTENT;
+                    constrainedHeight = true;
+                }
             }
             if (guidePercent != UNSET || guideBegin != UNSET || guideEnd != UNSET) {
                 isGuideline = true;

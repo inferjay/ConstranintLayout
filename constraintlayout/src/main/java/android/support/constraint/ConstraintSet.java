@@ -393,6 +393,8 @@ public class ConstraintSet {
         public float translationX = 0;
         public float translationY = 0;
         public float translationZ = 0;
+        public boolean constrainedWidth = false;
+        public boolean constrainedHeight = false;
         public int widthDefault = UNSET;
         public int heightDefault = UNSET;
         public int widthMax = UNSET;
@@ -465,6 +467,8 @@ public class ConstraintSet {
             clone.translationX = translationX;
             clone.translationY = translationY;
             clone.translationZ = translationZ;
+            clone.constrainedWidth = constrainedWidth;
+            clone.constrainedHeight = constrainedHeight;
             clone.widthDefault = widthDefault;
             clone.heightDefault = heightDefault;
             clone.widthMax = widthMax;
@@ -541,8 +545,11 @@ public class ConstraintSet {
             horizontalWeight = param.horizontalWeight;
             verticalChainStyle = param.verticalChainStyle;
             horizontalChainStyle = param.horizontalChainStyle;
+            constrainedWidth = param.constrainedWidth;
+            constrainedHeight = param.constrainedHeight;
             widthDefault = param.matchConstraintDefaultWidth;
             heightDefault = param.matchConstraintDefaultHeight;
+            constrainedWidth = param.constrainedWidth;
             widthMax = param.matchConstraintMaxWidth;
             heightMax = param.matchConstraintMaxHeight;
             widthMin = param.matchConstraintMinWidth;
@@ -590,6 +597,8 @@ public class ConstraintSet {
             param.horizontalWeight = horizontalWeight;
             param.verticalChainStyle = verticalChainStyle;
             param.horizontalChainStyle = horizontalChainStyle;
+            param.constrainedWidth = constrainedWidth;
+            param.constrainedHeight = constrainedHeight;
             param.matchConstraintDefaultWidth = widthDefault;
             param.matchConstraintDefaultHeight = heightDefault;
             param.matchConstraintMaxWidth = widthMax;
@@ -1662,7 +1671,7 @@ public class ConstraintSet {
 
     /**
      * Sets how the height is calculated ether MATCH_CONSTRAINT_WRAP or MATCH_CONSTRAINT_SPREAD.
-     * Default is wrap.
+     * Default is spread.
      *
      * @param viewId ID of view to adjust its matchConstraintDefaultHeight
      * @param height MATCH_CONSTRAINT_WRAP or MATCH_CONSTRAINT_SPREAD
@@ -1673,7 +1682,7 @@ public class ConstraintSet {
 
     /**
      * Sets how the width is calculated ether MATCH_CONSTRAINT_WRAP or MATCH_CONSTRAINT_SPREAD.
-     * Default is wrap.
+     * Default is spread.
      *
      * @param viewId ID of view to adjust its matchConstraintDefaultWidth
      * @param width SPREAD or WRAP
