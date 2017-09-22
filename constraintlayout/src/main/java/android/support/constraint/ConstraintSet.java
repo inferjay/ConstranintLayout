@@ -983,7 +983,7 @@ public class ConstraintSet {
             throw new IllegalArgumentException("must have 2 or more widgets in a chain");
         }
         if (weights != null) {
-            get(chainIds[0]).verticalWeight = weights[0];
+            get(chainIds[0]).horizontalWeight = weights[0];
         }
         get(chainIds[0]).horizontalChainStyle = style;
         connect(chainIds[0], left, leftId, leftSide, UNSET);
