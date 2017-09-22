@@ -393,7 +393,7 @@ public class ChainTest {
         C.setHorizontalWeight(1);
         root.layout();
         System.out.println("b) A: " + A + " B: " + B + " C: " + C);
-        assertEquals(2 * (A.getWidth() + marginL + marginR), B.getWidth() + marginL + marginR, 1);
+        assertEquals(2 * A.getWidth(), B.getWidth(), 1);
         assertEquals(A.getWidth(), C.getWidth(), 1);
     }
 
@@ -438,7 +438,7 @@ public class ChainTest {
         C.setVerticalWeight(1);
         root.layout();
         System.out.println("b) A: " + A + " B: " + B + " C: " + C);
-        assertEquals(2 * (A.getHeight() + marginT + marginB), B.getHeight() + marginT + marginB, 1);
+        assertEquals(2 * A.getHeight(), B.getHeight(), 1);
         assertEquals(A.getHeight(), C.getHeight(), 1);
     }
 
@@ -1092,5 +1092,38 @@ public class ChainTest {
         System.out.println("b) root: " + root + " A: " + A + " B: " + B + " C: " + C);
         assertEquals(B.getTop() - root.getTop(), root.getBottom() - B.getBottom());
         assertEquals(root.getHeight(), 52);
+    }
+
+    @Test
+    public void testVerticalSpreadInsideChain() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        C.setDebugName("C");
+        root.add(A);
+        root.add(B);
+        root.add(C);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 16);
+        A.connect(ConstraintAnchor.Type.BOTTOM, B, ConstraintAnchor.Type.TOP);
+        B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM);
+        B.connect(ConstraintAnchor.Type.BOTTOM, C, ConstraintAnchor.Type.TOP);
+        C.connect(ConstraintAnchor.Type.TOP, B, ConstraintAnchor.Type.BOTTOM);
+        C.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, 16);
+
+        A.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        B.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        C.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+
+        A.setVerticalChainStyle(ConstraintWidget.CHAIN_SPREAD_INSIDE);
+        root.layout();
+        System.out.println("a) root: " + root + " A: " + A + " B: " + B + " C: " + C);
+
+        assertEquals(A.getHeight(), B.getHeight(), 1);
+        assertEquals(B.getHeight(), C.getHeight(), 1);
+        assertEquals(A.getHeight(), (root.getHeight() - 32) / 3, 1);
     }
 }

@@ -211,6 +211,34 @@ public class ArrayRow implements LinearSystem.Row {
         return this;
     }
 
+    public ArrayRow createRowEqualMatchDimensions(float currentWeight, float totalWeights, float nextWeight,
+                                        SolverVariable variableStartA,
+                                        SolverVariable variableEndA,
+                                        SolverVariable variableStartB,
+                                        SolverVariable variableEndB) {
+        if (totalWeights == 0 || (currentWeight == nextWeight)) {
+            // endA - startA == endB - startB
+            // 0 = startA - endA + endB - startB
+            constantValue = 0;
+            variables.put(variableStartA, 1);
+            variables.put(variableEndA, -1);
+            variables.put(variableEndB, 1);
+            variables.put(variableStartB, -1);
+        } else {
+            float cw = currentWeight / totalWeights;
+            float nw = nextWeight / totalWeights;
+            float w = cw / nw;
+            // endA - startA == w * (endB - startB)
+            // 0 = startA - endA + w * (endB - startB)
+            constantValue = 0;
+            variables.put(variableStartA, 1);
+            variables.put(variableEndA, -1);
+            variables.put(variableEndB, w);
+            variables.put(variableStartB, -w);
+        }
+        return this;
+    }
+
     public ArrayRow createRowEqualDimension(float currentWeight, float totalWeights, float nextWeight,
                                             SolverVariable variableStartA, int marginStartA,
                                             SolverVariable variableEndA, int marginEndA,

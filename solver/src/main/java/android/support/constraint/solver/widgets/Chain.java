@@ -280,12 +280,7 @@ class Chain {
                 float nextWeight;
                 currentWeight = current.mWeight[orientation];
                 nextWeight = nextWidget.mWeight[orientation];
-                row.createRowEqualDimension(currentWeight,
-                        totalWeights, nextWeight,
-                        begin, current.mListAnchors[offset].getMargin(),
-                        end, current.mListAnchors[offset + 1].getMargin(),
-                        nextLeft, nextWidget.mListAnchors[offset].getMargin(),
-                        nextRight, nextWidget.mListAnchors[offset + 1].getMargin());
+                row.createRowEqualMatchDimensions(currentWeight, totalWeights, nextWeight, begin, end, nextLeft, nextRight);
 
                 system.addConstraint(row);
             }
