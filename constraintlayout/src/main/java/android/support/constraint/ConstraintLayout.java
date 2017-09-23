@@ -1017,6 +1017,7 @@ public class ConstraintLayout extends ViewGroup {
             if (params.isGuideline || params.isHelper) {
                 continue;
             }
+            widget.setVisibility(child.getVisibility());
 
             int width = params.width;
             int height = params.height;
