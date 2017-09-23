@@ -46,8 +46,8 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *<p>
  *     <b>Note:</b> {@code ConstraintLayout} is available as a support library that you can use
  *     on Android systems starting with API level 9 (Gingerbread).
- *     As such, we are planning in enriching its API and capabilities over time.
- *     This documentation will reflects the changes.
+ *     As such, we are planning on enriching its API and capabilities over time.
+ *     This documentation will reflect those changes.
  *</p>
  * <p>
  * There are currently various types of constraints that you can use:
