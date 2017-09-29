@@ -194,6 +194,9 @@ public class ConstraintWidget {
 
     float []mWeight = { 0, 0 };
 
+    protected ConstraintWidget[] mListNextMatchConstraintsWidget = { null, null };
+    protected ConstraintWidget[] mListNextVisibleWidget = { null, null };
+
     ConstraintWidget mHorizontalNextWidget = null;
     ConstraintWidget mVerticalNextWidget = null;
 
@@ -2322,7 +2325,7 @@ public class ConstraintWidget {
                 dimension = Math.min(dimension, matchMaxDimension);
             }
             if (matchConstraintDefault == MATCH_CONSTRAINT_WRAP) {
-                if (parentWrapContent) {
+                if (parentWrapContent || inChain) {
                     system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_HIGH);
                 } else {
                     system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_LOW);
