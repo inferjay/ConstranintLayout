@@ -1076,7 +1076,10 @@ public class LinearSystem {
     public void addCentering(SolverVariable a, SolverVariable b, int m1, float bias,
                              SolverVariable c, SolverVariable d, int m2, int strength) {
         if (DEBUG) {
-            System.out.println("-> [center bias: " + bias + "] : " + a + " - " + b + " = " + c + " - " + d + " " + getDisplayStrength(strength));
+            System.out.println("-> [center bias: " + bias + "] : " + a + " - " + b
+                    + " - " + m1
+                    + " = " + c + " - " + d + " - " + m2
+                    + " " + getDisplayStrength(strength));
         }
         ArrayRow row = createRow();
         row.createRowCentering(a, b, m1, bias, c, d, m2);

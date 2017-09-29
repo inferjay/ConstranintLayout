@@ -80,7 +80,6 @@ public class ChainWrapContentTest {
         root.add(A);
         root.add(B);
         root.add(C);
-        root.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
         B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
         A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 10);
         A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT);
@@ -89,7 +88,11 @@ public class ChainWrapContentTest {
         C.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.RIGHT);
         C.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, 32);
         root.layout();
-        System.out.println("res: " + directResolution + " root: " + root
+        System.out.println("1/ res: " + directResolution + " root: " + root
+                + " A: " + A + " B: " + B + " C: " + C);
+        root.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
+        root.layout();
+        System.out.println("2/ res: " + directResolution + " root: " + root
                 + " A: " + A + " B: " + B + " C: " + C);
         assertEquals(A.getLeft(), 10);
         assertEquals(B.getLeft(), 110);
@@ -97,7 +100,7 @@ public class ChainWrapContentTest {
         assertEquals(root.getWidth(), 242);
         root.setMinWidth(400);
         root.layout();
-        System.out.println("res: " + directResolution + " root: " + root
+        System.out.println("3/ res: " + directResolution + " root: " + root
                 + " A: " + A + " B: " + B + " C: " + C);
         assertEquals(A.getLeft(), 10);
         assertEquals(B.getLeft(), 110);
