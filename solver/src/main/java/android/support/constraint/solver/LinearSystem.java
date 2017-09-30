@@ -72,22 +72,17 @@ public class LinearSystem {
         mRows = new ArrayRow[TABLE_SIZE];
         releaseRows();
         mCache = new Cache();
-        mGoal = new ArrayRow(mCache);
+        mGoal = new GoalRow(mCache);
     }
 
     interface Row {
         SolverVariable getPivotCandidate(LinearSystem system, boolean[] avoid);
         void updateFromSystem(LinearSystem system);
-        void initFromSystemErrors(LinearSystem system);
         void clear();
         void initFromRow(Row row);
-
         void addError(SolverVariable variable);
 
         SolverVariable getKey();
-
-        SolverVariable getSubject(LinearSystem system);
-
         boolean isEmpty();
     }
 
@@ -344,17 +339,6 @@ public class LinearSystem {
     /*--------------------------------------------------------------------------------------------*/
 
     /**
-     * Rebuild the goal from the errors and slack variables
-     */
-    void rebuildGoalFromErrors() {
-        mGoal.initFromSystemErrors(this);
-        mGoal.updateFromSystem(this);
-        if (DEBUG) {
-            System.out.println("GOAL built from errors: " + mGoal);
-        }
-    }
-
-    /**
      * Minimize the current goal of the system.
      */
     public void minimize() throws Exception {
@@ -447,11 +431,8 @@ public class LinearSystem {
                 added = true;
                 Row goal = new ArrayRow(mCache); //TODO: use a pool
                 goal.initFromRow(row);
-//                displayReadableRows();
                 optimize(goal, true);
-//                displayReadableRows();
                 if (extra.definitionId == -1) {
-//                if (row.constantValue == 0) {
                     if (DEBUG) {
                         System.out.println("row added is 0, so get rid of it");
                     }

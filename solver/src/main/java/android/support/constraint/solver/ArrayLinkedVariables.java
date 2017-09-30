@@ -38,6 +38,7 @@ public class ArrayLinkedVariables {
     private static final boolean DEBUG = false;
 
     private final static int NONE = -1;
+    private static final boolean FULL_NEW_CHECK = false; // full validation (debug purposes)
 
     int currentSize = 0; // current size, accessed by ArrayRow and LinearSystem
 
@@ -123,6 +124,7 @@ public class ArrayLinkedVariables {
             mArrayValues[mHead] = value;
             mArrayIndices[mHead] = variable.id;
             mArrayNextIndices[mHead] = NONE;
+            variable.usageInRowCount++;
             currentSize++;
             if (!mDidFillOnce) {
                 // only increment mLast if we haven't done the first filling pass
@@ -193,6 +195,7 @@ public class ArrayLinkedVariables {
             mArrayNextIndices[availableIndice] = mHead;
             mHead = availableIndice;
         }
+        variable.usageInRowCount++;
         currentSize++;
         if (!mDidFillOnce) {
             // only increment mLast if we haven't done the first filling pass
@@ -226,6 +229,7 @@ public class ArrayLinkedVariables {
             mArrayValues[mHead] = value;
             mArrayIndices[mHead] = variable.id;
             mArrayNextIndices[mHead] = NONE;
+            variable.usageInRowCount++;
             currentSize++;
             if (!mDidFillOnce) {
                 // only increment mLast if we haven't done the first filling pass
@@ -256,6 +260,7 @@ public class ArrayLinkedVariables {
                         // If we did a full pass already, remember that spot
                         mLast = current;
                     }
+                    variable.usageInRowCount--;
                     currentSize--;
                 }
                 return;
@@ -311,6 +316,7 @@ public class ArrayLinkedVariables {
             mArrayNextIndices[availableIndice] = mHead;
             mHead = availableIndice;
         }
+        variable.usageInRowCount++;
         currentSize++;
         if (!mDidFillOnce) {
             // only increment mLast if we haven't done the first filling pass
@@ -347,6 +353,7 @@ public class ArrayLinkedVariables {
                     mArrayNextIndices[previous] = mArrayNextIndices[current];
                 }
                 mCache.mIndexedVariables[idx].removeClientEquation(mRow);
+                variable.usageInRowCount--;
                 currentSize--;
                 mArrayIndices[current] = NONE;
                 if (mDidFillOnce) {
@@ -451,14 +458,33 @@ public class ArrayLinkedVariables {
         }
     }
 
+
+    /**
+     * Returns true if the variable is new to the system, i.e. is already present
+     * in one of the rows. This function is called while choosing the subject of a new row.
+     *
+     * @param variable the variable to check for
+     * @param system the linear system we check
+     * @return
+     */
     private boolean isNew(SolverVariable variable, LinearSystem system) {
-        for (int i = 0; i < system.mNumRows; i++) {
-            ArrayRow row = system.mRows[i];
-            if (row.hasVariable(variable)) {
-                return false;
+        if (FULL_NEW_CHECK) {
+            boolean isNew = true;
+            for (int i = 0; i < system.mNumRows; i++) {
+                ArrayRow row = system.mRows[i];
+                if (row.hasVariable(variable)) {
+                    isNew = false;
+                }
             }
+            if (variable.usageInRowCount <= 1 != isNew) {
+                System.out.println("Problem with usage tracking");
+            }
+            return isNew;
         }
-        return true;
+        // We maintain a usage count -- variables are ref counted if they are present
+        // in the right side of a row or not. If the count is zero or one, the variable
+        // is new (if one, it means it exist in a row, but this is the row we insert)
+        return variable.usageInRowCount <= 1;
     }
 
     /**

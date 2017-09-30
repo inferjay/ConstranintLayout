@@ -209,20 +209,20 @@ public class LinearSystemTest {
             eq1.var("A").equalsTo().var(10);
             ArrayRow row1 = LinearEquation.createRowFromEquation(s, eq1);
             row1.addError(s, i % 3);
+            s.addConstraint(row1);
 
             LinearEquation eq2 = new LinearEquation(s);
             eq2.var("A").equalsTo().var(100);
             ArrayRow row2 = LinearEquation.createRowFromEquation(s, eq2);
             row2.addError(s, (i + 1) % 3);
+            s.addConstraint(row2);
 
             LinearEquation eq3 = new LinearEquation(s);
             eq3.var("A").equalsTo().var(1000);
             ArrayRow row3 = LinearEquation.createRowFromEquation(s, eq3);
             row3.addError(s, (i + 2) % 3);
-
-            s.addConstraint(row1);
-            s.addConstraint(row2);
             s.addConstraint(row3);
+
             try {
                 s.minimize();
             } catch (Exception e) {
@@ -245,7 +245,7 @@ public class LinearSystemTest {
         LinearEquation e1 = new LinearEquation(s);
         e1.var("W3.left").equalsTo().var(0);
         s.addConstraint(LinearEquation.createRowFromEquation(s, e1));
-        s.rebuildGoalFromErrors();
+        //s.rebuildGoalFromErrors();
         assertEquals(s.getGoal().toString(), "0 = 0.0");
         assertEquals(s.getRow(0).toReadableString(), "W3.left = 0.0");
     }
@@ -258,7 +258,7 @@ public class LinearSystemTest {
         e2.var("W3.right").equalsTo().var(600);
         s.addConstraint(LinearEquation.createRowFromEquation(s, e1));
         s.addConstraint(LinearEquation.createRowFromEquation(s, e2));
-        s.rebuildGoalFromErrors();
+        //s.rebuildGoalFromErrors();
         assertEquals(s.getGoal().toString(), "0 = 0.0");
         assertEquals(s.getRow(0).toReadableString(), "W3.left = 0.0");
         assertEquals(s.getRow(1).toReadableString(), "W3.right = 600.0");
@@ -275,7 +275,7 @@ public class LinearSystemTest {
         s.addConstraint(LinearEquation.createRowFromEquation(s, e1));
         s.addConstraint(LinearEquation.createRowFromEquation(s, e2));
         s.addConstraint(LinearEquation.createRowFromEquation(s, left_constraint)); // left
-        s.rebuildGoalFromErrors();
+        //s.rebuildGoalFromErrors();
         assertEquals(s.getRow(0).toReadableString(), "W3.left = 0.0");
         assertEquals(s.getRow(1).toReadableString(), "W3.right = 600.0");
         assertEquals(s.getRow(2).toReadableString(), "W4.left = 0.0");
@@ -306,7 +306,7 @@ public class LinearSystemTest {
 //        assertEquals(s.getRow(1).toReadableString(), "Xr = 100.0 - s3");
 //        assertEquals(s.getRow(2).toReadableString(), "Xl = -10.0 + s2");
 //        assertEquals(s.getRow(3).toReadableString(), "s1 = 100.0 - s2 - s3");
-        s.rebuildGoalFromErrors();
+        //s.rebuildGoalFromErrors();
 //        assertEquals(s.getGoal().toString(), "Goal: ");
         LinearEquation goal = new LinearEquation(s);
         goal.var("Xm").minus("Xl");

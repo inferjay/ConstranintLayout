@@ -56,6 +56,7 @@ public class SolverVariable {
 
     ArrayRow[] mClientEquations = new ArrayRow[8];
     int mClientEquationsCount = 0;
+    public int usageInRowCount = 0;
 
     /**
      * Type of variables
@@ -195,6 +196,7 @@ public class SolverVariable {
         definitionId = -1;
         computedValue = 0;
         mClientEquationsCount = 0;
+        usageInRowCount = 0;
     }
 
     /**

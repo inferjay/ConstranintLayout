@@ -423,11 +423,6 @@ public class ArrayRow implements LinearSystem.Row {
     // Row compatibility
 
     @Override
-    public SolverVariable getSubject(LinearSystem system) {
-        return variables.chooseSubject(system);
-    }
-
-    @Override
     public boolean isEmpty() {
         return (variable == null && constantValue == 0 && variables.currentSize == 0);
     }
@@ -445,36 +440,6 @@ public class ArrayRow implements LinearSystem.Row {
                 updateRowWithEquation(r);
             }
         }
-    }
-
-    @Override
-    public void initFromSystemErrors(LinearSystem system) {
-        variables.clear();
-        for (int i = 1; i < system.mNumColumns; i++) {
-            SolverVariable variable = system.mCache.mIndexedVariables[i];
-            for (int j = 0; j < MAX_STRENGTH; j++) {
-                variable.strengthVector[j] = 0;
-            }
-            variable.strengthVector[variable.strength] = 1;
-            if (variable.mType != SolverVariable.Type.ERROR
-                     /* && variable.mType != SolverVariable.Type.SLACK */) {
-                continue;
-            }
-            float weight = 1;
-            if (variable.strength == STRENGTH_LOW) {
-                weight = 1;
-            } else if (variable.strength == STRENGTH_MEDIUM) {
-                weight = 1E3F;
-            } else if (variable.strength == STRENGTH_HIGH) {
-                weight = 1E6F;
-            } else if (variable.strength == STRENGTH_HIGHEST) {
-                weight = 1E9F;
-            } else if (variable.strength == STRENGTH_EQUALITY) {
-                weight = 1E12F;
-            }
-            variables.add(variable, weight);
-        }
-        System.out.println("Row initialized from errors: " + this);
     }
 
     @Override
