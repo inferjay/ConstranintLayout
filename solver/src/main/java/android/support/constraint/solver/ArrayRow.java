@@ -433,16 +433,6 @@ public class ArrayRow implements LinearSystem.Row {
     }
 
     @Override
-    public void updateFromSystem(LinearSystem system) {
-        for (int i = 0; i < system.mNumRows; i++) {
-            ArrayRow r = system.mRows[i];
-            if (r != this) {
-                updateRowWithEquation(r);
-            }
-        }
-    }
-
-    @Override
     public void clear() {
         variables.clear();
         variable = null;

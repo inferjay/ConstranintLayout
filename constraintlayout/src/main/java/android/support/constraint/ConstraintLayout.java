@@ -1109,6 +1109,10 @@ public class ConstraintLayout extends ViewGroup {
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (DEBUG) {
+            System.out.println("onMeasure width: " + MeasureSpec.toString(widthMeasureSpec)
+                    + " height: " + MeasureSpec.toString(heightMeasureSpec));
+        }
         int paddingLeft = getPaddingLeft();
         int paddingTop = getPaddingTop();
 
@@ -1140,6 +1144,10 @@ public class ConstraintLayout extends ViewGroup {
 
         int heightPadding = paddingTop + getPaddingBottom();
         int widthPadding = paddingLeft + getPaddingRight();
+
+        if (DEBUG) {
+            System.out.println("size dependent widgets: " + sizeDependentWidgetsCount);
+        }
 
         if (sizeDependentWidgetsCount > 0) {
             boolean needSolverPass = false;
@@ -1338,6 +1346,10 @@ public class ConstraintLayout extends ViewGroup {
      */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        if (DEBUG) {
+            System.out.println("onLayout changed: " + changed + " left: " + left + " top: " + top
+                    + " right: " + right + " bottom: " + bottom);
+        }
         final int widgetsCount = getChildCount();
         final boolean isInEditMode = isInEditMode();
         final int helperCount = mConstraintHelpers.size();

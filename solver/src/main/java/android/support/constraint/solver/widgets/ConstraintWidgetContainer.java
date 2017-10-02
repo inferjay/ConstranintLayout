@@ -49,15 +49,11 @@ public class ConstraintWidgetContainer extends WidgetContainer {
 
     int mHorizontalChainsSize = 0;
     int mVerticalChainsSize = 0;
-    ConstraintWidget[] mMatchConstraintsChainedWidgets = new ConstraintWidget[4];
+
     ConstraintWidget[] mVerticalChainsArray = new ConstraintWidget[4];
     ConstraintWidget[] mHorizontalChainsArray = new ConstraintWidget[4];
 
     private int mOptimizationLevel = Optimizer.OPTIMIZATION_ALL;
-
-    // Internal -- used to keep track of first/last visible/invisible widgets
-    // TODO: we could save the array by using the children array and simply store the indexes.
-    ConstraintWidget[] mChainEnds = new ConstraintWidget[4];
 
     private boolean mWidthMeasuredTooSmall = false;
     private boolean mHeightMeasuredTooSmall = false;
@@ -143,9 +139,11 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      * @param widgets   the list of widgets we want to move inside the container
      * @param padding   if padding > 0, the container returned will be enlarged by this amount
      * @return
+     * // TODO: remove
      */
-    public static ConstraintWidgetContainer createContainer(ConstraintWidgetContainer
-                                                                    container, String name, ArrayList<ConstraintWidget> widgets, int padding) {
+    public static ConstraintWidgetContainer createContainer(ConstraintWidgetContainer container,
+                                                            String name, ArrayList<ConstraintWidget> widgets,
+                                                            int padding) {
         Rectangle bounds = getBounds(widgets);
         if (bounds.width == 0 || bounds.height == 0) {
             return null;

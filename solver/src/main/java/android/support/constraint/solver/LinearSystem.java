@@ -77,7 +77,6 @@ public class LinearSystem {
 
     interface Row {
         SolverVariable getPivotCandidate(LinearSystem system, boolean[] avoid);
-        void updateFromSystem(LinearSystem system);
         void clear();
         void initFromRow(Row row);
         void addError(SolverVariable variable);
@@ -361,7 +360,7 @@ public class LinearSystem {
         if (DEBUG) {
             System.out.println("minimize goal: " + goal);
         }
-        goal.updateFromSystem(this);
+        updateRowFromVariables((ArrayRow) goal);
         if (DEBUG) {
             displayReadableRows();
         }
@@ -382,7 +381,7 @@ public class LinearSystem {
      * Update the equation with the variables already defined in the system
      * @param row row to update
      */
-    private void updateRowFromVariables(ArrayRow row) {
+    void updateRowFromVariables(ArrayRow row) {
         if (mNumRows > 0) {
             row.variables.updateFromSystem(row, mRows);
             if (row.variables.currentSize == 0) {
@@ -456,8 +455,8 @@ public class LinearSystem {
                         }
                     }
                     // we can get rid of the variable
-//                    row.variables.clear();
-//                    row.variable = null;
+                    // row.variables.clear();
+                    // row.variable = null;
                     if (!row.isSimpleDefinition) {
                         row.updateClientEquations();
                         final int count = row.variable.mClientEquationsCount;
@@ -531,7 +530,7 @@ public class LinearSystem {
                 client.updateClientEquations();
             }
         }
-        mGoal.updateFromSystem(this);
+        updateRowFromVariables((GoalRow) mGoal);
 
         if (DEBUG) {
             System.out.println("Row added, here is the system:");
@@ -644,7 +643,7 @@ public class LinearSystem {
                         mRows[i].updateRowWithEquation(pivotEquation);
                     }
                     // let's update the goal equation as well
-                    goal.updateFromSystem(this);
+                    updateRowFromVariables((ArrayRow) goal);
                     if (DEBUG) {
                         System.out.println("new system after pivot:");
                         displayReadableRows();
@@ -777,7 +776,7 @@ public class LinearSystem {
                         mRows[i].updateRowWithEquation(pivotEquation);
                     }
                     // let's update the goal equation as well
-                    goal.updateFromSystem(this);
+                    updateRowFromVariables((ArrayRow) goal);
                     if (DEBUG) {
                         System.out.println("new goal after pivot: " + goal);
                         displayRows();
