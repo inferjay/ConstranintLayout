@@ -26,12 +26,17 @@ import android.util.AttributeSet;
 import android.view.View;
 
 /**
- * Placeholder provides a virtual object which can position an existing object.
- * When the id of another view is set on a placeholder (using setContent())
+ * <b>Added in 1.1</b>
+ * <p>
+ * A {code Placeholder} provides a virtual object which can position an existing object.
+ * <p>
+ * When the id of another view is set on a placeholder (using {@code setContent()}),
  * the placeholder effectively becomes the content view. If the content view exist on the
  * screen it is treated as gone from its original location.
- *
- * The ContentView is positioned using the layout of the parameters of the Placeholder.
+ * <p>
+ * The content view is positioned using the layout of the parameters of the {code Placeholder}  (the {code Placeholder}
+ * is simply constrained in the layout like any other view).
+ * </p>
  *
  */
 public class Placeholder extends View {
@@ -84,26 +89,34 @@ public class Placeholder extends View {
    * Sets the visibility of placeholder when not containing objects typically gone or invisible.
    * This can be important as it affects behaviour of surrounding components.
    *
-   * @param visibility
+   * @param visibility Either View.VISIBLE, View.INVISIBLE, View.GONE
    */
   public void setEmptyVisibility(int visibility) {
     mEmptyVisibility = visibility;
   }
 
   /**
-   * gets the behaviour of a placeholder when it contains no view;
+   * Returns the behaviour of a placeholder when it contains no view.
    *
-   * @return
+   * @return Either View.VISIBLE, View.INVISIBLE, View.GONE. Default is INVISIBLE
    */
   public int getEmptyVisibility() {
     return mEmptyVisibility;
   }
 
 
+  /**
+   * Returns the content view
+   * @return {code null} if no content is set, otherwise the content view
+   */
   public View getContent() {
     return mContent;
   }
 
+  /**
+   * @hide
+   * @param canvas
+   */
   public void onDraw(Canvas canvas) {
     if (isInEditMode()) {
       canvas.drawRGB(223, 223, 223);
@@ -126,13 +139,15 @@ public class Placeholder extends View {
     }
   }
 
+  /**
+   * @hide
+   * @param container
+   */
   public void updatePreLayout(ConstraintLayout container) {
     if (mContentId == -1) {
-      ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) getLayoutParams();
       if (!isInEditMode()) {
         setVisibility(mEmptyVisibility);
       }
-
     }
 
     mContent = container.findViewById(mContentId);
@@ -145,6 +160,11 @@ public class Placeholder extends View {
     }
   }
 
+  /**
+   * Sets the content view id
+   *
+   * @param id the id of the content view we want to place in the Placeholder
+   */
   public void setContentId(int id) {
     if (mContentId == id) {
       return;
@@ -166,6 +186,10 @@ public class Placeholder extends View {
     }
   }
 
+  /**
+   * @hide
+   * @param container
+   */
   public void updatePostMeasure(ConstraintLayout container) {
     if (mContent == null) {
       return;

@@ -1,12 +1,37 @@
 package android.support.constraint;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 
 /**
  * Control the visibility and elevation of the referenced views
+ */
+/**
+ * <b>Added in 1.1</b>
+ * <p>
+ *     This class control the visibility of a set of referenced widgets.
+ *     Widgets are referenced by being added to a comma separated list of ids, e.g:
+ *     <pre>
+ *     {@code
+ *          <android.support.constraint.Group
+ *              android:id="@+id/group"
+ *              android:layout_width="wrap_content"
+ *              android:layout_height="wrap_content"
+ *              android:visibility="visible"
+ *              app:constraint_referenced_ids="button4,button9" />
+ *     }
+ *     </pre>
+ *     <p>
+ *         The visibility of the group will be applied to the referenced widgets.
+ *         It's a convenient way to easily hide/show a set of widgets without having to maintain this set
+ *         programmatically.
+ *     <p>
+ *     <h2>Multiple groups</h2>
+ *     <p>
+ *         Multiple groups can reference the same widgets -- in that case, the XML declaration order will
+ *         define the final visibility state (the group declared last will have the last word).
+ * </p>
  */
 public class Group extends ConstraintHelper {
 

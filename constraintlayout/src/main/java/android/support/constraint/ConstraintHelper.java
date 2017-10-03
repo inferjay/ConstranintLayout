@@ -12,16 +12,52 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 
 /**
- * Base ConstraintHelper
+ * @hide
+ * <b>Added in 1.1</b>
+ * <p>
+ *     This class manages a set of referenced widgets. Helper objects can be created to act upon the set
+ *     of referenced widgets. The difference between {@code ConstraintHelper} and {@code ViewGroup} is that
+ *     multiple {@code ConstraintHelper} can reference the same widgets.
+ * <p>
+ *     Widgets are referenced by being added to a comma separated list of ids, e.g:
+ *     <pre>
+ *     {@code
+ *         <android.support.constraint.Barrier
+ *              android:id="@+id/barrier"
+ *              android:layout_width="wrap_content"
+ *              android:layout_height="wrap_content"
+ *              app:barrierDirection="start"
+ *              app:constraint_referenced_ids="button1,button2" />
+ *     }
+ *     </pre>
+ * </p>
  */
 public abstract class ConstraintHelper extends View {
 
+    /**
+     * @hide
+     */
     protected int[] mIds = new int[32];
+    /**
+     * @hide
+     */
     protected int mCount = 0;
 
+    /**
+     * @hide
+     */
     protected Context myContext;
+    /**
+     * @hide
+     */
     protected android.support.constraint.solver.widgets.Helper mHelperWidget = null;
+    /**
+     * @hide
+     */
     protected boolean mUseViewMeasure = false;
+    /**
+     * @hide
+     */
     private String mReferenceIds;
 
     public ConstraintHelper(Context context) {
@@ -42,6 +78,9 @@ public abstract class ConstraintHelper extends View {
         init(attrs);
     }
 
+    /**
+     * @hide
+     */
     protected void init(AttributeSet attrs) {
         if (attrs != null) {
             TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.ConstraintLayout_Layout);
@@ -74,6 +113,9 @@ public abstract class ConstraintHelper extends View {
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
     public void setTag(int tag, Object value) {
         if (mCount + 1 > mIds.length) {
@@ -84,7 +126,7 @@ public abstract class ConstraintHelper extends View {
     }
 
     /**
-     * {@hide
+     * @hide
      */
     @Override
     public void draw(Canvas canvas) {
@@ -92,7 +134,7 @@ public abstract class ConstraintHelper extends View {
     }
 
     /**
-     * {@hide
+     * @hide
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -117,6 +159,9 @@ public abstract class ConstraintHelper extends View {
         }
     }
 
+    /**
+     * @hide
+     */
     private void addID(String idString) {
         if (idString == null) {
             return;
@@ -153,6 +198,9 @@ public abstract class ConstraintHelper extends View {
         }
     }
 
+    /**
+     * @hide
+     */
     private void setIds(String idList) {
         if (idList == null) {
             return;
@@ -170,7 +218,7 @@ public abstract class ConstraintHelper extends View {
     }
 
     /**
-     * Allows a helper a chance to updatePreLayout its internal object or set up connections for the pointed elements
+     * Allows a helper a chance to update its internal object pre layout or set up connections for the pointed elements
      *
      * @param container
      */
@@ -191,10 +239,21 @@ public abstract class ConstraintHelper extends View {
         }
     }
 
-    public void updatePostMeasure(ConstraintLayout container) {
-        // Do nothing
-    }
+    /**
+     * Allows a helper a chance to update its internal object post layout or set up connections for the pointed elements
+     *
+     * @param container
+     */
     public void updatePostLayout(ConstraintLayout container) {
         // Do nothing
     }
+
+    /**
+     * @hide
+     * @param container
+     */
+    public void updatePostMeasure(ConstraintLayout container) {
+        // Do nothing
+    }
+
 }

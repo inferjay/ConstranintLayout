@@ -52,6 +52,16 @@ ext.localRepo = project.hasProperty('localRepo') ? localRepo : "$ext.androidHost
 task dist << {
 }
 
+project(':constraintlayout') {
+    ext.pomName = 'Android ConstraintLayout'
+    ext.pomDesc = 'ConstraintLayout for Android'
+}
+
+project(':solver') {
+    ext.pomName = 'Android ConstraintLayout Solver'
+    ext.pomDesc = 'Solver for ConstraintLayout'
+}
+
 subprojects { Project project ->
     // Change buildDir first so that all plugins pick up the new value.
     project.buildDir = project.file("$project.parent.buildDir/../$project.name/build")
@@ -70,7 +80,34 @@ subprojects { Project project ->
         repositories {
             mavenDeployer {
                 repository(url: uri("$rootProject.ext.supportRepoOut"))
-           }
+		if (project == ':constraintlayout' || project == ':solver') {
+		    pom.project {
+		        name project.ext.pomName
+		        description project.ext.pomDesc
+
+		        url 'http://tools.android.com'
+			inceptionYear '2007'
+
+			licenses {
+			    license {
+			        name 'The Apache Software License, Version 2.0'
+				url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+				distribution 'repo'
+		            }
+		        }
+
+			scm {
+			    url 'https://android.googlesource.com/platform/tools/sherpa'
+			    connection 'git://android.googlesource.com/platform/tools/sherpa.git'
+		        }
+			developers {
+		   	    developer {
+				name 'The Android Open Source Project'
+			    }
+			}
+		    }
+		}
+            }
         }
     }
 

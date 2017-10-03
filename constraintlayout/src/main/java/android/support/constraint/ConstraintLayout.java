@@ -289,6 +289,27 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *         be defined by using {@code MATCH_CONSTRAINT} with the corresponding left/right or top/bottom constraints being set to {@code "parent"}.
  *     </p>
  * </p>
+ * <h5>WRAP_CONTENT : enforcing constraints (<i><b>Added in 1.1</b></i>)</h5>
+ * <p>
+ *     If a dimension is set to {@code WRAP_CONTENT}, in versions before 1.1 they will be treated as a literal dimension -- meaning, constraints would
+ *     not limit the resulting dimension. While in general this is enough (and faster), in some situations, you might want to use {@code WRAP_CONTENT},
+ *     hile enforcing constraints to limit the resulting dimension. In that case, you can add one of the corresponding attribute:
+ *     <ul>
+ *         <li>{@code app:layout_constrainedWidth=”true|false”}</li>
+ *         <li>{@code app:layout_constrainedHeight=”true|false”}</li>
+ *     </ul>
+ * </p>
+ * <h5>MATCH_CONSTRAINT dimensions (<i><b>Added in 1.1</b></i>)</h5>
+ * <p>
+ *     When a dimension is set to {@code MATCH_CONSTRAINT}, the default behavior is to have the resulting size take all the available space.
+ *     You can instead specify to have the dimension be a percentage of the parent layout. You need to set the following:
+ *     <ul>
+ *         <li>The dimension should be set to {@code MATCH_CONSTRAINT} (0dp)
+ *         <li>The default should be set to percent {@code app:layout_constraintWidth_default="percent"} or {@code app:layout_constraintHeight_default="percent"}
+ *         <li>Then set the {@code layout_constraintWidth_percent}
+ *              or {@code layout_constraintHeight_percent} attributes to a value between 0 and 1
+ *     </ul>
+ * </p>
  * <h5>Ratio</h5>
  * <p>
  *     You can also define one dimension of a widget as a ratio of the other one. In order to do that, you
@@ -381,7 +402,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * <p>In addition to the intrinsic capabilities detailed previously, you can also use special helper objects
  * in {@code ConstraintLayout} to help you with your layout. Currently, the {@code Guideline}{@see Guideline} object allows you to create
  * Horizontal and Vertical guidelines which are positioned relative to the {@code ConstraintLayout} container. Widgets can
- * then be positioned by constraining them to such guidelines.</p>
+ * then be positioned by constraining them to such guidelines. In <b>1.1</b>, {@code Barrier} and {@code Group} were added too.</p>
  * </div>
  */
 public class ConstraintLayout extends ViewGroup {
@@ -475,6 +496,9 @@ public class ConstraintLayout extends ViewGroup {
         init(attrs);
     }
 
+    /**
+     * {@hide}
+     */
     @Override
     public void setId(int id) {
         mChildrenByIds.remove(getId());
@@ -482,10 +506,18 @@ public class ConstraintLayout extends ViewGroup {
         mChildrenByIds.put(getId(), this);
     }
 
+    /**
+     * @hide
+     * @param title
+     */
     public void setTitle(String title) {
         mTitle = title;
     }
 
+    /**
+     * @hide
+     * @return
+     */
     public String getTitle() {
         return mTitle;
     }
@@ -528,7 +560,7 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     /**
-     * {@inheritDoc}
+     * {@hide}
      */
     @Override
     public void addView(View child, int index, ViewGroup.LayoutParams params) {
@@ -539,7 +571,7 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     /**
-     * {@inheritDoc}
+     * {@hide}
      */
     @Override
     public void removeView(View view) {
@@ -550,7 +582,7 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     /**
-     * {@inheritDoc}
+     * {@hide}
      */
     @Override
     public void onViewAdded(View view) {
@@ -580,7 +612,7 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     /**
-     * {@inheritDoc}
+     * {@hide}
      */
     @Override
     public void onViewRemoved(View view) {
@@ -619,7 +651,7 @@ public class ConstraintLayout extends ViewGroup {
         requestLayout();
     }
 
-    /*
+    /**
      * The minimum width of this view.
      *
      * @return The minimum width of this view
@@ -995,6 +1027,11 @@ public class ConstraintLayout extends ViewGroup {
         }
     }
 
+    /**
+     * @hide
+     * @param view
+     * @return
+     */
     public final ConstraintWidget getViewWidget(View view) {
         if (view == this) {
             return mLayoutWidget;
@@ -1430,7 +1467,7 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     /**
-     * {@inheritDoc}
+     * {@hide}
      */
     @Override
     public LayoutParams generateLayoutParams(AttributeSet attrs) {
@@ -1470,6 +1507,7 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     /**
+     * @hide
      * Return a direct child view by its id if it exists
      *
      * @param id the view id
@@ -1479,6 +1517,9 @@ public class ConstraintLayout extends ViewGroup {
         return mChildrenByIds.get(id);
     }
 
+    /**
+     * @hide
+     */
     @Override
     public void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
@@ -2352,6 +2393,10 @@ public class ConstraintLayout extends ViewGroup {
         mDirtyHierarchy = true;
     }
 
+    /**
+     * {@hide}
+     * @return
+     */
     @Override
     public boolean shouldDelayChildPressedState() {
         return false;

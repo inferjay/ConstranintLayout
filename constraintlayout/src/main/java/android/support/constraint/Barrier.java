@@ -18,31 +18,89 @@ package android.support.constraint;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Canvas;
 import android.os.Build;
-import android.support.constraint.solver.widgets.ConstraintWidget;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-
-import java.lang.reflect.Field;
-import java.util.Arrays;
 
 /**
- * A Barrier is a Line on a Constraint Layout that takes multiple widgets and aligns
- * to the most extreme widget on the specified side.
- * e.g. A left barrier will align to the left of all the contained views.
+ * <b>Added in 1.1</b>
+ * <p>
+ * A Barrier references multiple widgets as input, and creates a virtual guideline based on the most
+ * extreme widget on the specified side. For example, a left barrier will align to the left of all the referenced views.
+ * </p>
+ * <p>
+ * <h2>Example</h2>
+ *     <p><div align="center" >
+ *       <img width="325px" src="resources/images/barrier-buttons.png">
+ *     </div>
+ *     Let's have two buttons, @id/button1 and @id/button2. The constraint_referenced_ids field will reference
+ *     them by simply having them as comma-separated list:
+ *     <pre>
+ *     {@code
+ *         <android.support.constraint.Barrier
+ *              android:id="@+id/barrier"
+ *              android:layout_width="wrap_content"
+ *              android:layout_height="wrap_content"
+ *              app:barrierDirection="start"
+ *              app:constraint_referenced_ids="button1,button2" />
+ *     }
+ *     </pre>
+ *     <p>
+ *         With the barrier direction set to start, we will have the following result:
+ *     <p><div align="center" >
+ *       <img width="325px" src="resources/images/barrier-start.png">
+ *     </div>
+ *     <p>
+ *         Reversely, with the direction set to end, we will have:
+ *     <p><div align="center" >
+ *       <img width="325px" src="resources/images/barrier-end.png">
+ *     </div>
+ *     <p>
+ *         If the widgets dimensions change, the barrier will automatically move according to its direction to get
+ *         the most extreme widget:
+ *     <p><div align="center" >
+ *       <img width="325px" src="resources/images/barrier-adapt.png">
+ *     </div>
+ *
+ *     <p>
+ *         Other widgets can then be constrained to the barrier itself, instead of the individual widget. This allows a layout
+ *         to automatically adapt on widget dimension changes (e.g. different languages will end up with different length for similar worlds).
+ *     </p>
+ *     </p>
+ * </p>
+ *
  */
 public class Barrier extends ConstraintHelper {
 
+    /**
+     * Left direction constant
+     */
     public static final int LEFT = android.support.constraint.solver.widgets.Barrier.LEFT;
-    public static final int RIGHT = android.support.constraint.solver.widgets.Barrier.RIGHT;
+
+    /**
+     * Top direction constant
+     */
     public static final int TOP = android.support.constraint.solver.widgets.Barrier.TOP;
+
+    /**
+     * Right direction constant
+     */
+    public static final int RIGHT = android.support.constraint.solver.widgets.Barrier.RIGHT;
+
+    /**
+     * Bottom direction constant
+     */
     public static final int BOTTOM = android.support.constraint.solver.widgets.Barrier.BOTTOM;
+
+    /**
+     * Start direction constant
+     */
     public static final int START = BOTTOM + 2;
+
+    /**
+     * End Barrier constant
+     */
     public static final int END = START + 1;
 
     private int mIndicatedType = LEFT;
@@ -64,12 +122,19 @@ public class Barrier extends ConstraintHelper {
         super.setVisibility(View.GONE);
     }
 
+    /**
+     * Get the barrier type ({@code Barrier.LEFT}, {@code Barrier.TOP},
+     * {@code Barrier.RIGHT}, {@code Barrier.BOTTOM}, {@code Barrier.END},
+     * {@code Barrier.START})
+     */
     public int getType() {
         return mIndicatedType;
     }
 
     /**
-     * Set the barrier type
+     * Set the barrier type ({@code Barrier.LEFT}, {@code Barrier.TOP},
+     * {@code Barrier.RIGHT}, {@code Barrier.BOTTOM}, {@code Barrier.END},
+     * {@code Barrier.START})
      */
     public void setType(int type) {
         mIndicatedType = type;
