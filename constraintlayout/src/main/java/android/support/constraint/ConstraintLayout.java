@@ -1118,6 +1118,9 @@ public class ConstraintLayout extends ViewGroup {
 
         mLayoutWidget.setX(paddingLeft);
         mLayoutWidget.setY(paddingTop);
+        mLayoutWidget.setMaxWidth(mMaxWidth);
+        mLayoutWidget.setMaxHeight(mMaxHeight);
+
         setSelfDimensionBehaviour(widthMeasureSpec, heightMeasureSpec);
         int startingWidth = mLayoutWidget.getWidth();
         int startingHeight = mLayoutWidget.getHeight();
@@ -1259,10 +1262,10 @@ public class ConstraintLayout extends ViewGroup {
             int resolvedWidthSize = resolveSizeAndState(androidLayoutWidth, widthMeasureSpec, childState);
             int resolvedHeightSize = resolveSizeAndState(androidLayoutHeight, heightMeasureSpec,
                     childState << MEASURED_HEIGHT_STATE_SHIFT);
-            resolvedWidthSize = Math.min(mMaxWidth, resolvedWidthSize);
-            resolvedHeightSize = Math.min(mMaxHeight, resolvedHeightSize);
             resolvedWidthSize &= MEASURED_SIZE_MASK;
             resolvedHeightSize &= MEASURED_SIZE_MASK;
+            resolvedWidthSize = Math.min(mMaxWidth, resolvedWidthSize);
+            resolvedHeightSize = Math.min(mMaxHeight, resolvedHeightSize);
             if (mLayoutWidget.isWidthMeasuredTooSmall()) {
                 resolvedWidthSize |= MEASURED_STATE_TOO_SMALL;
             }

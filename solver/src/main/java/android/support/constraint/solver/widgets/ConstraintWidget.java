@@ -82,6 +82,19 @@ public class ConstraintWidget {
     int mResolvedDimensionRatioSide = UNKNOWN;
     float mResolvedDimensionRatio = 1.0f;
 
+    private int mMaxDimension[] = { Integer.MAX_VALUE, Integer.MAX_VALUE };
+
+    public int getMaxHeight() { return mMaxDimension[VERTICAL]; }
+    public int getMaxWidth() { return mMaxDimension[HORIZONTAL]; }
+
+    public void setMaxWidth(int maxWidth) {
+        mMaxDimension[HORIZONTAL] = maxWidth;
+    }
+
+    public void setMaxHeight(int maxWidth) {
+        mMaxDimension[VERTICAL] = maxWidth;
+    }
+
     /**
      * Define how the content of a widget should align, if the widget has children
      */
@@ -247,6 +260,8 @@ public class ConstraintWidget {
         mWeight[DIMENSION_VERTICAL] = 0;
         mHorizontalResolution = UNKNOWN;
         mVerticalResolution = UNKNOWN;
+        mMaxDimension[HORIZONTAL] = Integer.MAX_VALUE;
+        mMaxDimension[VERTICAL] = Integer.MAX_VALUE;
     }
 
     /*-----------------------------------------------------------------------*/
@@ -2113,8 +2128,8 @@ public class ConstraintWidget {
             SolverVariable parentMin = mParent != null ? system.createObjectVariable(mParent.mLeft) : null;
                 applyConstraints(system, horizontalParentWrapContent, parentMin, parentMax, mListDimensionBehaviors[DIMENSION_HORIZONTAL], wrapContent,
                         mLeft, mRight, mX, width,
-                        mMinWidth, mHorizontalBiasPercent, useHorizontalRatio, inHorizontalChain,
-                        mMatchConstraintDefaultWidth, mMatchConstraintMinWidth, mMatchConstraintMaxWidth, mMatchConstraintPercentWidth, true);
+                        mMinWidth, mMaxDimension[HORIZONTAL], mHorizontalBiasPercent, useHorizontalRatio,
+                        inHorizontalChain, mMatchConstraintDefaultWidth, mMatchConstraintMinWidth, mMatchConstraintMaxWidth, mMatchConstraintPercentWidth, true);
         }
 
         if (mVerticalResolution == DIRECT) {
@@ -2147,8 +2162,8 @@ public class ConstraintWidget {
         SolverVariable parentMin = mParent != null ? system.createObjectVariable(mParent.mTop) : null;
         applyConstraints(system, verticalParentWrapContent, parentMin, parentMax, mListDimensionBehaviors[DIMENSION_VERTICAL],
                 wrapContent, mTop, mBottom, mY, height,
-                mMinHeight, mVerticalBiasPercent, useVerticalRatio, inVerticalChain,
-                mMatchConstraintDefaultHeight, mMatchConstraintMinHeight, mMatchConstraintMaxHeight, mMatchConstraintPercentHeight, applyPosition);
+                mMinHeight, mMaxDimension[VERTICAL], mVerticalBiasPercent, useVerticalRatio,
+                inVerticalChain, mMatchConstraintDefaultHeight, mMatchConstraintMinHeight, mMatchConstraintMaxHeight, mMatchConstraintPercentHeight, applyPosition);
 
         if (useRatio) {
             int strength = SolverVariable.STRENGTH_FIXED;
@@ -2242,6 +2257,7 @@ public class ConstraintWidget {
      * @param endAnchor               the second anchor
      * @param beginPosition           the original position of the anchor
      * @param dimension               the dimension
+     * @param maxDimension
      * @param matchPercentDimension   the percentage relative to the parent, applied if in match constraint and percent mode
      * @param applyPosition
      */
@@ -2249,7 +2265,7 @@ public class ConstraintWidget {
                                   DimensionBehaviour dimensionBehaviour, boolean wrapContent,
                                   ConstraintAnchor beginAnchor, ConstraintAnchor endAnchor,
                                   int beginPosition, int dimension, int minDimension,
-                                  float bias, boolean useRatio, boolean inChain, int matchConstraintDefault,
+                                  int maxDimension, float bias, boolean useRatio, boolean inChain, int matchConstraintDefault,
                                   int matchMinDimension, int matchMaxDimension, float matchPercentDimension, boolean applyPosition) {
         if (beginAnchor.resolutionStatus == ConstraintAnchor.RESOLVED
                 && endAnchor.resolutionStatus == ConstraintAnchor.RESOLVED) {
@@ -2296,6 +2312,9 @@ public class ConstraintWidget {
                 system.addEquality(end, begin, 0, SolverVariable.STRENGTH_HIGH);
                 if (minDimension > 0) {
                     system.addGreaterThan(end, begin, minDimension, SolverVariable.STRENGTH_FIXED);
+                }
+                if (maxDimension < Integer.MAX_VALUE) {
+                    system.addLowerThan(end, begin, maxDimension, SolverVariable.STRENGTH_FIXED);
                 }
             } else {
                 system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_FIXED);
