@@ -93,7 +93,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *     Those constraints allow you to position a given widget relative to another one. You can constrain
  *     a widget on the horizontal and vertical axis:
  *     <ul>
- *         <li>Horizontal Axis: Left, Right, Start and End sides</li>
+ *         <li>Horizontal Axis: left, right, start and end sides</li>
  *         <li>Vertical Axis: top, bottom sides and text baseline</li>
  *     </ul>
  *     <p>
@@ -138,7 +138,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *         <li>{@code layout_constraintEnd_toEndOf}</li>
  *     </ul>
  *     <p>
- *     They all takes a reference {@code id} to another widget, or the {@code parent} (which will reference the parent container, i.e. the ConstraintLayout):
+ *     They all take a reference {@code id} to another widget, or the {@code parent} (which will reference the parent container, i.e. the ConstraintLayout):
  *     <pre>{@code
  *         <Button android:id="@+id/buttonB" ...
  *                 app:layout_constraintLeft_toLeftOf="parent" />
@@ -154,7 +154,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *           <br><b><i>Fig. 3 - Relative Positioning Margins</i></b>
  *     </div>
  *      <p>If side margins are set, they will be applied to the corresponding constraints (if they exist) (Fig. 3), enforcing
- *      the margin as a space between the target and the source side. The usual layout margins attributes can be used to this effect:
+ *      the margin as a space between the target and the source side. The usual layout margin attributes can be used to this effect:
  *      <ul>
  *          <li>{@code android:layout_marginStart}</li>
  *          <li>{@code android:layout_marginEnd}</li>
@@ -165,7 +165,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *      </ul>
  *      <p>Note that a margin can only be positive or equals to zero, and takes a {@code Dimension}.</p>
  * <h4 id="GoneMargin"> Margins when connected to a GONE widget</h4>
- *      <p>When a position constraint target's visibility is {@code View.GONE}, you can also indicates a different
+ *      <p>When a position constraint target's visibility is {@code View.GONE}, you can also indicate a different
  *      margin value to be used using the following attributes:</p>
  *      <ul>
  *          <li>{@code layout_goneMarginStart}</li>
@@ -240,7 +240,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *
  *     <p>But in terms of the layout computations, {@code GONE} widgets are still part of it, with an important distinction:
  *     <ul>
- *         <li> For the layout pass, their dimension will be considered as if zero (basically, they will be resolved to a point)</li>
+ *         <li> For the layout pass, their dimension will be considered as zero (basically, they will be resolved to a point)</li>
  *         <li> If they have constraints to other widgets they will still be respected, but any margins will be as if equals to zero</li>
  *     </ul>
  *
@@ -334,7 +334,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * <p>
  *     You can also use ratio if both dimensions are set to {@code MATCH_CONSTRAINT} (0dp). In this case the system sets the
  *     largest dimensions the satisfies all constraints and maintains the aspect ratio specified. To constrain one specific side
- *     based on the dimensions of another. You can pre append {@code W,}" or {@code H,} to constrain the width or height
+ *     based on the dimensions of another, you can pre append {@code W,}" or {@code H,} to constrain the width or height
  *     respectively.
  *     For example,
  *     If one dimension is constrained by two targets (e.g. width is 0dp and centered on parent) you can indicate which
@@ -359,7 +359,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * <p>Chains provide group-like behavior in a single axis (horizontally or vertically). The other axis can be constrained independently.</p>
  * <h5>Creating a chain</h5>
  * <p>
- *     A set of widgets are considered a chain if they a linked together via a bi-directional connection (see Fig. 8, showing a minimal chain, with two widgets).
+ *     A set of widgets are considered a chain if they are linked together via a bi-directional connection (see Fig. 8, showing a minimal chain, with two widgets).
  * </p>
  *     <p><div align="center" >
  *       <img width="325px" src="resources/images/chains.png">
