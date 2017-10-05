@@ -2209,7 +2209,7 @@ public class ConstraintLayout extends ViewGroup {
                         }
                     }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_percent) {
-                    matchConstraintPercentWidth = a.getFloat(attr, matchConstraintPercentWidth);
+                    matchConstraintPercentWidth = Math.max(0, a.getFloat(attr, matchConstraintPercentWidth));
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_min) {
                     try {
                         matchConstraintMinHeight = a.getDimensionPixelSize(attr, matchConstraintMinHeight);
@@ -2229,7 +2229,7 @@ public class ConstraintLayout extends ViewGroup {
                         }
                     }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_percent) {
-                    matchConstraintPercentHeight = a.getFloat(attr, matchConstraintPercentHeight);
+                    matchConstraintPercentHeight = Math.max(0, a.getFloat(attr, matchConstraintPercentHeight));
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_creator) {
                     // Skip
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_creator) {

@@ -77,21 +77,21 @@ public class ChainTest {
         B.setWidth(100);
         B.setHeight(20);
         B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
-        B.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_WRAP, 0, 0, 0);
+        B.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_WRAP, 0, 0, 1);
         root.layout();
         System.out.println("e) A: " + A + " B: " + B);
         assertEquals(A.getWidth(), 100);
         assertEquals(B.getWidth(), 100);
         assertEquals(A.getLeft(), root.getWidth() - B.getRight());
         assertEquals(B.getLeft(), A.getLeft() + A.getWidth());
-        B.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 0, 0, 0);
+        B.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 0, 0, 1);
         root.layout();
         System.out.println("f) A: " + A + " B: " + B);
         assertEquals(A.getWidth(), 100);
         assertEquals(B.getWidth(), 500);
         assertEquals(A.getLeft(), 0);
         assertEquals(B.getLeft(), 100);
-        B.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 0, 50, 0);
+        B.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 0, 50, 1);
         root.layout();
         System.out.println("g) A: " + A + " B: " + B);
         assertEquals(A.getWidth(), 100);
@@ -106,7 +106,7 @@ public class ChainTest {
         assertEquals(A.getLeft(), root.getWidth() - B.getRight());
         assertEquals(B.getLeft(), A.getLeft() + A.getWidth());
         B.setDimensionRatio("16:9");
-        B.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_RATIO, 0, 0, 0);
+        B.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_RATIO, 0, 0, 1);
         root.layout();
         System.out.println("i) A: " + A + " B: " + B);
         assertEquals(A.getWidth(), 100);
@@ -114,9 +114,9 @@ public class ChainTest {
         assertEquals(A.getLeft(), root.getWidth() - B.getRight());
         assertEquals(B.getLeft(), A.getLeft() + A.getWidth());
         A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
-        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 0, 0, 0);
+        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 0, 0, 1);
         B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
-        B.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 0, 0, 0);
+        B.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 0, 0, 1);
         B.setDimensionRatio(0, 0);
         A.setVisibility(ConstraintWidget.VISIBLE);
         A.setWidth(100);
@@ -1335,9 +1335,9 @@ public class ChainTest {
 //        assertEquals(B.getWidth(), C.getWidth(), 1);
 //        assertEquals(A.getWidth(), 200, 1);
 
-        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 0, 50, 0);
-        B.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 0, 50, 0);
-        C.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 0, 50, 0);
+        A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 0, 50, 1);
+        B.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 0, 50, 1);
+        C.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 0, 50, 1);
         root.layout();
         System.out.println("b) root: " + root + " A: " + A + " B: " + B + " C: " + C);
         assertEquals(A.getWidth(), B.getWidth(), 1);

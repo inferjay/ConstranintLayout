@@ -262,6 +262,16 @@ public class ConstraintWidget {
         mVerticalResolution = UNKNOWN;
         mMaxDimension[HORIZONTAL] = Integer.MAX_VALUE;
         mMaxDimension[VERTICAL] = Integer.MAX_VALUE;
+        mMatchConstraintDefaultWidth = MATCH_CONSTRAINT_SPREAD;
+        mMatchConstraintDefaultHeight = MATCH_CONSTRAINT_SPREAD;
+        mMatchConstraintPercentWidth = 1;
+        mMatchConstraintPercentHeight = 1;
+        mMatchConstraintMaxWidth = Integer.MAX_VALUE;
+        mMatchConstraintMaxHeight= Integer.MAX_VALUE;
+        mMatchConstraintMinWidth = 0;
+        mMatchConstraintMinHeight = 0;
+        mResolvedDimensionRatioSide = UNKNOWN;
+        mResolvedDimensionRatio = 1f;
     }
 
     /*-----------------------------------------------------------------------*/
@@ -1050,6 +1060,9 @@ public class ConstraintWidget {
         mMatchConstraintMinWidth = min;
         mMatchConstraintMaxWidth = max;
         mMatchConstraintPercentWidth = percent;
+        if (percent < 1 && mMatchConstraintDefaultWidth == MATCH_CONSTRAINT_SPREAD) {
+            mMatchConstraintDefaultWidth = MATCH_CONSTRAINT_PERCENT;
+        }
     }
 
     /**
@@ -1065,6 +1078,9 @@ public class ConstraintWidget {
         mMatchConstraintMinHeight = min;
         mMatchConstraintMaxHeight = max;
         mMatchConstraintPercentHeight = percent;
+        if (percent < 1 && mMatchConstraintDefaultHeight == MATCH_CONSTRAINT_SPREAD) {
+            mMatchConstraintDefaultHeight = MATCH_CONSTRAINT_PERCENT;
+        }
     }
 
     /**
@@ -2191,17 +2207,23 @@ public class ConstraintWidget {
      * @param verticalDimensionFixed    true if this widget vertical dimension is fixed
      */
     public void setupDimensionRatio(boolean hparentWrapContent, boolean vparentWrapContent, boolean horizontalDimensionFixed, boolean verticalDimensionFixed) {
-        mMatchConstraintDefaultWidth = MATCH_CONSTRAINT_RATIO;
-        mMatchConstraintDefaultHeight = MATCH_CONSTRAINT_RATIO;
-        if (horizontalDimensionFixed && !verticalDimensionFixed) {
-            mResolvedDimensionRatioSide = HORIZONTAL;
-        } else if (!horizontalDimensionFixed && verticalDimensionFixed) {
-            mResolvedDimensionRatioSide = VERTICAL;
-            if (mDimensionRatioSide == UNKNOWN) {
-                // need to reverse the ratio as the parsing is done in horizontal mode
-                mResolvedDimensionRatio = 1 / mResolvedDimensionRatio;
-            }
+        if (mMatchConstraintDefaultWidth == MATCH_CONSTRAINT_SPREAD) {
+            mMatchConstraintDefaultWidth = MATCH_CONSTRAINT_RATIO;
+        }
+        if (mMatchConstraintDefaultHeight == MATCH_CONSTRAINT_SPREAD) {
+            mMatchConstraintDefaultHeight = MATCH_CONSTRAINT_RATIO;
+        }
 
+        if (mResolvedDimensionRatioSide == UNKNOWN) {
+            if (horizontalDimensionFixed && !verticalDimensionFixed) {
+                mResolvedDimensionRatioSide = HORIZONTAL;
+            } else if (!horizontalDimensionFixed && verticalDimensionFixed) {
+                mResolvedDimensionRatioSide = VERTICAL;
+                if (mDimensionRatioSide == UNKNOWN) {
+                    // need to reverse the ratio as the parsing is done in horizontal mode
+                    mResolvedDimensionRatio = 1 / mResolvedDimensionRatio;
+                }
+            }
         }
 
         if (mResolvedDimensionRatioSide == HORIZONTAL && !(mTop.isConnected() && mBottom.isConnected())) {
