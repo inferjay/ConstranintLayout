@@ -47,11 +47,19 @@ public class Group extends ConstraintHelper {
         super(context, attrs, defStyleAttr);
     }
 
+    /**
+     * @hide
+     * @param attrs
+     */
     protected void init(AttributeSet attrs) {
         super.init(attrs);
         mUseViewMeasure = false;
     }
 
+    /**
+     * @hide
+     * @param container
+     */
     @Override
     public void updatePreLayout(ConstraintLayout container) {
         int visibility = getVisibility();
@@ -71,6 +79,10 @@ public class Group extends ConstraintHelper {
         }
     }
 
+    /**
+     * @hide
+     * @param container
+     */
     @Override
     public void updatePostLayout(ConstraintLayout container) {
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) getLayoutParams();

@@ -146,6 +146,7 @@ public abstract class ConstraintHelper extends View {
     }
 
     /**
+     * @hide
      * Allows a helper to replace the default ConstraintWidget in LayoutParams by its own subclass
      */
     public void validateParams() {
@@ -218,6 +219,7 @@ public abstract class ConstraintHelper extends View {
     }
 
     /**
+     * @hide
      * Allows a helper a chance to update its internal object pre layout or set up connections for the pointed elements
      *
      * @param container
@@ -240,6 +242,7 @@ public abstract class ConstraintHelper extends View {
     }
 
     /**
+     * @hide
      * Allows a helper a chance to update its internal object post layout or set up connections for the pointed elements
      *
      * @param container

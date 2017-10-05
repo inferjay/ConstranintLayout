@@ -261,12 +261,14 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * <h4 id="DimensionConstraints"> Dimensions constraints </h4>
  * <h5>Minimum dimensions on ConstraintLayout</h5>
  * <p>
- *     You can define minimum sizes for the {@code ConstraintLayout} itself:
+ *     You can define minimum and maximum sizes for the {@code ConstraintLayout} itself:
  *     <ul>
  *         <li>{@code android:minWidth} set the minimum width for the layout</li>
  *         <li>{@code android:minHeight} set the minimum height for the layout</li>
+ *         <li>{@code android:maxWidth} set the maximum width for the layout</li>
+ *         <li>{@code android:maxHeight} set the maximum height for the layout</li>
  *     </ul>
- *     Those minimum dimensions will be used by {@code ConstraintLayout} when its dimensions are set to {@code WRAP_CONTENT}.
+ *     Those minimum and maximum dimensions will be used by {@code ConstraintLayout} when its dimensions are set to {@code WRAP_CONTENT}.
  * </p>
  * <h5>Widgets dimension constraints</h5>
  * <p>
@@ -315,7 +317,8 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *     <ul>
  *         <li>The dimension should be set to {@code MATCH_CONSTRAINT} (0dp)
  *         <li>The default should be set to percent {@code app:layout_constraintWidth_default="percent"}
- *          or {@code app:layout_constraintHeight_default="percent"} (<b>Note:</b> this is true in 1.1-beta1 and 1.1-beta2,
+ *          or {@code app:layout_constraintHeight_default="percent"}
+ *          <br>(<b>Note:</b> this is necessary in 1.1-beta1 and 1.1-beta2,
  *          but will not be needed in following versions if the percent attribute is defined)
  *         <li>Then set the {@code layout_constraintWidth_percent}
  *              or {@code layout_constraintHeight_percent} attributes to a value between 0 and 1

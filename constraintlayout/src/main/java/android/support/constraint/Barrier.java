@@ -168,6 +168,10 @@ public class Barrier extends ConstraintHelper {
         mBarrier.setBarrierType(mResolvedType);
     }
 
+    /**
+     * @hide
+     * @param attrs
+     */
     @Override
     protected void init(AttributeSet attrs) {
         super.init(attrs);
