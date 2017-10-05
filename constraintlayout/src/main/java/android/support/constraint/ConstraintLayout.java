@@ -821,10 +821,14 @@ public class ConstraintLayout extends ViewGroup {
                 if (layoutParams.guidePercent != -1) {
                     guideline.setGuidePercent(layoutParams.guidePercent);
                 }
-            } else if ((layoutParams.resolvedLeftToLeft != UNSET)
-                    || (layoutParams.resolvedLeftToRight != UNSET)
-                    || (layoutParams.resolvedRightToLeft != UNSET)
-                    || (layoutParams.resolvedRightToRight != UNSET)
+            } else if ((layoutParams.leftToLeft != UNSET)
+                    || (layoutParams.leftToRight != UNSET)
+                    || (layoutParams.rightToLeft != UNSET)
+                    || (layoutParams.rightToRight != UNSET)
+                    || (layoutParams.startToStart != UNSET)
+                    || (layoutParams.startToEnd != UNSET)
+                    || (layoutParams.endToStart != UNSET)
+                    || (layoutParams.endToEnd != UNSET)
                     || (layoutParams.topToTop != UNSET)
                     || (layoutParams.topToBottom != UNSET)
                     || (layoutParams.bottomToTop != UNSET)
@@ -2290,7 +2294,6 @@ public class ConstraintLayout extends ViewGroup {
                 ((Guideline) widget).setOrientation(orientation);
             }
         }
-
         public LayoutParams(int width, int height) {
             super(width, height);
         }
