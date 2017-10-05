@@ -325,7 +325,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * <p>
  *     You can also define one dimension of a widget as a ratio of the other one. In order to do that, you
  *     need to have at least one constrained dimension be set to {@code 0dp} (i.e., {@code MATCH_CONSTRAINT}), and set the
- *     attribute {@code layout_constraintDimentionRatio} to a given ratio.
+ *     attribute {@code layout_constraintDimensionRatio} to a given ratio.
  *     For example:
  *     <pre>
  *         {@code
