@@ -129,49 +129,6 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      */
     public boolean isHeightMeasuredTooSmall() { return mHeightMeasuredTooSmall; }
 
-    /**
-     * Set a new ConstraintWidgetContainer containing the list of supplied
-     * children. The dimensions of the container will be the bounding box
-     * containing all the children.
-     *
-     * @param container the container instance
-     * @param name      the name / id of the container
-     * @param widgets   the list of widgets we want to move inside the container
-     * @param padding   if padding > 0, the container returned will be enlarged by this amount
-     * @return
-     * // TODO: remove
-     */
-    public static ConstraintWidgetContainer createContainer(ConstraintWidgetContainer container,
-                                                            String name, ArrayList<ConstraintWidget> widgets,
-                                                            int padding) {
-        Rectangle bounds = getBounds(widgets);
-        if (bounds.width == 0 || bounds.height == 0) {
-            return null;
-        }
-        if (padding > 0) {
-            int maxPadding = Math.min(bounds.x, bounds.y);
-            if (padding > maxPadding) {
-                padding = maxPadding;
-            }
-            bounds.grow(padding, padding);
-        }
-        container.setOrigin(bounds.x, bounds.y);
-        container.setDimension(bounds.width, bounds.height);
-        container.setDebugName(name);
-
-        ConstraintWidget parent = widgets.get(0).getParent();
-        for (int i = 0, widgetsSize = widgets.size(); i < widgetsSize; i++) {
-            final ConstraintWidget widget = widgets.get(i);
-            if (widget.getParent() != parent) {
-                continue; // only allow widgets sharing a parent to be counted
-            }
-            container.add(widget);
-            widget.setX(widget.getX() - bounds.x);
-            widget.setY(widget.getY() - bounds.y);
-        }
-        return container;
-    }
-
     /*-----------------------------------------------------------------------*/
     // Overloaded methods from ConstraintWidget
     /*-----------------------------------------------------------------------*/
