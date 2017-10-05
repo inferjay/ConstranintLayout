@@ -1008,7 +1008,7 @@ public class ConstraintSet {
      * @param startSide the side of the widget to constrain
      * @param endID the id of the widget to constrain to
      * @param endSide the side of widget to constrain to
-     * @param margin the margin to constrain (margin must be postive)
+     * @param margin the margin to constrain (margin must be positive)
      */
     public void connect(int startID, int startSide, int endID, int endSide, int margin) {
         if (!mConstraints.containsKey(startID)) {
