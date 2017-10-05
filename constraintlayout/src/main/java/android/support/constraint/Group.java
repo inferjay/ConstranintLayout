@@ -10,7 +10,7 @@ import android.view.View;
 /**
  * <b>Added in 1.1</b>
  * <p>
- *     This class control the visibility of a set of referenced widgets.
+ *     This class controls the visibility of a set of referenced widgets.
  *     Widgets are referenced by being added to a comma separated list of ids, e.g:
  *     <pre>
  *     {@code

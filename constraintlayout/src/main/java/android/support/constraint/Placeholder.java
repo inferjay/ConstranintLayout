@@ -28,13 +28,13 @@ import android.view.View;
 /**
  * <b>Added in 1.1</b>
  * <p>
- * A {code Placeholder} provides a virtual object which can position an existing object.
+ * A {@code Placeholder} provides a virtual object which can position an existing object.
  * <p>
  * When the id of another view is set on a placeholder (using {@code setContent()}),
  * the placeholder effectively becomes the content view. If the content view exist on the
  * screen it is treated as gone from its original location.
  * <p>
- * The content view is positioned using the layout of the parameters of the {code Placeholder}  (the {code Placeholder}
+ * The content view is positioned using the layout of the parameters of the {@code Placeholder}  (the {@code Placeholder}
  * is simply constrained in the layout like any other view).
  * </p>
  *
@@ -107,7 +107,7 @@ public class Placeholder extends View {
 
   /**
    * Returns the content view
-   * @return {code null} if no content is set, otherwise the content view
+   * @return {@code null} if no content is set, otherwise the content view
    */
   public View getContent() {
     return mContent;

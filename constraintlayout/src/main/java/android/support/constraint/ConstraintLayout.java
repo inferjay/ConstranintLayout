@@ -291,9 +291,9 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * </p>
  * <h5>WRAP_CONTENT : enforcing constraints (<i><b>Added in 1.1</b></i>)</h5>
  * <p>
- *     If a dimension is set to {@code WRAP_CONTENT}, in versions before 1.1 they will be treated as a literal dimension -- meaning, constraints would
+ *     If a dimension is set to {@code WRAP_CONTENT}, in versions before 1.1 they will be treated as a literal dimension -- meaning, constraints will
  *     not limit the resulting dimension. While in general this is enough (and faster), in some situations, you might want to use {@code WRAP_CONTENT},
- *     hile enforcing constraints to limit the resulting dimension. In that case, you can add one of the corresponding attribute:
+ *     yet keep enforcing constraints to limit the resulting dimension. In that case, you can add one of the corresponding attribute:
  *     <ul>
  *         <li>{@code app:layout_constrainedWidth=”true|false”}</li>
  *         <li>{@code app:layout_constrainedHeight=”true|false”}</li>
@@ -302,10 +302,21 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * <h5>MATCH_CONSTRAINT dimensions (<i><b>Added in 1.1</b></i>)</h5>
  * <p>
  *     When a dimension is set to {@code MATCH_CONSTRAINT}, the default behavior is to have the resulting size take all the available space.
- *     You can instead specify to have the dimension be a percentage of the parent layout. You need to set the following:
+ *     Several additional modifiers are available:
+ *     <ul>
+ *         <li>{@code layout_constraintWidth_min} and {@code layout_constraintHeight_min} : will set the minimum size for this dimension</li>
+ *         <li>{@code layout_constraintWidth_max} and {@code layout_constraintHeight_max} : will set the maximum size for this dimension</li>
+ *         <li>{@code layout_constraintWidth_percent} and {@code layout_constraintHeight_percent} : will set the size of this dimension as a percentage of the parent</li>
+ *     </ul>
+ *     <h6>Min and Max</h6>
+ *     The value indicated for min and max can be either a dimension in Dp, or "wrap", which will use the same value as what {@code WRAP_CONTENT} would do.
+ *     <h6>Percent dimension</h6>
+ *     To use percent, you need to set the following:
  *     <ul>
  *         <li>The dimension should be set to {@code MATCH_CONSTRAINT} (0dp)
- *         <li>The default should be set to percent {@code app:layout_constraintWidth_default="percent"} or {@code app:layout_constraintHeight_default="percent"}
+ *         <li>The default should be set to percent {@code app:layout_constraintWidth_default="percent"}
+ *          or {@code app:layout_constraintHeight_default="percent"} (<b>Note:</b> this is true in 1.1-beta1 and 1.1-beta2,
+ *          but will not be needed in following versions if the percent attribute is defined)
  *         <li>Then set the {@code layout_constraintWidth_percent}
  *              or {@code layout_constraintHeight_percent} attributes to a value between 0 and 1
  *     </ul>
