@@ -2211,7 +2211,7 @@ public class ConstraintLayout extends ViewGroup {
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_min) {
                     try {
                         matchConstraintMinWidth = a.getDimensionPixelSize(attr, matchConstraintMinWidth);
-                    } catch (android.view.InflateException e) {
+                    } catch (Exception e) {
                         int value = a.getInt(attr, matchConstraintMinWidth);
                         if (value == WRAP_CONTENT) {
                             matchConstraintMinWidth = WRAP_CONTENT;
@@ -2220,7 +2220,7 @@ public class ConstraintLayout extends ViewGroup {
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_max) {
                     try {
                         matchConstraintMaxWidth = a.getDimensionPixelSize(attr, matchConstraintMaxWidth);
-                    } catch (android.view.InflateException e) {
+                    } catch (Exception e) {
                         int value = a.getInt(attr, matchConstraintMaxWidth);
                         if (value == WRAP_CONTENT) {
                             matchConstraintMaxWidth = WRAP_CONTENT;
@@ -2231,7 +2231,7 @@ public class ConstraintLayout extends ViewGroup {
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_min) {
                     try {
                         matchConstraintMinHeight = a.getDimensionPixelSize(attr, matchConstraintMinHeight);
-                    } catch (android.view.InflateException e) {
+                    } catch (Exception e) {
                         int value = a.getInt(attr, matchConstraintMinHeight);
                         if (value == WRAP_CONTENT) {
                             matchConstraintMinHeight = WRAP_CONTENT;
@@ -2240,7 +2240,7 @@ public class ConstraintLayout extends ViewGroup {
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_max) {
                     try {
                         matchConstraintMaxHeight = a.getDimensionPixelSize(attr, matchConstraintMaxHeight);
-                    } catch (android.view.InflateException e) {
+                    } catch (Exception e) {
                         int value = a.getInt(attr, matchConstraintMaxHeight);
                         if (value == WRAP_CONTENT) {
                             matchConstraintMaxHeight = WRAP_CONTENT;

@@ -120,6 +120,10 @@ class Chain {
             int strength = SolverVariable.STRENGTH_LOW;
             int margin = begin.getMargin();
 
+            if (isChainPacked && widget != first && widget != firstVisibleWidget) {
+                strength = SolverVariable.STRENGTH_FIXED;
+            }
+
             system.addGreaterThan(begin.mSolverVariable, begin.mTarget.mSolverVariable,
                     margin, SolverVariable.STRENGTH_FIXED);
             system.addEquality(begin.mSolverVariable, begin.mTarget.mSolverVariable, margin, strength);
