@@ -29,7 +29,6 @@ import java.util.HashSet;
  */
 public class ConstraintAnchor {
 
-    public static final boolean USE_CENTER_ANCHOR = false;
     private static final boolean ALLOW_BINARY = false;
 
     /**
@@ -329,11 +328,6 @@ public class ConstraintAnchor {
         }
         Type target = anchor.getType();
         if (target == mType) {
-            if (!USE_CENTER_ANCHOR) {
-                if (mType == Type.CENTER) {
-                    return false;
-                }
-            }
             if (mType == Type.BASELINE
                     && (!anchor.getOwner().hasBaseline() || !getOwner().hasBaseline())) {
                 return false;

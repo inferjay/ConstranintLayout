@@ -154,6 +154,11 @@
         <enum name="percent" value="2"/>
     </attr>
 
+    <!-- handles circular constraints -->
+    <attr name="layout_constraintCircle" format="reference"/>
+    <attr name="layout_constraintCircleRadius" format="dimension"/>
+    <attr name="layout_constraintCircleAngle" format="integer"/>
+
     <!-- explicitely enforces constraints in case of WRAP -->
     <attr name="layout_constrainedWidth" format="boolean"/>
     <attr name="layout_constrainedHeight" format="boolean"/>
@@ -206,6 +211,10 @@
         <attr name="constraint_referenced_ids"/>
         <attr name="chainUseRtl"/>
         <attr name="title"/>
+
+        <attr name="layout_constraintCircle"/>
+        <attr name="layout_constraintCircleRadius"/>
+        <attr name="layout_constraintCircleAngle"/>
 
         <attr name="layout_constraintGuide_begin"/>
         <attr name="layout_constraintGuide_end"/>
@@ -279,6 +288,10 @@
         <attr name="android:layout_marginEnd"/>
         <attr name="android:layout_marginLeft"/>
         <attr name="android:layout_marginRight"/>
+
+        <attr name="layout_constraintCircle"/>
+        <attr name="layout_constraintCircleRadius"/>
+        <attr name="layout_constraintCircleAngle"/>
 
         <attr name="layout_constraintGuide_begin"/>
         <attr name="layout_constraintGuide_end"/>

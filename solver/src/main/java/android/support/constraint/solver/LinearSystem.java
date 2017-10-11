@@ -17,6 +17,7 @@
 package android.support.constraint.solver;
 
 import android.support.constraint.solver.widgets.ConstraintAnchor;
+import android.support.constraint.solver.widgets.ConstraintWidget;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1280,4 +1281,36 @@ public class LinearSystem {
         }
         return row;
     }
+
+    /**
+     * Add the equations constraining a widget center to another widget center, positioned
+     * on a circle, following an angle and radius
+     *
+     * @param widget
+     * @param target
+     * @param angle from 0 to 360
+     * @param radius the distance between the two centers
+     */
+    public void addCenterPoint(ConstraintWidget widget, ConstraintWidget target, float angle, int radius) {
+
+        SolverVariable Al = createObjectVariable(widget.getAnchor(ConstraintAnchor.Type.LEFT));
+        SolverVariable At = createObjectVariable(widget.getAnchor(ConstraintAnchor.Type.TOP));
+        SolverVariable Ar = createObjectVariable(widget.getAnchor(ConstraintAnchor.Type.RIGHT));
+        SolverVariable Ab = createObjectVariable(widget.getAnchor(ConstraintAnchor.Type.BOTTOM));
+
+        SolverVariable Bl = createObjectVariable(target.getAnchor(ConstraintAnchor.Type.LEFT));
+        SolverVariable Bt = createObjectVariable(target.getAnchor(ConstraintAnchor.Type.TOP));
+        SolverVariable Br = createObjectVariable(target.getAnchor(ConstraintAnchor.Type.RIGHT));
+        SolverVariable Bb = createObjectVariable(target.getAnchor(ConstraintAnchor.Type.BOTTOM));
+
+        ArrayRow row = createRow();
+        float angleComponent = (float) (Math.sin(angle) * radius);
+        row.createRowWithAngle(At, Ab, Bt, Bb, angleComponent);
+        addConstraint(row);
+        row = createRow();
+        angleComponent = (float) (Math.cos(angle) * radius);
+        row.createRowWithAngle(Al, Ar, Bl, Br, angleComponent);
+        addConstraint(row);
+    }
+
 }

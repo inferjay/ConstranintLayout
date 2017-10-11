@@ -256,8 +256,10 @@ public class ConstraintSet {
     private static final int WIDTH_MIN = 58;
     private static final int HEIGHT_MIN = 59;
     private static final int ROTATION = 60;
-
-    private static final int UNUSED = 61;
+    private static final int CIRCLE = 61;
+    private static final int CIRCLE_RADIUS = 62;
+    private static final int CIRCLE_ANGLE = 63;
+    private static final int UNUSED = 64;
 
     static {
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintLeft_toLeftOf, LEFT_TO_LEFT);
@@ -326,7 +328,9 @@ public class ConstraintSet {
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintHeight_max, HEIGHT_MAX);
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintWidth_min, WIDTH_MIN);
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintHeight_min, HEIGHT_MIN);
-
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintCircle, CIRCLE);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintCircleRadius, CIRCLE_RADIUS);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintCircleAngle, CIRCLE_ANGLE);
         mapToConstant.append(R.styleable.ConstraintSet_android_id, VIEW_ID);
     }
 
@@ -358,6 +362,10 @@ public class ConstraintSet {
         public float horizontalBias = 0.5f;
         public float verticalBias = 0.5f;
         public String dimensionRatio = null;
+
+        public int circleConstraint = UNSET;
+        public int circleRadius = 0;
+        public int circleAngle = 0;
 
         public int editorAbsoluteX = UNSET;
         public int editorAbsoluteY = UNSET;
@@ -480,6 +488,9 @@ public class ConstraintSet {
             if (mReferenceIds != null) {
                 clone.mReferenceIds = Arrays.copyOf(mReferenceIds, mReferenceIds.length);
             }
+            clone.circleConstraint = circleConstraint;
+            clone.circleRadius = circleRadius;
+            clone.circleAngle = circleAngle;
             return clone;
         }
 
@@ -529,6 +540,11 @@ public class ConstraintSet {
             horizontalBias = param.horizontalBias;
             verticalBias = param.verticalBias;
             dimensionRatio = param.dimensionRatio;
+
+            circleConstraint = param.circleConstraint;
+            circleRadius = param.circleRadius;
+            circleAngle = param.circleAngle;
+
             editorAbsoluteX = param.editorAbsoluteX;
             editorAbsoluteY = param.editorAbsoluteY;
             orientation = param.orientation;
@@ -589,6 +605,10 @@ public class ConstraintSet {
 
             param.horizontalBias = horizontalBias;
             param.verticalBias = verticalBias;
+
+            param.circleConstraint = circleConstraint;
+            param.circleRadius = circleRadius;
+            param.circleAngle = circleAngle;
 
             param.dimensionRatio = dimensionRatio;
             param.editorAbsoluteX = editorAbsoluteX;
@@ -2135,6 +2155,15 @@ public class ConstraintSet {
                     break;
                 case END_TO_END:
                     c.bottomToTop = lookupID(a, attr, c.endToEnd);
+                    break;
+                case CIRCLE:
+                    c.circleConstraint = lookupID(a, attr, c.circleConstraint);
+                    break;
+                case CIRCLE_RADIUS:
+                    c.circleRadius = a.getDimensionPixelSize(attr, c.circleRadius);
+                    break;
+                case CIRCLE_ANGLE:
+                    c.circleAngle = a.getInt(attr, c.circleAngle);
                     break;
                 case GONE_LEFT_MARGIN:
                     c.goneLeftMargin = a.getDimensionPixelSize(attr, c.goneLeftMargin);

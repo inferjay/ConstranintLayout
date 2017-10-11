@@ -351,6 +351,25 @@ public class ArrayRow implements LinearSystem.Row {
         return this;
     }
 
+    /**
+     * Create a constraint to express At + (Ab-At)/2 = Bt + (Bb-Bt)/2 - angle
+     *
+     * @param at
+     * @param ab
+     * @param bt
+     * @param bb
+     * @param angleComponent
+     * @return
+     */
+    public ArrayRow createRowWithAngle(SolverVariable at, SolverVariable ab, SolverVariable bt, SolverVariable bb, float angleComponent) {
+        variables.put(bt, 0.5f);
+        variables.put(bb, 0.5f);
+        variables.put(at, -0.5f);
+        variables.put(ab, -0.5f);
+        constantValue = - angleComponent;
+        return this;
+    }
+
     int sizeInBytes() {
         int size = 0;
         if (variable != null) {

@@ -62,6 +62,9 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *         <a href="#CenteringPositioning">Centering positioning</a>
  *     </li>
  *     <li>
+ *         <a href="#CircularPositioning">Circular positioning</a>
+ *     </li>
+ *     <li>
  *         <a href="#VisibilityBehavior">Visibility behavior</a>
  *     </li>
  *     <li>
@@ -232,6 +235,30 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *     </p>
  * </p>
  *
+ * <h4 id="CircularPositioning"> Circular positioning (<b>Added in 1.1</b>)</h4>
+ * <p>
+ *     You can constrain a widget center relative to another widget center, at an angle and a distance. This allows
+ *     you to position a widget on a circle (see Fig. 6). The following attributes can be used:
+ *     <ul>
+ *         <li>{@code layout_constraintCircle} : references another widget id</li>
+ *         <li>{@code layout_constraintCircleRadius} : the distance to the other widget center</li>
+ *         <li>{@code layout_constraintCircleAngle} : which angle the widget should be at (in degrees, from 0 to 360)</li>
+ *     </ul>
+ *     <p><div align="center" >
+ *       <img width="325px" src="resources/images/circle1.png">
+ *       <img width="325px" src="resources/images/circle2.png">
+ *           <br><b><i>Fig. 6 - Circular Positioning</i></b>
+ *     </div>
+ *     <br><br>
+ *     <pre>{@code
+ *  <Button android:id="@+id/buttonA" ... />
+ *  <Button android:id="@+id/buttonB" ...
+ *      app:layout_constraintCircle="@+id/buttonA"
+ *      app:layout_constraintCircleRadius="100dp"
+ *      app:layout_constraintCircleAngle="45" />
+ *         }
+ *     </pre>
+ * </p>
  * <h4 id="VisibilityBehavior"> Visibility behavior </h4>
  * <p>
  *     {@code ConstraintLayout} has a specific handling of widgets being marked as {@code View.GONE}.
@@ -246,11 +273,11 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *
  *     <p><div align="center" >
  *       <img width="350px" src="resources/images/visibility-behavior.png">
- *           <br><b><i>Fig. 6 - Visibility Behavior</i></b>
+ *           <br><b><i>Fig. 7 - Visibility Behavior</i></b>
  *     </div>
  *     <p>This specific behavior allows to build layouts where you can temporarily mark widgets as being {@code GONE},
- *     without breaking the layout (Fig. 6), which can be particularly useful when doing simple layout animations.
- *     <p><b>Note: </b>The margin used will be the margin that B had defined when connecting to A (see Fig. 6 for an example).
+ *     without breaking the layout (Fig. 7), which can be particularly useful when doing simple layout animations.
+ *     <p><b>Note: </b>The margin used will be the margin that B had defined when connecting to A (see Fig. 7 for an example).
  *     In some cases, this might not be the margin you want (e.g. A had a 100dp margin to the side of its container,
  *     B only a 16dp to A, marking
  *     A as gone, B will have a margin of 16dp to the container).
@@ -281,11 +308,11 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *     </ul>
  *     <p><div align="center" >
  *       <img width="325px" src="resources/images/dimension-match-constraints.png">
- *           <br><b><i>Fig. 7 - Dimension Constraints</i></b>
+ *           <br><b><i>Fig. 8 - Dimension Constraints</i></b>
  *     </div>
  *     The first two works in a similar fashion as other layouts. The last one will resize the widget in such a way as
- *     matching the constraints that are set (see Fig. 7, (a) is wrap_content, (b) is 0dp). If margins are set, they will be taken in account
- *     in the computation (Fig. 7, (c) with 0dp).
+ *     matching the constraints that are set (see Fig. 8, (a) is wrap_content, (b) is 0dp). If margins are set, they will be taken in account
+ *     in the computation (Fig. 8, (c) with 0dp).
  *     <p>
  *         <b>Important: </b> {@code MATCH_PARENT} is not recommended for widgets contained in a {@code ConstraintLayout}. Similar behavior can
  *         be defined by using {@code MATCH_CONSTRAINT} with the corresponding left/right or top/bottom constraints being set to {@code "parent"}.
@@ -373,11 +400,11 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * <p>Chains provide group-like behavior in a single axis (horizontally or vertically). The other axis can be constrained independently.</p>
  * <h5>Creating a chain</h5>
  * <p>
- *     A set of widgets are considered a chain if they are linked together via a bi-directional connection (see Fig. 8, showing a minimal chain, with two widgets).
+ *     A set of widgets are considered a chain if they are linked together via a bi-directional connection (see Fig. 9, showing a minimal chain, with two widgets).
  * </p>
  *     <p><div align="center" >
  *       <img width="325px" src="resources/images/chains.png">
- *           <br><b><i>Fig. 8 - Chain</i></b>
+ *           <br><b><i>Fig. 9 - Chain</i></b>
  *     </div>
  * <p>
  * <h5>Chain heads</h5>
@@ -386,7 +413,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * </p>
  *     <p><div align="center" >
  *       <img width="400px" src="resources/images/chains-head.png">
- *           <br><b><i>Fig. 9 - Chain Head</i></b>
+ *           <br><b><i>Fig. 10 - Chain Head</i></b>
  *     </div>
  *     <p>The head is the left-most widget for horizontal chains, and the top-most widget for vertical chains.</p>
  * <h5>Margins in chains</h5>
@@ -403,7 +430,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * </ul>
  *     <p><div align="center" >
  *       <img width="600px" src="resources/images/chains-styles.png">
- *           <br><b><i>Fig. 10 - Chains Styles</i></b>
+ *           <br><b><i>Fig. 11 - Chains Styles</i></b>
  *     </div>
  * </p>
  * <h5>Weighted chains</h5>
@@ -850,6 +877,7 @@ public class ConstraintLayout extends ViewGroup {
                     || (layoutParams.baselineToBaseline != UNSET)
                     || (layoutParams.editorAbsoluteX != UNSET)
                     || (layoutParams.editorAbsoluteY != UNSET)
+                    || (layoutParams.circleConstraint != UNSET)
                     || (layoutParams.width == MATCH_PARENT)
                     || (layoutParams.height == MATCH_PARENT)) {
 
@@ -889,98 +917,106 @@ public class ConstraintLayout extends ViewGroup {
                     }
                 }
 
-                // Left constraint
-                if (resolvedLeftToLeft != UNSET) {
-                    ConstraintWidget target = getTargetWidget(resolvedLeftToLeft);
+                // Circular constraint
+                if (layoutParams.circleConstraint != UNSET) {
+                    ConstraintWidget target = getTargetWidget(layoutParams.circleConstraint);
                     if (target != null) {
-                        widget.immediateConnect(ConstraintAnchor.Type.LEFT, target,
-                                ConstraintAnchor.Type.LEFT, layoutParams.leftMargin,
-                                resolveGoneLeftMargin);
+                        widget.connectCircularConstraint(target, layoutParams.circleAngle, layoutParams.circleRadius);
                     }
-                } else if (resolvedLeftToRight != UNSET) {
-                    ConstraintWidget target = getTargetWidget(resolvedLeftToRight);
-                    if (target != null) {
-                        widget.immediateConnect(ConstraintAnchor.Type.LEFT, target,
-                                ConstraintAnchor.Type.RIGHT, layoutParams.leftMargin,
-                                resolveGoneLeftMargin);
+                } else {
+                    // Left constraint
+                    if (resolvedLeftToLeft != UNSET) {
+                        ConstraintWidget target = getTargetWidget(resolvedLeftToLeft);
+                        if (target != null) {
+                            widget.immediateConnect(ConstraintAnchor.Type.LEFT, target,
+                                    ConstraintAnchor.Type.LEFT, layoutParams.leftMargin,
+                                    resolveGoneLeftMargin);
+                        }
+                    } else if (resolvedLeftToRight != UNSET) {
+                        ConstraintWidget target = getTargetWidget(resolvedLeftToRight);
+                        if (target != null) {
+                            widget.immediateConnect(ConstraintAnchor.Type.LEFT, target,
+                                    ConstraintAnchor.Type.RIGHT, layoutParams.leftMargin,
+                                    resolveGoneLeftMargin);
+                        }
                     }
-                }
 
-                // Right constraint
-                if (resolvedRightToLeft != UNSET) {
-                    ConstraintWidget target = getTargetWidget(resolvedRightToLeft);
-                    if (target != null) {
-                        widget.immediateConnect(ConstraintAnchor.Type.RIGHT, target,
-                                ConstraintAnchor.Type.LEFT, layoutParams.rightMargin,
-                                resolveGoneRightMargin);
+                    // Right constraint
+                    if (resolvedRightToLeft != UNSET) {
+                        ConstraintWidget target = getTargetWidget(resolvedRightToLeft);
+                        if (target != null) {
+                            widget.immediateConnect(ConstraintAnchor.Type.RIGHT, target,
+                                    ConstraintAnchor.Type.LEFT, layoutParams.rightMargin,
+                                    resolveGoneRightMargin);
+                        }
+                    } else if (resolvedRightToRight != UNSET) {
+                        ConstraintWidget target = getTargetWidget(resolvedRightToRight);
+                        if (target != null) {
+                            widget.immediateConnect(ConstraintAnchor.Type.RIGHT, target,
+                                    ConstraintAnchor.Type.RIGHT, layoutParams.rightMargin,
+                                    resolveGoneRightMargin);
+                        }
                     }
-                } else if (resolvedRightToRight != UNSET) {
-                    ConstraintWidget target = getTargetWidget(resolvedRightToRight);
-                    if (target != null) {
-                        widget.immediateConnect(ConstraintAnchor.Type.RIGHT, target,
-                                ConstraintAnchor.Type.RIGHT, layoutParams.rightMargin,
-                                resolveGoneRightMargin);
-                    }
-                }
 
-                // Top constraint
-                if (layoutParams.topToTop != UNSET) {
-                    ConstraintWidget target = getTargetWidget(layoutParams.topToTop);
-                    if (target != null) {
-                        widget.immediateConnect(ConstraintAnchor.Type.TOP, target,
-                                ConstraintAnchor.Type.TOP, layoutParams.topMargin,
-                                layoutParams.goneTopMargin);
+                    // Top constraint
+                    if (layoutParams.topToTop != UNSET) {
+                        ConstraintWidget target = getTargetWidget(layoutParams.topToTop);
+                        if (target != null) {
+                            widget.immediateConnect(ConstraintAnchor.Type.TOP, target,
+                                    ConstraintAnchor.Type.TOP, layoutParams.topMargin,
+                                    layoutParams.goneTopMargin);
+                        }
+                    } else if (layoutParams.topToBottom != UNSET) {
+                        ConstraintWidget target = getTargetWidget(layoutParams.topToBottom);
+                        if (target != null) {
+                            widget.immediateConnect(ConstraintAnchor.Type.TOP, target,
+                                    ConstraintAnchor.Type.BOTTOM, layoutParams.topMargin,
+                                    layoutParams.goneTopMargin);
+                        }
                     }
-                } else if (layoutParams.topToBottom != UNSET) {
-                    ConstraintWidget target = getTargetWidget(layoutParams.topToBottom);
-                    if (target != null) {
-                        widget.immediateConnect(ConstraintAnchor.Type.TOP, target,
-                                ConstraintAnchor.Type.BOTTOM, layoutParams.topMargin,
-                                layoutParams.goneTopMargin);
-                    }
-                }
 
-                // Bottom constraint
-                if (layoutParams.bottomToTop != UNSET) {
-                    ConstraintWidget target = getTargetWidget(layoutParams.bottomToTop);
-                    if (target != null) {
-                        widget.immediateConnect(ConstraintAnchor.Type.BOTTOM, target,
-                                ConstraintAnchor.Type.TOP, layoutParams.bottomMargin,
-                                layoutParams.goneBottomMargin);
+                    // Bottom constraint
+                    if (layoutParams.bottomToTop != UNSET) {
+                        ConstraintWidget target = getTargetWidget(layoutParams.bottomToTop);
+                        if (target != null) {
+                            widget.immediateConnect(ConstraintAnchor.Type.BOTTOM, target,
+                                    ConstraintAnchor.Type.TOP, layoutParams.bottomMargin,
+                                    layoutParams.goneBottomMargin);
+                        }
+                    } else if (layoutParams.bottomToBottom != UNSET) {
+                        ConstraintWidget target = getTargetWidget(layoutParams.bottomToBottom);
+                        if (target != null) {
+                            widget.immediateConnect(ConstraintAnchor.Type.BOTTOM, target,
+                                    ConstraintAnchor.Type.BOTTOM, layoutParams.bottomMargin,
+                                    layoutParams.goneBottomMargin);
+                        }
                     }
-                } else if (layoutParams.bottomToBottom != UNSET) {
-                    ConstraintWidget target = getTargetWidget(layoutParams.bottomToBottom);
-                    if (target != null) {
-                        widget.immediateConnect(ConstraintAnchor.Type.BOTTOM, target,
-                                ConstraintAnchor.Type.BOTTOM, layoutParams.bottomMargin,
-                                layoutParams.goneBottomMargin);
+
+                    // Baseline constraint
+                    if (layoutParams.baselineToBaseline != UNSET) {
+                        View view = mChildrenByIds.get(layoutParams.baselineToBaseline);
+                        ConstraintWidget target = getTargetWidget(layoutParams.baselineToBaseline);
+                        if (target != null && view != null && view.getLayoutParams() instanceof LayoutParams) {
+                            LayoutParams targetParams = (LayoutParams) view.getLayoutParams();
+                            layoutParams.needsBaseline = true;
+                            targetParams.needsBaseline = true;
+                            ConstraintAnchor baseline = widget.getAnchor(ConstraintAnchor.Type.BASELINE);
+                            ConstraintAnchor targetBaseline =
+                                    target.getAnchor(ConstraintAnchor.Type.BASELINE);
+                            baseline.connect(targetBaseline, 0, -1, ConstraintAnchor.Strength.STRONG,
+                                    ConstraintAnchor.USER_CREATOR, true);
+
+                            widget.getAnchor(ConstraintAnchor.Type.TOP).reset();
+                            widget.getAnchor(ConstraintAnchor.Type.BOTTOM).reset();
+                        }
                     }
-                }
 
-                // Baseline constraint
-                if (layoutParams.baselineToBaseline != UNSET) {
-                    View view = mChildrenByIds.get(layoutParams.baselineToBaseline);
-                    ConstraintWidget target = getTargetWidget(layoutParams.baselineToBaseline);
-                    if (target != null && view != null && view.getLayoutParams() instanceof LayoutParams) {
-                        LayoutParams targetParams = (LayoutParams) view.getLayoutParams();
-                        layoutParams.needsBaseline = true;
-                        targetParams.needsBaseline = true;
-                        ConstraintAnchor baseline = widget.getAnchor(ConstraintAnchor.Type.BASELINE);
-                        ConstraintAnchor targetBaseline =
-                                target.getAnchor(ConstraintAnchor.Type.BASELINE);
-                        baseline.connect(targetBaseline, 0, -1, ConstraintAnchor.Strength.STRONG,
-                                ConstraintAnchor.USER_CREATOR, true);
-
-                        widget.getAnchor(ConstraintAnchor.Type.TOP).reset();
-                        widget.getAnchor(ConstraintAnchor.Type.BOTTOM).reset();
+                    if (resolvedHorizontalBias >= 0 && resolvedHorizontalBias != 0.5f) {
+                        widget.setHorizontalBiasPercent(resolvedHorizontalBias);
                     }
-                }
-
-                if (resolvedHorizontalBias >= 0 && resolvedHorizontalBias != 0.5f) {
-                    widget.setHorizontalBiasPercent(resolvedHorizontalBias);
-                }
-                if (layoutParams.verticalBias >= 0 && layoutParams.verticalBias != 0.5f) {
-                    widget.setVerticalBiasPercent(layoutParams.verticalBias);
+                    if (layoutParams.verticalBias >= 0 && layoutParams.verticalBias != 0.5f) {
+                        widget.setVerticalBiasPercent(layoutParams.verticalBias);
+                    }
                 }
 
                 if (isInEditMode && ((layoutParams.editorAbsoluteX != UNSET)
@@ -1410,13 +1446,6 @@ public class ConstraintLayout extends ViewGroup {
         }
         final int widgetsCount = getChildCount();
         final boolean isInEditMode = isInEditMode();
-        final int helperCount = mConstraintHelpers.size();
-        if (helperCount > 0) {
-            for (int i = 0; i < helperCount; i++) {
-                ConstraintHelper helper = mConstraintHelpers.get(i);
-                helper.updatePostLayout(this);
-            }
-        }
         for (int i = 0; i < widgetsCount; i++) {
             final View child = getChildAt(i);
             LayoutParams params = (LayoutParams) child.getLayoutParams();
@@ -1463,6 +1492,13 @@ public class ConstraintLayout extends ViewGroup {
                     content.setVisibility(VISIBLE);
                     content.layout(l, t, r, b);
                 }
+            }
+        }
+        final int helperCount = mConstraintHelpers.size();
+        if (helperCount > 0) {
+            for (int i = 0; i < helperCount; i++) {
+                ConstraintHelper helper = mConstraintHelpers.get(i);
+                helper.updatePostLayout(this);
             }
         }
     }
@@ -1739,6 +1775,21 @@ public class ConstraintLayout extends ViewGroup {
          * Constrains the baseline of a child to the baseline of a target child (contains the target child id).
          */
         public int baselineToBaseline = UNSET;
+
+        /**
+         * Constrains the center of a child to the center of a target child (contains the target child id).
+         */
+        public int circleConstraint = UNSET;
+
+        /**
+         * The radius used for a circular constraint
+         */
+        public int circleRadius = 0;
+
+        /**
+         * The angle used for a circular constraint]
+         */
+        public int circleAngle = 0;
 
         /**
          * Constrains the start side of a child to the end side of a target child (contains the target child id).
@@ -2086,6 +2137,18 @@ public class ConstraintLayout extends ViewGroup {
                     baselineToBaseline = a.getResourceId(attr, baselineToBaseline);
                     if (baselineToBaseline == UNSET) {
                         baselineToBaseline = a.getInt(attr, UNSET);
+                    }
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintCircle) {
+                    circleConstraint = a.getResourceId(attr, circleConstraint);
+                    if (circleConstraint == UNSET) {
+                        circleConstraint = a.getInt(attr, UNSET);
+                    }
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintCircleRadius) {
+                    circleRadius = a.getDimensionPixelSize(attr, circleRadius);
+                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintCircleAngle) {
+                    circleAngle = a.getInt(attr, circleAngle) % 360;
+                    if (circleAngle < 0) {
+                        circleAngle = (360 - circleAngle) % 360;
                     }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_editor_absoluteX) {
                     editorAbsoluteX = a.getDimensionPixelOffset(attr, editorAbsoluteX);

@@ -83,6 +83,7 @@ public class ConstraintWidget {
     float mResolvedDimensionRatio = 1.0f;
 
     private int mMaxDimension[] = { Integer.MAX_VALUE, Integer.MAX_VALUE };
+    private int mCircleConstraintAngle = 0;
 
     public int getMaxHeight() { return mMaxDimension[VERTICAL]; }
     public int getMaxWidth() { return mMaxDimension[HORIZONTAL]; }
@@ -126,7 +127,7 @@ public class ConstraintWidget {
     protected static final int ANCHOR_BOTTOM = 3;
     protected static final int ANCHOR_BASELINE = 4;
 
-    protected ConstraintAnchor[] mListAnchors = { mLeft, mRight, mTop, mBottom, mBaseline };
+    protected ConstraintAnchor[] mListAnchors = { mLeft, mRight, mTop, mBottom, mBaseline, mCenter };
     protected ArrayList<ConstraintAnchor> mAnchors = new ArrayList<>();
 
     // The horizontal and vertical behaviour for the widgets' dimensions
@@ -224,6 +225,7 @@ public class ConstraintWidget {
         mCenterY.reset();
         mCenter.reset();
         mParent = null;
+        mCircleConstraintAngle = 0;
         mWidth = 0;
         mHeight = 0;
         mDimensionRatio = 0;
@@ -336,9 +338,7 @@ public class ConstraintWidget {
         mAnchors.add(mBottom);
         mAnchors.add(mCenterX);
         mAnchors.add(mCenterY);
-        if (ConstraintAnchor.USE_CENTER_ANCHOR) {
-            mAnchors.add(mCenter);
-        }
+        mAnchors.add(mCenter);
         mAnchors.add(mBaseline);
     }
 
@@ -473,6 +473,18 @@ public class ConstraintWidget {
      */
     public boolean isHeightWrapContent() { return mIsHeightWrapContent; }
 
+    /**
+     * Set a circular constraint
+     *
+     * @param target the target widget we will use as the center of the circle
+     * @param angle the angle (from 0 to 360)
+     * @param radius the radius used
+     */
+    public void connectCircularConstraint(ConstraintWidget target, int angle, int radius) {
+        immediateConnect(ConstraintAnchor.Type.CENTER, target, ConstraintAnchor.Type.CENTER,
+                radius, 0);
+        mCircleConstraintAngle = angle;
+    }
 
     /**
      * Returns the type string if set
@@ -2190,6 +2202,10 @@ public class ConstraintWidget {
             }
         }
 
+        if (mCenter.isConnected()) {
+            system.addCenterPoint(this, mCenter.getTarget().getOwner(), (float) Math.toRadians(mCircleConstraintAngle + 90), mCenter.getMargin());
+        }
+
         if (LinearSystem.FULL_DEBUG) {
             System.out.println("\n----------------------------------------------");
             System.out.println("-- DONE adding " + getDebugName() + " to the solver");
@@ -2303,6 +2319,7 @@ public class ConstraintWidget {
 
         boolean isBeginConnected = beginAnchor.isConnected();
         boolean isEndConnected = endAnchor.isConnected();
+        boolean isCenterConnected = mCenter.isConnected();
 
         boolean variableSize = false;
 
@@ -2390,6 +2407,7 @@ public class ConstraintWidget {
         int numConnections = 0;
         if (isBeginConnected) { numConnections++; }
         if (isEndConnected) { numConnections++; }
+        if (isCenterConnected) { numConnections++; }
 
         if (variableSize && numConnections != 2 && !useRatio) {
             variableSize = false;
@@ -2412,7 +2430,7 @@ public class ConstraintWidget {
             return;
         }
 
-        if (!isBeginConnected && !isEndConnected) {
+        if (!isBeginConnected && !isEndConnected && !isCenterConnected) {
             system.addEquality(begin, beginPosition);
             if (parentWrapContent) {
                 system.addGreaterThan(parentMax, end, 0, SolverVariable.STRENGTH_EQUALITY);
