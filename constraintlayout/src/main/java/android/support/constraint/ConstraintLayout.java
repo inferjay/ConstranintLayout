@@ -2385,6 +2385,9 @@ public class ConstraintLayout extends ViewGroup {
         @Override
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
         public void resolveLayoutDirection(int layoutDirection) {
+            int preLeftMargin = leftMargin;
+            int preRightMargin = rightMargin;
+
             super.resolveLayoutDirection(layoutDirection);
 
             resolvedRightToLeft = UNSET;
@@ -2450,15 +2453,27 @@ public class ConstraintLayout extends ViewGroup {
             if (endToStart == UNSET && endToEnd == UNSET) {
                 if (rightToLeft != UNSET) {
                     resolvedRightToLeft = rightToLeft;
+                    if (rightMargin == 0) {
+                        rightMargin = preRightMargin;
+                    }
                 } else if (rightToRight != UNSET) {
                     resolvedRightToRight = rightToRight;
+                    if (rightMargin == 0) {
+                        rightMargin = preRightMargin;
+                    }
                 }
             }
             if (startToStart == UNSET && startToEnd == UNSET) {
                 if (leftToLeft != UNSET) {
                     resolvedLeftToLeft = leftToLeft;
+                    if (leftMargin == 0) {
+                        leftMargin = preLeftMargin;
+                    }
                 } else if (leftToRight != UNSET) {
                     resolvedLeftToRight = leftToRight;
+                    if (leftMargin == 0) {
+                        leftMargin = preLeftMargin;
+                    }
                 }
             }
         }
