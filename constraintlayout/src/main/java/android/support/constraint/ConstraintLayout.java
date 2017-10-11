@@ -2450,28 +2450,27 @@ public class ConstraintLayout extends ViewGroup {
                 }
             }
             // if no constraint is defined via RTL attributes, use left/right if present
-            if (endToStart == UNSET && endToEnd == UNSET) {
+            if (endToStart == UNSET && endToEnd == UNSET
+                    && startToStart == UNSET && startToEnd == UNSET) {
                 if (rightToLeft != UNSET) {
                     resolvedRightToLeft = rightToLeft;
-                    if (rightMargin == 0) {
+                    if (rightMargin <= 0 && preRightMargin > 0) {
                         rightMargin = preRightMargin;
                     }
                 } else if (rightToRight != UNSET) {
                     resolvedRightToRight = rightToRight;
-                    if (rightMargin == 0) {
+                    if (rightMargin <= 0 && preRightMargin > 0) {
                         rightMargin = preRightMargin;
                     }
                 }
-            }
-            if (startToStart == UNSET && startToEnd == UNSET) {
                 if (leftToLeft != UNSET) {
                     resolvedLeftToLeft = leftToLeft;
-                    if (leftMargin == 0) {
+                    if (leftMargin <= 0 && preLeftMargin > 0) {
                         leftMargin = preLeftMargin;
                     }
                 } else if (leftToRight != UNSET) {
                     resolvedLeftToRight = leftToRight;
-                    if (leftMargin == 0) {
+                    if (leftMargin <= 0 && preLeftMargin > 0) {
                         leftMargin = preLeftMargin;
                     }
                 }
