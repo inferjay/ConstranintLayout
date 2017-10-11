@@ -1789,7 +1789,7 @@ public class ConstraintLayout extends ViewGroup {
         /**
          * The angle used for a circular constraint]
          */
-        public int circleAngle = 0;
+        public float circleAngle = 0;
 
         /**
          * Constrains the start side of a child to the end side of a target child (contains the target child id).
@@ -2146,7 +2146,7 @@ public class ConstraintLayout extends ViewGroup {
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintCircleRadius) {
                     circleRadius = a.getDimensionPixelSize(attr, circleRadius);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintCircleAngle) {
-                    circleAngle = a.getInt(attr, circleAngle) % 360;
+                    circleAngle = a.getFloat(attr, circleAngle) % 360;
                     if (circleAngle < 0) {
                         circleAngle = (360 - circleAngle) % 360;
                     }

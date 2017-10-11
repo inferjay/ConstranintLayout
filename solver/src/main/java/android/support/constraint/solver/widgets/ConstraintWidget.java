@@ -83,7 +83,7 @@ public class ConstraintWidget {
     float mResolvedDimensionRatio = 1.0f;
 
     private int mMaxDimension[] = { Integer.MAX_VALUE, Integer.MAX_VALUE };
-    private int mCircleConstraintAngle = 0;
+    private float mCircleConstraintAngle = 0;
 
     public int getMaxHeight() { return mMaxDimension[VERTICAL]; }
     public int getMaxWidth() { return mMaxDimension[HORIZONTAL]; }
@@ -480,7 +480,7 @@ public class ConstraintWidget {
      * @param angle the angle (from 0 to 360)
      * @param radius the radius used
      */
-    public void connectCircularConstraint(ConstraintWidget target, int angle, int radius) {
+    public void connectCircularConstraint(ConstraintWidget target, float angle, int radius) {
         immediateConnect(ConstraintAnchor.Type.CENTER, target, ConstraintAnchor.Type.CENTER,
                 radius, 0);
         mCircleConstraintAngle = angle;

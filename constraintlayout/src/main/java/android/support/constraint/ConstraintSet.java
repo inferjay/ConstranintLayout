@@ -365,7 +365,7 @@ public class ConstraintSet {
 
         public int circleConstraint = UNSET;
         public int circleRadius = 0;
-        public int circleAngle = 0;
+        public float circleAngle = 0;
 
         public int editorAbsoluteX = UNSET;
         public int editorAbsoluteY = UNSET;
@@ -2163,7 +2163,7 @@ public class ConstraintSet {
                     c.circleRadius = a.getDimensionPixelSize(attr, c.circleRadius);
                     break;
                 case CIRCLE_ANGLE:
-                    c.circleAngle = a.getInt(attr, c.circleAngle);
+                    c.circleAngle = a.getFloat(attr, c.circleAngle);
                     break;
                 case GONE_LEFT_MARGIN:
                     c.goneLeftMargin = a.getDimensionPixelSize(attr, c.goneLeftMargin);
