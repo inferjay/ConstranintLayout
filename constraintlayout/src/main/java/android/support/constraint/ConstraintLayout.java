@@ -661,8 +661,10 @@ public class ConstraintLayout extends ViewGroup {
             super.onViewRemoved(view);
         }
         mChildrenByIds.remove(view.getId());
-        mLayoutWidget.remove(getViewWidget(view));
+        ConstraintWidget widget = getViewWidget(view);
+        mLayoutWidget.remove(widget);
         mConstraintHelpers.remove(view);
+        mVariableDimensionsWidgets.remove(widget);
         mDirtyHierarchy = true;
     }
 
