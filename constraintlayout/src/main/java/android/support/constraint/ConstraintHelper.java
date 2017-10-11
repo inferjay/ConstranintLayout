@@ -129,7 +129,7 @@ public abstract class ConstraintHelper extends View {
      * @hide
      */
     @Override
-    public void draw(Canvas canvas) {
+    public void onDraw(Canvas canvas) {
         // Nothing
     }
 
