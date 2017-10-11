@@ -49,6 +49,10 @@ public class Guideline extends ConstraintWidget {
     public Guideline() {
         mAnchors.clear();
         mAnchors.add(mAnchor);
+        final int count = mListAnchors.length;
+        for (int i = 0; i < count; i++) {
+            mListAnchors[i] = mAnchor;
+        }
     }
 
     public int getRelativeBehaviour() {
@@ -87,6 +91,10 @@ public class Guideline extends ConstraintWidget {
             mAnchor = mTop;
         }
         mAnchors.add(mAnchor);
+        final int count = mListAnchors.length;
+        for (int i = 0; i < count; i++) {
+            mListAnchors[i] = mAnchor;
+        }
     }
 
     public ConstraintAnchor getAnchor() {

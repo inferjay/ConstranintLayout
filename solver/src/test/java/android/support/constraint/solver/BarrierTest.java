@@ -157,4 +157,36 @@ public class BarrierTest {
         assertEquals(C.getLeft(), barrier.getLeft());
 
     }
+
+    @Test
+    public void withGuideline() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        Barrier barrier = new Barrier();
+        Guideline guideline = new Guideline();
+
+        root.setDebugSolverName(root.getSystem(), "root");
+        A.setDebugSolverName(root.getSystem(), "A");
+        barrier.setDebugSolverName(root.getSystem(), "Barrier");
+        guideline.setDebugSolverName(root.getSystem(), "Guideline");
+
+        guideline.setOrientation(ConstraintWidget.VERTICAL);
+        guideline.setGuideBegin(200);
+        barrier.setBarrierType(Barrier.RIGHT);
+
+        root.add(A);
+        root.add(barrier);
+        root.add(guideline);
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 10);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 50);
+
+        barrier.add(A);
+        barrier.add(guideline);
+
+        root.layout();
+
+        System.out.println("A: " + A + " guideline: " + guideline + " barrier: " + barrier);
+        assertEquals(barrier.getLeft(), guideline.getLeft());
+    }
 }
