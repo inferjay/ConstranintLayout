@@ -855,14 +855,20 @@ public class ConstraintLayout extends ViewGroup {
 
             if (layoutParams.isGuideline) {
                 Guideline guideline = (Guideline) widget;
-                if (layoutParams.guideBegin != -1) {
-                    guideline.setGuideBegin(layoutParams.guideBegin);
+                int resolvedGuideBegin = layoutParams.resolvedGuideBegin;
+                int resolvedGuideEnd = layoutParams.resolvedGuideEnd;
+                float resolvedGuidePercent = layoutParams.resolvedGuidePercent;
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    resolvedGuideBegin = layoutParams.guideBegin;
+                    resolvedGuideEnd = layoutParams.guideEnd;
+                    resolvedGuidePercent = layoutParams.guidePercent;
                 }
-                if (layoutParams.guideEnd != -1) {
-                    guideline.setGuideEnd(layoutParams.guideEnd);
-                }
-                if (layoutParams.guidePercent != -1) {
-                    guideline.setGuidePercent(layoutParams.guidePercent);
+                if (resolvedGuidePercent != UNSET) {
+                    guideline.setGuidePercent(resolvedGuidePercent);
+                } else if (resolvedGuideBegin != UNSET) {
+                    guideline.setGuideBegin(resolvedGuideBegin);
+                } else if (resolvedGuideEnd != UNSET) {
+                    guideline.setGuideEnd(resolvedGuideEnd);
                 }
             } else if ((layoutParams.leftToLeft != UNSET)
                     || (layoutParams.leftToRight != UNSET)
@@ -2013,6 +2019,10 @@ public class ConstraintLayout extends ViewGroup {
         int resolveGoneRightMargin = UNSET;
         float resolvedHorizontalBias = 0.5f;
 
+        int resolvedGuideBegin;
+        int resolvedGuideEnd;
+        float resolvedGuidePercent;
+
         ConstraintWidget widget = new ConstraintWidget();
 
         public void reset() {
@@ -2403,6 +2413,10 @@ public class ConstraintLayout extends ViewGroup {
             resolveGoneRightMargin = goneRightMargin;
             resolvedHorizontalBias = horizontalBias;
 
+            resolvedGuideBegin = guideBegin;
+            resolvedGuideEnd = guideEnd;
+            resolvedGuidePercent = guidePercent;
+
             boolean isRtl = (View.LAYOUT_DIRECTION_RTL == getLayoutDirection());
             // Post JB MR1, if start/end are defined, they take precedence over left/right
             if (isRtl) {
@@ -2430,6 +2444,22 @@ public class ConstraintLayout extends ViewGroup {
                 }
                 if (startEndDefined) {
                     resolvedHorizontalBias = 1 - horizontalBias;
+                }
+
+                if (isGuideline) {
+                    if (guidePercent != UNSET) {
+                        resolvedGuidePercent = 1 - guidePercent;
+                        resolvedGuideBegin = UNSET;
+                        resolvedGuideEnd = UNSET;
+                    } else if (guideBegin != UNSET) {
+                        resolvedGuideEnd = guideBegin;
+                        resolvedGuideBegin = UNSET;
+                        resolvedGuidePercent = UNSET;
+                    } else if (guideEnd != UNSET) {
+                        resolvedGuideBegin = guideEnd;
+                        resolvedGuideEnd = UNSET;
+                        resolvedGuidePercent = UNSET;
+                    }
                 }
             } else {
                 if (startToEnd != UNSET) {
