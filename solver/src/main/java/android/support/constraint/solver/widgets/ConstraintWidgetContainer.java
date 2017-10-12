@@ -39,9 +39,6 @@ public class ConstraintWidgetContainer extends WidgetContainer {
 
     private Snapshot mSnapshot;
 
-    int mWrapWidth;
-    int mWrapHeight;
-
     int mPaddingLeft;
     int mPaddingTop;
     int mPaddingRight;
@@ -274,44 +271,6 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         if (DEBUG_LAYOUT) {
             System.out.println("layout with prew: " + prew + " (" + mListDimensionBehaviors[DIMENSION_HORIZONTAL]
                 + ") preh: " + preh + " (" + mListDimensionBehaviors[DIMENSION_VERTICAL] + ")");
-        }
-        if (false && mOptimizationLevel == Optimizer.OPTIMIZATION_ALL
-                && (mListDimensionBehaviors[DIMENSION_VERTICAL] == DimensionBehaviour.WRAP_CONTENT
-                || mListDimensionBehaviors[DIMENSION_HORIZONTAL] == DimensionBehaviour.WRAP_CONTENT)) {
-            // TODO: do the wrap calculation in two separate passes
-            Optimizer.findWrapSize(this, mChildren, Optimizer.flags);
-            wrap_override = Optimizer.flags[Optimizer.FLAG_USE_OPTIMIZE];
-            if (DEBUG_LAYOUT) {
-                System.out.println("layout with wrap width: " + mWrapWidth + " wrap height: " + mWrapHeight + " wrap override? " + wrap_override);
-            }
-            if (prew > 0 && preh > 0 && (mWrapWidth > prew || mWrapHeight > preh)) {
-                // TODO: this could be better optimized with a tighter coupling between view measures and
-                // wrap/layout. For now, simply escape to the solver.
-                wrap_override = false;
-                if (DEBUG_LAYOUT) {
-                    System.out.println("wrap override set to false, goes to solver");
-                }
-            }
-            if (wrap_override) {
-                if (mListDimensionBehaviors[DIMENSION_HORIZONTAL] == DimensionBehaviour.WRAP_CONTENT) {
-                    mListDimensionBehaviors[DIMENSION_HORIZONTAL] = DimensionBehaviour.FIXED;
-                    if (prew > 0 && prew < mWrapWidth) {
-                        mWidthMeasuredTooSmall = true;
-                        setWidth(prew);
-                    } else {
-                        setWidth(Math.max(mMinWidth, mWrapWidth));
-                    }
-                }
-                if (mListDimensionBehaviors[DIMENSION_VERTICAL] == DimensionBehaviour.WRAP_CONTENT) {
-                    mListDimensionBehaviors[DIMENSION_VERTICAL] = DimensionBehaviour.FIXED;
-                    if (preh > 0 && preh < mWrapHeight) {
-                        mHeightMeasuredTooSmall = true;
-                        setHeight(preh);
-                    } else {
-                        setHeight(Math.max(mMinHeight, mWrapHeight));
-                    }
-                }
-            }
         }
 
         // Reset the chains before iterating on our children
