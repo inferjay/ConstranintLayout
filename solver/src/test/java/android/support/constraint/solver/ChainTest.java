@@ -1380,5 +1380,44 @@ public class ChainTest {
         assertEquals(A.getTop(), (root.getHeight() - A.getHeight() - B.getHeight()) / 2);
     }
 
+    @Test
+    public void testSpreadInsideChainWithMargins() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        C.setDebugName("C");
+        root.add(A);
+        root.add(B);
+        root.add(C);
+
+        int marginOut = 0;
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, marginOut);
+        A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT);
+        B.connect(ConstraintAnchor.Type.RIGHT, C, ConstraintAnchor.Type.LEFT);
+        C.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.RIGHT);
+        C.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, marginOut);
+        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_SPREAD_INSIDE);
+        root.layout();
+        System.out.println("a) root: " + root + " A: " + A + " B: " + B + " C: " + C);
+        assertEquals(A.getLeft(), marginOut);
+        assertEquals(C.getRight(), root.getWidth() - marginOut);
+        assertEquals(B.getLeft(), A.getRight() + (C.getLeft() - A.getRight() - B.getWidth()) / 2);
+
+        marginOut = 20;
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, marginOut);
+        C.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, marginOut);
+        root.layout();
+        System.out.println("b) root: " + root + " A: " + A + " B: " + B + " C: " + C);
+        assertEquals(A.getLeft(), marginOut);
+        assertEquals(C.getRight(), root.getWidth() - marginOut);
+        assertEquals(B.getLeft(), A.getRight() + (C.getLeft() - A.getRight() - B.getWidth()) / 2);
+    }
+
 
 }

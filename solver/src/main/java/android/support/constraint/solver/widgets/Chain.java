@@ -344,7 +344,7 @@ class Chain {
                 }
             }
             if (endTarget != null && (firstVisibleWidget != lastVisibleWidget)) {
-                system.addEquality(end.mSolverVariable, endTarget.mSolverVariable, end.getMargin(), SolverVariable.STRENGTH_FIXED);
+                system.addEquality(end.mSolverVariable, endTarget.mSolverVariable, -end.getMargin(), SolverVariable.STRENGTH_FIXED);
             }
         }
     }
