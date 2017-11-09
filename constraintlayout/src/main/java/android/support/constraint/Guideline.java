@@ -92,4 +92,36 @@ public class Guideline extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         setMeasuredDimension(0, 0);
     }
+
+    /**
+     * Set the guideline's distance form the top or left edge.
+     *
+     * @param margin the distance to the top or left edge
+     */
+    public void setGuidelineBegin(int margin) {
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) getLayoutParams();
+        params.guideBegin = margin;
+        setLayoutParams(params);
+    }
+
+    /**
+     * Set a guideline's distance to end.
+     *
+     * @param margin the margin to the right or bottom side of container
+     */
+    public void setGuidelineEnd(int margin) {
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) getLayoutParams();
+        params.guideEnd = margin;
+        setLayoutParams(params);
+    }
+
+    /**
+     * Set a Guideline's percent.
+     * @param ratio the ratio between the gap on the left and right 0.0 is top/left 0.5 is middle
+     */
+    public void setGuidelinePercent(float ratio) {
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) getLayoutParams();
+        params.guidePercent = ratio;
+        setLayoutParams(params);
+    }
 }
