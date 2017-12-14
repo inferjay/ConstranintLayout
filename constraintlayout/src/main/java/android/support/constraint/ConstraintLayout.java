@@ -2446,7 +2446,8 @@ public class ConstraintLayout extends ViewGroup {
                     resolvedHorizontalBias = 1 - horizontalBias;
                 }
 
-                if (isGuideline) {
+                // Only apply to vertical guidelines
+                if (isGuideline && orientation == Guideline.VERTICAL) {
                     if (guidePercent != UNSET) {
                         resolvedGuidePercent = 1 - guidePercent;
                         resolvedGuideBegin = UNSET;
