@@ -2384,7 +2384,7 @@ public class ConstraintWidget {
             }
             if (matchConstraintDefault == MATCH_CONSTRAINT_WRAP) {
                 if (parentWrapContent || inChain) {
-                    system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_HIGH);
+                    system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_EQUALITY);
                 } else {
                     system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_LOW);
                 }

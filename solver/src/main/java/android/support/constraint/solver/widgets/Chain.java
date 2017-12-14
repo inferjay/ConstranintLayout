@@ -22,6 +22,9 @@ import android.support.constraint.solver.SolverVariable;
 
 import java.util.Arrays;
 
+import static android.support.constraint.solver.widgets.ConstraintWidget.MATCH_CONSTRAINT_RATIO;
+import static android.support.constraint.solver.widgets.ConstraintWidget.MATCH_CONSTRAINT_SPREAD;
+
 /**
  * Chain management and constraints creation
  */
@@ -191,16 +194,35 @@ class Chain {
             while (widget != null) {
                 next = widget.mListNextMatchConstraintsWidget[orientation];
                 if (next != null) {
-                    ArrayRow row = system.createRow();
                     float currentWeight = widget.mWeight[orientation];
                     float nextWeight = next.mWeight[orientation];
                     SolverVariable begin = widget.mListAnchors[offset].mSolverVariable;
                     SolverVariable end = widget.mListAnchors[offset + 1].mSolverVariable;
                     SolverVariable nextBegin = next.mListAnchors[offset].mSolverVariable;
                     SolverVariable nextEnd = next.mListAnchors[offset + 1].mSolverVariable;
-                    row.createRowEqualMatchDimensions(currentWeight, totalWeights, nextWeight,
-                            begin, end, nextBegin, nextEnd);
-                    system.addConstraint(row);
+
+                    boolean applyEquality;
+                    int currentDimensionDefault;
+                    int nextDimensionDefault;
+                    if (orientation == ConstraintWidget.HORIZONTAL) {
+                        currentDimensionDefault = widget.mMatchConstraintDefaultWidth;
+                        nextDimensionDefault = next.mMatchConstraintDefaultWidth;
+                    } else {
+                        currentDimensionDefault = widget.mMatchConstraintDefaultHeight;
+                        nextDimensionDefault = next.mMatchConstraintDefaultHeight;
+                    }
+                    applyEquality = ((currentDimensionDefault == MATCH_CONSTRAINT_SPREAD)
+                            || (currentDimensionDefault == MATCH_CONSTRAINT_RATIO)) &&
+                            ((nextDimensionDefault == MATCH_CONSTRAINT_SPREAD)
+                                    || (nextDimensionDefault == MATCH_CONSTRAINT_RATIO));
+
+                    if (applyEquality) {
+                        ArrayRow row = system.createRow();
+                        row.createRowEqualMatchDimensions(currentWeight, totalWeights, nextWeight,
+                                begin, end, nextBegin, nextEnd);
+                        system.addConstraint(row);
+                    }
+
                 }
                 widget = next;
             }
