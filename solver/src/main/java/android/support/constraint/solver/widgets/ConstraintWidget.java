@@ -2151,13 +2151,18 @@ public class ConstraintWidget {
         boolean wrapContent = (mListDimensionBehaviors[DIMENSION_HORIZONTAL] == WRAP_CONTENT)
                 && (this instanceof ConstraintWidgetContainer);
 
+        boolean applyPosition = true;
+        if (mCenter.isConnected()) {
+            applyPosition = false;
+        }
+
         if (mHorizontalResolution != DIRECT) {
             SolverVariable parentMax = mParent != null ? system.createObjectVariable(mParent.mRight) : null;
             SolverVariable parentMin = mParent != null ? system.createObjectVariable(mParent.mLeft) : null;
                 applyConstraints(system, horizontalParentWrapContent, parentMin, parentMax, mListDimensionBehaviors[DIMENSION_HORIZONTAL], wrapContent,
                         mLeft, mRight, mX, width,
                         mMinWidth, mMaxDimension[HORIZONTAL], mHorizontalBiasPercent, useHorizontalRatio,
-                        inHorizontalChain, mMatchConstraintDefaultWidth, mMatchConstraintMinWidth, mMatchConstraintMaxWidth, mMatchConstraintPercentWidth, true);
+                        inHorizontalChain, mMatchConstraintDefaultWidth, mMatchConstraintMinWidth, mMatchConstraintMaxWidth, mMatchConstraintPercentWidth, applyPosition);
         }
 
         if (mVerticalResolution == DIRECT) {
@@ -2176,7 +2181,6 @@ public class ConstraintWidget {
         boolean useVerticalRatio = useRatio && (mResolvedDimensionRatioSide == VERTICAL
                 || mResolvedDimensionRatioSide == UNKNOWN);
 
-        boolean applyPosition = true;
         if (mBaselineDistance > 0) {
             system.addEquality(baseline, top, getBaselineDistance(), SolverVariable.STRENGTH_FIXED);
             if (mBaseline.mTarget != null) {
@@ -2425,6 +2429,7 @@ public class ConstraintWidget {
                         + ", not positioning (applyPosition: " + applyPosition + " inChain: " + inChain + ")");
             }
             if (numConnections < 2 && parentWrapContent) {
+                system.addGreaterThan(begin, parentMin, 0, SolverVariable.STRENGTH_FIXED);
                 system.addGreaterThan(parentMax, end, 0, SolverVariable.STRENGTH_FIXED);
             }
             return;
