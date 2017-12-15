@@ -842,6 +842,19 @@ public class ConstraintLayout extends ViewGroup {
                 layoutParams.helped = false;
             } else {
                 widget.reset();
+                if (isInEditMode) {
+                    // In design mode, let's make sure we keep track of the ids; in Studio, a build step
+                    // might not have been done yet, so asking the system for ids can break. So to be safe,
+                    // we save the current ids, which helpers can ask for.
+                    try {
+                        String IdAsString = getResources().getResourceName(child.getId());
+                        setDesignInformation(DESIGN_INFO_ID, IdAsString, child.getId());
+                        IdAsString = IdAsString.substring(IdAsString.indexOf("id/") + 3);
+                        getTargetWidget(child.getId()).setDebugName(IdAsString);
+                    } catch (Resources.NotFoundException e) {
+                        // nothing
+                    }
+                }
             }
             widget.setVisibility(child.getVisibility());
             if (layoutParams.isInPlaceholder) {
