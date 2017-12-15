@@ -31,6 +31,7 @@ import android.support.constraint.solver.widgets.Guideline;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -2070,6 +2071,9 @@ public class ConstraintLayout extends ViewGroup {
             this.bottomToTop = source.bottomToTop;
             this.bottomToBottom = source.bottomToBottom;
             this.baselineToBaseline = source.baselineToBaseline;
+            this.circleConstraint = source.circleConstraint;
+            this.circleRadius = source.circleRadius;
+            this.circleAngle = source.circleAngle;
             this.startToEnd = source.startToEnd;
             this.startToStart = source.startToStart;
             this.endToStart = source.endToStart;
@@ -2097,8 +2101,8 @@ public class ConstraintLayout extends ViewGroup {
             this.matchConstraintMaxWidth = source.matchConstraintMaxWidth;
             this.matchConstraintMinHeight = source.matchConstraintMinHeight;
             this.matchConstraintMaxHeight = source.matchConstraintMaxHeight;
-            this.matchConstraintPercentHeight = source.matchConstraintPercentHeight;
             this.matchConstraintPercentWidth = source.matchConstraintPercentWidth;
+            this.matchConstraintPercentHeight = source.matchConstraintPercentHeight;
             this.editorAbsoluteX = source.editorAbsoluteX;
             this.editorAbsoluteY = source.editorAbsoluteY;
             this.orientation = source.orientation;
@@ -2116,243 +2120,457 @@ public class ConstraintLayout extends ViewGroup {
             this.widget = source.widget;
         }
 
+        private static class Table {
+            public static final int UNUSED = 0;
+            public static final int ANDROID_ORIENTATION = 1;
+            public static final int LAYOUT_CONSTRAINT_CIRCLE = 2;
+            public static final int LAYOUT_CONSTRAINT_CIRCLE_RADIUS = 3;
+            public static final int LAYOUT_CONSTRAINT_CIRCLE_ANGLE = 4;
+            public static final int LAYOUT_CONSTRAINT_GUIDE_BEGIN = 5;
+            public static final int LAYOUT_CONSTRAINT_GUIDE_END = 6;
+            public static final int LAYOUT_CONSTRAINT_GUIDE_PERCENT = 7;
+            public static final int LAYOUT_CONSTRAINT_LEFT_TO_LEFT_OF = 8;
+            public static final int LAYOUT_CONSTRAINT_LEFT_TO_RIGHT_OF = 9;
+            public static final int LAYOUT_CONSTRAINT_RIGHT_TO_LEFT_OF = 10;
+            public static final int LAYOUT_CONSTRAINT_RIGHT_TO_RIGHT_OF = 11;
+            public static final int LAYOUT_CONSTRAINT_TOP_TO_TOP_OF = 12;
+            public static final int LAYOUT_CONSTRAINT_TOP_TO_BOTTOM_OF = 13;
+            public static final int LAYOUT_CONSTRAINT_BOTTOM_TO_TOP_OF = 14;
+            public static final int LAYOUT_CONSTRAINT_BOTTOM_TO_BOTTOM_OF = 15;
+            public static final int LAYOUT_CONSTRAINT_BASELINE_TO_BASELINE_OF = 16;
+            public static final int LAYOUT_CONSTRAINT_START_TO_END_OF = 17;
+            public static final int LAYOUT_CONSTRAINT_START_TO_START_OF = 18;
+            public static final int LAYOUT_CONSTRAINT_END_TO_START_OF = 19;
+            public static final int LAYOUT_CONSTRAINT_END_TO_END_OF = 20;
+            public static final int LAYOUT_GONE_MARGIN_LEFT = 21;
+            public static final int LAYOUT_GONE_MARGIN_TOP = 22;
+            public static final int LAYOUT_GONE_MARGIN_RIGHT = 23;
+            public static final int LAYOUT_GONE_MARGIN_BOTTOM = 24;
+            public static final int LAYOUT_GONE_MARGIN_START = 25;
+            public static final int LAYOUT_GONE_MARGIN_END = 26;
+            public static final int LAYOUT_CONSTRAINED_WIDTH = 27;
+            public static final int LAYOUT_CONSTRAINED_HEIGHT = 28;
+            public static final int LAYOUT_CONSTRAINT_HORIZONTAL_BIAS = 29;
+            public static final int LAYOUT_CONSTRAINT_VERTICAL_BIAS = 30;
+            public static final int LAYOUT_CONSTRAINT_WIDTH_DEFAULT = 31;
+            public static final int LAYOUT_CONSTRAINT_HEIGHT_DEFAULT = 32;
+            public static final int LAYOUT_CONSTRAINT_WIDTH_MIN = 33;
+            public static final int LAYOUT_CONSTRAINT_WIDTH_MAX = 34;
+            public static final int LAYOUT_CONSTRAINT_WIDTH_PERCENT = 35;
+            public static final int LAYOUT_CONSTRAINT_HEIGHT_MIN = 36;
+            public static final int LAYOUT_CONSTRAINT_HEIGHT_MAX = 37;
+            public static final int LAYOUT_CONSTRAINT_HEIGHT_PERCENT = 38;
+            public static final int LAYOUT_CONSTRAINT_LEFT_CREATOR = 39;
+            public static final int LAYOUT_CONSTRAINT_TOP_CREATOR = 40;
+            public static final int LAYOUT_CONSTRAINT_RIGHT_CREATOR = 41;
+            public static final int LAYOUT_CONSTRAINT_BOTTOM_CREATOR = 42;
+            public static final int LAYOUT_CONSTRAINT_BASELINE_CREATOR = 43;
+            public static final int LAYOUT_CONSTRAINT_DIMENSION_RATIO = 44;
+            public static final int LAYOUT_CONSTRAINT_HORIZONTAL_WEIGHT = 45;
+            public static final int LAYOUT_CONSTRAINT_VERTICAL_WEIGHT = 46;
+            public static final int LAYOUT_CONSTRAINT_HORIZONTAL_CHAINSTYLE = 47;
+            public static final int LAYOUT_CONSTRAINT_VERTICAL_CHAINSTYLE = 48;
+            public static final int LAYOUT_EDITOR_ABSOLUTEX = 49;
+            public static final int LAYOUT_EDITOR_ABSOLUTEY = 50;
+            public final static SparseIntArray map = new SparseIntArray();
+
+            static {
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintLeft_toLeftOf, LAYOUT_CONSTRAINT_LEFT_TO_LEFT_OF);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintLeft_toRightOf, LAYOUT_CONSTRAINT_LEFT_TO_RIGHT_OF);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintRight_toLeftOf, LAYOUT_CONSTRAINT_RIGHT_TO_LEFT_OF);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintRight_toRightOf, LAYOUT_CONSTRAINT_RIGHT_TO_RIGHT_OF);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintTop_toTopOf, LAYOUT_CONSTRAINT_TOP_TO_TOP_OF);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintTop_toBottomOf, LAYOUT_CONSTRAINT_TOP_TO_BOTTOM_OF);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintBottom_toTopOf, LAYOUT_CONSTRAINT_BOTTOM_TO_TOP_OF);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintBottom_toBottomOf, LAYOUT_CONSTRAINT_BOTTOM_TO_BOTTOM_OF);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintBaseline_toBaselineOf, LAYOUT_CONSTRAINT_BASELINE_TO_BASELINE_OF);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintCircle, LAYOUT_CONSTRAINT_CIRCLE);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintCircleRadius, LAYOUT_CONSTRAINT_CIRCLE_RADIUS);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintCircleAngle, LAYOUT_CONSTRAINT_CIRCLE_ANGLE);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_editor_absoluteX, LAYOUT_EDITOR_ABSOLUTEX);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_editor_absoluteY, LAYOUT_EDITOR_ABSOLUTEY);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintGuide_begin, LAYOUT_CONSTRAINT_GUIDE_BEGIN);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintGuide_end, LAYOUT_CONSTRAINT_GUIDE_END);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintGuide_percent, LAYOUT_CONSTRAINT_GUIDE_PERCENT);
+                map.append(R.styleable.ConstraintLayout_Layout_android_orientation, ANDROID_ORIENTATION);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintStart_toEndOf, LAYOUT_CONSTRAINT_START_TO_END_OF);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintStart_toStartOf, LAYOUT_CONSTRAINT_START_TO_START_OF);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintEnd_toStartOf, LAYOUT_CONSTRAINT_END_TO_START_OF);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintEnd_toEndOf, LAYOUT_CONSTRAINT_END_TO_END_OF);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_goneMarginLeft, LAYOUT_GONE_MARGIN_LEFT);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_goneMarginTop, LAYOUT_GONE_MARGIN_TOP);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_goneMarginRight, LAYOUT_GONE_MARGIN_RIGHT);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_goneMarginBottom, LAYOUT_GONE_MARGIN_BOTTOM);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_goneMarginStart, LAYOUT_GONE_MARGIN_START);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_goneMarginEnd, LAYOUT_GONE_MARGIN_END);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_bias, LAYOUT_CONSTRAINT_HORIZONTAL_BIAS);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintVertical_bias, LAYOUT_CONSTRAINT_VERTICAL_BIAS);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintDimensionRatio, LAYOUT_CONSTRAINT_DIMENSION_RATIO);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_weight, LAYOUT_CONSTRAINT_HORIZONTAL_WEIGHT);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintVertical_weight, LAYOUT_CONSTRAINT_VERTICAL_WEIGHT);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_chainStyle, LAYOUT_CONSTRAINT_HORIZONTAL_CHAINSTYLE);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintVertical_chainStyle, LAYOUT_CONSTRAINT_VERTICAL_CHAINSTYLE);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constrainedWidth, LAYOUT_CONSTRAINED_WIDTH);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constrainedHeight, LAYOUT_CONSTRAINED_HEIGHT);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintWidth_default, LAYOUT_CONSTRAINT_WIDTH_DEFAULT);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintHeight_default, LAYOUT_CONSTRAINT_HEIGHT_DEFAULT);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintWidth_min, LAYOUT_CONSTRAINT_WIDTH_MIN);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintWidth_max, LAYOUT_CONSTRAINT_WIDTH_MAX);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintWidth_percent, LAYOUT_CONSTRAINT_WIDTH_PERCENT);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintHeight_min, LAYOUT_CONSTRAINT_HEIGHT_MIN);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintHeight_max, LAYOUT_CONSTRAINT_HEIGHT_MAX);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintHeight_percent, LAYOUT_CONSTRAINT_HEIGHT_PERCENT);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintLeft_creator, LAYOUT_CONSTRAINT_LEFT_CREATOR);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintTop_creator, LAYOUT_CONSTRAINT_TOP_CREATOR);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintRight_creator, LAYOUT_CONSTRAINT_RIGHT_CREATOR);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintBottom_creator, LAYOUT_CONSTRAINT_BOTTOM_CREATOR);
+                map.append(R.styleable.ConstraintLayout_Layout_layout_constraintBaseline_creator, LAYOUT_CONSTRAINT_BASELINE_CREATOR);
+            }
+        }
+
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
-
             TypedArray a = c.obtainStyledAttributes(attrs, R.styleable.ConstraintLayout_Layout);
             final int N = a.getIndexCount();
             for (int i = 0; i < N; i++) {
                 int attr = a.getIndex(i);
-                if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_toLeftOf) {
-                    leftToLeft = a.getResourceId(attr, leftToLeft);
-                    if (leftToLeft == UNSET) {
-                        leftToLeft = a.getInt(attr, UNSET);
+                int look = Table.map.get(attr);
+                switch (look) {
+                    case Table.UNUSED: {
+                        // Skip
+                        break;
                     }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_toRightOf) {
-                    leftToRight = a.getResourceId(attr, leftToRight);
-                    if (leftToRight == UNSET) {
-                        leftToRight = a.getInt(attr, UNSET);
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_toLeftOf) {
-                    rightToLeft = a.getResourceId(attr, rightToLeft);
-                    if (rightToLeft == UNSET) {
-                        rightToLeft = a.getInt(attr, UNSET);
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_toRightOf) {
-                    rightToRight = a.getResourceId(attr, rightToRight);
-                    if (rightToRight == UNSET) {
-                        rightToRight = a.getInt(attr, UNSET);
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_toTopOf) {
-                    topToTop = a.getResourceId(attr, topToTop);
-                    if (topToTop == UNSET) {
-                        topToTop = a.getInt(attr, UNSET);
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_toBottomOf) {
-                    topToBottom = a.getResourceId(attr, topToBottom);
-                    if (topToBottom == UNSET) {
-                        topToBottom = a.getInt(attr, UNSET);
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBottom_toTopOf) {
-                    bottomToTop = a.getResourceId(attr, bottomToTop);
-                    if (bottomToTop == UNSET) {
-                        bottomToTop = a.getInt(attr, UNSET);
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBottom_toBottomOf) {
-                    bottomToBottom = a.getResourceId(attr, bottomToBottom);
-                    if (bottomToBottom == UNSET) {
-                        bottomToBottom = a.getInt(attr, UNSET);
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBaseline_toBaselineOf) {
-                    baselineToBaseline = a.getResourceId(attr, baselineToBaseline);
-                    if (baselineToBaseline == UNSET) {
-                        baselineToBaseline = a.getInt(attr, UNSET);
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintCircle) {
-                    circleConstraint = a.getResourceId(attr, circleConstraint);
-                    if (circleConstraint == UNSET) {
-                        circleConstraint = a.getInt(attr, UNSET);
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintCircleRadius) {
-                    circleRadius = a.getDimensionPixelSize(attr, circleRadius);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintCircleAngle) {
-                    circleAngle = a.getFloat(attr, circleAngle) % 360;
-                    if (circleAngle < 0) {
-                        circleAngle = (360 - circleAngle) % 360;
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_editor_absoluteX) {
-                    editorAbsoluteX = a.getDimensionPixelOffset(attr, editorAbsoluteX);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_editor_absoluteY) {
-                    editorAbsoluteY = a.getDimensionPixelOffset(attr, editorAbsoluteY);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintGuide_begin) {
-                    guideBegin = a.getDimensionPixelOffset(attr, guideBegin);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintGuide_end) {
-                    guideEnd = a.getDimensionPixelOffset(attr, guideEnd);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintGuide_percent) {
-                    guidePercent = a.getFloat(attr, guidePercent);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_android_orientation) {
-                    orientation = a.getInt(attr, orientation);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintStart_toEndOf) {
-                    startToEnd = a.getResourceId(attr, startToEnd);
-                    if (startToEnd == UNSET) {
-                        startToEnd = a.getInt(attr, UNSET);
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintStart_toStartOf) {
-                    startToStart = a.getResourceId(attr, startToStart);
-                    if (startToStart == UNSET) {
-                        startToStart = a.getInt(attr, UNSET);
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintEnd_toStartOf) {
-                    endToStart = a.getResourceId(attr, endToStart);
-                    if (endToStart == UNSET) {
-                        endToStart = a.getInt(attr, UNSET);
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintEnd_toEndOf) {
-                    endToEnd = a.getResourceId(attr, endToEnd);
-                    if (endToEnd == UNSET) {
-                        endToEnd = a.getInt(attr, UNSET);
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_goneMarginLeft) {
-                    goneLeftMargin = a.getDimensionPixelSize(attr, goneLeftMargin);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_goneMarginTop) {
-                    goneTopMargin = a.getDimensionPixelSize(attr, goneTopMargin);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_goneMarginRight) {
-                    goneRightMargin = a.getDimensionPixelSize(attr, goneRightMargin);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_goneMarginBottom) {
-                    goneBottomMargin = a.getDimensionPixelSize(attr, goneBottomMargin);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_goneMarginStart) {
-                    goneStartMargin = a.getDimensionPixelSize(attr, goneStartMargin);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_goneMarginEnd) {
-                    goneEndMargin = a.getDimensionPixelSize(attr, goneEndMargin);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_bias) {
-                    horizontalBias = a.getFloat(attr, horizontalBias);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_bias) {
-                    verticalBias = a.getFloat(attr, verticalBias);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintDimensionRatio) {
-                    dimensionRatio = a.getString(attr);
-                    dimensionRatioValue = Float.NaN;
-                    dimensionRatioSide = UNSET;
-                    if (dimensionRatio != null) {
-                        int len = dimensionRatio.length();
-                        int commaIndex = dimensionRatio.indexOf(',');
-                        if (commaIndex > 0 && commaIndex < len - 1) {
-                            String dimension = dimensionRatio.substring(0, commaIndex);
-                            if (dimension.equalsIgnoreCase("W")) {
-                                dimensionRatioSide = HORIZONTAL;
-                            } else if (dimension.equalsIgnoreCase("H")) {
-                                dimensionRatioSide = VERTICAL;
-                            }
-                            commaIndex++;
-                        } else {
-                            commaIndex = 0;
+                    case Table.LAYOUT_CONSTRAINT_LEFT_TO_LEFT_OF: {
+                        leftToLeft = a.getResourceId(attr, leftToLeft);
+                        if (leftToLeft == UNSET) {
+                            leftToLeft = a.getInt(attr, UNSET);
                         }
-                        int colonIndex = dimensionRatio.indexOf(':');
-                        if (colonIndex >= 0 && colonIndex < len - 1) {
-                            String nominator = dimensionRatio.substring(commaIndex, colonIndex);
-                            String denominator = dimensionRatio.substring(colonIndex + 1);
-                            if (nominator.length() > 0 && denominator.length() > 0) {
-                                try {
-                                    float nominatorValue = Float.parseFloat(nominator);
-                                    float denominatorValue = Float.parseFloat(denominator);
-                                    if (nominatorValue > 0 && denominatorValue > 0) {
-                                        if (dimensionRatioSide == VERTICAL) {
-                                            dimensionRatioValue = Math.abs(denominatorValue / nominatorValue);
-                                        } else {
-                                            dimensionRatioValue = Math.abs(nominatorValue / denominatorValue);
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_LEFT_TO_RIGHT_OF: {
+                        leftToRight = a.getResourceId(attr, leftToRight);
+                        if (leftToRight == UNSET) {
+                            leftToRight = a.getInt(attr, UNSET);
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_RIGHT_TO_LEFT_OF: {
+                        rightToLeft = a.getResourceId(attr, rightToLeft);
+                        if (rightToLeft == UNSET) {
+                            rightToLeft = a.getInt(attr, UNSET);
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_RIGHT_TO_RIGHT_OF: {
+                        rightToRight = a.getResourceId(attr, rightToRight);
+                        if (rightToRight == UNSET) {
+                            rightToRight = a.getInt(attr, UNSET);
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_TOP_TO_TOP_OF: {
+                        topToTop = a.getResourceId(attr, topToTop);
+                        if (topToTop == UNSET) {
+                            topToTop = a.getInt(attr, UNSET);
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_TOP_TO_BOTTOM_OF: {
+                        topToBottom = a.getResourceId(attr, topToBottom);
+                        if (topToBottom == UNSET) {
+                            topToBottom = a.getInt(attr, UNSET);
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_BOTTOM_TO_TOP_OF: {
+                        bottomToTop = a.getResourceId(attr, bottomToTop);
+                        if (bottomToTop == UNSET) {
+                            bottomToTop = a.getInt(attr, UNSET);
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_BOTTOM_TO_BOTTOM_OF: {
+                        bottomToBottom = a.getResourceId(attr, bottomToBottom);
+                        if (bottomToBottom == UNSET) {
+                            bottomToBottom = a.getInt(attr, UNSET);
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_BASELINE_TO_BASELINE_OF: {
+                        baselineToBaseline = a.getResourceId(attr, baselineToBaseline);
+                        if (baselineToBaseline == UNSET) {
+                            baselineToBaseline = a.getInt(attr, UNSET);
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_CIRCLE: {
+                        circleConstraint = a.getResourceId(attr, circleConstraint);
+                        if (circleConstraint == UNSET) {
+                            circleConstraint = a.getInt(attr, UNSET);
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_CIRCLE_RADIUS: {
+                        circleRadius = a.getDimensionPixelSize(attr, circleRadius);
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_CIRCLE_ANGLE: {
+                        circleAngle = a.getFloat(attr, circleAngle) % 360;
+                        if (circleAngle < 0) {
+                            circleAngle = (360 - circleAngle) % 360;
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_EDITOR_ABSOLUTEX: {
+                        editorAbsoluteX = a.getDimensionPixelOffset(attr, editorAbsoluteX);
+                        break;
+                    }
+                    case Table.LAYOUT_EDITOR_ABSOLUTEY: {
+                        editorAbsoluteY = a.getDimensionPixelOffset(attr, editorAbsoluteY);
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_GUIDE_BEGIN: {
+                        guideBegin = a.getDimensionPixelOffset(attr, guideBegin);
+                        break;
+                    }
+
+                    case Table.LAYOUT_CONSTRAINT_GUIDE_END: {
+                        guideEnd = a.getDimensionPixelOffset(attr, guideEnd);
+                        break;
+                    }
+
+                    case Table.LAYOUT_CONSTRAINT_GUIDE_PERCENT: {
+                        guidePercent = a.getFloat(attr, guidePercent);
+                        break;
+                    }
+
+                    case Table.ANDROID_ORIENTATION: {
+                        orientation = a.getInt(attr, orientation);
+                        break;
+                    }
+
+                    case Table.LAYOUT_CONSTRAINT_START_TO_END_OF: {
+                        startToEnd = a.getResourceId(attr, startToEnd);
+                        if (startToEnd == UNSET) {
+                            startToEnd = a.getInt(attr, UNSET);
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_START_TO_START_OF: {
+                        startToStart = a.getResourceId(attr, startToStart);
+                        if (startToStart == UNSET) {
+                            startToStart = a.getInt(attr, UNSET);
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_END_TO_START_OF: {
+                        endToStart = a.getResourceId(attr, endToStart);
+                        if (endToStart == UNSET) {
+                            endToStart = a.getInt(attr, UNSET);
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_END_TO_END_OF: {
+                        endToEnd = a.getResourceId(attr, endToEnd);
+                        if (endToEnd == UNSET) {
+                            endToEnd = a.getInt(attr, UNSET);
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_GONE_MARGIN_LEFT: {
+                        goneLeftMargin = a.getDimensionPixelSize(attr, goneLeftMargin);
+                        break;
+                    }
+                    case Table.LAYOUT_GONE_MARGIN_TOP: {
+                        goneTopMargin = a.getDimensionPixelSize(attr, goneTopMargin);
+                        break;
+                    }
+                    case Table.LAYOUT_GONE_MARGIN_RIGHT: {
+                        goneRightMargin = a.getDimensionPixelSize(attr, goneRightMargin);
+                        break;
+                    }
+                    case Table.LAYOUT_GONE_MARGIN_BOTTOM: {
+                        goneBottomMargin = a.getDimensionPixelSize(attr, goneBottomMargin);
+                        break;
+                    }
+                    case Table.LAYOUT_GONE_MARGIN_START: {
+                        goneStartMargin = a.getDimensionPixelSize(attr, goneStartMargin);
+                        break;
+                    }
+                    case Table.LAYOUT_GONE_MARGIN_END: {
+                        goneEndMargin = a.getDimensionPixelSize(attr, goneEndMargin);
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_HORIZONTAL_BIAS: {
+                        horizontalBias = a.getFloat(attr, horizontalBias);
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_VERTICAL_BIAS: {
+                        verticalBias = a.getFloat(attr, verticalBias);
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_DIMENSION_RATIO: {
+                        dimensionRatio = a.getString(attr);
+                        dimensionRatioValue = Float.NaN;
+                        dimensionRatioSide = UNSET;
+                        if (dimensionRatio != null) {
+                            int len = dimensionRatio.length();
+                            int commaIndex = dimensionRatio.indexOf(',');
+                            if (commaIndex > 0 && commaIndex < len - 1) {
+                                String dimension = dimensionRatio.substring(0, commaIndex);
+                                if (dimension.equalsIgnoreCase("W")) {
+                                    dimensionRatioSide = HORIZONTAL;
+                                } else if (dimension.equalsIgnoreCase("H")) {
+                                    dimensionRatioSide = VERTICAL;
+                                }
+                                commaIndex++;
+                            } else {
+                                commaIndex = 0;
+                            }
+                            int colonIndex = dimensionRatio.indexOf(':');
+                            if (colonIndex >= 0 && colonIndex < len - 1) {
+                                String nominator = dimensionRatio.substring(commaIndex, colonIndex);
+                                String denominator = dimensionRatio.substring(colonIndex + 1);
+                                if (nominator.length() > 0 && denominator.length() > 0) {
+                                    try {
+                                        float nominatorValue = Float.parseFloat(nominator);
+                                        float denominatorValue = Float.parseFloat(denominator);
+                                        if (nominatorValue > 0 && denominatorValue > 0) {
+                                            if (dimensionRatioSide == VERTICAL) {
+                                                dimensionRatioValue = Math.abs(denominatorValue / nominatorValue);
+                                            } else {
+                                                dimensionRatioValue = Math.abs(nominatorValue / denominatorValue);
+                                            }
                                         }
+                                    } catch (NumberFormatException e) {
+                                        // Ignore
                                     }
-                                } catch (NumberFormatException e) {
-                                    // Ignore
+                                }
+                            } else {
+                                String r = dimensionRatio.substring(commaIndex);
+                                if (r.length() > 0) {
+                                    try {
+                                        dimensionRatioValue = Float.parseFloat(r);
+                                    } catch (NumberFormatException e) {
+                                        // Ignore
+                                    }
                                 }
                             }
-                        } else {
-                            String r = dimensionRatio.substring(commaIndex);
-                            if (r.length() > 0) {
-                                try {
-                                    dimensionRatioValue = Float.parseFloat(r);
-                                } catch (NumberFormatException e) {
-                                    // Ignore
-                                }
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_HORIZONTAL_WEIGHT: {
+                        horizontalWeight = a.getFloat(attr, 0);
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_VERTICAL_WEIGHT: {
+                        verticalWeight = a.getFloat(attr, 0);
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_HORIZONTAL_CHAINSTYLE: {
+                        horizontalChainStyle = a.getInt(attr, CHAIN_SPREAD);
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_VERTICAL_CHAINSTYLE: {
+                        verticalChainStyle = a.getInt(attr, CHAIN_SPREAD);
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINED_WIDTH: {
+                        constrainedWidth = a.getBoolean(attr, constrainedWidth);
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINED_HEIGHT: {
+                        constrainedHeight = a.getBoolean(attr, constrainedHeight);
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_WIDTH_DEFAULT: {
+                        matchConstraintDefaultWidth = a.getInt(attr, MATCH_CONSTRAINT_SPREAD);
+                        if (matchConstraintDefaultWidth == MATCH_CONSTRAINT_WRAP) {
+                            Log.e(TAG, "layout_constraintWidth_default=\"wrap\" is deprecated." +
+                                    "\nUse layout_width=\"WRAP_CONTENT\" and layout_constrainedWidth=\"true\" instead.");
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_HEIGHT_DEFAULT: {
+                        matchConstraintDefaultHeight = a.getInt(attr, MATCH_CONSTRAINT_SPREAD);
+                        if (matchConstraintDefaultHeight == MATCH_CONSTRAINT_WRAP) {
+                            Log.e(TAG, "layout_constraintHeight_default=\"wrap\" is deprecated." +
+                                    "\nUse layout_height=\"WRAP_CONTENT\" and layout_constrainedHeight=\"true\" instead.");
+                        }
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_WIDTH_MIN: {
+                        try {
+                            matchConstraintMinWidth = a.getDimensionPixelSize(attr, matchConstraintMinWidth);
+                        } catch (Exception e) {
+                            int value = a.getInt(attr, matchConstraintMinWidth);
+                            if (value == WRAP_CONTENT) {
+                                matchConstraintMinWidth = WRAP_CONTENT;
                             }
                         }
+                        break;
                     }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_weight) {
-                    horizontalWeight = a.getFloat(attr, 0);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_weight) {
-                    verticalWeight = a.getFloat(attr, 0);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHorizontal_chainStyle) {
-                    horizontalChainStyle = a.getInt(attr, CHAIN_SPREAD);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintVertical_chainStyle) {
-                    verticalChainStyle = a.getInt(attr, CHAIN_SPREAD);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constrainedWidth) {
-                    constrainedWidth = a.getBoolean(attr, constrainedWidth);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constrainedHeight) {
-                    constrainedHeight = a.getBoolean(attr, constrainedHeight);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_default) {
-                    matchConstraintDefaultWidth = a.getInt(attr, MATCH_CONSTRAINT_SPREAD);
-                    System.out.println("matchConstraintDefault width: " + matchConstraintDefaultWidth);
-                    if (matchConstraintDefaultWidth == MATCH_CONSTRAINT_WRAP) {
-                        Log.e(TAG, "layout_constraintWidth_default=\"wrap\" is deprecated." +
-                                "\nUse layout_width=\"WRAP_CONTENT\" and layout_constrainedWidth=\"true\" instead.");
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_default) {
-                    matchConstraintDefaultHeight = a.getInt(attr, MATCH_CONSTRAINT_SPREAD);
-                    if (matchConstraintDefaultHeight == MATCH_CONSTRAINT_WRAP) {
-                        Log.e(TAG, "layout_constraintHeight_default=\"wrap\" is deprecated." +
-                                "\nUse layout_height=\"WRAP_CONTENT\" and layout_constrainedHeight=\"true\" instead.");
-                    }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_min) {
-                    try {
-                        matchConstraintMinWidth = a.getDimensionPixelSize(attr, matchConstraintMinWidth);
-                    } catch (Exception e) {
-                        int value = a.getInt(attr, matchConstraintMinWidth);
-                        if (value == WRAP_CONTENT) {
-                            matchConstraintMinWidth = WRAP_CONTENT;
+                    case Table.LAYOUT_CONSTRAINT_WIDTH_MAX: {
+                        try {
+                            matchConstraintMaxWidth = a.getDimensionPixelSize(attr, matchConstraintMaxWidth);
+                        } catch (Exception e) {
+                            int value = a.getInt(attr, matchConstraintMaxWidth);
+                            if (value == WRAP_CONTENT) {
+                                matchConstraintMaxWidth = WRAP_CONTENT;
+                            }
                         }
+                        break;
                     }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_max) {
-                    try {
-                        matchConstraintMaxWidth = a.getDimensionPixelSize(attr, matchConstraintMaxWidth);
-                    } catch (Exception e) {
-                        int value = a.getInt(attr, matchConstraintMaxWidth);
-                        if (value == WRAP_CONTENT) {
-                            matchConstraintMaxWidth = WRAP_CONTENT;
+                    case Table.LAYOUT_CONSTRAINT_WIDTH_PERCENT: {
+                        matchConstraintPercentWidth = Math.max(0, a.getFloat(attr, matchConstraintPercentWidth));
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_HEIGHT_MIN: {
+                        try {
+                            matchConstraintMinHeight = a.getDimensionPixelSize(attr, matchConstraintMinHeight);
+                        } catch (Exception e) {
+                            int value = a.getInt(attr, matchConstraintMinHeight);
+                            if (value == WRAP_CONTENT) {
+                                matchConstraintMinHeight = WRAP_CONTENT;
+                            }
                         }
+                        break;
                     }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_percent) {
-                    matchConstraintPercentWidth = Math.max(0, a.getFloat(attr, matchConstraintPercentWidth));
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_min) {
-                    try {
-                        matchConstraintMinHeight = a.getDimensionPixelSize(attr, matchConstraintMinHeight);
-                    } catch (Exception e) {
-                        int value = a.getInt(attr, matchConstraintMinHeight);
-                        if (value == WRAP_CONTENT) {
-                            matchConstraintMinHeight = WRAP_CONTENT;
+                    case Table.LAYOUT_CONSTRAINT_HEIGHT_MAX: {
+                        try {
+                            matchConstraintMaxHeight = a.getDimensionPixelSize(attr, matchConstraintMaxHeight);
+                        } catch (Exception e) {
+                            int value = a.getInt(attr, matchConstraintMaxHeight);
+                            if (value == WRAP_CONTENT) {
+                                matchConstraintMaxHeight = WRAP_CONTENT;
+                            }
                         }
+                        break;
                     }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_max) {
-                    try {
-                        matchConstraintMaxHeight = a.getDimensionPixelSize(attr, matchConstraintMaxHeight);
-                    } catch (Exception e) {
-                        int value = a.getInt(attr, matchConstraintMaxHeight);
-                        if (value == WRAP_CONTENT) {
-                            matchConstraintMaxHeight = WRAP_CONTENT;
-                        }
+                    case Table.LAYOUT_CONSTRAINT_HEIGHT_PERCENT: {
+                        matchConstraintPercentHeight = Math.max(0, a.getFloat(attr, matchConstraintPercentHeight));
+                        break;
                     }
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_percent) {
-                    matchConstraintPercentHeight = Math.max(0, a.getFloat(attr, matchConstraintPercentHeight));
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintLeft_creator) {
-                    // Skip
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintTop_creator) {
-                    // Skip
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintRight_creator) {
-                    // Skip
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBottom_creator) {
-                    // Skip
-                } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintBaseline_creator) {
-                    // Skip
-                } else {
-                    // Skip
+                    case Table.LAYOUT_CONSTRAINT_LEFT_CREATOR: {
+                        // Skip
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_TOP_CREATOR: {
+                        // Skip
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_RIGHT_CREATOR: {
+                        // Skip
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_BOTTOM_CREATOR: {
+                        // Skip
+                        break;
+                    }
+                    case Table.LAYOUT_CONSTRAINT_BASELINE_CREATOR: {
+                        // Skip
+                        break;
+                    }
                 }
             }
             a.recycle();
