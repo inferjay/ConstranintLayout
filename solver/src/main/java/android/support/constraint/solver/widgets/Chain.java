@@ -275,9 +275,9 @@ class Chain {
             if (beginTarget != null && endTarget != null) {
                 float bias = 0.5f;
                 if (orientation == ConstraintWidget.HORIZONTAL) {
-                    bias = first.mHorizontalBiasPercent;
+                    bias = head.mHorizontalBiasPercent;
                 } else {
-                    bias = first.mVerticalBiasPercent;
+                    bias = head.mVerticalBiasPercent;
                 }
                 int beginMargin = begin.getMargin();
                 if (lastVisibleWidget == null) {
