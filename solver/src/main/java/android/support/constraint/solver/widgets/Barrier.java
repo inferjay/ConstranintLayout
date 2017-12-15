@@ -57,13 +57,27 @@ public class Barrier extends Helper {
         } else {
             return;
         }
+        // We have to handle the case where some of the elements referenced in the barrier are set as
+        // match_constraint; we have to take it in account to set the strength of the barrier.
+        boolean hasMatchConstraintWidgets = false;
+        for (int i = 0; i < mWidgetsCount; i++) {
+            if ((mBarrierType == LEFT || mBarrierType == RIGHT)
+                && mWidgets[i].getHorizontalDimensionBehaviour() == DimensionBehaviour.MATCH_CONSTRAINT) {
+                hasMatchConstraintWidgets = true;
+                break;
+            } else if ((mBarrierType == TOP || mBarrierType == BOTTOM)
+                    && mWidgets[i].getVerticalDimensionBehaviour() == DimensionBehaviour.MATCH_CONSTRAINT) {
+                hasMatchConstraintWidgets = true;
+                break;
+            }
+        }
         for (int i = 0; i < mWidgetsCount; i++) {
             SolverVariable target = system.createObjectVariable(mWidgets[i].mListAnchors[mBarrierType]);
             mWidgets[i].mListAnchors[mBarrierType].mSolverVariable = target;
             if (mBarrierType == LEFT || mBarrierType == TOP) {
-                system.addLowerBarrier(position.mSolverVariable, target);
+                system.addLowerBarrier(position.mSolverVariable, target, hasMatchConstraintWidgets);
             } else {
-                system.addGreaterBarrier(position.mSolverVariable, target);
+                system.addGreaterBarrier(position.mSolverVariable, target, hasMatchConstraintWidgets);
             }
         }
         if (mBarrierType == LEFT) {
