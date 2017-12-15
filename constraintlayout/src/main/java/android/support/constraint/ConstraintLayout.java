@@ -29,6 +29,7 @@ import android.support.constraint.solver.widgets.ConstraintWidget;
 import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
 import android.support.constraint.solver.widgets.Guideline;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -454,7 +455,7 @@ public class ConstraintLayout extends ViewGroup {
     static final boolean ALLOWS_EMBEDDED = false;
 
     /** @hide */
-    public static final String VERSION="ConstraintLayout-1.1.0-beta3";
+    public static final String VERSION="ConstraintLayout-1.1.0-beta4";
     private static final String TAG = "ConstraintLayout";
 
     private static final boolean USE_CONSTRAINTS_HELPER = true;
@@ -2278,14 +2279,14 @@ public class ConstraintLayout extends ViewGroup {
                     matchConstraintDefaultWidth = a.getInt(attr, MATCH_CONSTRAINT_SPREAD);
                     System.out.println("matchConstraintDefault width: " + matchConstraintDefaultWidth);
                     if (matchConstraintDefaultWidth == MATCH_CONSTRAINT_WRAP) {
-                        System.err.println("layout_constraintWidth_default=\"wrap\" is deprecated." +
-                                "\nUse layout_width=\"WRAP_CONTENT\" and layout_constrainedWidth\"=true\" instead.");
+                        Log.e(TAG, "layout_constraintWidth_default=\"wrap\" is deprecated." +
+                                "\nUse layout_width=\"WRAP_CONTENT\" and layout_constrainedWidth=\"true\" instead.");
                     }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintHeight_default) {
                     matchConstraintDefaultHeight = a.getInt(attr, MATCH_CONSTRAINT_SPREAD);
                     if (matchConstraintDefaultHeight == MATCH_CONSTRAINT_WRAP) {
-                        System.err.println("layout_constraintHeight_default=\"wrap\" is deprecated." +
-                                "\nUse layout_height=\"WRAP_CONTENT\" and layout_constrainedHeight\"=true\" instead.");
+                        Log.e(TAG, "layout_constraintHeight_default=\"wrap\" is deprecated." +
+                                "\nUse layout_height=\"WRAP_CONTENT\" and layout_constrainedHeight=\"true\" instead.");
                     }
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_constraintWidth_min) {
                     try {
