@@ -108,6 +108,7 @@ public abstract class ConstraintHelper extends View {
      * @return ids referenced
      */
     public void setReferencedIds(int[] ids) {
+        mCount = 0;
         for (int i = 0; i < ids.length; i++) {
             setTag(ids[i], null);
         }
