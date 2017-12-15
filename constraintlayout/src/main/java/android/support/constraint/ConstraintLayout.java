@@ -1220,6 +1220,10 @@ public class ConstraintLayout extends ViewGroup {
         mLayoutWidget.setMaxWidth(mMaxWidth);
         mLayoutWidget.setMaxHeight(mMaxHeight);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            mLayoutWidget.setRtl(getLayoutDirection() == View.LAYOUT_DIRECTION_RTL);
+        }
+
         setSelfDimensionBehaviour(widthMeasureSpec, heightMeasureSpec);
         int startingWidth = mLayoutWidget.getWidth();
         int startingHeight = mLayoutWidget.getHeight();
@@ -1265,7 +1269,7 @@ public class ConstraintLayout extends ViewGroup {
                 if (child == null) {
                     continue;
                 }
-                ConstraintLayout.LayoutParams params = (LayoutParams) child.getLayoutParams();
+                LayoutParams params = (LayoutParams) child.getLayoutParams();
                 if (params.isHelper || params.isGuideline) {
                     continue;
                 }

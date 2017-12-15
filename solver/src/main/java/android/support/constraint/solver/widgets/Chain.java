@@ -89,14 +89,41 @@ class Chain {
         boolean isChainSpreadInside = false;
         boolean isChainPacked = false;
 
+        ConstraintWidget head = first;
+        if (container.isRtl()) {
+            // find the last widget
+            while (!done) {
+                // go to the next widget
+                ConstraintAnchor nextAnchor = widget.mListAnchors[offset + 1].mTarget;
+                if (nextAnchor != null) {
+                    next = nextAnchor.mOwner;
+                    if (next.mListAnchors[offset].mTarget == null
+                            || next.mListAnchors[offset].mTarget.mOwner != widget) {
+                        next = null;
+                    }
+                } else {
+                    next = null;
+                }
+                if (next != null) {
+                    widget = next;
+                } else {
+                    done = true;
+                }
+            }
+            head = widget;
+            widget = first;
+            next = null;
+            done = false;
+        }
+
         if (orientation == ConstraintWidget.HORIZONTAL) {
-            isChainSpread = first.mHorizontalChainStyle == ConstraintWidget.CHAIN_SPREAD;
-            isChainSpreadInside = first.mHorizontalChainStyle == ConstraintWidget.CHAIN_SPREAD_INSIDE;
-            isChainPacked = first.mHorizontalChainStyle == ConstraintWidget.CHAIN_PACKED;
+            isChainSpread = head.mHorizontalChainStyle == ConstraintWidget.CHAIN_SPREAD;
+            isChainSpreadInside = head.mHorizontalChainStyle == ConstraintWidget.CHAIN_SPREAD_INSIDE;
+            isChainPacked = head.mHorizontalChainStyle == ConstraintWidget.CHAIN_PACKED;
         } else {
-            isChainSpread = first.mVerticalChainStyle == ConstraintWidget.CHAIN_SPREAD;
-            isChainSpreadInside = first.mVerticalChainStyle == ConstraintWidget.CHAIN_SPREAD_INSIDE;
-            isChainPacked = first.mVerticalChainStyle == ConstraintWidget.CHAIN_PACKED;
+            isChainSpread = head.mVerticalChainStyle == ConstraintWidget.CHAIN_SPREAD;
+            isChainSpreadInside = head.mVerticalChainStyle == ConstraintWidget.CHAIN_SPREAD_INSIDE;
+            isChainPacked = head.mVerticalChainStyle == ConstraintWidget.CHAIN_PACKED;
         }
 
         // The first traversal will:
