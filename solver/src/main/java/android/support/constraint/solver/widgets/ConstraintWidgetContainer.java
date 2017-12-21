@@ -35,6 +35,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     private static final boolean DEBUG = FULL_DEBUG;
     private static final boolean DEBUG_LAYOUT = false;
 
+    private boolean mIsRtl = false;
+
     protected LinearSystem mSystem = new LinearSystem();
 
     private Snapshot mSnapshot;
@@ -226,6 +228,22 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         mPaddingTop = top;
         mPaddingRight = right;
         mPaddingBottom = bottom;
+    }
+
+    /**
+     * Set the rtl status. This has implications for Chains.
+     * @param isRtl true if we are in RTL.
+     */
+    public void setRtl(boolean isRtl) {
+        mIsRtl = isRtl;
+    }
+
+    /**
+     * Returns the rtl status.
+     * @return true if in RTL, false otherwise.
+     */
+    public boolean isRtl() {
+        return mIsRtl;
     }
 
     /**

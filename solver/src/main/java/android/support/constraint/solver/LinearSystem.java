@@ -995,7 +995,7 @@ public class LinearSystem {
         addConstraint(row);
     }
 
-    public void addGreaterBarrier(SolverVariable a, SolverVariable b) {
+    public void addGreaterBarrier(SolverVariable a, SolverVariable b, boolean hasMatchConstraintWidgets) {
         if (DEBUG) {
             System.out.println("-> Barrier " + a + " >= " + b);
         }
@@ -1004,7 +1004,12 @@ public class LinearSystem {
         slack.strength = SolverVariable.STRENGTH_NONE;
         row.createRowGreaterThan(a, b, slack, 0);
         float slackValue = row.variables.get(slack);
-        addSingleError(row, (int) (-1 * slackValue), SolverVariable.STRENGTH_EQUALITY);
+        if (hasMatchConstraintWidgets) {
+            // We set it to low, as constrained widgets (0d) will have a strength of low in default wrap
+            addSingleError(row, (int) (-1 * slackValue), SolverVariable.STRENGTH_LOW);
+        } else {
+            addSingleError(row, (int) (-1 * slackValue), SolverVariable.STRENGTH_BARRIER);
+        }
         addConstraint(row);
     }
 
@@ -1030,7 +1035,7 @@ public class LinearSystem {
         addConstraint(row);
     }
 
-    public void addLowerBarrier(SolverVariable a, SolverVariable b) {
+    public void addLowerBarrier(SolverVariable a, SolverVariable b, boolean hasMatchConstraintWidgets) {
         if (DEBUG) {
             System.out.println("-> Barrier " + a + " <= " + b);
         }
@@ -1039,7 +1044,12 @@ public class LinearSystem {
         slack.strength = SolverVariable.STRENGTH_NONE;
         row.createRowLowerThan(a, b, slack, 0);
         float slackValue = row.variables.get(slack);
-        addSingleError(row, (int) (-1 * slackValue), SolverVariable.STRENGTH_EQUALITY);
+        if (hasMatchConstraintWidgets) {
+            // We set it to low, as constrained widgets (0d) will have a strength of low in default wrap
+            addSingleError(row, (int) (-1 * slackValue), SolverVariable.STRENGTH_LOW);
+        } else {
+            addSingleError(row, (int) (-1 * slackValue), SolverVariable.STRENGTH_BARRIER);
+        }
         addConstraint(row);
     }
 

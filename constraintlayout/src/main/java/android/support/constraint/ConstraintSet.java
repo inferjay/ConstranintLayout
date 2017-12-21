@@ -409,6 +409,8 @@ public class ConstraintSet {
         public int heightMax = UNSET;
         public int widthMin = UNSET;
         public int heightMin = UNSET;
+        public float widthPercent = 1;
+        public float heightPercent = 1;
         public int mBarrierDirection = UNSET;
         public int mHelperType = UNSET;
         public int [] mReferenceIds;
@@ -483,6 +485,8 @@ public class ConstraintSet {
             clone.heightMax = heightMax;
             clone.widthMin = widthMin;
             clone.heightMin = heightMin;
+            clone.widthPercent = widthPercent;
+            clone.heightPercent = heightPercent;
             clone.mBarrierDirection = mBarrierDirection;
             clone.mHelperType = mHelperType;
             if (mReferenceIds != null) {
@@ -570,6 +574,8 @@ public class ConstraintSet {
             heightMax = param.matchConstraintMaxHeight;
             widthMin = param.matchConstraintMinWidth;
             heightMin = param.matchConstraintMinHeight;
+            widthPercent = param.matchConstraintPercentWidth;
+            heightPercent = param.matchConstraintPercentHeight;
 
             int currentapiVersion = android.os.Build.VERSION.SDK_INT;
             if (currentapiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
@@ -625,6 +631,8 @@ public class ConstraintSet {
             param.matchConstraintMaxHeight = heightMax;
             param.matchConstraintMinWidth = widthMin;
             param.matchConstraintMinHeight = heightMin;
+            param.matchConstraintPercentWidth = widthPercent;
+            param.matchConstraintPercentHeight = heightPercent;
             param.orientation = orientation;
             param.guidePercent = guidePercent;
             param.guideBegin = guideBegin;
@@ -1688,6 +1696,23 @@ public class ConstraintSet {
         get(viewId).widthMin = width;
     }
 
+    /**
+     * Sets the width of the view as a percentage of the parent.
+     * @param viewId
+     * @param percent
+     */
+    public void constrainPercentWidth(int viewId, float percent) {
+        get(viewId).widthPercent = percent;
+    }
+
+    /**
+     * Sets the height of the view as a percentage of the parent.
+     * @param viewId
+     * @param percent
+     */
+    public void constrainPercentHeight(int viewId, float percent) {
+        get(viewId).heightPercent = percent;
+    }
 
     /**
      * Sets how the height is calculated ether MATCH_CONSTRAINT_WRAP or MATCH_CONSTRAINT_SPREAD.

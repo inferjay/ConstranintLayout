@@ -36,6 +36,7 @@ public class SolverVariable {
     public static final int STRENGTH_HIGHEST = 4;
     public static final int STRENGTH_EQUALITY = 5;
     public static final int STRENGTH_FIXED = 6;
+    public static final int STRENGTH_BARRIER = 7;
 
     private static int uniqueSlackId = 1;
     private static int uniqueErrorId = 1;

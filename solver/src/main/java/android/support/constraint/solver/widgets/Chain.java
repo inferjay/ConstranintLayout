@@ -22,6 +22,9 @@ import android.support.constraint.solver.SolverVariable;
 
 import java.util.Arrays;
 
+import static android.support.constraint.solver.widgets.ConstraintWidget.MATCH_CONSTRAINT_RATIO;
+import static android.support.constraint.solver.widgets.ConstraintWidget.MATCH_CONSTRAINT_SPREAD;
+
 /**
  * Chain management and constraints creation
  */
@@ -86,14 +89,41 @@ class Chain {
         boolean isChainSpreadInside = false;
         boolean isChainPacked = false;
 
+        ConstraintWidget head = first;
+        if (container.isRtl()) {
+            // find the last widget
+            while (!done) {
+                // go to the next widget
+                ConstraintAnchor nextAnchor = widget.mListAnchors[offset + 1].mTarget;
+                if (nextAnchor != null) {
+                    next = nextAnchor.mOwner;
+                    if (next.mListAnchors[offset].mTarget == null
+                            || next.mListAnchors[offset].mTarget.mOwner != widget) {
+                        next = null;
+                    }
+                } else {
+                    next = null;
+                }
+                if (next != null) {
+                    widget = next;
+                } else {
+                    done = true;
+                }
+            }
+            head = widget;
+            widget = first;
+            next = null;
+            done = false;
+        }
+
         if (orientation == ConstraintWidget.HORIZONTAL) {
-            isChainSpread = first.mHorizontalChainStyle == ConstraintWidget.CHAIN_SPREAD;
-            isChainSpreadInside = first.mHorizontalChainStyle == ConstraintWidget.CHAIN_SPREAD_INSIDE;
-            isChainPacked = first.mHorizontalChainStyle == ConstraintWidget.CHAIN_PACKED;
+            isChainSpread = head.mHorizontalChainStyle == ConstraintWidget.CHAIN_SPREAD;
+            isChainSpreadInside = head.mHorizontalChainStyle == ConstraintWidget.CHAIN_SPREAD_INSIDE;
+            isChainPacked = head.mHorizontalChainStyle == ConstraintWidget.CHAIN_PACKED;
         } else {
-            isChainSpread = first.mVerticalChainStyle == ConstraintWidget.CHAIN_SPREAD;
-            isChainSpreadInside = first.mVerticalChainStyle == ConstraintWidget.CHAIN_SPREAD_INSIDE;
-            isChainPacked = first.mVerticalChainStyle == ConstraintWidget.CHAIN_PACKED;
+            isChainSpread = head.mVerticalChainStyle == ConstraintWidget.CHAIN_SPREAD;
+            isChainSpreadInside = head.mVerticalChainStyle == ConstraintWidget.CHAIN_SPREAD_INSIDE;
+            isChainPacked = head.mVerticalChainStyle == ConstraintWidget.CHAIN_PACKED;
         }
 
         // The first traversal will:
@@ -191,16 +221,35 @@ class Chain {
             while (widget != null) {
                 next = widget.mListNextMatchConstraintsWidget[orientation];
                 if (next != null) {
-                    ArrayRow row = system.createRow();
                     float currentWeight = widget.mWeight[orientation];
                     float nextWeight = next.mWeight[orientation];
                     SolverVariable begin = widget.mListAnchors[offset].mSolverVariable;
                     SolverVariable end = widget.mListAnchors[offset + 1].mSolverVariable;
                     SolverVariable nextBegin = next.mListAnchors[offset].mSolverVariable;
                     SolverVariable nextEnd = next.mListAnchors[offset + 1].mSolverVariable;
-                    row.createRowEqualMatchDimensions(currentWeight, totalWeights, nextWeight,
-                            begin, end, nextBegin, nextEnd);
-                    system.addConstraint(row);
+
+                    boolean applyEquality;
+                    int currentDimensionDefault;
+                    int nextDimensionDefault;
+                    if (orientation == ConstraintWidget.HORIZONTAL) {
+                        currentDimensionDefault = widget.mMatchConstraintDefaultWidth;
+                        nextDimensionDefault = next.mMatchConstraintDefaultWidth;
+                    } else {
+                        currentDimensionDefault = widget.mMatchConstraintDefaultHeight;
+                        nextDimensionDefault = next.mMatchConstraintDefaultHeight;
+                    }
+                    applyEquality = ((currentDimensionDefault == MATCH_CONSTRAINT_SPREAD)
+                            || (currentDimensionDefault == MATCH_CONSTRAINT_RATIO)) &&
+                            ((nextDimensionDefault == MATCH_CONSTRAINT_SPREAD)
+                                    || (nextDimensionDefault == MATCH_CONSTRAINT_RATIO));
+
+                    if (applyEquality) {
+                        ArrayRow row = system.createRow();
+                        row.createRowEqualMatchDimensions(currentWeight, totalWeights, nextWeight,
+                                begin, end, nextBegin, nextEnd);
+                        system.addConstraint(row);
+                    }
+
                 }
                 widget = next;
             }
@@ -226,9 +275,9 @@ class Chain {
             if (beginTarget != null && endTarget != null) {
                 float bias = 0.5f;
                 if (orientation == ConstraintWidget.HORIZONTAL) {
-                    bias = first.mHorizontalBiasPercent;
+                    bias = head.mHorizontalBiasPercent;
                 } else {
-                    bias = first.mVerticalBiasPercent;
+                    bias = head.mVerticalBiasPercent;
                 }
                 int beginMargin = begin.getMargin();
                 if (lastVisibleWidget == null) {
