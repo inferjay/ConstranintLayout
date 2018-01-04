@@ -189,4 +189,48 @@ public class BarrierTest {
         System.out.println("A: " + A + " guideline: " + guideline + " barrier: " + barrier);
         assertEquals(barrier.getLeft(), guideline.getLeft());
     }
+
+    @Test
+    public void wrapIssue() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        Barrier barrier = new Barrier();
+        root.setDebugSolverName(root.getSystem(), "root");
+        A.setDebugSolverName(root.getSystem(), "A");
+        B.setDebugSolverName(root.getSystem(), "B");
+        barrier.setDebugSolverName(root.getSystem(), "Barrier");
+        barrier.setBarrierType(Barrier.BOTTOM);
+
+        root.add(A);
+        root.add(B);
+        root.add(barrier);
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 0);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 0);
+
+        barrier.add(A);
+
+        B.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 0);
+        B.connect(ConstraintAnchor.Type.TOP, barrier, ConstraintAnchor.Type.BOTTOM, 0);
+        B.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, 0);
+
+        root.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
+        root.layout();
+        System.out.println("1/ root: " + root + " A: " + A + " B: " + B + " barrier: " + barrier);
+
+        assertEquals(barrier.getTop(), A.getBottom());
+        assertEquals(B.getTop(), barrier.getBottom());
+        assertEquals(root.getHeight(), A.getHeight() + B.getHeight());
+
+        A.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setVerticalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_WRAP, 0, 0, 0);
+
+        root.layout();
+        System.out.println("2/ root: " + root + " A: " + A + " B: " + B + " barrier: " + barrier);
+
+        assertEquals(barrier.getTop(), A.getBottom());
+        assertEquals(B.getTop(), barrier.getBottom());
+        assertEquals(root.getHeight(), A.getHeight() + B.getHeight());
+    }
 }

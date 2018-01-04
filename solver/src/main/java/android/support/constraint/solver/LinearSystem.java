@@ -1003,12 +1003,10 @@ public class LinearSystem {
         SolverVariable slack = createSlackVariable();
         slack.strength = SolverVariable.STRENGTH_NONE;
         row.createRowGreaterThan(a, b, slack, 0);
-        float slackValue = row.variables.get(slack);
         if (hasMatchConstraintWidgets) {
             // We set it to low, as constrained widgets (0d) will have a strength of low in default wrap
+            float slackValue = row.variables.get(slack);
             addSingleError(row, (int) (-1 * slackValue), SolverVariable.STRENGTH_LOW);
-        } else {
-            addSingleError(row, (int) (-1 * slackValue), SolverVariable.STRENGTH_BARRIER);
         }
         addConstraint(row);
     }
@@ -1043,12 +1041,10 @@ public class LinearSystem {
         SolverVariable slack = createSlackVariable();
         slack.strength = SolverVariable.STRENGTH_NONE;
         row.createRowLowerThan(a, b, slack, 0);
-        float slackValue = row.variables.get(slack);
         if (hasMatchConstraintWidgets) {
             // We set it to low, as constrained widgets (0d) will have a strength of low in default wrap
+            float slackValue = row.variables.get(slack);
             addSingleError(row, (int) (-1 * slackValue), SolverVariable.STRENGTH_LOW);
-        } else {
-            addSingleError(row, (int) (-1 * slackValue), SolverVariable.STRENGTH_BARRIER);
         }
         addConstraint(row);
     }
