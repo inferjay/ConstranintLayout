@@ -336,8 +336,8 @@ public class ConstraintSet {
 
     private static class Constraint {
         boolean mIsGuideline = false;
-        public int mWidth;
-        public int mHeight;
+        public int mWidth = Constraints.LayoutParams.WRAP_CONTENT;
+        public int mHeight = Constraints.LayoutParams.WRAP_CONTENT;
         int mViewId;
         static final int UNSET = ConstraintLayout.LayoutParams.UNSET;
         public int guideBegin = UNSET;
@@ -1504,6 +1504,7 @@ public class ConstraintSet {
         get(viewId).elevation = elevation;
         get(viewId).applyElevation = true;
     }
+
     /**
      * Adjust the post-layout rotation about the Z axis of a view.
      *
@@ -1650,6 +1651,21 @@ public class ConstraintSet {
      */
     public void constrainWidth(int viewId, int width) {
         get(viewId).mWidth = width;
+    }
+
+    /**
+     * Contrain the view on a circle constraint
+     *
+     * @param viewId ID of the view we constrain
+     * @param id ID of the view we constrain relative to
+     * @param radius the radius of the circle in degrees
+     * @param angle the angle
+     */
+    public void constrainCircle(int viewId, int id, int radius, float angle) {
+        Constraint constraint = get(viewId);
+        constraint.circleConstraint = id;
+        constraint.circleRadius = radius;
+        constraint.circleAngle = angle;
     }
 
     /**
