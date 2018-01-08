@@ -20,9 +20,7 @@ import android.support.constraint.solver.ArrayRow;
 import android.support.constraint.solver.LinearSystem;
 import android.support.constraint.solver.SolverVariable;
 
-import static android.support.constraint.solver.widgets.ConstraintWidget.DIMENSION_HORIZONTAL;
-import static android.support.constraint.solver.widgets.ConstraintWidget.MATCH_CONSTRAINT_RATIO;
-import static android.support.constraint.solver.widgets.ConstraintWidget.MATCH_CONSTRAINT_SPREAD;
+import static android.support.constraint.solver.widgets.ConstraintWidget.*;
 
 /**
  * Chain management and constraints creation
@@ -57,7 +55,14 @@ class Chain {
         }
         for (int i = 0; i < chainsSize; i++) {
             ConstraintWidget first = chainsArray[i];
-            applyChainConstraints(constraintWidgetContainer, system, orientation, offset, first);
+            if ((constraintWidgetContainer.getOptimizationLevel() & Optimizer.OPTIMIZATION_CHAIN)
+                    == Optimizer.OPTIMIZATION_CHAIN) {
+                if (!Optimizer.applyChainOptimized(constraintWidgetContainer, system, orientation, offset, first)) {
+                    applyChainConstraints(constraintWidgetContainer, system, orientation, offset, first);
+                }
+            } else {
+                applyChainConstraints(constraintWidgetContainer, system, orientation, offset, first);
+            }
         }
     }
 

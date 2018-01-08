@@ -47,6 +47,19 @@ public class ConstraintAnchor {
     public enum ConnectionType { RELAXED, STRICT }
 
     /**
+     * Resolution node, used by graph resolution
+     */
+    private ResolutionNode mResolutionNode = new ResolutionNode(this);
+
+    /**
+     * Resolution node accessor
+     * @return the Resolution node for this ConstraintAnchor
+     */
+    public ResolutionNode getResolutionNode() {
+        return mResolutionNode;
+    }
+
+    /**
      * Type of creator
      */
     public static final int USER_CREATOR = 0;
@@ -65,77 +78,6 @@ public class ConstraintAnchor {
     private ConnectionType mConnectionType = ConnectionType.RELAXED;
     private int mConnectionCreator = USER_CREATOR;
     SolverVariable mSolverVariable;
-
-    // -----------------------------------------------
-    // Direct resolution management (experimental)
-    // -----------------------------------------------
-
-    public static final int UNRESOLVED = 0;
-    public static final int RESOLVED = 1;
-    public static final int SOLVER = 2;
-    public int resolutionStatus = UNRESOLVED;
-    public int resolvedValue = -1;
-    ConstraintAnchor resolvedAnchor = null;
-
-    String getResolutionStatus() {
-        String status = "";
-        if (resolutionStatus == UNRESOLVED) {
-           status = "{unresolved}";
-        } else if (resolutionStatus == RESOLVED) {
-            status = "**RESOLVED**";
-        } else if (resolutionStatus == SOLVER) {
-            status = "SOLVER";
-        }
-        status += " val: " + resolvedValue + " anchor: " + resolvedAnchor;
-        return status;
-    }
-
-    void resolve(LinearSystem system, int value, ConstraintAnchor anchor) {
-        if (mSolverVariable == null) {
-            mSolverVariable = system.createObjectVariable(this);
-        }
-        resolutionStatus = RESOLVED;
-        resolvedValue = value;
-        resolvedAnchor = anchor;
-    }
-
-    void addResolvedValue(LinearSystem system) {
-        mSolverVariable = system.createObjectVariable(this);
-        if (resolvedAnchor == null) {
-            system.addEquality(mSolverVariable, resolvedValue);
-        } else {
-            SolverVariable v = system.createObjectVariable(resolvedAnchor);
-            system.addEquality(mSolverVariable, v, resolvedValue, SolverVariable.STRENGTH_FIXED);
-        }
-    }
-
-    ConstraintAnchor findResolvedAnchor(int margin[]) {
-        ConstraintAnchor target = mTarget;
-        margin[0] = getMargin();
-        ConstraintAnchor lastTarget = mTarget;
-        if (lastTarget.resolutionStatus == SOLVER) {
-            return lastTarget;
-        }
-        if (mTarget.resolutionStatus == RESOLVED) {
-            lastTarget = mTarget.resolvedAnchor;
-            margin[0] += mTarget.resolvedValue;
-        } else {
-            while (target != null) {
-                lastTarget = target;
-                if (target.mTarget != null) {
-                    margin[0] += target.getMargin();
-                }
-                if (target.mTarget != null && target.mTarget.mTarget != target) {
-                    target = target.mTarget;
-                } else {
-                    target = null;
-                }
-            }
-        }
-        return lastTarget;
-    }
-
-    // -----------------------------------------------
 
     /**
      * Constructor
@@ -237,6 +179,7 @@ public class ConstraintAnchor {
         mStrength = Strength.STRONG;
         mConnectionCreator = USER_CREATOR;
         mConnectionType = ConnectionType.RELAXED;
+        mResolutionNode.reset();
     }
 
     /**
@@ -479,16 +422,9 @@ public class ConstraintAnchor {
      */
     @Override
     public String toString() {
-        HashSet<ConstraintAnchor> visited = new HashSet<ConstraintAnchor>();
-        return mOwner.getDebugName() + ":" + mType.toString() + (mTarget != null ? " connected to " + mTarget.toString(visited) : "");
+        return mOwner.getDebugName() + ":" + mType.toString();
     }
 
-    private String toString(HashSet<ConstraintAnchor> visited) {
-        if (visited.add(this)) {
-            return mOwner.getDebugName() + ":" + mType.toString() + (mTarget != null ? " connected to " + mTarget.toString(visited) : "");
-        }
-        return "<-";
-    }
     /**
      * Return the priority level of the anchor (higher is stronger).
      * This method is used to pick an anchor among many when there's a choice (we use it

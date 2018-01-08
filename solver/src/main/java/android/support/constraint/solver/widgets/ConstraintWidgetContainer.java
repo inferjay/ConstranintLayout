@@ -17,12 +17,12 @@
 package android.support.constraint.solver.widgets;
 
 import android.support.constraint.solver.LinearSystem;
+import android.support.constraint.solver.Metrics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import static android.support.constraint.solver.LinearSystem.FULL_DEBUG;
-import static android.support.constraint.solver.widgets.ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
 
 /**
  * A container of ConstraintWidget that can layout its children
@@ -34,8 +34,13 @@ public class ConstraintWidgetContainer extends WidgetContainer {
 
     private static final boolean DEBUG = FULL_DEBUG;
     private static final boolean DEBUG_LAYOUT = false;
+    static final boolean DEBUG_GRAPH = false;
 
     private boolean mIsRtl = false;
+
+    public void fillMetrics(Metrics metrics) {
+        mSystem.fillMetrics(metrics);
+    }
 
     protected LinearSystem mSystem = new LinearSystem();
 
@@ -99,6 +104,15 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     }
 
     /**
+     * Returns the current optimization level
+     *
+     * @return
+     */
+    public int getOptimizationLevel() {
+        return mOptimizationLevel;
+    }
+
+    /**
      * Specify the xml type for the container
      *
      * @return
@@ -128,10 +142,6 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      */
     public boolean isHeightMeasuredTooSmall() { return mHeightMeasuredTooSmall; }
 
-    /*-----------------------------------------------------------------------*/
-    // Overloaded methods from ConstraintWidget
-    /*-----------------------------------------------------------------------*/
-
     int mDebugSolverPassCount = 0;
 
     /**
@@ -148,16 +158,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         }
         addToSolver(system);
         final int count = mChildren.size();
-        boolean setMatchParent = true;
 
-        if (mOptimizationLevel == Optimizer.OPTIMIZATION_ALL
-                || mOptimizationLevel == Optimizer.OPTIMIZATION_BASIC) {
-            if (Optimizer.optimize(system, this)) {
-                return false; // all work is done
-            }
-            // need to check match_parent
-            setMatchParent = true;
-        }
         for (int i = 0; i < count; i++) {
             ConstraintWidget widget = mChildren.get(i);
             if (widget instanceof ConstraintWidgetContainer) {
@@ -177,12 +178,11 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                     widget.setVerticalDimensionBehaviour(verticalBehaviour);
                 }
             } else {
-                if (setMatchParent) {
-                    Optimizer.checkMatchParent(this, system, widget);
-                }
+                Optimizer.checkMatchParent(this, system, widget);
                 widget.addToSolver(system);
             }
         }
+
         if (mHorizontalChainsSize > 0) {
             Chain.applyChainConstraints(this, system, HORIZONTAL);
         }
@@ -246,6 +246,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         return mIsRtl;
     }
 
+    /*-----------------------------------------------------------------------*/
+    // Overloaded methods from ConstraintWidget
+    /*-----------------------------------------------------------------------*/
+
     /**
      * Layout the tree of widgets
      */
@@ -280,6 +284,58 @@ public class ConstraintWidgetContainer extends WidgetContainer {
         } else {
             mX = 0;
             mY = 0;
+        }
+
+        if ((mOptimizationLevel & Optimizer.OPTIMIZATION_GRAPH) == Optimizer.OPTIMIZATION_GRAPH) {
+            if (DEBUG_GRAPH) {
+                System.out.println("### Graph resolution... " + mWidth + " x " + mHeight + " ###");
+            }
+            final int count = mChildren.size();
+            resetResolutionNodes();
+            for (int i = 0; i < count; i++) {
+                mChildren.get(i).resetResolutionNodes();
+            }
+            if (DEBUG_GRAPH) {
+                System.out.println("### Update Constraints Graph ###");
+                setDebugName("Root");
+            }
+
+            Optimizer.analyze(this);
+            for (int i = 0; i < count; i++) {
+                Optimizer.analyze(mChildren.get(i));
+            }
+
+            if (DEBUG_GRAPH) {
+                for (int i = 0; i < mChildren.size(); i++) {
+                    ConstraintWidget widget = mChildren.get(i);
+                    System.out.println("(pre) child [" + i + "/" + mChildren.size() + "] - " + widget.mLeft.getResolutionNode()
+                            + ", " + widget.mTop.getResolutionNode()
+                            + ", " + widget.mRight.getResolutionNode()
+                            + ", " + widget.mBottom.getResolutionNode());
+                }
+            }
+            ResolutionNode leftNode = getAnchor(ConstraintAnchor.Type.LEFT).getResolutionNode();
+            ResolutionNode topNode = getAnchor(ConstraintAnchor.Type.TOP).getResolutionNode();
+
+            if (DEBUG_GRAPH) {
+                System.out.println("### RESOLUTION ###");
+            }
+
+            leftNode.resolve(null, 0);
+            topNode.resolve(null, 0);
+
+            if (DEBUG_GRAPH) {
+                for (int i = 0; i < mChildren.size(); i++) {
+                    ConstraintWidget widget = mChildren.get(i);
+                    System.out.println("child [" + i + "/" + mChildren.size() + "] - " + widget.mLeft.getResolutionNode()
+                            + ", " + widget.mTop.getResolutionNode()
+                            + ", " + widget.mRight.getResolutionNode()
+                            + ", " + widget.mBottom.getResolutionNode());
+                }
+            }
+            mSystem.graphOptimizer = true;
+        } else {
+            mSystem.graphOptimizer = false;
         }
 
         boolean wrap_override = false;
@@ -451,6 +507,17 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             mListDimensionBehaviors[DIMENSION_HORIZONTAL] = originalHorizontalDimensionBehaviour;
             mListDimensionBehaviors[DIMENSION_VERTICAL] = originalVerticalDimensionBehaviour;
         }
+
+        if (DEBUG_GRAPH) {
+            for (int i = 0; i < mChildren.size(); i++) {
+                ConstraintWidget widget = mChildren.get(i);
+                System.out.println("final child [" + i + "/" + mChildren.size() + "] - " + widget.mLeft.getResolutionNode()
+                        + ", " + widget.mTop.getResolutionNode()
+                        + ", " + widget.mRight.getResolutionNode()
+                        + ", " + widget.mBottom.getResolutionNode());
+            }
+        }
+
         resetSolverVariables(mSystem.getCache());
         if (this == getRootConstraintContainer()) {
             updateDrawPosition();

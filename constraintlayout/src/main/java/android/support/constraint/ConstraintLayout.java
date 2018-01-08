@@ -24,9 +24,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Build;
-import android.support.constraint.solver.widgets.ConstraintAnchor;
-import android.support.constraint.solver.widgets.ConstraintWidget;
-import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
+import android.support.constraint.solver.Metrics;
+import android.support.constraint.solver.widgets.*;
 import android.support.constraint.solver.widgets.Guideline;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -480,7 +479,7 @@ public class ConstraintLayout extends ViewGroup {
     private int mMaxHeight = Integer.MAX_VALUE;
 
     private boolean mDirtyHierarchy = true;
-    private int mOptimizationLevel = 2; // all
+    private int mOptimizationLevel = Optimizer.OPTIMIZATION_ALL;
     private ConstraintSet mConstraintSet = null;
 
     private String mTitle;
@@ -804,11 +803,25 @@ public class ConstraintLayout extends ViewGroup {
                 try {
                     String IdAsString = getResources().getResourceName(view.getId());
                     setDesignInformation(DESIGN_INFO_ID, IdAsString, view.getId());
+                    int slashIndex = IdAsString.indexOf('/');
+                    if (slashIndex != -1) {
+                        IdAsString = IdAsString.substring(slashIndex + 1);
+                    }
                     getTargetWidget(view.getId()).setDebugName(IdAsString);
                 } catch (Resources.NotFoundException e) {
                     // nothing
                 }
             }
+        }
+
+        // Make sure everything is fully reset before anything else
+        for (int i = 0; i < count; i++) {
+            View child = getChildAt(i);
+            ConstraintWidget widget = getViewWidget(child);
+            if (widget == null) {
+                continue;
+            }
+            widget.reset();
         }
 
         if (USE_CONSTRAINTS_HELPER && mConstraintSetId != -1) {
@@ -850,7 +863,6 @@ public class ConstraintLayout extends ViewGroup {
             if (layoutParams.helped) {
                 layoutParams.helped = false;
             } else {
-                widget.reset();
                 if (isInEditMode) {
                     // In design mode, let's make sure we keep track of the ids; in Studio, a build step
                     // might not have been done yet, so asking the system for ids can break. So to be safe,
@@ -1233,6 +1245,17 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     /**
+     * @hide
+     *
+     * Fills metrics object
+     *
+     * @param metrics
+     */
+    public void fillMetrics(Metrics metrics) {
+        mLayoutWidget.fillMetrics(metrics);
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -1581,16 +1604,25 @@ public class ConstraintLayout extends ViewGroup {
      * Set the optimization level for the layout resolution
      * The level can be one of:
      * <ul>
-     * <li>ConstraintWidgetContainer.OPTIMIZATION_NONE</li>
-     * <li>ConstraintWidgetContainer.OPTIMIZATION_ALL</li>
-     * <li>ConstraintWidgetContainer.OPTIMIZATION_BASIC</li>
-     * <li>ConstraintWidgetContainer.OPTIMIZATION_CHAIN  </li>
+     * <li>Optimizer.OPTIMIZATION_NONE</li>
+     * <li>Optimizer.OPTIMIZATION_ALL</li>
+     * <li>Optimizer.OPTIMIZATION_BASIC</li>
+     * <li>Optimizer.OPTIMIZATION_CHAIN  </li>
      * </ul>
      * @param level optimization level
      */
     public void setOptimizationLevel(int level) {
         mLayoutWidget.setOptimizationLevel(level);
     }
+
+    /**
+     * @hide
+     *
+     * Return the current optimization level for the layout resolution
+     *
+     * @return the current level
+     */
+    public int getOptimizationLevel() { return mLayoutWidget.getOptimizationLevel(); }
 
     /**
      * {@hide}
