@@ -22,7 +22,7 @@ task('checkJavaVersion') << {
 }
 final def checkJavaVersionTask = tasks['checkJavaVersion']
 
-ext.version = '1.1.0-beta4'
+ext.version = '1.1.0-beta5'
 
 /*
  * With the build server you are given two env variables.
@@ -80,7 +80,7 @@ subprojects { Project project ->
         repositories {
             mavenDeployer {
                 repository(url: uri("$rootProject.ext.supportRepoOut"))
-		if (project == ':constraintlayout' || project == ':solver') {
+		if (project.getName() == 'constraintlayout' || project.getName() == 'solver') {
 		    pom.project {
 		        name project.ext.pomName
 		        description project.ext.pomDesc

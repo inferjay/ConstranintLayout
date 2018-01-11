@@ -71,6 +71,15 @@ public class Barrier extends Helper {
                 break;
             }
         }
+        if ((mBarrierType == LEFT || mBarrierType == RIGHT)) {
+            if (getParent().getHorizontalDimensionBehaviour() == DimensionBehaviour.WRAP_CONTENT) {
+                hasMatchConstraintWidgets = false;
+            }
+        } else {
+            if (getParent().getVerticalDimensionBehaviour() == DimensionBehaviour.WRAP_CONTENT) {
+                hasMatchConstraintWidgets = false;
+            }
+        }
         for (int i = 0; i < mWidgetsCount; i++) {
             SolverVariable target = system.createObjectVariable(mWidgets[i].mListAnchors[mBarrierType]);
             mWidgets[i].mListAnchors[mBarrierType].mSolverVariable = target;
