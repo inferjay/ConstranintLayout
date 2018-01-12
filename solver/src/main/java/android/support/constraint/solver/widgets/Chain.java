@@ -89,7 +89,7 @@ class Chain {
         boolean isChainPacked = false;
 
         ConstraintWidget head = first;
-        if (orientation == HORIZONTAL && container.isRtl()) {
+        if (orientation == ConstraintWidget.HORIZONTAL && container.isRtl()) {
             // find the last widget
             while (!done) {
                 // go to the next widget
