@@ -20,8 +20,7 @@ import android.support.constraint.solver.ArrayRow;
 import android.support.constraint.solver.LinearSystem;
 import android.support.constraint.solver.SolverVariable;
 
-import java.util.Arrays;
-
+import static android.support.constraint.solver.widgets.ConstraintWidget.DIMENSION_HORIZONTAL;
 import static android.support.constraint.solver.widgets.ConstraintWidget.MATCH_CONSTRAINT_RATIO;
 import static android.support.constraint.solver.widgets.ConstraintWidget.MATCH_CONSTRAINT_SPREAD;
 
@@ -90,7 +89,7 @@ class Chain {
         boolean isChainPacked = false;
 
         ConstraintWidget head = first;
-        if (container.isRtl()) {
+        if (orientation == ConstraintWidget.HORIZONTAL && container.isRtl()) {
             // find the last widget
             while (!done) {
                 // go to the next widget

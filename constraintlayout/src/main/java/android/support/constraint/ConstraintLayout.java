@@ -488,6 +488,14 @@ public class ConstraintLayout extends ViewGroup {
 
     private HashMap<String, Integer> mDesignIds = new HashMap<>();
 
+    // Cache last measure
+    private int mLastMeasureWidth = -1;
+    private int mLastMeasureHeight = -1;
+    int mLastMeasureWidthSize = -1;
+    int mLastMeasureHeightSize = -1;
+    int mLastMeasureWidthMode = MeasureSpec.UNSPECIFIED;
+    int mLastMeasureHeightMode = MeasureSpec.UNSPECIFIED;
+
     /**
      * @hide
      */
@@ -1155,10 +1163,13 @@ public class ConstraintLayout extends ViewGroup {
                 final int childWidthMeasureSpec;
                 final int childHeightMeasureSpec;
 
-                if (width == MATCH_CONSTRAINT || width == MATCH_PARENT) {
+                if (width == MATCH_CONSTRAINT) {
                     childWidthMeasureSpec = getChildMeasureSpec(parentWidthSpec,
                             widthPadding, LayoutParams.WRAP_CONTENT);
                     didWrapMeasureWidth = true;
+                } else if (width == MATCH_PARENT) {
+                    childWidthMeasureSpec = getChildMeasureSpec(parentWidthSpec,
+                            widthPadding, LayoutParams.MATCH_PARENT);
                 } else {
                     if (width == WRAP_CONTENT) {
                         didWrapMeasureWidth = true;
@@ -1166,10 +1177,13 @@ public class ConstraintLayout extends ViewGroup {
                     childWidthMeasureSpec = getChildMeasureSpec(parentWidthSpec,
                             widthPadding, width);
                 }
-                if (height == MATCH_CONSTRAINT || height == MATCH_PARENT) {
+                if (height == MATCH_CONSTRAINT) {
                     childHeightMeasureSpec = getChildMeasureSpec(parentHeightSpec,
                             heightPadding, LayoutParams.WRAP_CONTENT);
                     didWrapMeasureHeight = true;
+                } else if (height == MATCH_PARENT) {
+                    childHeightMeasureSpec = getChildMeasureSpec(parentHeightSpec,
+                            heightPadding, LayoutParams.MATCH_PARENT);
                 } else {
                     if (height == WRAP_CONTENT) {
                         didWrapMeasureHeight = true;
@@ -1227,6 +1241,33 @@ public class ConstraintLayout extends ViewGroup {
             System.out.println("onMeasure width: " + MeasureSpec.toString(widthMeasureSpec)
                     + " height: " + MeasureSpec.toString(heightMeasureSpec));
         }
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+        boolean validLastMeasure = mLastMeasureWidth != -1 && mLastMeasureHeight != -1;
+        boolean sameSize = widthMode == MeasureSpec.EXACTLY && heightMode == MeasureSpec.EXACTLY
+                && widthSize == mLastMeasureWidth && heightSize == mLastMeasureHeight;
+        boolean sameMode = widthMode == mLastMeasureWidthMode && heightMode == mLastMeasureHeightMode;
+        boolean sameMeasure = sameMode && widthSize == mLastMeasureWidthSize && heightSize == mLastMeasureHeightSize;
+
+        boolean fitSizeWidth = sameMode && widthMode == MeasureSpec.AT_MOST && heightMode == MeasureSpec.EXACTLY
+                && widthSize >= mLastMeasureWidth && heightSize == mLastMeasureHeight;
+
+        boolean fitSizeHeight = sameMode && widthMode == MeasureSpec.EXACTLY && heightMode == MeasureSpec.AT_MOST
+                && widthSize == mLastMeasureWidth && heightSize >= mLastMeasureHeight;
+
+        if (validLastMeasure && (sameMeasure || sameSize || fitSizeWidth || fitSizeHeight)) {
+            setMeasuredDimension(mLastMeasureWidth, mLastMeasureHeight);
+            return;
+        }
+
+        mLastMeasureWidthMode = widthMode;
+        mLastMeasureHeightMode = heightMode;
+        mLastMeasureWidthSize = widthSize;
+        mLastMeasureHeightSize = heightSize;
+
         int paddingLeft = getPaddingLeft();
         int paddingTop = getPaddingTop();
 
@@ -1391,8 +1432,12 @@ public class ConstraintLayout extends ViewGroup {
                 resolvedHeightSize |= MEASURED_STATE_TOO_SMALL;
             }
             setMeasuredDimension(resolvedWidthSize, resolvedHeightSize);
+            mLastMeasureWidth = resolvedWidthSize;
+            mLastMeasureHeight = resolvedHeightSize;
         } else {
             setMeasuredDimension(androidLayoutWidth, androidLayoutHeight);
+            mLastMeasureWidth = androidLayoutWidth;
+            mLastMeasureHeight = androidLayoutHeight;
         }
     }
 
@@ -2754,6 +2799,13 @@ public class ConstraintLayout extends ViewGroup {
     public void requestLayout() {
         super.requestLayout();
         mDirtyHierarchy = true;
+        // reset measured cache
+        mLastMeasureWidth = -1;
+        mLastMeasureHeight = -1;
+        mLastMeasureWidthSize = -1;
+        mLastMeasureHeightSize = -1;
+        mLastMeasureWidthMode = MeasureSpec.UNSPECIFIED;
+        mLastMeasureHeightMode = MeasureSpec.UNSPECIFIED;
     }
 
     /**
