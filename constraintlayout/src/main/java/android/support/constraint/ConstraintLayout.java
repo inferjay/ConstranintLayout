@@ -1258,7 +1258,7 @@ public class ConstraintLayout extends ViewGroup {
         boolean fitSizeHeight = sameMode && widthMode == MeasureSpec.EXACTLY && heightMode == MeasureSpec.AT_MOST
                 && widthSize == mLastMeasureWidth && heightSize >= mLastMeasureHeight;
 
-        if (validLastMeasure && (sameMeasure || sameSize || fitSizeWidth || fitSizeHeight)) {
+        if (false && validLastMeasure && (sameMeasure || sameSize || fitSizeWidth || fitSizeHeight)) {
             setMeasuredDimension(mLastMeasureWidth, mLastMeasureHeight);
             return;
         }

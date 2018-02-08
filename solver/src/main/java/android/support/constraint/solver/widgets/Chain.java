@@ -149,6 +149,10 @@ class Chain {
             int strength = SolverVariable.STRENGTH_LOW;
             int margin = begin.getMargin();
 
+            if (begin.mTarget != null) {
+                margin += begin.mTarget.getMargin();
+            }
+
             if (isChainPacked && widget != first && widget != firstVisibleWidget) {
                 strength = SolverVariable.STRENGTH_FIXED;
             }
@@ -266,11 +270,15 @@ class Chain {
 
         // Finally, let's apply the specific rules dealing with the different chain types
 
-        if (firstVisibleWidget == lastVisibleWidget || isChainPacked) {
+        if (firstVisibleWidget != null && (firstVisibleWidget == lastVisibleWidget || isChainPacked)) {
             ConstraintAnchor begin = first.mListAnchors[offset];
             ConstraintAnchor end = last.mListAnchors[offset + 1];
             SolverVariable beginTarget = first.mListAnchors[offset].mTarget != null ? first.mListAnchors[offset].mTarget.mSolverVariable : null;
             SolverVariable endTarget = last.mListAnchors[offset + 1].mTarget != null ? last.mListAnchors[offset + 1].mTarget.mSolverVariable : null;
+            if (firstVisibleWidget == lastVisibleWidget) {
+                begin = firstVisibleWidget.mListAnchors[offset];
+                end = firstVisibleWidget.mListAnchors[offset + 1];
+            }
             if (beginTarget != null && endTarget != null) {
                 float bias = 0.5f;
                 if (orientation == ConstraintWidget.HORIZONTAL) {
@@ -285,7 +293,7 @@ class Chain {
                 }
                 int endMargin = lastVisibleWidget.mListAnchors[offset + 1].getMargin();
                 system.addCentering(begin.mSolverVariable, beginTarget, beginMargin, bias,
-                        endTarget, end.mSolverVariable, endMargin, SolverVariable.STRENGTH_HIGHEST);
+                        endTarget, end.mSolverVariable, endMargin, SolverVariable.STRENGTH_EQUALITY);
             }
         } else if (isChainSpread && firstVisibleWidget != null) {
             // for chain spread, we need to add equal dimensions in between *visible* widgets
