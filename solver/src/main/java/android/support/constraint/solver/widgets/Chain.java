@@ -149,7 +149,7 @@ class Chain {
             int strength = SolverVariable.STRENGTH_LOW;
             int margin = begin.getMargin();
 
-            if (begin.mTarget != null) {
+            if (begin.mTarget != null && widget != first) {
                 margin += begin.mTarget.getMargin();
             }
 
