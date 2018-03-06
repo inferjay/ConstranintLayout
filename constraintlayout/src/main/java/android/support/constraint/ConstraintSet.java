@@ -2195,7 +2195,7 @@ public class ConstraintSet {
                     c.endToStart = lookupID(a, attr, c.endToStart);
                     break;
                 case END_TO_END:
-                    c.bottomToTop = lookupID(a, attr, c.endToEnd);
+                    c.endToEnd = lookupID(a, attr, c.endToEnd);
                     break;
                 case CIRCLE:
                     c.circleConstraint = lookupID(a, attr, c.circleConstraint);
@@ -2266,7 +2266,7 @@ public class ConstraintSet {
                     c.elevation = a.getDimension(attr, c.elevation);
                     break;
                 case ROTATION:
-                    c.rotation = a.getFloat(attr,c.rotation);
+                    c.rotation = a.getFloat(attr, c.rotation);
                 case ROTATION_X:
                     c.rotationX = a.getFloat(attr, c.rotationX);
                     break;
