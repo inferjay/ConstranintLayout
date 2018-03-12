@@ -55,6 +55,11 @@ public class Guideline extends ConstraintWidget {
         }
     }
 
+    @Override
+    public boolean allowedInBarrier() {
+        return true;
+    }
+
     public int getRelativeBehaviour() {
         if (mRelativePercent != -1) {
             return RELATIVE_PERCENT;

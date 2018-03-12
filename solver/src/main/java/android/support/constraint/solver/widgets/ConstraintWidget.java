@@ -1477,6 +1477,16 @@ public class ConstraintWidget {
         return mVerticalChainStyle;
     }
 
+    /**
+     * Returns true if this widget should be used in a barrier
+     */
+    public boolean allowedInBarrier() {
+        if (mVisibility == GONE) {
+            return false;
+        }
+        return true;
+    }
+
     /*-----------------------------------------------------------------------*/
     // Connections
     /*-----------------------------------------------------------------------*/
