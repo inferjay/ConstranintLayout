@@ -683,6 +683,9 @@ public class ConstraintSet {
             ConstraintLayout.LayoutParams param = (ConstraintLayout.LayoutParams) view.getLayoutParams();
 
             int id = view.getId();
+            if (id == -1) {
+                throw new RuntimeException("All children of ConstraintLayout must have ids to use ConstraintSet");
+            }
             if (!mConstraints.containsKey(id)) {
                 mConstraints.put(id, new Constraint());
             }
@@ -696,8 +699,15 @@ public class ConstraintSet {
                 constraint.rotationY = view.getRotationY();
                 constraint.scaleX = view.getScaleX();
                 constraint.scaleY = view.getScaleY();
-                constraint.transformPivotX = view.getPivotX();
-                constraint.transformPivotY = view.getPivotY();
+
+                float pivotX = view.getPivotX(); // we assume it is not set if set to 0.0
+                float pivotY = view.getPivotY(); // we assume it is not set if set to 0.0
+
+                if (pivotX != 0.0 || pivotY != 0.0) {
+                    constraint.transformPivotX = pivotX;
+                    constraint.transformPivotY = pivotY;
+                }
+
                 constraint.translationX = view.getTranslationX();
                 constraint.translationY = view.getTranslationY();
                 if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
@@ -723,6 +733,9 @@ public class ConstraintSet {
             Constraints.LayoutParams param = (Constraints.LayoutParams) view.getLayoutParams();
 
             int id = view.getId();
+            if (id == -1) {
+                throw new RuntimeException("All children of ConstraintLayout must have ids to use ConstraintSet");
+            }
             if (!mConstraints.containsKey(id)) {
                 mConstraints.put(id, new Constraint());
             }
@@ -755,6 +768,9 @@ public class ConstraintSet {
         for (int i = 0; i < count; i++) {
             View view = constraintLayout.getChildAt(i);
             int id = view.getId();
+            if (id == -1) {
+                throw new RuntimeException("All children of ConstraintLayout must have ids to use ConstraintSet");
+            }
             if (mConstraints.containsKey(id)) {
                 used.remove(id);
                 Constraint constraint = mConstraints.get(id);
@@ -1557,6 +1573,8 @@ public class ConstraintSet {
 
     /**
      * Set X location of the pivot point around which the view will rotate and scale.
+     * use Float.NaN to clear the pivot value.
+     * Note: once an actual View has had its pivot set it cannot be cleared.
      *
      * @param viewId ID of view to adjust the transforms pivot point about X
      * @param transformPivotX X location of the pivot point.
@@ -1567,6 +1585,8 @@ public class ConstraintSet {
 
     /**
      * Set Y location of the pivot point around which the view will rotate and scale.
+     * use Float.NaN to clear the pivot value.
+     * Note: once an actual View has had its pivot set it cannot be cleared.
      *
      * @param viewId ID of view to adjust the transforms pivot point about Y
      * @param transformPivotY Y location of the pivot point.
@@ -1577,6 +1597,8 @@ public class ConstraintSet {
 
     /**
      * Set X,Y location of the pivot point around which the view will rotate and scale.
+     * use Float.NaN to clear the pivot value.
+     * Note: once an actual View has had its pivot set it cannot be cleared.
      *
      * @param viewId ID of view to adjust the transforms pivot point
      * @param transformPivotX X location of the pivot point.
