@@ -106,22 +106,22 @@ public class Barrier extends Helper {
         if (mBarrierType == LEFT) {
             system.addEquality(mRight.mSolverVariable, mLeft.mSolverVariable, 0, SolverVariable.STRENGTH_FIXED);
             if (!hasMatchConstraintWidgets) {
-                system.addEquality(mLeft.mSolverVariable, mParent.mRight.mSolverVariable, 0, SolverVariable.STRENGTH_NONE);
+                system.addEquality(mLeft.mSolverVariable, mParent.mRight.mSolverVariable, 0, SolverVariable.STRENGTH_HIGHEST);
             }
         } else if (mBarrierType == RIGHT) {
             system.addEquality(mLeft.mSolverVariable, mRight.mSolverVariable, 0, SolverVariable.STRENGTH_FIXED);
             if (!hasMatchConstraintWidgets) {
-                system.addEquality(mLeft.mSolverVariable, mParent.mLeft.mSolverVariable, 0, SolverVariable.STRENGTH_NONE);
+                system.addEquality(mLeft.mSolverVariable, mParent.mLeft.mSolverVariable, 0, SolverVariable.STRENGTH_HIGHEST);
             }
         } else if (mBarrierType == TOP) {
             system.addEquality(mBottom.mSolverVariable, mTop.mSolverVariable, 0, SolverVariable.STRENGTH_FIXED);
             if (!hasMatchConstraintWidgets) {
-                system.addEquality(mTop.mSolverVariable, mParent.mBottom.mSolverVariable, 0, SolverVariable.STRENGTH_NONE);
+                system.addEquality(mTop.mSolverVariable, mParent.mBottom.mSolverVariable, 0, SolverVariable.STRENGTH_HIGHEST);
             }
         } else if (mBarrierType == BOTTOM) {
             system.addEquality(mTop.mSolverVariable, mBottom.mSolverVariable, 0, SolverVariable.STRENGTH_FIXED);
             if (!hasMatchConstraintWidgets) {
-                system.addEquality(mTop.mSolverVariable, mParent.mTop.mSolverVariable, 0, SolverVariable.STRENGTH_NONE);
+                system.addEquality(mTop.mSolverVariable, mParent.mTop.mSolverVariable, 0, SolverVariable.STRENGTH_HIGHEST);
             }
         }
     }

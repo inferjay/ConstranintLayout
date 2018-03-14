@@ -11,6 +11,93 @@ import static org.testng.Assert.assertEquals;
 public class BarrierTest {
 
     @Test
+    public void barrierTooStrong() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
+        ConstraintWidget A = new ConstraintWidget(60, 60);
+        ConstraintWidget B = new ConstraintWidget(100, 200);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        Barrier barrier = new Barrier();
+
+        root.setDebugSolverName(root.getSystem(), "root");
+        A.setDebugSolverName(root.getSystem(), "A");
+        B.setDebugSolverName(root.getSystem(), "B");
+        C.setDebugSolverName(root.getSystem(), "C");
+        barrier.setDebugSolverName(root.getSystem(), "Barrier");
+        barrier.setBarrierType(Barrier.BOTTOM);
+
+        barrier.add(B);
+
+        root.add(A);
+        root.add(B);
+        root.add(C);
+        root.add(barrier);
+
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        A.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+
+        B.connect(ConstraintAnchor.Type.TOP, C, ConstraintAnchor.Type.BOTTOM);
+        B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_PARENT);
+
+        C.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_PARENT);
+        C.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        C.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        C.connect(ConstraintAnchor.Type.BOTTOM, A, ConstraintAnchor.Type.BOTTOM);
+
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_NONE);
+        root.layout();
+        System.out.println("A: " + A + " B: " + B + " C: " + C + " barrier: " + barrier);
+        assertEquals(A.getLeft(), 740);
+        assertEquals(A.getTop(), 0);
+        assertEquals(B.getLeft(), 0);
+        assertEquals(B.getTop(), 60);
+        assertEquals(B.getWidth(), 800);
+        assertEquals(B.getHeight(), 200);
+        assertEquals(C.getLeft(), 0);
+        assertEquals(C.getTop(), 0);
+        assertEquals(C.getWidth(), 800);
+        assertEquals(C.getHeight(), 60);
+        assertEquals(barrier.getBottom(), 260);
+    }
+
+    @Test
+    public void barrierMax() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(150, 20);
+        Barrier barrier = new Barrier();
+
+        root.setDebugSolverName(root.getSystem(), "root");
+        A.setDebugSolverName(root.getSystem(), "A");
+        B.setDebugSolverName(root.getSystem(), "B");
+        barrier.setDebugSolverName(root.getSystem(), "Barrier");
+
+        barrier.add(A);
+
+        root.add(A);
+        root.add(barrier);
+        root.add(B);
+
+        barrier.setBarrierType(Barrier.RIGHT);
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        B.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        B.connect(ConstraintAnchor.Type.LEFT, barrier, ConstraintAnchor.Type.LEFT);
+        B.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+        B.setHorizontalBiasPercent(0);
+        B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        B.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 0, 150, 1);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_NONE);
+        root.layout();
+
+        System.out.println("A: " + A + " B: " + B + " barrier: " + barrier);
+        assertEquals(A.getLeft(), 0);
+        assertEquals(barrier.getLeft(), 100);
+        assertEquals(B.getLeft(), 100);
+        assertEquals(B.getWidth(), 150);
+    }
+
+    @Test
     public void basic() {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
         ConstraintWidget A = new ConstraintWidget(100, 20);
