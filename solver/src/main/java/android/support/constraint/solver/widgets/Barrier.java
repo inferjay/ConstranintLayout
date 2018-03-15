@@ -19,6 +19,7 @@ package android.support.constraint.solver.widgets;
 import android.support.constraint.solver.LinearSystem;
 import android.support.constraint.solver.SolverVariable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -32,6 +33,7 @@ public class Barrier extends Helper {
     public static final int BOTTOM = 3;
 
     private int mBarrierType = LEFT;
+    private ArrayList<ResolutionNode> mNodes = new ArrayList<>(4);
 
     @Override
     public boolean allowedInBarrier() {
@@ -40,6 +42,153 @@ public class Barrier extends Helper {
 
     public void setBarrierType(int barrierType) {
         mBarrierType = barrierType;
+    }
+
+    @Override
+    public void resetResolutionNodes() {
+        super.resetResolutionNodes();
+        mNodes.clear();
+    }
+
+    /**
+     * Graph analysis
+     */
+    @Override
+    public void analyze() {
+        if (mParent == null) {
+            return;
+        }
+        if (!((ConstraintWidgetContainer) mParent).optimizeFor(Optimizer.OPTIMIZATION_BARRIER)) {
+            return;
+        }
+
+        ResolutionNode node;
+        switch (mBarrierType) {
+            case LEFT:
+                node = mLeft.getResolutionNode();
+            break;
+            case RIGHT:
+                node = mRight.getResolutionNode();
+            break;
+            case TOP:
+                node = mTop.getResolutionNode();
+            break;
+            case BOTTOM:
+                node = mBottom.getResolutionNode();
+            break;
+            default:
+                return;
+        }
+        node.setType(ResolutionNode.BARRIER_CONNECTION);
+
+        if (mBarrierType == LEFT || mBarrierType == RIGHT) {
+            mTop.getResolutionNode().resolve(null, 0);
+            mBottom.getResolutionNode().resolve(null, 0);
+        } else {
+            mLeft.getResolutionNode().resolve(null, 0);
+            mRight.getResolutionNode().resolve(null, 0);
+        }
+
+        mNodes.clear();
+        for (int i = 0; i < mWidgetsCount; i++) {
+            ConstraintWidget widget = mWidgets[i];
+            if (!widget.allowedInBarrier()) {
+                continue;
+            }
+            ResolutionNode depends = null;
+            switch (mBarrierType) {
+                case LEFT:
+                    depends = widget.mLeft.getResolutionNode();
+                break;
+                case RIGHT:
+                    depends = widget.mRight.getResolutionNode();
+                break;
+                case TOP:
+                    depends = widget.mTop.getResolutionNode();
+                break;
+                case BOTTOM:
+                    depends = widget.mBottom.getResolutionNode();
+                break;
+            }
+            if (depends != null) {
+                mNodes.add(depends);
+                depends.addDependent(node);
+            }
+        }
+    }
+
+    /**
+     * Try resolving the graph analysis
+     */
+    @Override
+    public void resolve() {
+        ResolutionNode node = null;
+        float value = 0;
+        switch (mBarrierType) {
+            case LEFT: {
+                node = mLeft.getResolutionNode();
+                value = Float.MAX_VALUE;
+            } break;
+            case RIGHT: {
+                node = mRight.getResolutionNode();
+            } break;
+            case TOP: {
+                node = mTop.getResolutionNode();
+                value = Float.MAX_VALUE;
+            } break;
+            case BOTTOM: {
+                node = mBottom.getResolutionNode();
+            } break;
+            default:
+                return;
+        }
+
+        final int count = mNodes.size();
+        ResolutionNode resolvedTarget = null;
+        for (int i = 0; i < count; i++) {
+            ResolutionNode n = mNodes.get(i);
+            if (n.state != ResolutionNode.RESOLVED) {
+                return;
+            }
+            if (mBarrierType == LEFT || mBarrierType == TOP) {
+                if (n.resolvedOffset < value) {
+                    value = n.resolvedOffset;
+                    resolvedTarget = n.resolvedTarget;
+                }
+            } else {
+                if (n.resolvedOffset > value) {
+                    value = n.resolvedOffset;
+                    resolvedTarget = n.resolvedTarget;
+                }
+            }
+        }
+
+        if (LinearSystem.getMetrics() != null) {
+            LinearSystem.getMetrics().barrierConnectionResolved++;
+        }
+
+        if (ConstraintWidgetContainer.DEBUG_GRAPH) {
+            System.out.println("  * barrier resolved to " + resolvedTarget + " : " + value);
+        }
+        node.resolvedTarget = resolvedTarget;
+        node.resolvedOffset = value;
+        node.didResolve();
+        switch (mBarrierType) {
+            case LEFT: {
+                mRight.getResolutionNode().resolve(resolvedTarget, value);
+            } break;
+            case RIGHT: {
+                mLeft.getResolutionNode().resolve(resolvedTarget, value);
+            } break;
+            case TOP: {
+                mBottom.getResolutionNode().resolve(resolvedTarget, value);
+            } break;
+            case BOTTOM: {
+                mTop.getResolutionNode().resolve(resolvedTarget, value);
+            } break;
+            default:
+                return;
+        }
     }
 
     /**
@@ -125,4 +274,5 @@ public class Barrier extends Helper {
             }
         }
     }
+
 }

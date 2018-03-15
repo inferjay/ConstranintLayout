@@ -113,6 +113,15 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     }
 
     /**
+     * Returns true if the given feature should be optimized
+     * @param feature
+     * @return
+     */
+    public boolean optimizeFor(int feature) {
+        return (mOptimizationLevel & feature) == feature;
+    }
+
+    /**
      * Specify the xml type for the container
      *
      * @return
@@ -251,6 +260,18 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     /*-----------------------------------------------------------------------*/
 
     /**
+     * Graph analysis
+     */
+    @Override
+    public void analyze() {
+        super.analyze();
+        final int count = mChildren.size();
+        for (int i = 0; i < count; i++) {
+            mChildren.get(i).analyze();
+        }
+    }
+
+    /**
      * Layout the tree of widgets
      */
     @Override
@@ -286,7 +307,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             mY = 0;
         }
 
-        if ((mOptimizationLevel & Optimizer.OPTIMIZATION_GRAPH) == Optimizer.OPTIMIZATION_GRAPH) {
+        if (optimizeFor(Optimizer.OPTIMIZATION_GRAPH)) {
             if (DEBUG_GRAPH) {
                 System.out.println("### Graph resolution... " + mWidth + " x " + mHeight + " ###");
             }
@@ -300,10 +321,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                 setDebugName("Root");
             }
 
-            Optimizer.analyze(this);
-            for (int i = 0; i < count; i++) {
-                Optimizer.analyze(mChildren.get(i));
-            }
+            analyze();
 
             if (DEBUG_GRAPH) {
                 for (int i = 0; i < mChildren.size(); i++) {

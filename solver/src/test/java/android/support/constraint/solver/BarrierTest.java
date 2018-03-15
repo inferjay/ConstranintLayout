@@ -11,6 +11,57 @@ import static org.testng.Assert.assertEquals;
 public class BarrierTest {
 
     @Test
+    public void barrierImage() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(200, 20);
+        ConstraintWidget C = new ConstraintWidget(60, 60);
+        Barrier barrier = new Barrier();
+
+        root.setDebugSolverName(root.getSystem(), "root");
+        A.setDebugSolverName(root.getSystem(), "A");
+        B.setDebugSolverName(root.getSystem(), "B");
+        C.setDebugSolverName(root.getSystem(), "C");
+        barrier.setDebugSolverName(root.getSystem(), "Barrier");
+        barrier.setBarrierType(Barrier.RIGHT);
+
+        barrier.add(A);
+        barrier.add(B);
+
+        root.add(A);
+        root.add(B);
+        root.add(C);
+        root.add(barrier);
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        A.connect(ConstraintAnchor.Type.BOTTOM, B, ConstraintAnchor.Type.TOP);
+
+        B.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM);
+        B.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM);
+
+        A.setVerticalChainStyle(ConstraintWidget.CHAIN_SPREAD_INSIDE);
+
+        C.setHorizontalBiasPercent(1);
+        C.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        C.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM);
+        C.connect(ConstraintAnchor.Type.LEFT, barrier, ConstraintAnchor.Type.RIGHT);
+        C.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_ALL);
+        root.layout();
+        System.out.println("A: " + A + " B: " + B + " C: " + C + " barrier: " + barrier);
+        assertEquals(A.getLeft(), 0);
+        assertEquals(A.getTop(), 0);
+        assertEquals(B.getLeft(), 0);
+        assertEquals(B.getTop(), 580);
+        assertEquals(C.getLeft(), 740);
+        assertEquals(C.getTop(), 270);
+        assertEquals(barrier.getLeft(), 200);
+    }
+
+    @Test
     public void barrierTooStrong() {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 600);
         ConstraintWidget A = new ConstraintWidget(60, 60);

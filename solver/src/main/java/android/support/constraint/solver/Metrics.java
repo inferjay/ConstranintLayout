@@ -40,6 +40,7 @@ public class Metrics {
     public long centerConnectionResolved;
     public long matchConnectionResolved;
     public long chainConnectionResolved;
+    public long barrierConnectionResolved;
     public long oldresolvedWidgets;
     public long nonresolvedWidgets;
     public ArrayList<String> problematicLayouts = new ArrayList<>();
@@ -71,6 +72,7 @@ public class Metrics {
                 + "centerConnectionResolved: " + centerConnectionResolved + "\n"
                 + "matchConnectionResolved: " + matchConnectionResolved + "\n"
                 + "chainConnectionResolved: " + chainConnectionResolved + "\n"
+                + "barrierConnectionResolved: " + barrierConnectionResolved + "\n"
                 + "problematicsLayouts: " + problematicLayouts + "\n"
                 ;
     }
@@ -100,6 +102,7 @@ public class Metrics {
         centerConnectionResolved = 0;
         matchConnectionResolved = 0;
         chainConnectionResolved = 0;
+        barrierConnectionResolved = 0;
         problematicLayouts.clear();
     }
 }

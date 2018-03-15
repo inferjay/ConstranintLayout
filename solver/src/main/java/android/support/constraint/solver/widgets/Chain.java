@@ -55,8 +55,7 @@ class Chain {
         }
         for (int i = 0; i < chainsSize; i++) {
             ConstraintWidget first = chainsArray[i];
-            if ((constraintWidgetContainer.getOptimizationLevel() & Optimizer.OPTIMIZATION_CHAIN)
-                    == Optimizer.OPTIMIZATION_CHAIN) {
+            if (constraintWidgetContainer.optimizeFor(Optimizer.OPTIMIZATION_CHAIN)) {
                 if (!Optimizer.applyChainOptimized(constraintWidgetContainer, system, orientation, offset, first)) {
                     applyChainConstraints(constraintWidgetContainer, system, orientation, offset, first);
                 }

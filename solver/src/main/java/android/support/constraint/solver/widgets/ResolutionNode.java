@@ -40,6 +40,7 @@ public class ResolutionNode {
     public static final int CENTER_CONNECTION = 2;
     public static final int MATCH_CONNECTION = 3;
     public static final int CHAIN_CONNECTION = 4;
+    public static final int BARRIER_CONNECTION = 5;
 
     /**
      * A node has two possible states:
@@ -97,6 +98,8 @@ public class ResolutionNode {
             return "MATCH";
         } else if (type == 4) {
             return "CHAIN";
+        } else if (type == 5) {
+            return "BARRIER";
         }
         return "UNCONNECTED";
     }
@@ -200,6 +203,8 @@ public class ResolutionNode {
 
             didResolve();
             opposite.didResolve();
+        } else if (type == BARRIER_CONNECTION) {
+            myAnchor.mOwner.resolve();
         }
     }
 
