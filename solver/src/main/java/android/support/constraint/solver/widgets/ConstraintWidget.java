@@ -250,7 +250,6 @@ public class ConstraintWidget {
         mCompanionWidget = null;
         mContainerItemSkip = 0;
         mVisibility = VISIBLE;
-        mDebugName = null;
         mType = null;
         mHorizontalWrapVisited = false;
         mVerticalWrapVisited = false;
@@ -274,6 +273,43 @@ public class ConstraintWidget {
         mMatchConstraintMinHeight = 0;
         mResolvedDimensionRatioSide = UNKNOWN;
         mResolvedDimensionRatio = 1f;
+    }
+
+    /*-----------------------------------------------------------------------*/
+    // Optimizer-related methods
+    /*-----------------------------------------------------------------------*/
+
+    /**
+     * Reset the resolution nodes of the anchors
+     */
+    public void resetResolutionNodes() {
+        for (int i = 0; i < 6; i++) {
+            mListAnchors[i].getResolutionNode().reset();
+        }
+    }
+
+    /**
+     * Update the resolution nodes of the anchors
+     */
+    public void updateResolutionNodes() {
+        for (int i = 0; i < 6; i++) {
+            mListAnchors[i].getResolutionNode().update();
+        }
+    }
+
+    /**
+     * Returns true if all the nodes are resolved
+     *
+     * @return true if the widget is fully resolved
+     */
+    public boolean isFullyResolved() {
+        if (mLeft.getResolutionNode().state == ResolutionNode.RESOLVED
+                && mRight.getResolutionNode().state == ResolutionNode.RESOLVED
+                && mTop.getResolutionNode().state == ResolutionNode.RESOLVED
+                && mBottom.getResolutionNode().state == ResolutionNode.RESOLVED) {
+            return true;
+        }
+        return false;
     }
 
     /*-----------------------------------------------------------------------*/
@@ -1440,6 +1476,13 @@ public class ConstraintWidget {
         return mVerticalChainStyle;
     }
 
+    /**
+     * Returns true if this widget should be used in a barrier
+     */
+    public boolean allowedInBarrier() {
+        return mVisibility != GONE;
+    }
+
     /*-----------------------------------------------------------------------*/
     // Connections
     /*-----------------------------------------------------------------------*/
@@ -2182,12 +2225,16 @@ public class ConstraintWidget {
                 || mResolvedDimensionRatioSide == UNKNOWN);
 
         if (mBaselineDistance > 0) {
-            system.addEquality(baseline, top, getBaselineDistance(), SolverVariable.STRENGTH_FIXED);
-            if (mBaseline.mTarget != null) {
-                SolverVariable baselineTarget = system.createObjectVariable(mBaseline.mTarget);
-                int baselineMargin = 0; // for now at least, baseline don't have margins
-                system.addEquality(baseline, baselineTarget, baselineMargin, SolverVariable.STRENGTH_FIXED);
-                applyPosition = false;
+            if (mBaseline.getResolutionNode().state == ResolutionNode.RESOLVED) {
+                mBaseline.getResolutionNode().addResolvedValue(system);
+            } else {
+                system.addEquality(baseline, top, getBaselineDistance(), SolverVariable.STRENGTH_FIXED);
+                if (mBaseline.mTarget != null) {
+                    SolverVariable baselineTarget = system.createObjectVariable(mBaseline.mTarget);
+                    int baselineMargin = 0; // for now at least, baseline don't have margins
+                    system.addEquality(baseline, baselineTarget, baselineMargin, SolverVariable.STRENGTH_FIXED);
+                    applyPosition = false;
+                }
             }
         }
         SolverVariable parentMax = mParent != null ? system.createObjectVariable(mParent.mBottom) : null;
@@ -2309,17 +2356,29 @@ public class ConstraintWidget {
                                   int beginPosition, int dimension, int minDimension,
                                   int maxDimension, float bias, boolean useRatio, boolean inChain, int matchConstraintDefault,
                                   int matchMinDimension, int matchMaxDimension, float matchPercentDimension, boolean applyPosition) {
-        if (beginAnchor.resolutionStatus == ConstraintAnchor.RESOLVED
-                && endAnchor.resolutionStatus == ConstraintAnchor.RESOLVED) {
-            beginAnchor.addResolvedValue(system);
-            endAnchor.addResolvedValue(system);
-            return;
-        }
 
         SolverVariable begin = system.createObjectVariable(beginAnchor);
         SolverVariable end = system.createObjectVariable(endAnchor);
         SolverVariable beginTarget = system.createObjectVariable(beginAnchor.getTarget());
         SolverVariable endTarget = system.createObjectVariable(endAnchor.getTarget());
+
+        if (system.graphOptimizer) {
+            if (beginAnchor.getResolutionNode().state == ResolutionNode.RESOLVED
+                    && endAnchor.getResolutionNode().state == ResolutionNode.RESOLVED) {
+                if (system.getMetrics() != null) {
+                    system.getMetrics().resolvedWidgets++;
+                }
+                beginAnchor.getResolutionNode().addResolvedValue(system);
+                endAnchor.getResolutionNode().addResolvedValue(system);
+                if (!inChain && parentWrapContent) {
+                    system.addGreaterThan(parentMax, end, 0, SolverVariable.STRENGTH_FIXED);
+                }
+                return;
+            }
+        }
+        if (system.getMetrics() != null) {
+            system.getMetrics().nonresolvedWidgets++;
+        }
 
         boolean isBeginConnected = beginAnchor.isConnected();
         boolean isEndConnected = endAnchor.isConnected();
@@ -2387,7 +2446,9 @@ public class ConstraintWidget {
                 dimension = Math.min(dimension, matchMaxDimension);
             }
             if (matchConstraintDefault == MATCH_CONSTRAINT_WRAP) {
-                if (parentWrapContent || inChain) {
+                if (parentWrapContent) {
+                    system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_FIXED);
+                } else if (inChain) {
                     system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_EQUALITY);
                 } else {
                     system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_LOW);
@@ -2452,17 +2513,34 @@ public class ConstraintWidget {
             }
         } else if (isBeginConnected && isEndConnected && !inChain) {
 
+            boolean applyBoundsCheck = false;
+            boolean applyCentering = false;
+            int centeringStrength = SolverVariable.STRENGTH_EQUALITY;
+
             if (variableSize) {
+
                 if (parentWrapContent && minDimension == 0) {
                     system.addGreaterThan(end, begin, 0, SolverVariable.STRENGTH_FIXED);
                 }
-                // first, Al >= Tl & Ar <= Tr
-                system.addGreaterThan(begin, beginTarget, beginAnchor.getMargin(), SolverVariable.STRENGTH_FIXED);
-                system.addLowerThan(end, endTarget, -endAnchor.getMargin(), SolverVariable.STRENGTH_FIXED);
+
                 if (matchConstraintDefault == MATCH_CONSTRAINT_SPREAD) {
-                    system.addEquality(begin, beginTarget, beginAnchor.getMargin(), SolverVariable.STRENGTH_HIGHEST);
-                    system.addEquality(end, endTarget, -endAnchor.getMargin(), SolverVariable.STRENGTH_HIGHEST);
+                    int strength = SolverVariable.STRENGTH_FIXED;
+                    if (matchMaxDimension > 0 || matchMinDimension > 0) {
+                        strength = SolverVariable.STRENGTH_HIGHEST;
+                        applyBoundsCheck = true;
+                    }
+                    system.addEquality(begin, beginTarget, beginAnchor.getMargin(), strength);
+                    system.addEquality(end, endTarget, -endAnchor.getMargin(), strength);
+                    if (matchMaxDimension > 0 || matchMinDimension > 0) {
+                        applyCentering = true;
+                    }
+                } else if (matchConstraintDefault == MATCH_CONSTRAINT_WRAP) {
+                    applyCentering = true;
+                    applyBoundsCheck = true;
+                    centeringStrength = SolverVariable.STRENGTH_FIXED;
                 } else if (matchConstraintDefault == MATCH_CONSTRAINT_RATIO) {
+                    applyCentering = true;
+                    applyBoundsCheck = true;
                     int strength = SolverVariable.STRENGTH_HIGH;
                     if (!useRatio) {
                         // useRatio is true if the side we base ourselves on for the ratio is this one
@@ -2472,32 +2550,24 @@ public class ConstraintWidget {
                     system.addEquality(begin, beginTarget, beginAnchor.getMargin(), strength);
                     system.addEquality(end, endTarget, -endAnchor.getMargin(), strength);
                 }
-            }
 
-            if (variableSize && (matchConstraintDefault == MATCH_CONSTRAINT_SPREAD
-                        || matchConstraintDefault == MATCH_CONSTRAINT_WRAP)) {
-                if (matchConstraintDefault == MATCH_CONSTRAINT_WRAP) {
-                    system.addCentering(begin, beginTarget, beginAnchor.getMargin(),
-                            bias, endTarget, end, endAnchor.getMargin(), SolverVariable.STRENGTH_FIXED);
-                } else if (matchConstraintDefault == MATCH_CONSTRAINT_SPREAD) {
-                    if (matchMaxDimension > 0 || matchMinDimension > 0) {
-                        system.addCentering(begin, beginTarget, beginAnchor.getMargin(),
-                                bias, endTarget, end, endAnchor.getMargin(), SolverVariable.STRENGTH_EQUALITY);
-                    }
-                }
-            } else if (variableSize && matchConstraintDefault == MATCH_CONSTRAINT_RATIO) {
-                system.addCentering(begin, beginTarget, beginAnchor.getMargin(),
-                        bias, endTarget, end, endAnchor.getMargin(), SolverVariable.STRENGTH_EQUALITY);
             } else {
+                applyCentering = true;
                 if (parentWrapContent) {
                     system.addGreaterThan(begin, beginTarget, beginAnchor.getMargin(), SolverVariable.STRENGTH_EQUALITY);
                     system.addLowerThan(end, endTarget, -endAnchor.getMargin(), SolverVariable.STRENGTH_EQUALITY);
-                    system.addCentering(begin, beginTarget, beginAnchor.getMargin(),
-                            bias, endTarget, end, endAnchor.getMargin(), SolverVariable.STRENGTH_EQUALITY);
-                } else {
-                    system.addCentering(begin, beginTarget, beginAnchor.getMargin(),
-                            bias, endTarget, end, endAnchor.getMargin(), SolverVariable.STRENGTH_EQUALITY);
                 }
+            }
+
+            if (applyCentering) {
+                system.addCentering(begin, beginTarget, beginAnchor.getMargin(),
+                        bias, endTarget, end, endAnchor.getMargin(), centeringStrength); //SolverVariable.STRENGTH_EQUALITY);
+            }
+
+            if (applyBoundsCheck) {
+                // Al >= Tl & Ar <= Tr
+                system.addGreaterThan(begin, beginTarget, beginAnchor.getMargin(), SolverVariable.STRENGTH_FIXED);
+                system.addLowerThan(end, endTarget, -endAnchor.getMargin(), SolverVariable.STRENGTH_FIXED);
             }
         }
 

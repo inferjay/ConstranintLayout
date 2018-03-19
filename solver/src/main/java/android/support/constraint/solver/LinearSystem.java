@@ -18,6 +18,7 @@ package android.support.constraint.solver;
 
 import android.support.constraint.solver.widgets.ConstraintAnchor;
 import android.support.constraint.solver.widgets.ConstraintWidget;
+import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -55,6 +56,9 @@ public class LinearSystem {
     private int mMaxColumns = TABLE_SIZE;
     ArrayRow[] mRows = null;
 
+    // if true, will use graph optimizations
+    public boolean graphOptimizer = false;
+
     // Used in optimize()
     private boolean[] mAlreadyTestedCandidates = new boolean[TABLE_SIZE];
 
@@ -68,12 +72,21 @@ public class LinearSystem {
     private int mPoolVariablesCount = 0;
 
     private ArrayRow[] tempClientsCopy = new ArrayRow[TABLE_SIZE];
+    public static Metrics sMetrics;
 
     public LinearSystem() {
         mRows = new ArrayRow[TABLE_SIZE];
         releaseRows();
         mCache = new Cache();
         mGoal = new GoalRow(mCache);
+    }
+
+    public void fillMetrics(Metrics metrics) {
+        sMetrics = metrics;
+    }
+
+    public static Metrics getMetrics() {
+        return sMetrics;
     }
 
     interface Row {
@@ -100,6 +113,11 @@ public class LinearSystem {
         mAlreadyTestedCandidates = new boolean[TABLE_SIZE];
         mMaxColumns = TABLE_SIZE;
         mMaxRows = TABLE_SIZE;
+        if (sMetrics != null) {
+            sMetrics.tableSizeIncrease++;
+            sMetrics.maxTableSize = Math.max(sMetrics.maxTableSize, TABLE_SIZE);
+            sMetrics.lastTableSize = sMetrics.maxTableSize;
+        }
     }
 
     /**
@@ -188,6 +206,9 @@ public class LinearSystem {
     }
 
     public SolverVariable createSlackVariable() {
+        if (sMetrics != null) {
+            sMetrics.slackvariables++;
+        }
         if (mNumColumns + 1 >= mMaxColumns) {
             increaseTableSize();
         }
@@ -200,6 +221,9 @@ public class LinearSystem {
     }
 
     public SolverVariable createExtraVariable() {
+        if (sMetrics != null) {
+            sMetrics.extravariables++;
+        }
         if (mNumColumns + 1 >= mMaxColumns) {
             increaseTableSize();
         }
@@ -234,6 +258,9 @@ public class LinearSystem {
     }
 
     private SolverVariable createVariable(String name, SolverVariable.Type type) {
+        if (sMetrics != null) {
+            sMetrics.variables++;
+        }
         if (mNumColumns + 1 >= mMaxColumns) {
             increaseTableSize();
         }
@@ -251,6 +278,9 @@ public class LinearSystem {
     }
 
     public SolverVariable createErrorVariable(int strength, String prefix) {
+        if (sMetrics != null) {
+            sMetrics.errors++;
+        }
         if (mNumColumns + 1 >= mMaxColumns) {
             increaseTableSize();
         }
@@ -342,10 +372,35 @@ public class LinearSystem {
      * Minimize the current goal of the system.
      */
     public void minimize() throws Exception {
+        if (sMetrics != null) {
+            sMetrics.minimize++;
+        }
         if (DEBUG) {
             System.out.println("\n*** MINIMIZE ***\n");
         }
-        minimizeGoal(mGoal);
+        if (graphOptimizer) {
+            if (sMetrics != null) {
+                sMetrics.graphOptimizer++;
+            }
+            boolean fullySolved = true;
+            for (int i = 0; i < mNumRows; i++) {
+                ArrayRow r = mRows[i];
+                if (!r.isSimpleDefinition) {
+                    fullySolved = false;
+                    break;
+                }
+            }
+            if (!fullySolved) {
+                minimizeGoal(mGoal);
+            } else {
+                if (sMetrics != null) {
+                    sMetrics.fullySolved++;
+                }
+                computeValues();
+            }
+        } else {
+            minimizeGoal(mGoal);
+        }
         if (DEBUG) {
             System.out.println("\n*** END MINIMIZE ***\n");
         }
@@ -356,6 +411,11 @@ public class LinearSystem {
      * @param goal the goal to minimize.
      */
     void minimizeGoal(Row goal) throws Exception {
+        if (sMetrics != null) {
+            sMetrics.minimizeGoal++;
+            sMetrics.maxVariables = Math.max(sMetrics.maxVariables, mNumColumns);
+            sMetrics.maxRows = Math.max(sMetrics.maxRows, mNumRows);
+        }
         // First, let's make sure that the system is in Basic Feasible Solved Form (BFS), i.e.
         // all the constants of the restricted variables should be positive.
         if (DEBUG) {
@@ -399,6 +459,12 @@ public class LinearSystem {
         if (row == null) {
             return;
         }
+        if (sMetrics != null) {
+            sMetrics.constraints++;
+            if (row.isSimpleDefinition) {
+                sMetrics.simpleconstraints++;
+            }
+        }
         if (mNumRows + 1 >= mMaxRows || mNumColumns + 1 >= mMaxColumns) {
             increaseTableSize();
         }
@@ -440,6 +506,9 @@ public class LinearSystem {
                         // move extra to be parametric
                         SolverVariable pivotCandidate = row.pickPivot(extra);
                         if (pivotCandidate != null) {
+                            if (sMetrics != null) {
+                                sMetrics.pivots++;
+                            }
                             row.pivot(pivotCandidate);
                             row.updateClientEquations();
                         }
@@ -546,6 +615,9 @@ public class LinearSystem {
      * @return number of iterations.
      */
     private int optimize(Row goal, boolean b) {
+        if (sMetrics != null) {
+            sMetrics.optimize++;
+        }
         boolean done = false;
         int tries = 0;
         for (int i = 0; i < mNumColumns; i++) {
@@ -561,6 +633,9 @@ public class LinearSystem {
         }
 
         while (!done) {
+            if (sMetrics != null) {
+                sMetrics.iterations++;
+            }
             tries++;
             if (DEBUG) {
                 System.out.println("\n******************************");
@@ -636,6 +711,9 @@ public class LinearSystem {
                     }
                     ArrayRow pivotEquation = mRows[pivotRowIndex];
                     pivotEquation.variable.definitionId = -1;
+                    if (sMetrics != null) {
+                        sMetrics.pivots++;
+                    }
                     pivotEquation.pivot(pivotCandidate);
                     pivotEquation.updateClientEquations();
                     pivotEquation.variable.definitionId = pivotRowIndex;
@@ -717,6 +795,9 @@ public class LinearSystem {
             done = false;
             tries = 0;
             while (!done) {
+                if (sMetrics != null) {
+                    sMetrics.bfs++;
+                }
                 tries++;
                 if (DEBUG) {
                     System.out.println("iteration on infeasible system " + tries);
@@ -769,6 +850,9 @@ public class LinearSystem {
                                 + mCache.mIndexedVariables[pivotColumnIndex]);
                     }
                     pivotEquation.variable.definitionId = -1;
+                    if (sMetrics != null) {
+                        sMetrics.pivots++;
+                    }
                     pivotEquation.pivot(mCache.mIndexedVariables[pivotColumnIndex]);
                     pivotEquation.updateClientEquations();
                     pivotEquation.variable.definitionId = pivotRowIndex;

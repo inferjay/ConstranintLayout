@@ -23,6 +23,454 @@ import static org.testng.Assert.assertEquals;
 public class OptimizationsTest {
 
     @Test
+    public void test3EltsChain() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        C.setDebugName("C");
+        root.add(A);
+        root.add(B);
+        root.add(C);
+
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        B.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        C.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 40);
+        A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT);
+        B.connect(ConstraintAnchor.Type.RIGHT, C, ConstraintAnchor.Type.LEFT);
+        C.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.RIGHT);
+        C.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, 30);
+
+        Metrics metrics = new Metrics();
+        root.fillMetrics(metrics);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+//        root.setOptimizationLevel(Optimizer.OPTIMIZATION_NONE);
+        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_SPREAD_INSIDE);
+        root.layout();
+        System.out.println("1) root: " + root + " A: " + A + " B: " + B + " C: " + C);
+        System.out.println(metrics);
+        assertEquals(A.getLeft(), 40);
+        assertEquals(B.getLeft(), 255);
+        assertEquals(C.getLeft(), 470);
+
+        A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        C.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        root.layout();
+        System.out.println("2) root: " + root + " A: " + A + " B: " + B + " C: " + C);
+        System.out.println(metrics);
+        assertEquals(A.getLeft(), 40);
+        assertEquals(B.getLeft(), 217,1);
+        assertEquals(C.getLeft(), 393);
+        assertEquals(A.getWidth(), 177, 1);
+        assertEquals(B.getWidth(), 176, 1);
+        assertEquals(C.getWidth(), 177, 1);
+
+        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_SPREAD);
+        A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT, 7);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT, 3);
+        B.connect(ConstraintAnchor.Type.RIGHT, C, ConstraintAnchor.Type.LEFT, 7);
+        C.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.RIGHT, 3);
+
+        root.layout();
+        System.out.println("3) root: " + root + " A: " + A + " B: " + B + " C: " + C);
+        System.out.println(metrics);
+
+        assertEquals(A.getLeft(), 50);
+        assertEquals(B.getLeft(), 223);
+        assertEquals(C.getLeft(), 397, 1);
+        assertEquals(A.getWidth(), 163, 1);
+        assertEquals(B.getWidth(), 163, 1);
+        assertEquals(C.getWidth(), 163, 1);
+
+        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_SPREAD_INSIDE);
+
+        A.setVisibility(ConstraintWidget.GONE);
+        root.layout();
+        System.out.println("4) root: " + root + " A: " + A + " B: " + B + " C: " + C);
+        System.out.println(metrics);
+        assertEquals(A.getLeft(), 0);
+        assertEquals(B.getLeft(), 3);
+        assertEquals(C.getLeft(), 292,1 );
+        assertEquals(A.getWidth(), 0);
+        assertEquals(B.getWidth(), 279, 1);
+        assertEquals(C.getWidth(), 278, 1);
+    }
+
+    @Test
+    public void testBasicChain() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        root.add(A);
+        root.add(B);
+
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        B.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT);
+        B.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+
+        Metrics metrics = new Metrics();
+        root.fillMetrics(metrics);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        root.layout();
+        System.out.println("1) root: " + root + " A: " + A + " B: " + B);
+        System.out.println(metrics);
+        assertEquals(A.getLeft(), 133);
+        assertEquals(B.getLeft(), 367, 1);
+
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        C.setDebugName("C");
+        root.add(C);
+        C.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        C.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.RIGHT);
+        root.layout();
+        System.out.println("2) root: " + root + " A: " + A + " B: " + B);
+        System.out.println(metrics);
+        assertEquals(A.getLeft(), 133);
+        assertEquals(B.getLeft(), 367, 1);
+        assertEquals(C.getLeft(), B.getRight());
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 40);
+        A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT, 100);
+        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_PACKED);
+
+        root.layout();
+        System.out.println("3) root: " + root + " A: " + A + " B: " + B);
+        System.out.println(metrics);
+        assertEquals(A.getLeft(), 170);
+        assertEquals(B.getLeft(), 370);
+
+        A.setHorizontalBiasPercent(0);
+        root.layout();
+        System.out.println("4) root: " + root + " A: " + A + " B: " + B);
+        System.out.println(metrics);
+        assertEquals(A.getLeft(), 40);
+        assertEquals(B.getLeft(), 240);
+
+        A.setHorizontalBiasPercent(0.5f);
+        A.setVisibility(ConstraintWidget.GONE);
+//        root.setOptimizationLevel(Optimizer.OPTIMIZATION_NONE);
+        root.layout();
+        System.out.println("5) root: " + root + " A: " + A + " B: " + B);
+        System.out.println(metrics);
+        assertEquals(A.getLeft(), 250);
+        assertEquals(B.getLeft(), 250);
+    }
+
+    @Test
+    public void testBasicRatio() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        root.add(A);
+        root.add(B);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT);
+        B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.TOP);
+        B.connect(ConstraintAnchor.Type.BOTTOM, A, ConstraintAnchor.Type.BOTTOM);
+        A.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setDimensionRatio("1:1");
+        Metrics metrics = new Metrics();
+        root.fillMetrics(metrics);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        root.layout();
+        System.out.println("1) root: " + root + " A: " + A + " B: " + B);
+        System.out.println(metrics);
+        assertEquals(A.getHeight(), A.getWidth());
+        assertEquals(B.getTop(), (A.getHeight() - B.getHeight()) / 2);
+    }
+
+    @Test
+    public void testBasicBaseline() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        A.setBaselineDistance(8);
+        B.setBaselineDistance(8);
+        root.add(A);
+        root.add(B);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        A.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT);
+        B.connect(ConstraintAnchor.Type.BASELINE, A, ConstraintAnchor.Type.BASELINE);
+        Metrics metrics = new Metrics();
+        root.fillMetrics(metrics);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        root.layout();
+        System.out.println("1) root: " + root + " A: " + A + " B: " + B);
+        System.out.println(metrics);
+        assertEquals(A.getTop(), 290);
+        assertEquals(B.getTop(), A.getTop());
+    }
+
+    @Test
+    public void testBasicMatchConstraints() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        root.add(A);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        A.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        A.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+        A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        Metrics metrics = new Metrics();
+        root.fillMetrics(metrics);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        root.layout();
+        System.out.println("1) root: " + root + " A: " + A);
+        System.out.println(metrics);
+        assertEquals(A.getLeft(), 0);
+        assertEquals(A.getTop(), 0);
+        assertEquals(A.getRight(), root.getWidth());
+        assertEquals(A.getBottom(), root.getHeight());
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 10);
+        A.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, 20);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 30);
+        A.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, 40);
+        root.layout();
+        System.out.println("2) root: " + root + " A: " + A);
+        System.out.println(metrics);
+        assertEquals(A.getLeft(), 30);
+        assertEquals(A.getTop(), 10);
+        assertEquals(A.getRight(), root.getWidth() - 40);
+        assertEquals(A.getBottom(), root.getHeight() - 20);
+    }
+
+    @Test
+    public void testBasicCenteringPositioning() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        A.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        A.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+        root.add(A);
+        long time = System.nanoTime();
+        Metrics metrics = new Metrics();
+        root.fillMetrics(metrics);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        root.layout();
+        time = System.nanoTime() - time;
+        System.out.println("A) execution time: " + time);
+        System.out.println("1) root: " + root + " A: " + A);
+        System.out.println(metrics);
+        assertEquals(A.getLeft(), (root.getWidth() - A.getWidth()) / 2);
+        assertEquals(A.getTop(), (root.getHeight() - A.getHeight()) / 2);
+        A.setHorizontalBiasPercent(0.3f);
+        A.setVerticalBiasPercent(0.3f);
+        root.layout();
+        System.out.println("2) root: " + root + " A: " + A);
+        System.out.println(metrics);
+        assertEquals(A.getLeft(), (int) ((root.getWidth() - A.getWidth()) * 0.3f));
+        assertEquals(A.getTop(), (int) ((root.getHeight() - A.getHeight()) * 0.3f));
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 10);
+        A.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, 30);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 50);
+        A.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, 20);
+        root.layout();
+        System.out.println("3) root: " + root + " A: " + A);
+        System.out.println(metrics);
+        assertEquals(A.getLeft(), (int) ((root.getWidth() - A.getWidth() - 40) * 0.3f) + 10);
+        assertEquals(A.getTop(), (int) ((root.getHeight() - A.getHeight() - 70) * 0.3f) + 50);
+    }
+
+    @Test
+    public void testBasicVerticalPositioning() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        int margin = 13;
+        int marginR = 27;
+
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 31);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 27);
+        B.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 27);
+        B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM, 104);
+        root.add(A);
+        root.add(B);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        long time = System.nanoTime();
+        root.layout();
+        time = System.nanoTime() - time;
+        System.out.println("A) execution time: " + time);
+        System.out.println("a - root: " + root + " A: " + A + " B: " + B);
+
+        assertEquals(A.getLeft(), 27);
+        assertEquals(A.getTop(), 31);
+        assertEquals(B.getLeft(), 27);
+        assertEquals(B.getTop(), 155);
+
+        A.setVisibility(ConstraintWidget.GONE);
+        Metrics metrics = new Metrics();
+        root.fillMetrics(metrics);
+        root.layout();
+        System.out.println("b - root: " + root + " A: " + A + " B: " + B);
+        System.out.println(metrics);
+        assertEquals(A.getLeft(), 0);
+        assertEquals(A.getTop(), 0);
+        assertEquals(B.getLeft(), 27);
+        assertEquals(B.getTop(), 104);
+        // root: id: root (0, 0) - (600 x 600) wrap: (0 x 0) A: id: A (27, 31) - (100 x 20) wrap: (0 x 0) B: id: B (27, 155) - (100 x 20) wrap: (0 x 0)
+
+    }
+
+    @Test
+    public void testBasicVerticalGuidelinePositioning() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        Guideline guidelineA = new Guideline();
+        guidelineA.setOrientation(Guideline.HORIZONTAL);
+        guidelineA.setGuideEnd(67);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        guidelineA.setDebugName("guideline");
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 31);
+        A.connect(ConstraintAnchor.Type.BOTTOM, guidelineA, ConstraintAnchor.Type.TOP, 12);
+        root.add(A);
+        root.add(guidelineA);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        long time = System.nanoTime();
+        root.layout();
+        time = System.nanoTime() - time;
+        System.out.println("A) execution time: " + time);
+        System.out.println("root: " + root + " A: " + A + " guide: " +guidelineA);
+        assertEquals(A.getTop(), 266);
+        assertEquals(guidelineA.getTop(), 533);
+    }
+
+    @Test
+    public void testSimpleCenterPositioning() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        int margin = 13;
+        int marginR = 27;
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, margin);
+        A.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM, -margin);
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, margin);
+        A.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, -marginR);
+        root.add(A);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        long time = System.nanoTime();
+        root.layout();
+        time = System.nanoTime() - time;
+        System.out.println("A) execution time: " + time);
+        System.out.println("root: " + root + " A: " + A);
+        assertEquals(A.getLeft(), 257, 1);
+        assertEquals(A.getTop(), 297, 1);
+    }
+
+    @Test
+    public void testSimpleGuideline() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        Guideline guidelineA = new Guideline();
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        guidelineA.setOrientation(Guideline.VERTICAL);
+        guidelineA.setGuideBegin(100);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        guidelineA.setDebugName("guidelineA");
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 32);
+        A.connect(ConstraintAnchor.Type.LEFT, guidelineA, ConstraintAnchor.Type.LEFT, 2);
+        A.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, 7);
+        A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        root.add(guidelineA);
+        root.add(A);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        Metrics metrics = new Metrics();
+        root.fillMetrics(metrics);
+        long time = System.nanoTime();
+        root.layout();
+        assertEquals(A.getLeft(), 102);
+        assertEquals(A.getTop(), 32);
+        assertEquals(A.getWidth(), 491);
+        assertEquals(A.getHeight(), 20);
+        assertEquals(guidelineA.getLeft(), 100);
+        time = System.nanoTime() - time;
+        System.out.println("A) execution time: " + time);
+        System.out.println("root: " + root + " A: " + A + " guideline: " + guidelineA);
+        System.out.println(metrics);
+        root.setWidth(700);
+        time = System.nanoTime();
+        root.layout();
+        time = System.nanoTime() - time;
+        System.out.println("B) execution time: " + time);
+        System.out.println("root: " + root + " A: " + A + " guideline: " + guidelineA);
+        System.out.println(metrics);
+        assertEquals(A.getLeft(), 102);
+        assertEquals(A.getTop(), 32);
+        assertEquals(A.getWidth(), 591);
+        assertEquals(A.getHeight(), 20);
+        assertEquals(guidelineA.getLeft(), 100);
+    }
+
+    @Test
+    public void testSimple() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        C.setDebugName("C");
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 10);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP, 20);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT, 10);
+        B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM, 20);
+        C.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT, 30);
+        C.connect(ConstraintAnchor.Type.TOP, B, ConstraintAnchor.Type.BOTTOM, 20);
+        root.add(A);
+        root.add(B);
+        root.add(C);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+
+        long time = System.nanoTime();
+        root.layout();
+        time = System.nanoTime() - time;
+        System.out.println("execution time: " + time);
+        System.out.println("root: " + root + " A: " + A + " B: " + B + " C: " + C);
+
+        assertEquals(A.getLeft(), 10);
+        assertEquals(A.getTop(), 20);
+        assertEquals(B.getLeft(), 120);
+        assertEquals(B.getTop(), 60);
+        assertEquals(C.getLeft(), 140);
+        assertEquals(C.getTop(), 100);
+    }
+
+    @Test
     public void testGuideline() {
         testVerticalGuideline(Optimizer.OPTIMIZATION_NONE);
         testVerticalGuideline(Optimizer.OPTIMIZATION_ALL);

@@ -33,6 +33,11 @@ public class Barrier extends Helper {
 
     private int mBarrierType = LEFT;
 
+    @Override
+    public boolean allowedInBarrier() {
+        return true;
+    }
+
     public void setBarrierType(int barrierType) {
         mBarrierType = barrierType;
     }
@@ -61,12 +66,16 @@ public class Barrier extends Helper {
         // match_constraint; we have to take it in account to set the strength of the barrier.
         boolean hasMatchConstraintWidgets = false;
         for (int i = 0; i < mWidgetsCount; i++) {
+            ConstraintWidget widget = mWidgets[i];
+            if (!widget.allowedInBarrier()) {
+                continue;
+            }
             if ((mBarrierType == LEFT || mBarrierType == RIGHT)
-                && mWidgets[i].getHorizontalDimensionBehaviour() == DimensionBehaviour.MATCH_CONSTRAINT) {
+                && widget.getHorizontalDimensionBehaviour() == DimensionBehaviour.MATCH_CONSTRAINT) {
                 hasMatchConstraintWidgets = true;
                 break;
             } else if ((mBarrierType == TOP || mBarrierType == BOTTOM)
-                    && mWidgets[i].getVerticalDimensionBehaviour() == DimensionBehaviour.MATCH_CONSTRAINT) {
+                    && widget.getVerticalDimensionBehaviour() == DimensionBehaviour.MATCH_CONSTRAINT) {
                 hasMatchConstraintWidgets = true;
                 break;
             }
@@ -81,8 +90,12 @@ public class Barrier extends Helper {
             }
         }
         for (int i = 0; i < mWidgetsCount; i++) {
-            SolverVariable target = system.createObjectVariable(mWidgets[i].mListAnchors[mBarrierType]);
-            mWidgets[i].mListAnchors[mBarrierType].mSolverVariable = target;
+            ConstraintWidget widget = mWidgets[i];
+            if (!widget.allowedInBarrier()) {
+                continue;
+            }
+            SolverVariable target = system.createObjectVariable(widget.mListAnchors[mBarrierType]);
+            widget.mListAnchors[mBarrierType].mSolverVariable = target;
             if (mBarrierType == LEFT || mBarrierType == TOP) {
                 system.addLowerBarrier(position.mSolverVariable, target, hasMatchConstraintWidgets);
             } else {
@@ -93,22 +106,22 @@ public class Barrier extends Helper {
         if (mBarrierType == LEFT) {
             system.addEquality(mRight.mSolverVariable, mLeft.mSolverVariable, 0, SolverVariable.STRENGTH_FIXED);
             if (!hasMatchConstraintWidgets) {
-                system.addEquality(mLeft.mSolverVariable, mParent.mRight.mSolverVariable, 0, SolverVariable.STRENGTH_NONE);
+                system.addEquality(mLeft.mSolverVariable, mParent.mRight.mSolverVariable, 0, SolverVariable.STRENGTH_EQUALITY);
             }
         } else if (mBarrierType == RIGHT) {
             system.addEquality(mLeft.mSolverVariable, mRight.mSolverVariable, 0, SolverVariable.STRENGTH_FIXED);
             if (!hasMatchConstraintWidgets) {
-                system.addEquality(mLeft.mSolverVariable, mParent.mLeft.mSolverVariable, 0, SolverVariable.STRENGTH_NONE);
+                system.addEquality(mLeft.mSolverVariable, mParent.mLeft.mSolverVariable, 0, SolverVariable.STRENGTH_EQUALITY);
             }
         } else if (mBarrierType == TOP) {
             system.addEquality(mBottom.mSolverVariable, mTop.mSolverVariable, 0, SolverVariable.STRENGTH_FIXED);
             if (!hasMatchConstraintWidgets) {
-                system.addEquality(mTop.mSolverVariable, mParent.mBottom.mSolverVariable, 0, SolverVariable.STRENGTH_NONE);
+                system.addEquality(mTop.mSolverVariable, mParent.mBottom.mSolverVariable, 0, SolverVariable.STRENGTH_EQUALITY);
             }
         } else if (mBarrierType == BOTTOM) {
             system.addEquality(mTop.mSolverVariable, mBottom.mSolverVariable, 0, SolverVariable.STRENGTH_FIXED);
             if (!hasMatchConstraintWidgets) {
-                system.addEquality(mTop.mSolverVariable, mParent.mTop.mSolverVariable, 0, SolverVariable.STRENGTH_NONE);
+                system.addEquality(mTop.mSolverVariable, mParent.mTop.mSolverVariable, 0, SolverVariable.STRENGTH_EQUALITY);
             }
         }
     }

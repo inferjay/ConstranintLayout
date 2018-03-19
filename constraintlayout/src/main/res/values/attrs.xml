@@ -139,10 +139,11 @@
     <!-- Used at design time to define to position the view -->
     <attr name="layout_editor_absoluteY" format="dimension"/>
 
-    <!-- Used to set the type of optimization we apply -->
+    <!-- Used to set the type of optimization we apply. This is a mask. -->
     <attr name="layout_optimizationLevel">
         <flag name="none" value="1"/>
-        <flag name="all" value="2" />
+        <flag name="all" value="6" />
+        <flag name="graph" value="2"/>
         <flag name="basic" value="4"/>
         <flag name="chains" value="8"/>
     </attr>
