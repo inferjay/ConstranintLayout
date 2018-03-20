@@ -317,13 +317,12 @@ class Chain {
                     SolverVariable beginNext = null;
                     SolverVariable beginNextTarget = null;
                     int beginMargin = beginAnchor.getMargin();
-                    int nextMargin = 0;
+                    int nextMargin = widget.mListAnchors[offset + 1].getMargin();
 
                     if (next != null) {
                         beginNextAnchor = next.mListAnchors[offset];
                         beginNext = beginNextAnchor.mSolverVariable;
                         beginNextTarget = beginNextAnchor.mTarget != null ? beginNextAnchor.mTarget.mSolverVariable : null;
-                        nextMargin = beginNextAnchor.getMargin();
                     } else {
                         beginNextAnchor = last.mListAnchors[offset + 1].mTarget;
                         if (beginNextAnchor != null) {
@@ -332,12 +331,18 @@ class Chain {
                         beginNextTarget = widget.mListAnchors[offset + 1].mSolverVariable;
                     }
 
+                    if (beginNextAnchor != null) {
+                        nextMargin += beginNextAnchor.getMargin();
+                    }
+                    if (previousVisibleWidget != null) {
+                        beginMargin += previousVisibleWidget.mListAnchors[offset + 1].getMargin();
+                    }
                     if (begin != null && beginTarget != null && beginNext != null && beginNextTarget != null) {
-                        int margin1 = 0;
+                        int margin1 = beginMargin;
                         if (widget == firstVisibleWidget) {
                             margin1 = firstVisibleWidget.mListAnchors[offset].getMargin();
                         }
-                        int margin2 = 0;
+                        int margin2 = nextMargin;
                         if (widget == lastVisibleWidget) {
                             margin2 = lastVisibleWidget.mListAnchors[offset + 1].getMargin();
                         }
@@ -355,7 +360,7 @@ class Chain {
             ConstraintWidget previousVisibleWidget = firstVisibleWidget;
             while (widget != null) {
                 next = widget.mListNextVisibleWidget[orientation];
-                if (widget != firstVisibleWidget && next != null) {
+                if (widget != firstVisibleWidget && widget != lastVisibleWidget && next != null) {
                     if (next == lastVisibleWidget) {
                         next = null;
                     }
@@ -367,13 +372,12 @@ class Chain {
                     SolverVariable beginNext = null;
                     SolverVariable beginNextTarget = null;
                     int beginMargin = beginAnchor.getMargin();
-                    int nextMargin = 0;
+                    int nextMargin = widget.mListAnchors[offset + 1].getMargin();
 
                     if (next != null) {
                         beginNextAnchor = next.mListAnchors[offset];
                         beginNext = beginNextAnchor.mSolverVariable;
                         beginNextTarget = beginNextAnchor.mTarget != null ? beginNextAnchor.mTarget.mSolverVariable : null;
-                        nextMargin = beginNextAnchor.getMargin();
                     } else {
                         beginNextAnchor = widget.mListAnchors[offset + 1].mTarget;
                         if (beginNextAnchor != null) {
@@ -382,9 +386,15 @@ class Chain {
                         beginNextTarget = widget.mListAnchors[offset + 1].mSolverVariable;
                     }
 
+                    if (beginNextAnchor != null) {
+                        nextMargin += beginNextAnchor.getMargin();
+                    }
+                    if (previousVisibleWidget != null) {
+                        beginMargin += previousVisibleWidget.mListAnchors[offset + 1].getMargin();
+                    }
                     if (begin != null && beginTarget != null && beginNext != null && beginNextTarget != null) {
-                        system.addCentering(begin, beginTarget, 0, 0.5f,
-                                beginNext, beginNextTarget, 0,
+                        system.addCentering(begin, beginTarget, beginMargin, 0.5f,
+                                beginNext, beginNextTarget, nextMargin,
                                 SolverVariable.STRENGTH_HIGHEST);
                     }
                 }

@@ -28,6 +28,40 @@ import static org.testng.Assert.assertEquals;
 public class ChainTest {
 
     @Test
+    public void testSpreadInsideChain2() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        C.setDebugName("C");
+        root.add(A);
+        root.add(B);
+        root.add(C);
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT);
+        B.connect(ConstraintAnchor.Type.RIGHT, C, ConstraintAnchor.Type.LEFT);
+        C.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.RIGHT, 25);
+        C.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+
+        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_SPREAD_INSIDE);
+        B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+
+        root.layout();
+        System.out.println("A: " + A + " B: " + B + " C: " + C);
+        assertEquals(A.getLeft(), 0);
+        assertEquals(A.getRight(), 100);
+        assertEquals(B.getLeft(), 100);
+        assertEquals(B.getRight(), 475);
+        assertEquals(C.getLeft(), 500);
+        assertEquals(C.getRight(), 600);
+    }
+
+    @Test
     public void testPackChain() {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
         ConstraintWidget A = new ConstraintWidget(100, 20);
