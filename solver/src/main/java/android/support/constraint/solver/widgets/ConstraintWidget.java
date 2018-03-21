@@ -2483,7 +2483,7 @@ public class ConstraintWidget {
                 if (parentWrapContent) {
                     system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_FIXED);
                 } else if (inChain) {
-                    system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_EQUALITY);
+                    system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_HIGHEST);
                 } else {
                     system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_LOW);
                 }
@@ -2578,7 +2578,7 @@ public class ConstraintWidget {
                     if (!useRatio) {
                         // useRatio is true if the side we base ourselves on for the ratio is this one
                         // in that case, we need to have a stronger constraint.
-                        strength = SolverVariable.STRENGTH_EQUALITY;
+                        strength = SolverVariable.STRENGTH_HIGHEST;
                     }
                     system.addEquality(begin, beginTarget, beginAnchor.getMargin(), strength);
                     system.addEquality(end, endTarget, -endAnchor.getMargin(), strength);

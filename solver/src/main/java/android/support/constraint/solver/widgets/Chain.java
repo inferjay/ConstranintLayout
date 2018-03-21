@@ -161,8 +161,13 @@ class Chain {
                 strength = SolverVariable.STRENGTH_FIXED;
             }
 
-            system.addGreaterThan(begin.mSolverVariable, begin.mTarget.mSolverVariable,
-                    margin, SolverVariable.STRENGTH_FIXED);
+            if (widget == firstVisibleWidget) {
+                system.addGreaterThan(begin.mSolverVariable, begin.mTarget.mSolverVariable,
+                        margin, SolverVariable.STRENGTH_EQUALITY);
+            } else {
+                system.addGreaterThan(begin.mSolverVariable, begin.mTarget.mSolverVariable,
+                        margin, SolverVariable.STRENGTH_FIXED);
+            }
             system.addEquality(begin.mSolverVariable, begin.mTarget.mSolverVariable, margin, strength);
 
             // First, let's maintain a linked list of matched widgets for the chain
@@ -212,7 +217,7 @@ class Chain {
             ConstraintAnchor end = lastVisibleWidget.mListAnchors[offset + 1];
             system.addLowerThan(end.mSolverVariable,
                     last.mListAnchors[offset + 1].mTarget.mSolverVariable, -end.getMargin(),
-                    SolverVariable.STRENGTH_FIXED);
+                    SolverVariable.STRENGTH_EQUALITY);
         }
 
         // ... and make sure the root end is constrained in wrap content.
@@ -407,14 +412,38 @@ class Chain {
             ConstraintAnchor endTarget = last.mListAnchors[offset + 1].mTarget;
             if (beginTarget != null) {
                 if (firstVisibleWidget != lastVisibleWidget) {
-                    system.addEquality(begin.mSolverVariable, beginTarget.mSolverVariable, begin.getMargin(), SolverVariable.STRENGTH_FIXED);
+                    system.addEquality(begin.mSolverVariable, beginTarget.mSolverVariable, begin.getMargin(), SolverVariable.STRENGTH_EQUALITY);
                 } else if (endTarget != null) {
                     system.addCentering(begin.mSolverVariable, beginTarget.mSolverVariable, begin.getMargin(), 0.5f,
-                            end.mSolverVariable, endTarget.mSolverVariable, end.getMargin(), SolverVariable.STRENGTH_FIXED);
+                            end.mSolverVariable, endTarget.mSolverVariable, end.getMargin(), SolverVariable.STRENGTH_EQUALITY);
                 }
             }
             if (endTarget != null && (firstVisibleWidget != lastVisibleWidget)) {
-                system.addEquality(end.mSolverVariable, endTarget.mSolverVariable, -end.getMargin(), SolverVariable.STRENGTH_FIXED);
+                system.addEquality(end.mSolverVariable, endTarget.mSolverVariable, -end.getMargin(), SolverVariable.STRENGTH_EQUALITY);
+            }
+
+        }
+
+        // final centering
+        if ((isChainSpread || isChainSpreadInside) && firstVisibleWidget != null) {
+            ConstraintAnchor begin = firstVisibleWidget.mListAnchors[offset];
+            ConstraintAnchor end = lastVisibleWidget.mListAnchors[offset + 1];
+            SolverVariable beginTarget = begin.mTarget != null ? begin.mTarget.mSolverVariable : null;
+            SolverVariable endTarget = end.mTarget != null ? end.mTarget.mSolverVariable : null;
+            if (firstVisibleWidget == lastVisibleWidget) {
+                begin = firstVisibleWidget.mListAnchors[offset];
+                end = firstVisibleWidget.mListAnchors[offset + 1];
+            }
+            if (beginTarget != null && endTarget != null) {
+                float bias = 0.5f;
+                int beginMargin = begin.getMargin();
+                if (lastVisibleWidget == null) {
+                    // everything is hidden
+                    lastVisibleWidget = last;
+                }
+                int endMargin = lastVisibleWidget.mListAnchors[offset + 1].getMargin();
+                system.addCentering(begin.mSolverVariable, beginTarget, beginMargin, bias,
+                        endTarget, end.mSolverVariable, endMargin, SolverVariable.STRENGTH_EQUALITY);
             }
         }
     }
