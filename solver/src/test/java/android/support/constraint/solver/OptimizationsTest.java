@@ -49,7 +49,7 @@ public class OptimizationsTest {
 
         Metrics metrics = new Metrics();
         root.fillMetrics(metrics);
-        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
 //        root.setOptimizationLevel(Optimizer.OPTIMIZATION_NONE);
         A.setHorizontalChainStyle(ConstraintWidget.CHAIN_SPREAD_INSIDE);
         root.layout();
@@ -82,12 +82,12 @@ public class OptimizationsTest {
         System.out.println("3) root: " + root + " A: " + A + " B: " + B + " C: " + C);
         System.out.println(metrics);
 
-        assertEquals(A.getLeft(), 50);
-        assertEquals(B.getLeft(), 223);
-        assertEquals(C.getLeft(), 397, 1);
-        assertEquals(A.getWidth(), 163, 1);
-        assertEquals(B.getWidth(), 163, 1);
-        assertEquals(C.getWidth(), 163, 1);
+        assertEquals(A.getLeft(), 40);
+        assertEquals(B.getLeft(), 220);
+        assertEquals(C.getLeft(), 400, 1);
+        assertEquals(A.getWidth(), 170, 1);
+        assertEquals(B.getWidth(), 170, 1);
+        assertEquals(C.getWidth(), 170, 1);
 
         A.setHorizontalChainStyle(ConstraintWidget.CHAIN_SPREAD_INSIDE);
 
@@ -124,7 +124,7 @@ public class OptimizationsTest {
 
         Metrics metrics = new Metrics();
         root.fillMetrics(metrics);
-        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
         root.layout();
         System.out.println("1) root: " + root + " A: " + A + " B: " + B);
         System.out.println(metrics);
@@ -189,7 +189,7 @@ public class OptimizationsTest {
         A.setDimensionRatio("1:1");
         Metrics metrics = new Metrics();
         root.fillMetrics(metrics);
-        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
         root.layout();
         System.out.println("1) root: " + root + " A: " + A + " B: " + B);
         System.out.println(metrics);
@@ -216,7 +216,7 @@ public class OptimizationsTest {
         B.connect(ConstraintAnchor.Type.BASELINE, A, ConstraintAnchor.Type.BASELINE);
         Metrics metrics = new Metrics();
         root.fillMetrics(metrics);
-        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
         root.layout();
         System.out.println("1) root: " + root + " A: " + A + " B: " + B);
         System.out.println(metrics);
@@ -239,7 +239,7 @@ public class OptimizationsTest {
         A.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
         Metrics metrics = new Metrics();
         root.fillMetrics(metrics);
-        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
         root.layout();
         System.out.println("1) root: " + root + " A: " + A);
         System.out.println(metrics);
@@ -274,7 +274,7 @@ public class OptimizationsTest {
         long time = System.nanoTime();
         Metrics metrics = new Metrics();
         root.fillMetrics(metrics);
-        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
         root.layout();
         time = System.nanoTime() - time;
         System.out.println("A) execution time: " + time);
@@ -317,7 +317,7 @@ public class OptimizationsTest {
         B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM, 104);
         root.add(A);
         root.add(B);
-        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
         long time = System.nanoTime();
         root.layout();
         time = System.nanoTime() - time;
@@ -357,7 +357,7 @@ public class OptimizationsTest {
         A.connect(ConstraintAnchor.Type.BOTTOM, guidelineA, ConstraintAnchor.Type.TOP, 12);
         root.add(A);
         root.add(guidelineA);
-        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
         long time = System.nanoTime();
         root.layout();
         time = System.nanoTime() - time;
@@ -380,7 +380,7 @@ public class OptimizationsTest {
         A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, margin);
         A.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, -marginR);
         root.add(A);
-        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
         long time = System.nanoTime();
         root.layout();
         time = System.nanoTime() - time;
@@ -406,7 +406,7 @@ public class OptimizationsTest {
         A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
         root.add(guidelineA);
         root.add(A);
-        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
         Metrics metrics = new Metrics();
         root.fillMetrics(metrics);
         long time = System.nanoTime();
@@ -454,7 +454,7 @@ public class OptimizationsTest {
         root.add(A);
         root.add(B);
         root.add(C);
-        root.setOptimizationLevel(Optimizer.OPTIMIZATION_GRAPH);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
 
         long time = System.nanoTime();
         root.layout();
@@ -473,9 +473,9 @@ public class OptimizationsTest {
     @Test
     public void testGuideline() {
         testVerticalGuideline(Optimizer.OPTIMIZATION_NONE);
-        testVerticalGuideline(Optimizer.OPTIMIZATION_ALL);
+        testVerticalGuideline(Optimizer.OPTIMIZATION_STANDARD);
         testHorizontalGuideline(Optimizer.OPTIMIZATION_NONE);
-        testHorizontalGuideline(Optimizer.OPTIMIZATION_ALL);
+        testHorizontalGuideline(Optimizer.OPTIMIZATION_STANDARD);
     }
 
     public void testVerticalGuideline(int directResolution) {
@@ -557,7 +557,7 @@ public class OptimizationsTest {
     @Test
     public void testBasicCentering() {
         testBasicCentering(Optimizer.OPTIMIZATION_NONE);
-        testBasicCentering(Optimizer.OPTIMIZATION_ALL);
+        testBasicCentering(Optimizer.OPTIMIZATION_STANDARD);
     }
 
     public void testBasicCentering(int directResolution) {
@@ -580,7 +580,7 @@ public class OptimizationsTest {
     @Test
     public void testPercent() {
         testPercent(Optimizer.OPTIMIZATION_NONE);
-        testPercent(Optimizer.OPTIMIZATION_ALL);
+        testPercent(Optimizer.OPTIMIZATION_STANDARD);
     }
 
     public void testPercent(int directResolution) {
@@ -607,7 +607,7 @@ public class OptimizationsTest {
     @Test
     public void testDependency() {
         testDependency(Optimizer.OPTIMIZATION_NONE);
-        testDependency(Optimizer.OPTIMIZATION_ALL);
+        testDependency(Optimizer.OPTIMIZATION_STANDARD);
     }
 
     public void testDependency(int directResolution) {
@@ -646,7 +646,7 @@ public class OptimizationsTest {
     @Test
     public void testDependency2() {
         testDependency2(Optimizer.OPTIMIZATION_NONE);
-        testDependency2(Optimizer.OPTIMIZATION_ALL);
+        testDependency2(Optimizer.OPTIMIZATION_STANDARD);
     }
 
     public void testDependency2(int directResolution) {
@@ -684,7 +684,7 @@ public class OptimizationsTest {
     @Test
     public void testDependency3() {
         testDependency3(Optimizer.OPTIMIZATION_NONE);
-        testDependency3(Optimizer.OPTIMIZATION_ALL);
+        testDependency3(Optimizer.OPTIMIZATION_STANDARD);
     }
 
     public void testDependency3(int directResolution) {
@@ -724,7 +724,7 @@ public class OptimizationsTest {
     @Test
     public void testDependency4() {
         testDependency4(Optimizer.OPTIMIZATION_NONE);
-        testDependency4(Optimizer.OPTIMIZATION_ALL);
+        testDependency4(Optimizer.OPTIMIZATION_STANDARD);
     }
 
     public void testDependency4(int directResolution) {
@@ -757,7 +757,7 @@ public class OptimizationsTest {
     @Test
     public void testDependency5() {
         testDependency5(Optimizer.OPTIMIZATION_NONE);
-        testDependency5(Optimizer.OPTIMIZATION_ALL);
+        testDependency5(Optimizer.OPTIMIZATION_STANDARD);
     }
 
     public void testDependency5(int directResolution) {
@@ -808,7 +808,7 @@ public class OptimizationsTest {
     @Test
     public void testUnconstrainedDependency() {
         testUnconstrainedDependency(Optimizer.OPTIMIZATION_NONE);
-        testUnconstrainedDependency(Optimizer.OPTIMIZATION_ALL);
+        testUnconstrainedDependency(Optimizer.OPTIMIZATION_STANDARD);
     }
 
     public void testUnconstrainedDependency(int directResolution) {
@@ -848,7 +848,7 @@ public class OptimizationsTest {
     @Test
     public void testFullLayout() {
         testFullLayout(Optimizer.OPTIMIZATION_NONE);
-        testFullLayout(Optimizer.OPTIMIZATION_ALL);
+        testFullLayout(Optimizer.OPTIMIZATION_STANDARD);
     }
 
     public void testFullLayout(int directResolution) {

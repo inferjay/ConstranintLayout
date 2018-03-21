@@ -28,7 +28,7 @@ public class ChainWrapContentTest {
     @Test
     public void testVertWrapContentChain() {
         testVertWrapContentChain(Optimizer.OPTIMIZATION_NONE);
-        testVertWrapContentChain(Optimizer.OPTIMIZATION_ALL);
+        testVertWrapContentChain(Optimizer.OPTIMIZATION_STANDARD);
     }
 
     public void testVertWrapContentChain(int directResolution) {
@@ -64,7 +64,7 @@ public class ChainWrapContentTest {
     @Test
     public void testHorizWrapContentChain() {
         testHorizWrapContentChain(Optimizer.OPTIMIZATION_NONE);
-        testHorizWrapContentChain(Optimizer.OPTIMIZATION_ALL);
+        testHorizWrapContentChain(Optimizer.OPTIMIZATION_STANDARD);
     }
 
     public void testHorizWrapContentChain(int directResolution) {
@@ -111,7 +111,7 @@ public class ChainWrapContentTest {
     @Test
     public void testVertWrapContentChain3Elts() {
         testVertWrapContentChain3Elts(Optimizer.OPTIMIZATION_NONE);
-        testVertWrapContentChain3Elts(Optimizer.OPTIMIZATION_ALL);
+        testVertWrapContentChain3Elts(Optimizer.OPTIMIZATION_STANDARD);
     }
 
     public void testVertWrapContentChain3Elts(int directResolution) {
@@ -173,7 +173,7 @@ public class ChainWrapContentTest {
     @Test
     public void testHorizWrapContentChain3Elts() {
         testHorizWrapContentChain3Elts(Optimizer.OPTIMIZATION_NONE);
-        testHorizWrapContentChain3Elts(Optimizer.OPTIMIZATION_ALL);
+        testHorizWrapContentChain3Elts(Optimizer.OPTIMIZATION_STANDARD);
     }
 
     public void testHorizWrapContentChain3Elts(int directResolution) {

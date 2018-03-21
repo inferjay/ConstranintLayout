@@ -57,7 +57,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     ConstraintWidget[] mVerticalChainsArray = new ConstraintWidget[4];
     ConstraintWidget[] mHorizontalChainsArray = new ConstraintWidget[4];
 
-    private int mOptimizationLevel = Optimizer.OPTIMIZATION_ALL;
+    private int mOptimizationLevel = Optimizer.OPTIMIZATION_STANDARD;
 
     private boolean mWidthMeasuredTooSmall = false;
     private boolean mHeightMeasuredTooSmall = false;
@@ -307,7 +307,7 @@ public class ConstraintWidgetContainer extends WidgetContainer {
             mY = 0;
         }
 
-        if (optimizeFor(Optimizer.OPTIMIZATION_GRAPH)) {
+        if (mOptimizationLevel != Optimizer.OPTIMIZATION_NONE) {
             if (DEBUG_GRAPH) {
                 System.out.println("### Graph resolution... " + mWidth + " x " + mHeight + " ###");
             }

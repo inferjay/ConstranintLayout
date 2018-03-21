@@ -77,6 +77,9 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  *     <li>
  *         <a href="#VirtualHelpers">Virtual Helpers objects</a>
  *     </li>
+ *     <li>
+ *         <a href="#Optimizer">Optimizer</a>
+ *     </li>
  * </ul>
  * </p>
  *
@@ -440,12 +443,33 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * will control how the space will be distributed among the elements using {@code MATCH_CONSTRAINT}. For exemple, on a chain containing two elements using {@code MATCH_CONSTRAINT},
  * with the first element using a weight of 2 and the second a weight of 1, the space occupied by the first element will be twice that of the second element.</p>
  *
+ * <h5>Margins and chains (<i><b>in 1.1</b></i>)</h5>
+ * <p>When using margins on elements in a chain, the margin will:
+ * <ul>
+ *     <li>be additive : for example on a horizontal chain, if one element defines a right margin of 10dp and the next element a left margin of 5dp, the result margin between those two elements will be 15dp</li>
+ *     <li>the leftover space used by chains to position items will not contains the margin (we can think about it as what is positioned is the item plus its margins).</li>
+ * </ul>
+ * essentially be considere</p>
  * <h4 id="VirtualHelpers"> Virtual Helper objects </h4>
  * <p>In addition to the intrinsic capabilities detailed previously, you can also use special helper objects
  * in {@code ConstraintLayout} to help you with your layout. Currently, the {@code Guideline}{@see Guideline} object allows you to create
  * Horizontal and Vertical guidelines which are positioned relative to the {@code ConstraintLayout} container. Widgets can
  * then be positioned by constraining them to such guidelines. In <b>1.1</b>, {@code Barrier} and {@code Group} were added too.</p>
  * </div>
+ *
+ * <h4 id="Optimizer">Optimizer (<i><b>in 1.1</b></i>)</h4>
+ * <p>
+ *     In 1.1 we exposed the constraints optimizer. You can decide which optimizations are applied by adding the tag <i>app:layout_optimizationLevel</i> to the ConstraintLayout element.
+ *     <ul>
+ *         <li><b>none</b> : no optimizations are applied</li>
+ *         <li><b>standard</b> : Default. Optimize direct and barrier constraints only</li>
+ *         <li><b>direct</b> : optimize direct constraints</li>
+ *         <li><b>barrier</b> : optimize barrier constraints</li>
+ *         <li><b>chain</b> : optimize chain constraints (experimental)</li>
+ *     </ul>
+ * </p>
+ * <p>This attribute is a mask, so you can decide to turn on or off specific optimizations by listing the ones you want.
+ * For example: <i>app:layout_optimizationLevel="direct|barrier|chain"</i> </p>
  */
 public class ConstraintLayout extends ViewGroup {
     // For now, disallow embedded (single-layer resolution) situations.
@@ -479,7 +503,7 @@ public class ConstraintLayout extends ViewGroup {
     private int mMaxHeight = Integer.MAX_VALUE;
 
     private boolean mDirtyHierarchy = true;
-    private int mOptimizationLevel = Optimizer.OPTIMIZATION_ALL;
+    private int mOptimizationLevel = Optimizer.OPTIMIZATION_STANDARD;
     private ConstraintSet mConstraintSet = null;
 
     private String mTitle;
@@ -1599,14 +1623,19 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     /**
-     * @hide
+     * Set the optimization for the layout resolution.
      *
-     * Set the optimization level for the layout resolution
-     * The level can be one of:
+     * The optimization can be one of:
      * <ul>
      * <li>Optimizer.OPTIMIZATION_NONE</li>
-     * <li>Optimizer.OPTIMIZATION_ALL</li>
-     * <li>Optimizer.OPTIMIZATION_BASIC</li>
+     * <li>Optimizer.OPTIMIZATION_STANDARD</li>
+     * </ul>
+     * (At the moment, the standard optimizations are DIRECT and BARRIER)
+     *
+     * Or a mask composed of:
+     * <ul>
+     * <li>Optimizer.OPTIMIZATION_DIRECT  </li>
+     * <li>Optimizer.OPTIMIZATION_BARRIER  </li>
      * <li>Optimizer.OPTIMIZATION_CHAIN  </li>
      * </ul>
      * @param level optimization level
@@ -1616,8 +1645,6 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     /**
-     * @hide
-     *
      * Return the current optimization level for the layout resolution
      *
      * @return the current level

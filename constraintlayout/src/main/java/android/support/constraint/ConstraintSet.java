@@ -336,8 +336,8 @@ public class ConstraintSet {
 
     private static class Constraint {
         boolean mIsGuideline = false;
-        public int mWidth = Constraints.LayoutParams.WRAP_CONTENT;
-        public int mHeight = Constraints.LayoutParams.WRAP_CONTENT;
+        public int mWidth;
+        public int mHeight;
         int mViewId;
         static final int UNSET = ConstraintLayout.LayoutParams.UNSET;
         public int guideBegin = UNSET;
@@ -396,8 +396,8 @@ public class ConstraintSet {
         public float rotationY = 0;
         public float scaleX = 1;
         public float scaleY = 1;
-        public float transformPivotX = 0;
-        public float transformPivotY = 0;
+        public float transformPivotX = Float.NaN;
+        public float transformPivotY = Float.NaN;
         public float translationX = 0;
         public float translationY = 0;
         public float translationZ = 0;
@@ -800,8 +800,12 @@ public class ConstraintSet {
                     view.setRotationY(constraint.rotationY);
                     view.setScaleX(constraint.scaleX);
                     view.setScaleY(constraint.scaleY);
-                    view.setPivotX(constraint.transformPivotX);
-                    view.setPivotY(constraint.transformPivotY);
+                    if (!Float.isNaN(constraint.transformPivotX)) {
+                        view.setPivotX(constraint.transformPivotX);
+                    }
+                    if (!Float.isNaN(constraint.transformPivotY)) {
+                        view.setPivotY(constraint.transformPivotY);
+                    }
                     view.setTranslationX(constraint.translationX);
                     view.setTranslationY(constraint.translationY);
                     if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
@@ -2291,6 +2295,7 @@ public class ConstraintSet {
                     break;
                 case ROTATION:
                     c.rotation = a.getFloat(attr, c.rotation);
+                    break;
                 case ROTATION_X:
                     c.rotationX = a.getFloat(attr, c.rotationX);
                     break;

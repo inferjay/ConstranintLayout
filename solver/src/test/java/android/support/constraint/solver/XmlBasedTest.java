@@ -158,7 +158,7 @@ public class XmlBasedTest {
     public void testDirectResolutionXML(String file) {
 
         parseXML(file);
-        container.setOptimizationLevel(Optimizer.OPTIMIZATION_ALL);
+        container.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
         int[] perm = new int[boundsMap.size()];
         for (int i = 0; i < perm.length; i++) {
             perm[i] = i;

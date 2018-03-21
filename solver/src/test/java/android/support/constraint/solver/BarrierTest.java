@@ -49,7 +49,7 @@ public class BarrierTest {
         C.connect(ConstraintAnchor.Type.LEFT, barrier, ConstraintAnchor.Type.RIGHT);
         C.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
 
-        root.setOptimizationLevel(Optimizer.OPTIMIZATION_ALL);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
         root.layout();
         System.out.println("A: " + A + " B: " + B + " C: " + C + " barrier: " + barrier);
         assertEquals(A.getLeft(), 0);

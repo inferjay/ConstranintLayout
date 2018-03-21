@@ -2574,11 +2574,11 @@ public class ConstraintWidget {
                 } else if (matchConstraintDefault == MATCH_CONSTRAINT_RATIO) {
                     applyCentering = true;
                     applyBoundsCheck = true;
-                    int strength = SolverVariable.STRENGTH_HIGH;
+                    int strength = SolverVariable.STRENGTH_HIGHEST;
                     if (!useRatio) {
                         // useRatio is true if the side we base ourselves on for the ratio is this one
                         // in that case, we need to have a stronger constraint.
-                        strength = SolverVariable.STRENGTH_HIGHEST;
+                        strength = SolverVariable.STRENGTH_EQUALITY;
                     }
                     system.addEquality(begin, beginTarget, beginAnchor.getMargin(), strength);
                     system.addEquality(end, endTarget, -endAnchor.getMargin(), strength);

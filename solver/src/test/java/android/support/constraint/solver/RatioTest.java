@@ -43,7 +43,7 @@ public class RatioTest {
         assertEquals(A.getTop(), 290);
         assertEquals(A.getWidth(), 100);
         assertEquals(A.getHeight(), 20);
-        root.setOptimizationLevel(Optimizer.OPTIMIZATION_ALL);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
         root.layout();
         System.out.println("b) root: " + root + " A: " + A);
         assertEquals(A.getLeft(), 450);
@@ -84,7 +84,7 @@ public class RatioTest {
         assertEquals(A.getHeight(), 600);
 
         A.setVerticalBiasPercent(0);
-        root.setOptimizationLevel(Optimizer.OPTIMIZATION_ALL);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
         root.layout();
         System.out.println("c) root: " + root + " A: " + A);
         assertEquals(A.getLeft(), 0);
@@ -113,7 +113,7 @@ public class RatioTest {
         assertEquals(A.getTop(), 250);
         assertEquals(A.getWidth(), 100);
         assertEquals(A.getHeight(), 100);
-        root.setOptimizationLevel(Optimizer.OPTIMIZATION_ALL);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
         root.layout();
         System.out.println("b) root: " + root + " A: " + A);
         assertEquals(A.getLeft(), 450);
@@ -185,7 +185,7 @@ public class RatioTest {
         assertEquals(A.getWidth(), w);
         assertEquals(A.getHeight(), w);
 
-        root.setOptimizationLevel(Optimizer.OPTIMIZATION_ALL);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
         root.layout();
         System.out.println("b) root: " + root + " A: " + A);
         assertEquals(A.getLeft(), (root.getWidth() - w) / 2);

@@ -16,9 +16,6 @@
 package android.support.constraint.solver.widgets;
 
 import android.support.constraint.solver.LinearSystem;
-import android.support.constraint.solver.SolverVariable;
-
-import java.util.ArrayList;
 
 import static android.support.constraint.solver.widgets.ConstraintWidget.*;
 import static android.support.constraint.solver.widgets.ConstraintWidget.DimensionBehaviour.FIXED;
@@ -31,12 +28,11 @@ public class Optimizer {
 
     // Optimization levels (mask)
     public static final int OPTIMIZATION_NONE  = 0;
-    public static final int OPTIMIZATION_GRAPH = 1;
-    public static final int OPTIMIZATION_BASIC = 1 << 1;
+    public static final int OPTIMIZATION_DIRECT = 1;
+    public static final int OPTIMIZATION_BARRIER = 1 << 1;
     public static final int OPTIMIZATION_CHAIN = 1 << 2;
     public static final int OPTIMIZATION_RATIO = 1 << 3;
-    public static final int OPTIMIZATION_BARRIER = 1 << 4;
-    public static final int OPTIMIZATION_ALL = OPTIMIZATION_GRAPH | OPTIMIZATION_BASIC | OPTIMIZATION_BARRIER /* | OPTIMIZATION_CHAIN */;
+    public static final int OPTIMIZATION_STANDARD = OPTIMIZATION_DIRECT | OPTIMIZATION_BARRIER /* | OPTIMIZATION_CHAIN */;
 
     // Internal use.
     static boolean[] flags = new boolean[3];

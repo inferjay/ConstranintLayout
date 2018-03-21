@@ -17,6 +17,11 @@ package android.support.constraint.solver;
 
 import java.util.ArrayList;
 
+/**
+ * @hide
+ *
+ * Utility class to track metrics during the system resolution
+ */
 public class Metrics {
     public long tableSizeIncrease;
     public long minimize;
