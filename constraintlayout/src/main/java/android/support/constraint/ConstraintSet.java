@@ -2062,7 +2062,9 @@ public class ConstraintSet {
     }
 
     /**
-     * Load a constraint set from a constraintSet.xml file
+     * Load a constraint set from a constraintSet.xml file.
+     * Note. Do NOT use this to load a layout file.
+     * It will fail silently as there is no efficient way to differentiate.
      *
      * @param context the context for the inflation
      * @param resourceId id of xml file in res/xml/
