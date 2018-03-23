@@ -94,7 +94,7 @@ public class Guideline extends View {
     }
 
     /**
-     * Set the guideline's distance form the top or left edge.
+     * Set the guideline's distance from the top or left edge.
      *
      * @param margin the distance to the top or left edge
      */
