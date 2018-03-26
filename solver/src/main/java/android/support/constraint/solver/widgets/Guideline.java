@@ -20,6 +20,7 @@ import android.support.constraint.solver.SolverVariable;
 
 import java.util.ArrayList;
 
+import static android.support.constraint.solver.widgets.ConstraintWidget.DimensionBehaviour.FIXED;
 import static android.support.constraint.solver.widgets.ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
 
 /**
@@ -201,6 +202,46 @@ public class Guideline extends ConstraintWidget {
 
     public int getRelativeEnd() {
         return mRelativeEnd;
+    }
+
+    /**
+     * Graph analysis
+     */
+    @Override
+    public void analyze() {
+        ConstraintWidget constraintWidgetContainer = getParent();
+        if (constraintWidgetContainer == null) {
+            return;
+        }
+        if (getOrientation() == Guideline.VERTICAL) {
+            mTop.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION,constraintWidgetContainer.mTop.getResolutionNode(), 0);
+            mBottom.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), 0);
+            if (mRelativeBegin != -1) {
+                mLeft.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), mRelativeBegin);
+                mRight.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), mRelativeBegin);
+            } else if (mRelativeEnd != -1) {
+                mLeft.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mRight.getResolutionNode(), -mRelativeEnd);
+                mRight.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mRight.getResolutionNode(), -mRelativeEnd);
+            } else if (mRelativePercent != -1 && constraintWidgetContainer.getHorizontalDimensionBehaviour() == FIXED) {
+                int position = (int) (constraintWidgetContainer.mWidth * mRelativePercent);
+                mLeft.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), position);
+                mRight.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), position);
+            }
+        } else {
+            mLeft.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), 0);
+            mRight.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), 0);
+            if (mRelativeBegin != -1) {
+                mTop.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), mRelativeBegin);
+                mBottom.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), mRelativeBegin);
+            } else if (mRelativeEnd != -1) {
+                mTop.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mBottom.getResolutionNode(), -mRelativeEnd);
+                mBottom.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mBottom.getResolutionNode(), -mRelativeEnd);
+            } else if (mRelativePercent != -1 && constraintWidgetContainer.getVerticalDimensionBehaviour() == FIXED) {
+                int position = (int) (constraintWidgetContainer.mHeight * mRelativePercent);
+                mTop.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), position);
+                mBottom.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), position);
+            }
+        }
     }
 
     @Override

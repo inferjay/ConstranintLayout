@@ -16,9 +16,6 @@
 package android.support.constraint.solver.widgets;
 
 import android.support.constraint.solver.LinearSystem;
-import android.support.constraint.solver.SolverVariable;
-
-import java.util.ArrayList;
 
 import static android.support.constraint.solver.widgets.ConstraintWidget.*;
 import static android.support.constraint.solver.widgets.ConstraintWidget.DimensionBehaviour.FIXED;
@@ -30,12 +27,12 @@ import static android.support.constraint.solver.widgets.ConstraintWidget.Dimensi
 public class Optimizer {
 
     // Optimization levels (mask)
-    public static final int OPTIMIZATION_NONE  = 1;
-    public static final int OPTIMIZATION_GRAPH = 1 << 1;
-    public static final int OPTIMIZATION_BASIC = 1 << 2;
-    public static final int OPTIMIZATION_CHAIN = 1 << 3;
-    public static final int OPTIMIZATION_RATIO = 1 << 4;
-    public static final int OPTIMIZATION_ALL = OPTIMIZATION_GRAPH | OPTIMIZATION_BASIC /* | OPTIMIZATION_CHAIN */;
+    public static final int OPTIMIZATION_NONE  = 0;
+    public static final int OPTIMIZATION_DIRECT = 1;
+    public static final int OPTIMIZATION_BARRIER = 1 << 1;
+    public static final int OPTIMIZATION_CHAIN = 1 << 2;
+    public static final int OPTIMIZATION_RATIO = 1 << 3;
+    public static final int OPTIMIZATION_STANDARD = OPTIMIZATION_DIRECT | OPTIMIZATION_BARRIER /* | OPTIMIZATION_CHAIN */;
 
     // Internal use.
     static boolean[] flags = new boolean[3];
@@ -140,45 +137,6 @@ public class Optimizer {
      * @param widget
      */
     static void analyze(ConstraintWidget widget) {
-
-        // Let's optimize guidelines
-        if (widget instanceof Guideline) {
-            Guideline guideline = (Guideline) widget;
-            ConstraintWidget constraintWidgetContainer = widget.getParent();
-            if (constraintWidgetContainer == null) {
-                return;
-            }
-            if (guideline.getOrientation() == Guideline.VERTICAL) {
-                guideline.mTop.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION,constraintWidgetContainer.mTop.getResolutionNode(), 0);
-                guideline.mBottom.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), 0);
-                if (guideline.mRelativeBegin != -1) {
-                    guideline.mLeft.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), guideline.mRelativeBegin);
-                    guideline.mRight.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), guideline.mRelativeBegin);
-                } else if (guideline.mRelativeEnd != -1) {
-                    guideline.mLeft.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mRight.getResolutionNode(), -guideline.mRelativeEnd);
-                    guideline.mRight.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mRight.getResolutionNode(), -guideline.mRelativeEnd);
-                } else if (guideline.mRelativePercent != -1 && constraintWidgetContainer.getHorizontalDimensionBehaviour() == FIXED) {
-                    int position = (int) (constraintWidgetContainer.mWidth * guideline.mRelativePercent);
-                    guideline.mLeft.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), position);
-                    guideline.mRight.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), position);
-                }
-            } else {
-                guideline.mLeft.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), 0);
-                guideline.mRight.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), 0);
-                if (guideline.mRelativeBegin != -1) {
-                    guideline.mTop.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), guideline.mRelativeBegin);
-                    guideline.mBottom.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), guideline.mRelativeBegin);
-                } else if (guideline.mRelativeEnd != -1) {
-                    guideline.mTop.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mBottom.getResolutionNode(), -guideline.mRelativeEnd);
-                    guideline.mBottom.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mBottom.getResolutionNode(), -guideline.mRelativeEnd);
-                } else if (guideline.mRelativePercent != -1 && constraintWidgetContainer.getVerticalDimensionBehaviour() == FIXED) {
-                    int position = (int) (constraintWidgetContainer.mHeight * guideline.mRelativePercent);
-                    guideline.mTop.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), position);
-                    guideline.mBottom.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), position);
-                }
-            }
-            return;
-        }
 
         // Let's update the graph from the nodes!
         // This will only apply if the nodes are not part of a chain.

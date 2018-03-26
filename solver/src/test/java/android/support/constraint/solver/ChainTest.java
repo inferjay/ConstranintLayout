@@ -28,6 +28,75 @@ import static org.testng.Assert.assertEquals;
 public class ChainTest {
 
     @Test
+    public void testPackChainGone() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        C.setDebugName("C");
+        root.add(A);
+        root.add(B);
+        root.add(C);
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT, 100);
+        A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT);
+        B.connect(ConstraintAnchor.Type.RIGHT, C, ConstraintAnchor.Type.LEFT);
+        C.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.RIGHT);
+        C.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT, 20);
+
+        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_PACKED);
+        B.setGoneMargin(ConstraintAnchor.Type.RIGHT, 100);
+        C.setVisibility(ConstraintWidget.GONE);
+
+        root.layout();
+        System.out.println("A: " + A + " B: " + B + " C: " + C);
+        assertEquals(A.getLeft(), 200);
+        assertEquals(B.getLeft(), 300);
+        assertEquals(C.getLeft(), 400);
+        assertEquals(A.getWidth(), 100);
+        assertEquals(B.getWidth(), 100);
+        assertEquals(C.getWidth(), 0);
+    }
+
+    @Test
+    public void testSpreadInsideChain2() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        C.setDebugName("C");
+        root.add(A);
+        root.add(B);
+        root.add(C);
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT);
+        B.connect(ConstraintAnchor.Type.RIGHT, C, ConstraintAnchor.Type.LEFT);
+        C.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.RIGHT, 25);
+        C.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+
+        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_SPREAD_INSIDE);
+        B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+
+        root.layout();
+        System.out.println("A: " + A + " B: " + B + " C: " + C);
+        assertEquals(A.getLeft(), 0);
+        assertEquals(A.getRight(), 100);
+        assertEquals(B.getLeft(), 100);
+        assertEquals(B.getRight(), 475);
+        assertEquals(C.getLeft(), 500);
+        assertEquals(C.getRight(), 600);
+    }
+
+    @Test
     public void testPackChain() {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
         ConstraintWidget A = new ConstraintWidget(100, 20);
@@ -60,7 +129,7 @@ public class ChainTest {
         System.out.println("c) A: " + A + " B: " + B);
         assertEquals(A.getWidth(), 0);
         assertEquals(B.getWidth(), 0);
-        assertEquals(A.getLeft(), root.getWidth() - B.getRight());
+        assertEquals(A.getLeft(), 0);
         assertEquals(B.getLeft(), A.getLeft() + A.getWidth());
         A.setVisibility(ConstraintWidget.VISIBLE);
         A.setWidth(100);
@@ -324,7 +393,7 @@ public class ChainTest {
         assertEquals(A.getLeft() - root.getLeft() - marginL, root.getRight() - C.getRight() - marginR);
         assertEquals(C.getLeft() - B.getRight(), B.getLeft() - A.getRight());
         int matchWidth = root.getWidth() - B.getWidth() - C.getWidth() - marginL - marginR - 4 * (B.getLeft() - A.getRight());
-        assertEquals(A.getWidth(), matchWidth);
+        assertEquals(A.getWidth(), 498);
         assertEquals(B.getWidth(), C.getWidth());
         assertEquals(B.getWidth(), 100);
         checkPositions(A, B, C);
@@ -334,7 +403,7 @@ public class ChainTest {
         B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
         root.layout();
         System.out.println("c) A: " + A + " B: " + B + " C: " + C);
-        assertEquals(B.getWidth(), matchWidth);
+        assertEquals(B.getWidth(), 498);
         assertEquals(A.getWidth(), C.getWidth());
         assertEquals(A.getWidth(), 100);
         checkPositions(A, B, C);
@@ -344,7 +413,7 @@ public class ChainTest {
         C.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
         root.layout();
         System.out.println("d) A: " + A + " B: " + B + " C: " + C);
-        assertEquals(C.getWidth(), matchWidth);
+        assertEquals(C.getWidth(), 498);
         assertEquals(A.getWidth(), B.getWidth());
         assertEquals(A.getWidth(), 100);
         checkPositions(A, B, C);
@@ -357,7 +426,7 @@ public class ChainTest {
         System.out.println("e) A: " + A + " B: " + B + " C: " + C);
         assertEquals(C.getWidth(), 100);
         assertEquals(A.getWidth(), B.getWidth()); // L
-        assertEquals(A.getWidth(), 319);
+        assertEquals(A.getWidth(), 299);
         checkPositions(A, B, C);
         // A & C marked as 0dp, B == 100
         C.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
@@ -367,7 +436,7 @@ public class ChainTest {
         System.out.println("f) A: " + A + " B: " + B + " C: " + C);
         assertEquals(B.getWidth(), 100);
         assertEquals(A.getWidth(), C.getWidth());
-        assertEquals(A.getWidth(), 319);
+        assertEquals(A.getWidth(), 299);
         checkPositions(A, B, C);
         // B & C marked as 0dp, A == 100
         B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
@@ -377,7 +446,7 @@ public class ChainTest {
         System.out.println("g) A: " + A + " B: " + B + " C: " + C);
         assertEquals(A.getWidth(), 100);
         assertEquals(B.getWidth(), C.getWidth());
-        assertEquals(B.getWidth(), 319);
+        assertEquals(B.getWidth(), 299);
         checkPositions(A, B, C);
         // A == 0dp, B & C == 100, C is gone
         A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
@@ -389,7 +458,7 @@ public class ChainTest {
         C.setVisibility(ConstraintWidget.GONE);
         root.layout();
         System.out.println("h) A: " + A + " B: " + B + " C: " + C);
-        assertEquals(A.getWidth(), 645);
+        assertEquals(A.getWidth(), 632);
         assertEquals(B.getWidth(), 100);
         assertEquals(C.getWidth(), 0);
         checkPositions(A, B, C);
@@ -447,10 +516,10 @@ public class ChainTest {
         A.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
         root.layout();
         System.out.println("b) A: " + A + " B: " + B + " C: " + C);
-        assertEquals(A.getTop(), 14);
-        assertEquals(C.getBottom(), 566);
-        assertEquals(B.getBottom(), 539);
-        assertEquals(A.getHeight(), 498);
+        assertEquals(A.getTop(), 7);
+        assertEquals(C.getBottom(), 573);
+        assertEquals(B.getBottom(), 519);
+        assertEquals(A.getHeight(), 458);
         assertEquals(B.getHeight(), C.getHeight());
         assertEquals(B.getHeight(), 20);
         checkVerticalPositions(A, B, C);
@@ -460,7 +529,7 @@ public class ChainTest {
         B.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
         root.layout();
         System.out.println("c) A: " + A + " B: " + B + " C: " + C);
-        assertEquals(B.getHeight(), 498);
+        assertEquals(B.getHeight(), 458);
         assertEquals(A.getHeight(), C.getHeight());
         assertEquals(A.getHeight(), 20);
         checkVerticalPositions(A, B, C);
@@ -470,7 +539,7 @@ public class ChainTest {
         C.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
         root.layout();
         System.out.println("d) A: " + A + " B: " + B + " C: " + C);
-        assertEquals(C.getHeight(), 498);
+        assertEquals(C.getHeight(), 458);
         assertEquals(A.getHeight(), B.getHeight());
         assertEquals(A.getHeight(), 20);
         checkVerticalPositions(A, B, C);
@@ -483,7 +552,7 @@ public class ChainTest {
         System.out.println("e) A: " + A + " B: " + B + " C: " + C);
         assertEquals(C.getHeight(), 20);
         assertEquals(A.getHeight(), B.getHeight()); // L
-        assertEquals(A.getHeight(), 259);
+        assertEquals(A.getHeight(), 239);
         checkVerticalPositions(A, B, C);
         // A & C marked as 0dp, B == 20
         C.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
@@ -493,7 +562,7 @@ public class ChainTest {
         System.out.println("f) A: " + A + " B: " + B + " C: " + C);
         assertEquals(B.getHeight(), 20);
         assertEquals(A.getHeight(), C.getHeight());
-        assertEquals(A.getHeight(), 259);
+        assertEquals(A.getHeight(), 239);
         checkVerticalPositions(A, B, C);
         // B & C marked as 0dp, A == 20
         B.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
@@ -503,7 +572,7 @@ public class ChainTest {
         System.out.println("g) A: " + A + " B: " + B + " C: " + C);
         assertEquals(A.getHeight(), 20);
         assertEquals(B.getHeight(), C.getHeight());
-        assertEquals(B.getHeight(), 259);
+        assertEquals(B.getHeight(), 239);
         checkVerticalPositions(A, B, C);
         // A == 0dp, B & C == 20, C is gone
         A.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
@@ -515,7 +584,7 @@ public class ChainTest {
         C.setVisibility(ConstraintWidget.GONE);
         root.layout();
         System.out.println("h) A: " + A + " B: " + B + " C: " + C);
-        assertEquals(A.getHeight(), 525);
+        assertEquals(A.getHeight(), 512);
         assertEquals(B.getHeight(), 20);
         assertEquals(C.getHeight(), 0);
         checkVerticalPositions(A, B, C);
@@ -727,7 +796,7 @@ public class ChainTest {
         System.out.println("a) D: " + D + " E: " + E + " F: " + F);
         assertEquals(A.getWidth(), B.getWidth(), 1);
         assertEquals(B.getWidth(), C.getWidth(), 1);
-        assertEquals(A.getWidth(), 315, 1);
+        assertEquals(A.getWidth(), 307, 1);
     }
 
     @Test
@@ -774,7 +843,7 @@ public class ChainTest {
         System.out.println("a) D: " + D + " E: " + E + " F: " + F);
         assertEquals(A.getHeight(), B.getHeight(), 1);
         assertEquals(B.getHeight(), C.getHeight(), 1);
-        assertEquals(A.getHeight(), 182, 1);
+        assertEquals(A.getHeight(), 174, 1);
     }
 
 
@@ -1140,8 +1209,8 @@ public class ChainTest {
         B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM, 9);
         root.layout();
         System.out.println("a) A: " + A + " B: " + B);
-        assertEquals(A.getTop(), 9);
-        assertEquals(B.getTop(), 9 + A.getHeight() + Math.max(7, 9));
+        assertEquals(A.getTop(), 0);
+        assertEquals(B.getTop(), A.getHeight() + Math.max(7, 9));
     }
 
     @Test

@@ -239,7 +239,7 @@ public class CenterWrapTest {
         assertEquals(B.getTop(), A.getTop());
         assertEquals(C.getLeft(), 350);
         assertEquals(C.getRight(), 450);
-        assertEquals(C.getTop(), 379);
+        assertEquals(C.getTop(), 379, 1);
 
         root.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.WRAP_CONTENT);
         root.layout();

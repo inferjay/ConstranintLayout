@@ -82,11 +82,16 @@ public class ConstraintWidget {
     int mResolvedDimensionRatioSide = UNKNOWN;
     float mResolvedDimensionRatio = 1.0f;
 
-    private int mMaxDimension[] = { Integer.MAX_VALUE, Integer.MAX_VALUE };
+    private int mMaxDimension[] = {Integer.MAX_VALUE, Integer.MAX_VALUE};
     private float mCircleConstraintAngle = 0;
 
-    public int getMaxHeight() { return mMaxDimension[VERTICAL]; }
-    public int getMaxWidth() { return mMaxDimension[HORIZONTAL]; }
+    public int getMaxHeight() {
+        return mMaxDimension[VERTICAL];
+    }
+
+    public int getMaxWidth() {
+        return mMaxDimension[HORIZONTAL];
+    }
 
     public void setMaxWidth(int maxWidth) {
         mMaxDimension[HORIZONTAL] = maxWidth;
@@ -127,13 +132,13 @@ public class ConstraintWidget {
     protected static final int ANCHOR_BOTTOM = 3;
     protected static final int ANCHOR_BASELINE = 4;
 
-    protected ConstraintAnchor[] mListAnchors = { mLeft, mRight, mTop, mBottom, mBaseline, mCenter };
+    protected ConstraintAnchor[] mListAnchors = {mLeft, mRight, mTop, mBottom, mBaseline, mCenter};
     protected ArrayList<ConstraintAnchor> mAnchors = new ArrayList<>();
 
     // The horizontal and vertical behaviour for the widgets' dimensions
     static final int DIMENSION_HORIZONTAL = 0;
     static final int DIMENSION_VERTICAL = 1;
-    protected DimensionBehaviour[] mListDimensionBehaviors = { DimensionBehaviour.FIXED, DimensionBehaviour.FIXED };
+    protected DimensionBehaviour[] mListDimensionBehaviors = {DimensionBehaviour.FIXED, DimensionBehaviour.FIXED};
 
     // Parent of this widget
     ConstraintWidget mParent = null;
@@ -206,10 +211,10 @@ public class ConstraintWidget {
     boolean mHorizontalChainFixedPosition;
     boolean mVerticalChainFixedPosition;
 
-    float []mWeight = { 0, 0 };
+    float[] mWeight = {0, 0};
 
-    protected ConstraintWidget[] mListNextMatchConstraintsWidget = { null, null };
-    protected ConstraintWidget[] mListNextVisibleWidget = { null, null };
+    protected ConstraintWidget[] mListNextMatchConstraintsWidget = {null, null};
+    protected ConstraintWidget[] mListNextVisibleWidget = {null, null};
 
     ConstraintWidget mHorizontalNextWidget = null;
     ConstraintWidget mVerticalNextWidget = null;
@@ -268,7 +273,7 @@ public class ConstraintWidget {
         mMatchConstraintPercentWidth = 1;
         mMatchConstraintPercentHeight = 1;
         mMatchConstraintMaxWidth = Integer.MAX_VALUE;
-        mMatchConstraintMaxHeight= Integer.MAX_VALUE;
+        mMatchConstraintMaxHeight = Integer.MAX_VALUE;
         mMatchConstraintMinWidth = 0;
         mMatchConstraintMinHeight = 0;
         mResolvedDimensionRatioSide = UNKNOWN;
@@ -295,6 +300,20 @@ public class ConstraintWidget {
         for (int i = 0; i < 6; i++) {
             mListAnchors[i].getResolutionNode().update();
         }
+    }
+
+    /**
+     * Graph analysis
+     */
+    public void analyze() {
+        Optimizer.analyze(this);
+    }
+
+    /**
+     * Try resolving the graph analysis
+     */
+    public void resolve() {
+        // basic constraints resolution is done in ResolutionNode
     }
 
     /**
@@ -2386,6 +2405,11 @@ public class ConstraintWidget {
 
         boolean variableSize = false;
 
+        int numConnections = 0;
+        if (isBeginConnected) { numConnections++; }
+        if (isEndConnected) { numConnections++; }
+        if (isCenterConnected) { numConnections++; }
+
         if (useRatio) {
             matchConstraintDefault = MATCH_CONSTRAINT_RATIO;
         }
@@ -2409,6 +2433,16 @@ public class ConstraintWidget {
             variableSize = false;
         }
 
+        // First apply starting direct connections (more solver-friendly)
+        if (applyPosition) {
+            if (!isBeginConnected && !isEndConnected && !isCenterConnected) {
+                system.addEquality(begin, beginPosition);
+            } else if (isBeginConnected && !isEndConnected) {
+                system.addEquality(begin, beginTarget, beginAnchor.getMargin(), SolverVariable.STRENGTH_FIXED);
+            }
+        }
+
+        // Then apply the dimension
         if (!variableSize) {
             if (wrapContent) {
                 system.addEquality(end, begin, 0, SolverVariable.STRENGTH_HIGH);
@@ -2449,7 +2483,7 @@ public class ConstraintWidget {
                 if (parentWrapContent) {
                     system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_FIXED);
                 } else if (inChain) {
-                    system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_EQUALITY);
+                    system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_HIGHEST);
                 } else {
                     system.addEquality(end, begin, dimension, SolverVariable.STRENGTH_LOW);
                 }
@@ -2467,24 +2501,19 @@ public class ConstraintWidget {
                 system.addConstraint(system.createRow().createRowDimensionRatio(end, begin, percentEnd, percentBegin, matchPercentDimension));
                 variableSize = false;
             }
-        }
 
-        int numConnections = 0;
-        if (isBeginConnected) { numConnections++; }
-        if (isEndConnected) { numConnections++; }
-        if (isCenterConnected) { numConnections++; }
-
-        if (variableSize && numConnections != 2 && !useRatio) {
-            variableSize = false;
-            int d = Math.max(matchMinDimension, dimension);
-            if (matchMaxDimension > 0) {
-                d = Math.min(matchMaxDimension, d);
+            if (variableSize && numConnections != 2 && !useRatio) {
+                variableSize = false;
+                int d = Math.max(matchMinDimension, dimension);
+                if (matchMaxDimension > 0) {
+                    d = Math.min(matchMaxDimension, d);
+                }
+                system.addEquality(end, begin, d, SolverVariable.STRENGTH_FIXED);
             }
-            system.addEquality(end, begin, d, SolverVariable.STRENGTH_FIXED);
         }
 
         if (!applyPosition || inChain) {
-            // we only need to deal with dimension, not positioning.
+            // If we don't need to apply the position, let's finish now.
             if (LinearSystem.FULL_DEBUG) {
                 System.out.println("only deal with dimension for " + mDebugName
                         + ", not positioning (applyPosition: " + applyPosition + " inChain: " + inChain + ")");
@@ -2496,13 +2525,15 @@ public class ConstraintWidget {
             return;
         }
 
+        // Ok, we are dealing with single or centered constraints, let's apply them
+
         if (!isBeginConnected && !isEndConnected && !isCenterConnected) {
-            system.addEquality(begin, beginPosition);
+            // note we already applied the start position before, no need to redo it...
             if (parentWrapContent) {
                 system.addGreaterThan(parentMax, end, 0, SolverVariable.STRENGTH_EQUALITY);
             }
         } else if (isBeginConnected && !isEndConnected) {
-            system.addEquality(begin, beginTarget, beginAnchor.getMargin(), SolverVariable.STRENGTH_FIXED);
+            // note we already applied the start position before, no need to redo it...
             if (parentWrapContent) {
                 system.addGreaterThan(parentMax, end, 0, SolverVariable.STRENGTH_EQUALITY);
             }
@@ -2511,7 +2542,9 @@ public class ConstraintWidget {
             if (parentWrapContent) {
                 system.addGreaterThan(begin, parentMin, 0, SolverVariable.STRENGTH_EQUALITY);
             }
-        } else if (isBeginConnected && isEndConnected && !inChain) {
+        } else if (isBeginConnected && isEndConnected) {
+
+            // Ok, we have a centered connection, let's deal with it
 
             boolean applyBoundsCheck = false;
             boolean applyCentering = false;
@@ -2541,7 +2574,7 @@ public class ConstraintWidget {
                 } else if (matchConstraintDefault == MATCH_CONSTRAINT_RATIO) {
                     applyCentering = true;
                     applyBoundsCheck = true;
-                    int strength = SolverVariable.STRENGTH_HIGH;
+                    int strength = SolverVariable.STRENGTH_HIGHEST;
                     if (!useRatio) {
                         // useRatio is true if the side we base ourselves on for the ratio is this one
                         // in that case, we need to have a stronger constraint.

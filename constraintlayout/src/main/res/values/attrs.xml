@@ -141,11 +141,11 @@
 
     <!-- Used to set the type of optimization we apply. This is a mask. -->
     <attr name="layout_optimizationLevel">
-        <flag name="none" value="1"/>
-        <flag name="all" value="6" />
-        <flag name="graph" value="2"/>
-        <flag name="basic" value="4"/>
-        <flag name="chains" value="8"/>
+        <flag name="none" value="0"/>
+        <flag name="standard" value="3" /> <!-- for now only direct & barriers -->
+        <flag name="direct" value="1"/>
+        <flag name="barrier" value="2"/>
+        <flag name="chains" value="4"/>
     </attr>
 
     <!-- Specify the style of match constraint -->
