@@ -80,6 +80,7 @@ task makeJavadocs(type: Javadoc, dependsOn: project.configurations.doclava) {
         options.addStringOption("toroot", "/")
         options.addStringOption("hdf", "dac")
         options.addBooleanOption("devsite", true)
+        options.addBooleanOption("yamlV2", true)
     }
 
     title = null
