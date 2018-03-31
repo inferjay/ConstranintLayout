@@ -444,18 +444,17 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * with the first element using a weight of 2 and the second a weight of 1, the space occupied by the first element will be twice that of the second element.</p>
  *
  * <h5>Margins and chains (<i><b>in 1.1</b></i>)</h5>
- * <p>When using margins on elements in a chain, the margin will:
- * <ul>
- *     <li>be additive : for example on a horizontal chain, if one element defines a right margin of 10dp and the next element a left margin of 5dp, the result margin between those two elements will be 15dp</li>
- *     <li>the leftover space used by chains to position items will not contains the margin (we can think about it as what is positioned is the item plus its margins).</li>
- * </ul>
- * essentially be considere</p>
+ * <p>When using margins on elements in a chain, the margins are additive.</p>
+ * <p>For example, on a horizontal chain, if one element defines a right margin of 10dp and the next element
+ * defines a left margin of 5dp, the resulting margin between those two elements is 15dp.</p>
+ * <p>An item plus its margins are considered together when calculating leftover space used by chains
+ * to position items. The leftover space does not contain the margins.</p>
+ *
  * <h4 id="VirtualHelpers"> Virtual Helper objects </h4>
  * <p>In addition to the intrinsic capabilities detailed previously, you can also use special helper objects
  * in {@code ConstraintLayout} to help you with your layout. Currently, the {@code Guideline}{@see Guideline} object allows you to create
  * Horizontal and Vertical guidelines which are positioned relative to the {@code ConstraintLayout} container. Widgets can
  * then be positioned by constraining them to such guidelines. In <b>1.1</b>, {@code Barrier} and {@code Group} were added too.</p>
- * </div>
  *
  * <h4 id="Optimizer">Optimizer (<i><b>in 1.1</b></i>)</h4>
  * <p>
@@ -470,6 +469,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * </p>
  * <p>This attribute is a mask, so you can decide to turn on or off specific optimizations by listing the ones you want.
  * For example: <i>app:layout_optimizationLevel="direct|barrier|chain"</i> </p>
+ * </div>
  */
 public class ConstraintLayout extends ViewGroup {
     // For now, disallow embedded (single-layer resolution) situations.
@@ -1623,6 +1623,8 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     /**
+     * @since 1.1
+     *
      * Set the optimization for the layout resolution.
      *
      * The optimization can be one of:
@@ -1645,6 +1647,8 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     /**
+     * @since 1.1
+     *
      * Return the current optimization level for the layout resolution
      *
      * @return the current level

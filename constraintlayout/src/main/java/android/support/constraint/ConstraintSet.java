@@ -1658,6 +1658,8 @@ public class ConstraintSet {
     }
 
     /**
+     * @since 1.1
+     *
      * Sets the height of the view. It can be a dimension, {@link #WRAP_CONTENT} or {@link
      * #MATCH_CONSTRAINT}.
      *
@@ -1669,6 +1671,8 @@ public class ConstraintSet {
     }
 
     /**
+     * @since 1.1
+     *
      * Sets the width of the view. It can be a dimension, {@link #WRAP_CONTENT} or {@link
      * #MATCH_CONSTRAINT}.
      *
@@ -1680,7 +1684,9 @@ public class ConstraintSet {
     }
 
     /**
-     * Contrain the view on a circle constraint
+     * @since 1.1
+     *
+     * Constrain the view on a circle constraint
      *
      * @param viewId ID of the view we constrain
      * @param id ID of the view we constrain relative to
@@ -1695,6 +1701,8 @@ public class ConstraintSet {
     }
 
     /**
+     * @since 1.1
+     *
      * Sets the maximum height of the view. It is a dimension, It is only applicable if height is
      * #MATCH_CONSTRAINT}.
      *
@@ -1706,6 +1714,8 @@ public class ConstraintSet {
     }
 
     /**
+     * @since 1.1
+     *
      * Sets the maximum width of the view. It is a dimension, It is only applicable if width is
      * #MATCH_CONSTRAINT}.
      *
@@ -1717,6 +1727,8 @@ public class ConstraintSet {
     }
 
     /**
+     * @since 1.1
+     *
      * Sets the height of the view. It is a dimension, It is only applicable if height is
      * #MATCH_CONSTRAINT}.
      *
@@ -1728,6 +1740,8 @@ public class ConstraintSet {
     }
 
     /**
+     * @since 1.1
+     *
      * Sets the width of the view.  It is a dimension, It is only applicable if width is
      * #MATCH_CONSTRAINT}.
      *
@@ -1739,6 +1753,8 @@ public class ConstraintSet {
     }
 
     /**
+     * @since 1.1
+     *
      * Sets the width of the view as a percentage of the parent.
      * @param viewId
      * @param percent
@@ -1748,6 +1764,8 @@ public class ConstraintSet {
     }
 
     /**
+     * @since 1.1
+     *
      * Sets the height of the view as a percentage of the parent.
      * @param viewId
      * @param percent
@@ -1757,6 +1775,8 @@ public class ConstraintSet {
     }
 
     /**
+     * @since 1.1
+     *
      * Sets how the height is calculated ether MATCH_CONSTRAINT_WRAP or MATCH_CONSTRAINT_SPREAD.
      * Default is spread.
      *
@@ -1768,6 +1788,8 @@ public class ConstraintSet {
     }
 
     /**
+     * @since 1.1
+     *
      * Sets how the width is calculated ether MATCH_CONSTRAINT_WRAP or MATCH_CONSTRAINT_SPREAD.
      * Default is spread.
      *
@@ -1984,6 +2006,8 @@ public class ConstraintSet {
     }
 
     /**
+     * @since 1.1
+     *
      * Creates a ConstraintLayout Barrier object.
      *
      * @param id
