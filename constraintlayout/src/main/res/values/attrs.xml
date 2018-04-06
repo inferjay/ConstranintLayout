@@ -145,6 +145,7 @@
         <flag name="direct" value="1"/>
         <flag name="barrier" value="2"/>
         <flag name="chains" value="4"/>
+        <flag name="dimensions" value="8"/>
     </attr>
 
     <!-- Specify the style of match constraint -->

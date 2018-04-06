@@ -31,8 +31,13 @@ public class Optimizer {
     public static final int OPTIMIZATION_DIRECT = 1;
     public static final int OPTIMIZATION_BARRIER = 1 << 1;
     public static final int OPTIMIZATION_CHAIN = 1 << 2;
-    public static final int OPTIMIZATION_RATIO = 1 << 3;
-    public static final int OPTIMIZATION_STANDARD = OPTIMIZATION_DIRECT | OPTIMIZATION_BARRIER /* | OPTIMIZATION_CHAIN */;
+    public static final int OPTIMIZATION_DIMENSIONS = 1 << 3;
+    public static final int OPTIMIZATION_RATIO = 1 << 4;
+    public static final int OPTIMIZATION_STANDARD = OPTIMIZATION_DIRECT
+            | OPTIMIZATION_BARRIER
+            /* | OPTIMIZATION_CHAIN */
+            /* | OPTIMIZATION_DIMENSIONS */
+            ;
 
     // Internal use.
     static boolean[] flags = new boolean[3];
@@ -136,7 +141,7 @@ public class Optimizer {
      *
      * @param widget
      */
-    static void analyze(ConstraintWidget widget) {
+    static void analyze(int optimisationLevel, ConstraintWidget widget) {
 
         // Let's update the graph from the nodes!
         // This will only apply if the nodes are not part of a chain.
@@ -145,57 +150,98 @@ public class Optimizer {
 
         widget.updateResolutionNodes();
 
-        ResolutionNode leftNode = widget.mLeft.getResolutionNode();
-        ResolutionNode topNode = widget.mTop.getResolutionNode();
-        ResolutionNode rightNode = widget.mRight.getResolutionNode();
-        ResolutionNode bottomNode = widget.mBottom.getResolutionNode();
+        ResolutionAnchor leftNode = widget.mLeft.getResolutionNode();
+        ResolutionAnchor topNode = widget.mTop.getResolutionNode();
+        ResolutionAnchor rightNode = widget.mRight.getResolutionNode();
+        ResolutionAnchor bottomNode = widget.mBottom.getResolutionNode();
+
+        boolean optimiseDimensions = (optimisationLevel & OPTIMIZATION_DIMENSIONS) == OPTIMIZATION_DIMENSIONS;
 
         // First the horizontal nodes...
 
-        if (leftNode.type != ResolutionNode.CHAIN_CONNECTION
-                && rightNode.type != ResolutionNode.CHAIN_CONNECTION) {
+        if (leftNode.type != ResolutionAnchor.CHAIN_CONNECTION
+                && rightNode.type != ResolutionAnchor.CHAIN_CONNECTION) {
             if (widget.mListDimensionBehaviors[HORIZONTAL] == FIXED) {
                 if (widget.mLeft.mTarget == null && widget.mRight.mTarget == null) {
-                    leftNode.setType(ResolutionNode.DIRECT_CONNECTION);
-                    rightNode.setType(ResolutionNode.DIRECT_CONNECTION);
-                    rightNode.dependsOn(leftNode, widget.getWidth());
+                    leftNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
+                    rightNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
+                    if (optimiseDimensions) {
+                        rightNode.dependsOn(leftNode, 1, widget.getResolutionWidth());
+                    } else {
+                        rightNode.dependsOn(leftNode, widget.getWidth());
+                    }
                 } else if (widget.mLeft.mTarget != null && widget.mRight.mTarget == null) {
-                    leftNode.setType(ResolutionNode.DIRECT_CONNECTION);
-                    rightNode.setType(ResolutionNode.DIRECT_CONNECTION);
-                    rightNode.dependsOn(leftNode, widget.getWidth());
+                    leftNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
+                    rightNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
+                    if (optimiseDimensions) {
+                        rightNode.dependsOn(leftNode, 1, widget.getResolutionWidth());
+                    } else {
+                        rightNode.dependsOn(leftNode, widget.getWidth());
+                    }
                 } else if (widget.mLeft.mTarget == null && widget.mRight.mTarget != null) {
-                    leftNode.setType(ResolutionNode.DIRECT_CONNECTION);
-                    rightNode.setType(ResolutionNode.DIRECT_CONNECTION);
+                    leftNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
+                    rightNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
                     leftNode.dependsOn(rightNode, -widget.getWidth());
+                    if (optimiseDimensions) {
+                        leftNode.dependsOn(rightNode, -1, widget.getResolutionWidth());
+                    } else {
+                        leftNode.dependsOn(rightNode, -widget.getWidth());
+                    }
                 } else if (widget.mLeft.mTarget != null && widget.mRight.mTarget != null) {
-                    leftNode.setType(ResolutionNode.CENTER_CONNECTION);
-                    rightNode.setType(ResolutionNode.CENTER_CONNECTION);
-                    leftNode.setOpposite(rightNode, -widget.getWidth());
-                    rightNode.setOpposite(leftNode, widget.getWidth());
+                    leftNode.setType(ResolutionAnchor.CENTER_CONNECTION);
+                    rightNode.setType(ResolutionAnchor.CENTER_CONNECTION);
+                    if (optimiseDimensions) {
+                        widget.getResolutionWidth().addDependent(leftNode);
+                        widget.getResolutionWidth().addDependent(rightNode);
+                        leftNode.setOpposite(rightNode, -1, widget.getResolutionWidth());
+                        rightNode.setOpposite(leftNode, 1, widget.getResolutionWidth());
+                    } else {
+                        leftNode.setOpposite(rightNode, -widget.getWidth());
+                        rightNode.setOpposite(leftNode, widget.getWidth());
+                    }
                 }
             } else if (widget.mListDimensionBehaviors[HORIZONTAL] == MATCH_CONSTRAINT
                     && optimizableMatchConstraint(widget, HORIZONTAL)) {
                 int width = widget.getWidth();
-                if (widget.mDimensionRatio != 0) {
-                    width = (int) (widget.getHeight() * widget.mDimensionRatio);
-                }
-                leftNode.setType(ResolutionNode.DIRECT_CONNECTION);
-                rightNode.setType(ResolutionNode.DIRECT_CONNECTION);
+                // TODO: ratio won't work with optimiseDimensions as it is
+                // ...but ratio won't work period for now as optimizableMatchConstraint will return false
+                // if (widget.mDimensionRatio != 0) {
+                //     width = (int) (widget.getHeight() * widget.mDimensionRatio);
+                // }
+                leftNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
+                rightNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
                 if (widget.mLeft.mTarget == null && widget.mRight.mTarget == null) {
-                    rightNode.dependsOn(leftNode, width);
+                    if (optimiseDimensions) {
+                        rightNode.dependsOn(leftNode, 1, widget.getResolutionWidth());
+                    } else {
+                        rightNode.dependsOn(leftNode, width);
+                    }
                 } else if (widget.mLeft.mTarget != null && widget.mRight.mTarget == null) {
-                    rightNode.dependsOn(leftNode, width);
+                    if (optimiseDimensions) {
+                        rightNode.dependsOn(leftNode, 1, widget.getResolutionWidth());
+                    } else {
+                        rightNode.dependsOn(leftNode, width);
+                    }
                 } else if (widget.mLeft.mTarget == null && widget.mRight.mTarget != null) {
-                    leftNode.dependsOn(rightNode, -width);
+                    if (optimiseDimensions) {
+                        leftNode.dependsOn(rightNode, -1, widget.getResolutionWidth());
+                    } else {
+                        leftNode.dependsOn(rightNode, -width);
+                    }
                 } else if (widget.mLeft.mTarget != null && widget.mRight.mTarget != null) {
+                    if (optimiseDimensions) {
+                        widget.getResolutionWidth().addDependent(leftNode);
+                        widget.getResolutionWidth().addDependent(rightNode);
+                    }
                     if (widget.mDimensionRatio == 0) {
-                        leftNode.setType(ResolutionNode.MATCH_CONNECTION);
-                        rightNode.setType(ResolutionNode.MATCH_CONNECTION);
+                        leftNode.setType(ResolutionAnchor.MATCH_CONNECTION);
+                        rightNode.setType(ResolutionAnchor.MATCH_CONNECTION);
                         leftNode.setOpposite(rightNode, 0);
                         rightNode.setOpposite(leftNode, 0);
                     } else {
-                        leftNode.setType(ResolutionNode.CENTER_CONNECTION);
-                        rightNode.setType(ResolutionNode.CENTER_CONNECTION);
+                        // TODO -- fix ratio. For now this won't work.
+                        leftNode.setType(ResolutionAnchor.CENTER_CONNECTION);
+                        rightNode.setType(ResolutionAnchor.CENTER_CONNECTION);
                         leftNode.setOpposite(rightNode, -width);
                         rightNode.setOpposite(leftNode, width);
                         widget.setWidth(width);
@@ -206,70 +252,106 @@ public class Optimizer {
 
         // ...then the vertical ones
 
-        if (topNode.type != ResolutionNode.CHAIN_CONNECTION
-                && bottomNode.type != ResolutionNode.CHAIN_CONNECTION
-                /* && mBaseline.getResolutionNode().type == ResolutionNode.UNCONNECTED */) {
+        if (topNode.type != ResolutionAnchor.CHAIN_CONNECTION
+                && bottomNode.type != ResolutionAnchor.CHAIN_CONNECTION
+                /* && mBaseline.getResolutionNode().type == ResolutionAnchor.UNCONNECTED */) {
             if (widget.mListDimensionBehaviors[VERTICAL] == FIXED) {
                 if (widget.mTop.mTarget == null && widget.mBottom.mTarget == null) {
-                    topNode.setType(ResolutionNode.DIRECT_CONNECTION);
-                    bottomNode.setType(ResolutionNode.DIRECT_CONNECTION);
-                    bottomNode.dependsOn(topNode, widget.getHeight());
+                    topNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
+                    bottomNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
+                    if (optimiseDimensions) {
+                        bottomNode.dependsOn(topNode, 1, widget.getResolutionHeight());
+                    } else {
+                        bottomNode.dependsOn(topNode, widget.getHeight());
+                    }
                     if (widget.mBaseline.mTarget != null) {
-                        widget.mBaseline.getResolutionNode().setType(ResolutionNode.DIRECT_CONNECTION);
-                        topNode.dependsOn(ResolutionNode.DIRECT_CONNECTION,
+                        widget.mBaseline.getResolutionNode().setType(ResolutionAnchor.DIRECT_CONNECTION);
+                        topNode.dependsOn(ResolutionAnchor.DIRECT_CONNECTION,
                                 widget.mBaseline.getResolutionNode(), -widget.mBaselineDistance);
                     }
                 } else if (widget.mTop.mTarget != null && widget.mBottom.mTarget == null) {
-                    topNode.setType(ResolutionNode.DIRECT_CONNECTION);
-                    bottomNode.setType(ResolutionNode.DIRECT_CONNECTION);
-                    bottomNode.dependsOn(topNode, widget.getHeight());
+                    topNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
+                    bottomNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
+                    if (optimiseDimensions) {
+                        bottomNode.dependsOn(topNode, 1, widget.getResolutionHeight());
+                    } else {
+                        bottomNode.dependsOn(topNode, widget.getHeight());
+                    }
                     if (widget.mBaselineDistance > 0) {
-                        widget.mBaseline.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, topNode, widget.mBaselineDistance);
+                        widget.mBaseline.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, topNode, widget.mBaselineDistance);
                     }
                 } else if (widget.mTop.mTarget == null && widget.mBottom.mTarget != null) {
-                    topNode.setType(ResolutionNode.DIRECT_CONNECTION);
-                    bottomNode.setType(ResolutionNode.DIRECT_CONNECTION);
-                    topNode.dependsOn(bottomNode, -widget.getHeight());
+                    topNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
+                    bottomNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
+                    if (optimiseDimensions) {
+                        topNode.dependsOn(bottomNode, -1, widget.getResolutionHeight());
+                    } else {
+                        topNode.dependsOn(bottomNode, -widget.getHeight());
+                    }
                     if (widget.mBaselineDistance > 0) {
-                        widget.mBaseline.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, topNode, widget.mBaselineDistance);
+                        widget.mBaseline.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, topNode, widget.mBaselineDistance);
                     }
                 } else if (widget.mTop.mTarget != null && widget.mBottom.mTarget != null) {
-                    topNode.setType(ResolutionNode.CENTER_CONNECTION);
-                    bottomNode.setType(ResolutionNode.CENTER_CONNECTION);
-                    topNode.setOpposite(bottomNode, -widget.getHeight());
-                    bottomNode.setOpposite(topNode, widget.getHeight());
+                    topNode.setType(ResolutionAnchor.CENTER_CONNECTION);
+                    bottomNode.setType(ResolutionAnchor.CENTER_CONNECTION);
+                    if (optimiseDimensions) {
+                        topNode.setOpposite(bottomNode, -1, widget.getResolutionHeight());
+                        bottomNode.setOpposite(topNode, 1, widget.getResolutionHeight());
+                        widget.getResolutionHeight().addDependent(topNode);
+                        widget.getResolutionWidth().addDependent(bottomNode);
+                    } else {
+                        topNode.setOpposite(bottomNode, -widget.getHeight());
+                        bottomNode.setOpposite(topNode, widget.getHeight());
+                    }
                     if (widget.mBaselineDistance > 0) {
-                        widget.mBaseline.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, topNode, widget.mBaselineDistance);
+                        widget.mBaseline.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, topNode, widget.mBaselineDistance);
                     }
                 }
             } else if (widget.mListDimensionBehaviors[VERTICAL] == MATCH_CONSTRAINT
                     && optimizableMatchConstraint(widget, VERTICAL)) {
                 int height = widget.getHeight();
-                if (widget.mDimensionRatio != 0) {
-                    height = (int) (widget.getWidth() * widget.mDimensionRatio);
-                }
-                topNode.setType(ResolutionNode.DIRECT_CONNECTION);
-                bottomNode.setType(ResolutionNode.DIRECT_CONNECTION);
+                // TODO: fix ratio (right it won't work, optimizableMatchConstraint will return false
+                // if (widget.mDimensionRatio != 0) {
+                //     height = (int) (widget.getWidth() * widget.mDimensionRatio);
+                // }
+                topNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
+                bottomNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
                 if (widget.mTop.mTarget == null && widget.mBottom.mTarget == null) {
-                    bottomNode.dependsOn(topNode, height);
+                    if (optimiseDimensions) {
+                        bottomNode.dependsOn(topNode, 1, widget.getResolutionHeight());
+                    } else {
+                        bottomNode.dependsOn(topNode, height);
+                    }
                 } else if (widget.mTop.mTarget != null && widget.mBottom.mTarget == null) {
-                    bottomNode.dependsOn(topNode, height);
+                    if (optimiseDimensions) {
+                        bottomNode.dependsOn(topNode, 1, widget.getResolutionHeight());
+                    } else {
+                        bottomNode.dependsOn(topNode, height);
+                    }
                 } else if (widget.mTop.mTarget == null && widget.mBottom.mTarget != null) {
-                    topNode.dependsOn(bottomNode, -height);
+                    if (optimiseDimensions) {
+                        topNode.dependsOn(bottomNode, -1, widget.getResolutionHeight());
+                    } else {
+                        topNode.dependsOn(bottomNode, -height);
+                    }
                 } else if (widget.mTop.mTarget != null && widget.mBottom.mTarget != null) {
+                    if (optimiseDimensions) {
+                        widget.getResolutionHeight().addDependent(topNode);
+                        widget.getResolutionWidth().addDependent(bottomNode);
+                    }
                     if (widget.mDimensionRatio == 0) {
-                        topNode.setType(ResolutionNode.MATCH_CONNECTION);
-                        bottomNode.setType(ResolutionNode.MATCH_CONNECTION);
+                        topNode.setType(ResolutionAnchor.MATCH_CONNECTION);
+                        bottomNode.setType(ResolutionAnchor.MATCH_CONNECTION);
                         topNode.setOpposite(bottomNode, 0);
                         bottomNode.setOpposite(topNode, 0);
                     } else {
-                        topNode.setType(ResolutionNode.CENTER_CONNECTION);
-                        bottomNode.setType(ResolutionNode.CENTER_CONNECTION);
+                        topNode.setType(ResolutionAnchor.CENTER_CONNECTION);
+                        bottomNode.setType(ResolutionAnchor.CENTER_CONNECTION);
                         topNode.setOpposite(bottomNode, -height);
                         bottomNode.setOpposite(topNode, height);
                         widget.setHeight(height);
                         if (widget.mBaselineDistance > 0) {
-                            widget.mBaseline.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, topNode, widget.mBaselineDistance);
+                            widget.mBaseline.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, topNode, widget.mBaselineDistance);
                         }
                     }
                 }
@@ -428,8 +510,8 @@ public class Optimizer {
         }
         ConstraintWidget last = widget;
 
-        ResolutionNode firstNode = first.mListAnchors[offset].getResolutionNode();
-        ResolutionNode lastNode = last.mListAnchors[offset + 1].getResolutionNode();
+        ResolutionAnchor firstNode = first.mListAnchors[offset].getResolutionNode();
+        ResolutionAnchor lastNode = last.mListAnchors[offset + 1].getResolutionNode();
 
         if (firstNode.target == null || lastNode.target == null) {
             // dangling chain, let's bail for now
@@ -437,8 +519,8 @@ public class Optimizer {
         }
 
         // let's look at the endpoints
-        if (firstNode.target.state != ResolutionNode.RESOLVED
-                && lastNode.target.state != ResolutionNode.RESOLVED) {
+        if (firstNode.target.state != ResolutionAnchor.RESOLVED
+                && lastNode.target.state != ResolutionAnchor.RESOLVED) {
             // No resolved endpoints, let's exit
             return false;
         }

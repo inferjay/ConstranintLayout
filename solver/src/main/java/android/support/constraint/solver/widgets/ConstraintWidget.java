@@ -19,6 +19,7 @@ import android.support.constraint.solver.*;
 
 import java.util.ArrayList;
 
+import static android.support.constraint.solver.widgets.ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT;
 import static android.support.constraint.solver.widgets.ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
 
 /**
@@ -68,6 +69,9 @@ public class ConstraintWidget {
 
     private static final int WRAP = -2;
 
+    ResolutionDimension mResolutionWidth;
+    ResolutionDimension mResolutionHeight;
+
     int mMatchConstraintDefaultWidth = MATCH_CONSTRAINT_SPREAD;
     int mMatchConstraintDefaultHeight = MATCH_CONSTRAINT_SPREAD;
     int mMatchConstraintMinWidth = 0;
@@ -99,6 +103,22 @@ public class ConstraintWidget {
 
     public void setMaxHeight(int maxWidth) {
         mMaxDimension[VERTICAL] = maxWidth;
+    }
+
+    public boolean isSpreadWidth() {
+        return mMatchConstraintDefaultWidth == MATCH_CONSTRAINT_SPREAD
+                && mDimensionRatio == 0
+                && mMatchConstraintMinWidth == 0
+                && mMatchConstraintMaxWidth == 0
+                && mListDimensionBehaviors[HORIZONTAL] == MATCH_CONSTRAINT;
+    }
+
+    public boolean isSpreadHeight() {
+        return mMatchConstraintDefaultHeight == MATCH_CONSTRAINT_SPREAD
+                && mDimensionRatio == 0
+                && mMatchConstraintMinHeight == 0
+                && mMatchConstraintMaxHeight == 0
+                && mListDimensionBehaviors[VERTICAL] == MATCH_CONSTRAINT;
     }
 
     /**
@@ -278,6 +298,12 @@ public class ConstraintWidget {
         mMatchConstraintMinHeight = 0;
         mResolvedDimensionRatioSide = UNKNOWN;
         mResolvedDimensionRatio = 1f;
+        if (mResolutionWidth != null) {
+            mResolutionWidth.reset();
+        }
+        if (mResolutionHeight != null) {
+            mResolutionHeight.reset();
+        }
     }
 
     /*-----------------------------------------------------------------------*/
@@ -304,16 +330,17 @@ public class ConstraintWidget {
 
     /**
      * Graph analysis
+     * @param optimizationLevel the current optimisation level
      */
-    public void analyze() {
-        Optimizer.analyze(this);
+    public void analyze(int optimizationLevel) {
+        Optimizer.analyze(optimizationLevel,this);
     }
 
     /**
      * Try resolving the graph analysis
      */
     public void resolve() {
-        // basic constraints resolution is done in ResolutionNode
+        // basic constraints resolution is done in ResolutionAnchor
     }
 
     /**
@@ -322,13 +349,35 @@ public class ConstraintWidget {
      * @return true if the widget is fully resolved
      */
     public boolean isFullyResolved() {
-        if (mLeft.getResolutionNode().state == ResolutionNode.RESOLVED
-                && mRight.getResolutionNode().state == ResolutionNode.RESOLVED
-                && mTop.getResolutionNode().state == ResolutionNode.RESOLVED
-                && mBottom.getResolutionNode().state == ResolutionNode.RESOLVED) {
+        if (mLeft.getResolutionNode().state == ResolutionAnchor.RESOLVED
+                && mRight.getResolutionNode().state == ResolutionAnchor.RESOLVED
+                && mTop.getResolutionNode().state == ResolutionAnchor.RESOLVED
+                && mBottom.getResolutionNode().state == ResolutionAnchor.RESOLVED) {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Return a ResolutionDimension for the width
+     * @return
+     */
+    public ResolutionDimension getResolutionWidth() {
+        if (mResolutionWidth == null) {
+            mResolutionWidth = new ResolutionDimension();
+        }
+        return mResolutionWidth;
+    }
+
+    /**
+     * Return a ResolutionDimension for the height
+     * @return
+     */
+    public ResolutionDimension getResolutionHeight() {
+        if (mResolutionHeight == null) {
+            mResolutionHeight = new ResolutionDimension();
+        }
+        return mResolutionHeight;
     }
 
     /*-----------------------------------------------------------------------*/
@@ -2244,7 +2293,7 @@ public class ConstraintWidget {
                 || mResolvedDimensionRatioSide == UNKNOWN);
 
         if (mBaselineDistance > 0) {
-            if (mBaseline.getResolutionNode().state == ResolutionNode.RESOLVED) {
+            if (mBaseline.getResolutionNode().state == ResolutionAnchor.RESOLVED) {
                 mBaseline.getResolutionNode().addResolvedValue(system);
             } else {
                 system.addEquality(baseline, top, getBaselineDistance(), SolverVariable.STRENGTH_FIXED);
@@ -2382,8 +2431,8 @@ public class ConstraintWidget {
         SolverVariable endTarget = system.createObjectVariable(endAnchor.getTarget());
 
         if (system.graphOptimizer) {
-            if (beginAnchor.getResolutionNode().state == ResolutionNode.RESOLVED
-                    && endAnchor.getResolutionNode().state == ResolutionNode.RESOLVED) {
+            if (beginAnchor.getResolutionNode().state == ResolutionAnchor.RESOLVED
+                    && endAnchor.getResolutionNode().state == ResolutionAnchor.RESOLVED) {
                 if (system.getMetrics() != null) {
                     system.getMetrics().resolvedWidgets++;
                 }

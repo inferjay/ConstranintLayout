@@ -206,40 +206,41 @@ public class Guideline extends ConstraintWidget {
 
     /**
      * Graph analysis
+     * @param optimizationLevel
      */
     @Override
-    public void analyze() {
+    public void analyze(int optimizationLevel) {
         ConstraintWidget constraintWidgetContainer = getParent();
         if (constraintWidgetContainer == null) {
             return;
         }
         if (getOrientation() == Guideline.VERTICAL) {
-            mTop.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION,constraintWidgetContainer.mTop.getResolutionNode(), 0);
-            mBottom.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), 0);
+            mTop.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION,constraintWidgetContainer.mTop.getResolutionNode(), 0);
+            mBottom.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), 0);
             if (mRelativeBegin != -1) {
-                mLeft.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), mRelativeBegin);
-                mRight.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), mRelativeBegin);
+                mLeft.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), mRelativeBegin);
+                mRight.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), mRelativeBegin);
             } else if (mRelativeEnd != -1) {
-                mLeft.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mRight.getResolutionNode(), -mRelativeEnd);
-                mRight.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mRight.getResolutionNode(), -mRelativeEnd);
+                mLeft.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, constraintWidgetContainer.mRight.getResolutionNode(), -mRelativeEnd);
+                mRight.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, constraintWidgetContainer.mRight.getResolutionNode(), -mRelativeEnd);
             } else if (mRelativePercent != -1 && constraintWidgetContainer.getHorizontalDimensionBehaviour() == FIXED) {
                 int position = (int) (constraintWidgetContainer.mWidth * mRelativePercent);
-                mLeft.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), position);
-                mRight.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), position);
+                mLeft.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), position);
+                mRight.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), position);
             }
         } else {
-            mLeft.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), 0);
-            mRight.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), 0);
+            mLeft.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), 0);
+            mRight.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, constraintWidgetContainer.mLeft.getResolutionNode(), 0);
             if (mRelativeBegin != -1) {
-                mTop.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), mRelativeBegin);
-                mBottom.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), mRelativeBegin);
+                mTop.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), mRelativeBegin);
+                mBottom.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), mRelativeBegin);
             } else if (mRelativeEnd != -1) {
-                mTop.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mBottom.getResolutionNode(), -mRelativeEnd);
-                mBottom.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mBottom.getResolutionNode(), -mRelativeEnd);
+                mTop.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, constraintWidgetContainer.mBottom.getResolutionNode(), -mRelativeEnd);
+                mBottom.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, constraintWidgetContainer.mBottom.getResolutionNode(), -mRelativeEnd);
             } else if (mRelativePercent != -1 && constraintWidgetContainer.getVerticalDimensionBehaviour() == FIXED) {
                 int position = (int) (constraintWidgetContainer.mHeight * mRelativePercent);
-                mTop.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), position);
-                mBottom.getResolutionNode().dependsOn(ResolutionNode.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), position);
+                mTop.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), position);
+                mBottom.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, constraintWidgetContainer.mTop.getResolutionNode(), position);
             }
         }
     }

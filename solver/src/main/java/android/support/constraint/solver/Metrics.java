@@ -23,6 +23,9 @@ import java.util.ArrayList;
  * Utility class to track metrics during the system resolution
  */
 public class Metrics {
+    public long measures;
+    public long additionalMeasures;
+    public long resolutions;
     public long tableSizeIncrease;
     public long minimize;
     public long constraints;
@@ -53,6 +56,9 @@ public class Metrics {
 
     public String toString() {
         return "\n*** Metrics ***\n"
+                + "measures: " + measures + "\n"
+                + "additionalMeasures: " + additionalMeasures + "\n"
+                + "resolutions passes: " + resolutions + "\n"
                 + "table increases: " + tableSizeIncrease + "\n"
                 + "maxTableSize: " + maxTableSize + "\n"
                 + "maxVariables: " + maxVariables + "\n"
@@ -82,6 +88,9 @@ public class Metrics {
                 ;
     }
     public void reset() {
+        measures = 0;
+        additionalMeasures = 0;
+        resolutions = 0;
         tableSizeIncrease = 0;
         maxTableSize = 0;
         lastTableSize = 0;
