@@ -98,7 +98,7 @@ public class OriginalGoal {
             GoalElement element = variables.get(i);
             if (element.variable.definitionId != -1) {
                 ArrayRow definition = system.getRow(element.variable.definitionId);
-                ArrayLinkedVariables variables = definition.variables;
+                ArrayLinkedVariables variables = (ArrayLinkedVariables) (Object) definition.variables;
                 int size = variables.currentSize;
                 for (int j = 0; j < size; j++) {
                     SolverVariable var = variables.getVariable(j);

@@ -75,7 +75,7 @@ public class OptimizedGoal extends OriginalGoal {
             SolverVariable element = system.mCache.mIndexedVariables[i];
             if (element.definitionId != -1) {
                 ArrayRow definition = system.getRow(element.definitionId);
-                ArrayLinkedVariables variables = definition.variables;
+                ArrayLinkedVariables variables = (ArrayLinkedVariables) (Object)  definition.variables;
                 int size = variables.currentSize;
                 for (int j = 0; j < size; j++) {
                     SolverVariable var = variables.getVariable(j);

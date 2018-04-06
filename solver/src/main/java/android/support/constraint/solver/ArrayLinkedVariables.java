@@ -115,7 +115,7 @@ public class ArrayLinkedVariables {
      */
     public final void put(SolverVariable variable, float value) {
         if (value == 0) {
-            remove(variable);
+            remove(variable, true);
             return;
         }
         // Special casing empty list...
@@ -125,6 +125,7 @@ public class ArrayLinkedVariables {
             mArrayIndices[mHead] = variable.id;
             mArrayNextIndices[mHead] = NONE;
             variable.usageInRowCount++;
+            variable.addToRow(mRow);
             currentSize++;
             if (!mDidFillOnce) {
                 // only increment mLast if we haven't done the first filling pass
@@ -196,6 +197,7 @@ public class ArrayLinkedVariables {
             mHead = availableIndice;
         }
         variable.usageInRowCount++;
+        variable.addToRow(mRow);
         currentSize++;
         if (!mDidFillOnce) {
             // only increment mLast if we haven't done the first filling pass
@@ -215,11 +217,11 @@ public class ArrayLinkedVariables {
      *
      * The code is broadly identical to the put() method, only differing
      * in in-line deletion, and of course doing an add rather than a put
-     *
-     * @param variable the variable we want to add
+     *  @param variable the variable we want to add
      * @param value its value
+     * @param removeFromDefinition
      */
-    public final void add(SolverVariable variable, float value) {
+    final void add(SolverVariable variable, float value, boolean removeFromDefinition) {
         if (value == 0) {
             return;
         }
@@ -230,6 +232,7 @@ public class ArrayLinkedVariables {
             mArrayIndices[mHead] = variable.id;
             mArrayNextIndices[mHead] = NONE;
             variable.usageInRowCount++;
+            variable.addToRow(mRow);
             currentSize++;
             if (!mDidFillOnce) {
                 // only increment mLast if we haven't done the first filling pass
@@ -255,7 +258,9 @@ public class ArrayLinkedVariables {
                     } else {
                         mArrayNextIndices[previous] = mArrayNextIndices[current];
                     }
-                    mCache.mIndexedVariables[idx].removeClientEquation(mRow);
+                    if (removeFromDefinition) {
+                        variable.removeFromRow(mRow);
+                    }
                     if (mDidFillOnce) {
                         // If we did a full pass already, remember that spot
                         mLast = current;
@@ -317,6 +322,7 @@ public class ArrayLinkedVariables {
             mHead = availableIndice;
         }
         variable.usageInRowCount++;
+        variable.addToRow(mRow);
         currentSize++;
         if (!mDidFillOnce) {
             // only increment mLast if we haven't done the first filling pass
@@ -332,9 +338,10 @@ public class ArrayLinkedVariables {
      * Remove a variable from the list
      *
      * @param variable the variable we want to remove
+     * @param removeFromDefinition
      * @return the value of the removed variable
      */
-    public final float remove(SolverVariable variable) {
+    public final float remove(SolverVariable variable, boolean removeFromDefinition) {
         if (candidate == variable) {
             candidate = null;
         }
@@ -352,7 +359,10 @@ public class ArrayLinkedVariables {
                 } else {
                     mArrayNextIndices[previous] = mArrayNextIndices[current];
                 }
-                mCache.mIndexedVariables[idx].removeClientEquation(mRow);
+
+                if (removeFromDefinition) {
+                    variable.removeFromRow(mRow);
+                }
                 variable.usageInRowCount--;
                 currentSize--;
                 mArrayIndices[current] = NONE;
@@ -372,6 +382,16 @@ public class ArrayLinkedVariables {
      * Clear the list of variables
      */
     public final void clear() {
+        int current = mHead;
+        int counter = 0;
+        while (current != NONE && counter < currentSize) {
+            SolverVariable variable = mCache.mIndexedVariables[mArrayIndices[current]];
+            if (variable != null) {
+                variable.removeFromRow(mRow);
+            }
+            current = mArrayNextIndices[current]; counter++;
+        }
+
         mHead = NONE;
         mLast = NONE;
         mDidFillOnce = false;
@@ -444,22 +464,6 @@ public class ArrayLinkedVariables {
     }
 
     /**
-     * Make sure that all variables contained in the list
-     * know we reference them
-     *
-     * @param row update the variable to reference the row
-     */
-    void updateClientEquations(ArrayRow row) {
-        int current = mHead;
-        int counter = 0;
-        while (current != NONE && counter < currentSize) {
-            mCache.mIndexedVariables[mArrayIndices[current]].addClientEquation(row);
-            current = mArrayNextIndices[current]; counter++;
-        }
-    }
-
-
-    /**
      * Returns true if the variable is new to the system, i.e. is already present
      * in one of the rows. This function is called while choosing the subject of a new row.
      *
@@ -511,46 +515,50 @@ public class ArrayLinkedVariables {
         while (current != NONE && counter < currentSize) {
             float amount = mArrayValues[current];
             float epsilon = 0.001f;
+            SolverVariable variable = mCache.mIndexedVariables[mArrayIndices[current]];
             if (amount < 0) {
                 if (amount > -epsilon) {
                     mArrayValues[current] = 0;
                     amount = 0;
+                    variable.removeFromRow(mRow);
                 }
             } else {
                 if (amount < epsilon) {
                     mArrayValues[current] = 0;
                     amount = 0;
+                    variable.removeFromRow(mRow);
                 }
             }
-            SolverVariable variable = mCache.mIndexedVariables[mArrayIndices[current]];
-            if (variable.mType == SolverVariable.Type.UNRESTRICTED) {
-                if (unrestrictedCandidate == null) {
-                    unrestrictedCandidate = variable;
-                    unrestrictedCandidateAmount = amount;
-                    unrestrictedCandidateIsNew = isNew(variable, system);
-                } else if (unrestrictedCandidateAmount > amount) {
-                    unrestrictedCandidate = variable;
-                    unrestrictedCandidateAmount = amount;
-                    unrestrictedCandidateIsNew = isNew(variable, system);
-                } else if (!unrestrictedCandidateIsNew && isNew(variable, system)) {
-                    unrestrictedCandidate = variable;
-                    unrestrictedCandidateAmount = amount;
-                    unrestrictedCandidateIsNew = true;
-                }
-            } else if (unrestrictedCandidate == null) {
-                if (amount < 0) {
-                    if (restrictedCandidate == null) {
-                        restrictedCandidate = variable;
-                        restrictedCandidateAmount = amount;
-                        restrictedCandidateIsNew = isNew(variable, system);
-                    } else if (restrictedCandidateAmount > amount) {
-                        restrictedCandidate = variable;
-                        restrictedCandidateAmount = amount;
-                        restrictedCandidateIsNew = isNew(variable, system);
-                    } else if (!restrictedCandidateIsNew && isNew(variable, system)) {
-                        restrictedCandidate = variable;
-                        restrictedCandidateAmount = amount;
-                        restrictedCandidateIsNew = true;
+            if (amount != 0) {
+                if (variable.mType == SolverVariable.Type.UNRESTRICTED) {
+                    if (unrestrictedCandidate == null) {
+                        unrestrictedCandidate = variable;
+                        unrestrictedCandidateAmount = amount;
+                        unrestrictedCandidateIsNew = isNew(variable, system);
+                    } else if (unrestrictedCandidateAmount > amount) {
+                        unrestrictedCandidate = variable;
+                        unrestrictedCandidateAmount = amount;
+                        unrestrictedCandidateIsNew = isNew(variable, system);
+                    } else if (!unrestrictedCandidateIsNew && isNew(variable, system)) {
+                        unrestrictedCandidate = variable;
+                        unrestrictedCandidateAmount = amount;
+                        unrestrictedCandidateIsNew = true;
+                    }
+                } else if (unrestrictedCandidate == null) {
+                    if (amount < 0) {
+                        if (restrictedCandidate == null) {
+                            restrictedCandidate = variable;
+                            restrictedCandidateAmount = amount;
+                            restrictedCandidateIsNew = isNew(variable, system);
+                        } else if (restrictedCandidateAmount > amount) {
+                            restrictedCandidate = variable;
+                            restrictedCandidateAmount = amount;
+                            restrictedCandidateIsNew = isNew(variable, system);
+                        } else if (!restrictedCandidateIsNew && isNew(variable, system)) {
+                            restrictedCandidate = variable;
+                            restrictedCandidateAmount = amount;
+                            restrictedCandidateIsNew = true;
+                        }
                     }
                 }
             }
@@ -564,11 +572,11 @@ public class ArrayLinkedVariables {
 
     /**
      * Update the current list with a new definition
-     *
-     * @param self the row we will update with the definition
+     *  @param self the row we will update with the definition
      * @param definition the row containing the definition
+     * @param removeFromDefinition
      */
-    void updateFromRow(ArrayRow self, ArrayRow definition) {
+    final void updateFromRow(ArrayRow self, ArrayRow definition, boolean removeFromDefinition) {
         // This is one of the two method (the other being updateFromSystem())
         // that is constantly being called while building and solving the linear system
         // performances are critical
@@ -577,20 +585,22 @@ public class ArrayLinkedVariables {
         while (current != NONE && counter < currentSize) {
             if (mArrayIndices[current] == definition.variable.id) {
                 float value = mArrayValues[current];
-                remove(definition.variable);
+                remove(definition.variable, removeFromDefinition);
                 // now, let's add all values from the definition
-                ArrayLinkedVariables definitionVariables = definition.variables;
+                ArrayLinkedVariables definitionVariables = (ArrayLinkedVariables) (Object) definition.variables;
                 int definitionCurrent = definitionVariables.mHead;
                 int definitionCounter = 0;
                 while (definitionCurrent != NONE && definitionCounter < definitionVariables.currentSize) {
                     SolverVariable definitionVariable = mCache.mIndexedVariables[
                             definitionVariables.mArrayIndices[definitionCurrent]];
                     float definitionValue = definitionVariables.mArrayValues[definitionCurrent];
-                    add(definitionVariable, definitionValue * value);
+                    add(definitionVariable, definitionValue * value, removeFromDefinition);
                     definitionCurrent = definitionVariables.mArrayNextIndices[definitionCurrent]; definitionCounter++;
                 }
                 self.constantValue += definition.constantValue * value;
-                definition.variable.removeClientEquation(self);
+                if (removeFromDefinition) {
+                    definition.variable.removeFromRow(self);
+                }
 
                 // Here we reset our counter as the linked list has changed, if we weren't doing that
                 // we could potentially skip some of the original elements. On the other hand, this approach
@@ -619,24 +629,24 @@ public class ArrayLinkedVariables {
             SolverVariable variable = mCache.mIndexedVariables[mArrayIndices[current]];
             if (variable.definitionId != -1) {
                 float value = mArrayValues[current];
-                remove(variable);
+                remove(variable, true);
                 // now, let's add all values from the definition
                 ArrayRow definition = rows[variable.definitionId];
                 if (!definition.isSimpleDefinition) {
-                    ArrayLinkedVariables definitionVariables = definition.variables;
+                    ArrayLinkedVariables definitionVariables = (ArrayLinkedVariables) (Object) definition.variables;
                     int definitionCurrent = definitionVariables.mHead;
                     int definitionCounter = 0;
                     while (definitionCurrent != NONE && definitionCounter < definitionVariables.currentSize) {
                         SolverVariable definitionVariable = mCache.mIndexedVariables[
                                 definitionVariables.mArrayIndices[definitionCurrent]];
                         float definitionValue = definitionVariables.mArrayValues[definitionCurrent];
-                        add(definitionVariable, definitionValue * value);
+                        add(definitionVariable, definitionValue * value, true);
                         definitionCurrent = definitionVariables.mArrayNextIndices[definitionCurrent];
                         definitionCounter++;
                     }
                 }
                 self.constantValue += definition.constantValue * value;
-                definition.variable.removeClientEquation(self);
+                definition.variable.removeFromRow(self);
 
                 // Here we reset our counter as the linked list has changed, if we weren't doing that
                 // we could potentially skip some of the original elements. On the other hand, this approach

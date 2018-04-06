@@ -18,7 +18,6 @@ package android.support.constraint.solver;
 
 import android.support.constraint.solver.widgets.ConstraintAnchor;
 import android.support.constraint.solver.widgets.ConstraintWidget;
-import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -74,11 +73,14 @@ public class LinearSystem {
     private ArrayRow[] tempClientsCopy = new ArrayRow[TABLE_SIZE];
     public static Metrics sMetrics;
 
+    private final Row mTempGoal;
+
     public LinearSystem() {
         mRows = new ArrayRow[TABLE_SIZE];
         releaseRows();
         mCache = new Cache();
         mGoal = new GoalRow(mCache);
+        mTempGoal = new ArrayRow(mCache);
     }
 
     public void fillMetrics(Metrics metrics) {
@@ -442,7 +444,7 @@ public class LinearSystem {
      * Update the equation with the variables already defined in the system
      * @param row row to update
      */
-    void updateRowFromVariables(ArrayRow row) {
+    private final void updateRowFromVariables(ArrayRow row) {
         if (mNumRows > 0) {
             row.variables.updateFromSystem(row, mRows);
             if (row.variables.currentSize == 0) {
@@ -495,9 +497,8 @@ public class LinearSystem {
                 row.variable = extra;
                 addRow(row);
                 added = true;
-                Row goal = new ArrayRow(mCache); //TODO: use a pool
-                goal.initFromRow(row);
-                optimize(goal, true);
+                mTempGoal.initFromRow(row);
+                optimize(mTempGoal, true);
                 if (extra.definitionId == -1) {
                     if (DEBUG) {
                         System.out.println("row added is 0, so get rid of it");
@@ -510,45 +511,12 @@ public class LinearSystem {
                                 sMetrics.pivots++;
                             }
                             row.pivot(pivotCandidate);
-                            row.updateClientEquations();
                         }
                     }
-                    // TODO: keep track of variables...
-                    for (int i = 0; i < mNumRows; i++) {
-                        ArrayRow r = mRows[i];
-                        r.variables.remove(extra);
-                    }
-                    for (int i = 0; i < mNumRows; i++) {
-                        ArrayRow r = mRows[i];
-                        if (r != row) {
-                            r.updateRowWithEquation(row);
-                        }
-                    }
-                    // we can get rid of the variable
-                    // row.variables.clear();
-                    // row.variable = null;
                     if (!row.isSimpleDefinition) {
-                        row.updateClientEquations();
-                        final int count = row.variable.mClientEquationsCount;
-                        if (count > 0) {
-                            while (tempClientsCopy.length < count) {
-                                tempClientsCopy = new ArrayRow[tempClientsCopy.length * 2];
-                            }
-                            ArrayRow[] clients = tempClientsCopy;
-                            //noinspection ManualArrayCopy
-                            for (int i = 0; i < count; i++) {
-                                clients[i] = row.variable.mClientEquations[i];
-                            }
-                            for (int i = 0; i < count; i++) {
-                                ArrayRow client = clients[i];
-                                if (client == row) {
-                                    continue;
-                                }
-                                client.variables.updateFromRow(client, row);
-                                client.updateClientEquations();
-                            }
-                        }
+                        row.variable.updateReferencesWithNewDefinition(row);
                     }
+                    mNumRows--;
                 }
             }
 
@@ -558,10 +526,6 @@ public class LinearSystem {
                     System.out.println("No variable found to pivot on " + row.toReadableString());
                     displayReadableRows();
                 }
-                // We haven't found a variable to pivot on. Normally, we should introduce a new stay
-                // variable to solve the system, then solve, and possibly remove the stay variable.
-                // But the equations we insert have (for this exact purpose) balanced +/- variables,
-                // so should not be necessary. Let's simply exit.
                 return;
             }
         }
@@ -570,37 +534,14 @@ public class LinearSystem {
         }
     }
 
-    private void addRow(ArrayRow row) {
+    private final void addRow(ArrayRow row) {
         if (mRows[mNumRows] != null) {
             mCache.arrayRowPool.release(mRows[mNumRows]);
-        }
-        if (!row.isSimpleDefinition) {
-            row.updateClientEquations();
         }
         mRows[mNumRows] = row;
         row.variable.definitionId = mNumRows;
         mNumRows++;
-
-        final int count = row.variable.mClientEquationsCount;
-        if (count > 0) {
-            while (tempClientsCopy.length < count) {
-                tempClientsCopy = new ArrayRow[tempClientsCopy.length * 2];
-            }
-            ArrayRow[] clients = tempClientsCopy;
-            //noinspection ManualArrayCopy
-            for (int i = 0; i < count; i++) {
-                clients[i] = row.variable.mClientEquations[i];
-            }
-            for (int i = 0; i < count; i++) {
-                ArrayRow client = clients[i];
-                if (client == row) {
-                    continue;
-                }
-                client.variables.updateFromRow(client, row);
-                client.updateClientEquations();
-            }
-        }
-        updateRowFromVariables((GoalRow) mGoal);
+        row.variable.updateReferencesWithNewDefinition(row);
 
         if (DEBUG) {
             System.out.println("Row added, here is the system:");
@@ -614,7 +555,7 @@ public class LinearSystem {
      * @param b
      * @return number of iterations.
      */
-    private int optimize(Row goal, boolean b) {
+    private final int optimize(Row goal, boolean b) {
         if (sMetrics != null) {
             sMetrics.optimize++;
         }
@@ -685,6 +626,9 @@ public class LinearSystem {
                         // skip unrestricted variables equations (to only look at Cs)
                         continue;
                     }
+                    if (current.isSimpleDefinition) {
+                        continue;
+                    }
 
                     if (current.hasVariable(pivotCandidate)) {
                         if (DEBUG) {
@@ -715,14 +659,8 @@ public class LinearSystem {
                         sMetrics.pivots++;
                     }
                     pivotEquation.pivot(pivotCandidate);
-                    pivotEquation.updateClientEquations();
                     pivotEquation.variable.definitionId = pivotRowIndex;
-                    // let's update the system with the new pivoted equation
-                    for (int i = 0; i < mNumRows; i++) {
-                        mRows[i].updateRowWithEquation(pivotEquation);
-                    }
-                    // let's update the goal equation as well
-                    updateRowFromVariables((ArrayRow) goal);
+                    pivotEquation.variable.updateReferencesWithNewDefinition(pivotEquation);
                     if (DEBUG) {
                         System.out.println("new system after pivot:");
                         displayReadableRows();
@@ -739,7 +677,7 @@ public class LinearSystem {
                     // now that we pivoted, we're going to continue looping on the next goal
                     // columns, until we exhaust all the possibilities of improving the system
                 } else {
-                    System.out.println("we couldn't find an equation to pivot upon");
+//                    System.out.println("we couldn't find an equation to pivot upon");
                     // We couldn't find an equation to pivot, we should exit the loop.
                     done = true;
                 }
@@ -815,6 +753,9 @@ public class LinearSystem {
                         // can be either positive or negative.
                         continue;
                     }
+                    if (current.isSimpleDefinition) {
+                        continue;
+                    }
                     if (current.constantValue < 0) {
                         // let's examine this row, see if we can find a good pivot
                         if (DEBUG) {
@@ -854,14 +795,9 @@ public class LinearSystem {
                         sMetrics.pivots++;
                     }
                     pivotEquation.pivot(mCache.mIndexedVariables[pivotColumnIndex]);
-                    pivotEquation.updateClientEquations();
                     pivotEquation.variable.definitionId = pivotRowIndex;
-                    // let's update the system with the new pivoted equation
-                    for (int i = 0; i < mNumRows; i++) {
-                        mRows[i].updateRowWithEquation(pivotEquation);
-                    }
-                    // let's update the goal equation as well
-                    updateRowFromVariables((ArrayRow) goal);
+                    pivotEquation.variable.updateReferencesWithNewDefinition(pivotEquation);
+
                     if (DEBUG) {
                         System.out.println("new goal after pivot: " + goal);
                         displayRows();
@@ -875,26 +811,26 @@ public class LinearSystem {
         if (DEBUG) {
             System.out.println("the current system should now be feasible [" + infeasibleSystem + "] after " + tries + " iterations");
             displayReadableRows();
-        }
 
-        // Let's make sure the system is correct
-        //noinspection UnusedAssignment
-        infeasibleSystem = false;
-        for (int i = 0; i < mNumRows; i++) {
-            SolverVariable variable = mRows[i].variable;
-            if (variable.mType == SolverVariable.Type.UNRESTRICTED) {
-                continue; // C can be either positive or negative.
+            // Let's make sure the system is correct
+            //noinspection UnusedAssignment
+            infeasibleSystem = false;
+            for (int i = 0; i < mNumRows; i++) {
+                SolverVariable variable = mRows[i].variable;
+                if (variable.mType == SolverVariable.Type.UNRESTRICTED) {
+                    continue; // C can be either positive or negative.
+                }
+                if (mRows[i].constantValue < 0) {
+                    //noinspection UnusedAssignment
+                    infeasibleSystem = true;
+                    break;
+                }
             }
-            if (mRows[i].constantValue < 0) {
-                //noinspection UnusedAssignment
-                infeasibleSystem = true;
-                break;
-            }
-        }
 
-        if (DEBUG && infeasibleSystem) {
-            System.out.println("IMPOSSIBLE SYSTEM, WTF");
-            throw new Exception();
+            if (DEBUG && infeasibleSystem) {
+                System.out.println("IMPOSSIBLE SYSTEM, WTF");
+                throw new Exception();
+            }
         }
 
         return tries;

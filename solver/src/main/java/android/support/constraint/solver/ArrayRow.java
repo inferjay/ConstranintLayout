@@ -33,14 +33,6 @@ public class ArrayRow implements LinearSystem.Row {
         variables = new ArrayLinkedVariables(this, cache);
     }
 
-    void updateClientEquations() {
-        variables.updateClientEquations(this);
-    }
-
-    boolean hasAtLeastOnePositiveVariable() {
-        return variables.hasAtLeastOnePositiveVariable();
-    }
-
     boolean hasKeyVariable() {
         return !(
                 (variable == null)
@@ -73,6 +65,9 @@ public class ArrayRow implements LinearSystem.Row {
                 continue;
             }
             float amount = variables.getVariableValue(i);
+            if (amount == 0) {
+                continue;
+            }
             String name = v.toString();
             if (!addedVariable) {
                 if (amount < 0) {
@@ -382,11 +377,6 @@ public class ArrayRow implements LinearSystem.Row {
         return size;
     }
 
-    boolean updateRowWithEquation(ArrayRow definition) {
-        variables.updateFromRow(this, definition);
-        return true;
-    }
-
     void ensurePositiveConstant() {
         // Ensure that if we have a constant it's positive
         if (constantValue < 0) {
@@ -430,7 +420,7 @@ public class ArrayRow implements LinearSystem.Row {
             variable = null;
         }
 
-        float amount = variables.remove(v) * -1;
+        float amount = variables.remove(v, true) * -1;
         variable = v;
         if (amount == 1) {
             return;
@@ -471,7 +461,7 @@ public class ArrayRow implements LinearSystem.Row {
             for (int i = 0; i < copiedRow.variables.currentSize; i++) {
                 SolverVariable var = copiedRow.variables.getVariable(i);
                 float val = copiedRow.variables.getVariableValue(i);
-                variables.add(var, val);
+                variables.add(var, val, true);
             }
         }
     }
