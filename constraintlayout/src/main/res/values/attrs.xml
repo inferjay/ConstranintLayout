@@ -20,6 +20,8 @@
         <enum name="end" value="6"/>
     </attr>
 
+    <attr name="barrierAllowsGoneWidgets" format="boolean" />
+
     <!-- Let a chain helper be rtl or not -->
     <attr name="chainUseRtl" format="boolean"/>
 
@@ -209,6 +211,7 @@
 
         <attr name="constraintSet"/>
         <attr name="barrierDirection"/>
+        <attr name="barrierAllowsGoneWidgets"/>
         <attr name="constraint_referenced_ids"/>
         <attr name="chainUseRtl"/>
         <attr name="title"/>
