@@ -506,7 +506,6 @@ public class ConstraintLayout extends ViewGroup {
     private int mOptimizationLevel = Optimizer.OPTIMIZATION_STANDARD;
     private ConstraintSet mConstraintSet = null;
 
-    private String mTitle;
     private int mConstraintSetId = -1;
 
     private HashMap<String, Integer> mDesignIds = new HashMap<>();
@@ -580,22 +579,6 @@ public class ConstraintLayout extends ViewGroup {
         mChildrenByIds.put(getId(), this);
     }
 
-    /**
-     * @hide
-     * @param title
-     */
-    public void setTitle(String title) {
-        mTitle = title;
-    }
-
-    /**
-     * @hide
-     * @return
-     */
-    public String getTitle() {
-        return mTitle;
-    }
-
     private void init(AttributeSet attrs) {
         mLayoutWidget.setCompanionWidget(this);
         mChildrenByIds.put(getId(), this);
@@ -615,8 +598,6 @@ public class ConstraintLayout extends ViewGroup {
                     mMaxHeight = a.getDimensionPixelOffset(attr, mMaxHeight);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_layout_optimizationLevel) {
                     mOptimizationLevel = a.getInt(attr, mOptimizationLevel);
-                } else if (attr == R.styleable.ConstraintLayout_Layout_title) {
-                    mTitle = a.getString(attr);
                 } else if (attr == R.styleable.ConstraintLayout_Layout_constraintSet) {
                     int id = a.getResourceId(attr, 0);
                     try {
