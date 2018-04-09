@@ -67,6 +67,10 @@ import android.view.View;
  *         Other widgets can then be constrained to the barrier itself, instead of the individual widget. This allows a layout
  *         to automatically adapt on widget dimension changes (e.g. different languages will end up with different length for similar worlds).
  *     </p>
+ * <h2>Gone widgets handling</h2>
+ * <p>If the barrier references Gone widgets, the default behavior is to create a barrier on the resolved position of the gone widget.
+ * If you do not want to have the barrier take in account gone widgets, you can change this by setting the attribute <i>barrierAllowsGoneWidgets</i>
+ * to false (default being true).</p>
  *     </p>
  * </p>
  *
@@ -183,6 +187,8 @@ public class Barrier extends ConstraintHelper {
                 int attr = a.getIndex(i);
                 if (attr == R.styleable.ConstraintLayout_Layout_barrierDirection) {
                     setType(a.getInt(attr, LEFT));
+                } else if (attr == R.styleable.ConstraintLayout_Layout_barrierAllowsGoneWidgets) {
+                    mBarrier.setAllowsGoneWidget(a.getBoolean(attr, true));
                 }
             }
         }

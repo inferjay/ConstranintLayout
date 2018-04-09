@@ -80,7 +80,7 @@ public class XmlBasedTest {
         if (v.equals("END")) return "RIGHT";
         return v;
     }
-    @Test
+    //@Test
     public void testAccessToResources() {
         String dirName  = System.getProperty("user.dir") + "/src/test/resources/";
         assertTrue(new File(dirName).exists(), " could not find dir "+dirName);

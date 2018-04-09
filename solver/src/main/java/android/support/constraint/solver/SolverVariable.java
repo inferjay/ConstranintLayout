@@ -159,34 +159,38 @@ public class SolverVariable {
         return representation;
     }
 
-    void addClientEquation(ArrayRow equation) {
+    public final void addToRow(ArrayRow row) {
         for (int i = 0; i < mClientEquationsCount; i++) {
-            if (mClientEquations[i] == equation) {
+            if (mClientEquations[i] == row) {
                 return;
             }
         }
         if (mClientEquationsCount >= mClientEquations.length) {
             mClientEquations = Arrays.copyOf(mClientEquations, mClientEquations.length * 2);
         }
-        mClientEquations[mClientEquationsCount] = equation;
+        mClientEquations[mClientEquationsCount] = row;
         mClientEquationsCount++;
     }
 
-    void removeClientEquation(ArrayRow equation) {
-        if (INTERNAL_DEBUG) {
-            if (equation.variables.get(this) != 0) {
-                return;
-            }
-        }
-        for (int i = 0; i < mClientEquationsCount; i++) {
-            if (mClientEquations[i] == equation) {
-                for (int j = 0; j < (mClientEquationsCount - i - 1); j++) {
+    public final void removeFromRow(ArrayRow row) {
+        final int count = mClientEquationsCount;
+        for (int i = 0; i < count; i++) {
+            if (mClientEquations[i] == row) {
+                for (int j = 0; j < (count - i - 1); j++) {
                     mClientEquations[i + j] = mClientEquations[i + j + 1];
                 }
                 mClientEquationsCount--;
                 return;
             }
         }
+    }
+
+    public final void updateReferencesWithNewDefinition(ArrayRow definition) {
+        final int count = mClientEquationsCount;
+        for (int i = 0; i < count; i++) {
+            mClientEquations[i].variables.updateFromRow(mClientEquations[i], definition, false);
+        }
+        mClientEquationsCount = 0;
     }
 
     public void reset() {

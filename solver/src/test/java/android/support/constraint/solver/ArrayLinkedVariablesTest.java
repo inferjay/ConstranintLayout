@@ -21,9 +21,9 @@ public class ArrayLinkedVariablesTest {
             v[i] = new SolverVariable("dog"+p+"("+i+")"+p, SolverVariable.Type.UNRESTRICTED);
             cache.mIndexedVariables[i] = v[i];
             v[i].id = i;
-            variables.add(v[i],20f);
+            variables.add(v[i],20f, true);
             if (i%2==1) {
-                variables.remove(v[i/2]);
+                variables.remove(v[i/2], true);
 
             }
              variables.display();
@@ -32,7 +32,7 @@ public class ArrayLinkedVariablesTest {
         for (int i = 0; i < v.length; i++) {
             if (i%2==1) {
                 variables.display();
-                variables.add(v[i / 2], 24f);
+                variables.add(v[i / 2], 24f, true);
             }
         }
         Assert.assertTrue(true);

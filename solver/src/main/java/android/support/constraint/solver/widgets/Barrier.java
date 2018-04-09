@@ -35,6 +35,8 @@ public class Barrier extends Helper {
     private int mBarrierType = LEFT;
     private ArrayList<ResolutionNode> mNodes = new ArrayList<>(4);
 
+    private boolean mAllowsGoneWidget = true;
+
     @Override
     public boolean allowedInBarrier() {
         return true;
@@ -43,6 +45,8 @@ public class Barrier extends Helper {
     public void setBarrierType(int barrierType) {
         mBarrierType = barrierType;
     }
+
+    public void setAllowsGoneWidget(boolean allowsGoneWidget) { mAllowsGoneWidget = allowsGoneWidget; }
 
     @Override
     public void resetResolutionNodes() {
@@ -92,7 +96,7 @@ public class Barrier extends Helper {
         mNodes.clear();
         for (int i = 0; i < mWidgetsCount; i++) {
             ConstraintWidget widget = mWidgets[i];
-            if (!widget.allowedInBarrier()) {
+            if (!mAllowsGoneWidget && !widget.allowedInBarrier()) {
                 continue;
             }
             ResolutionNode depends = null;
@@ -216,7 +220,7 @@ public class Barrier extends Helper {
         boolean hasMatchConstraintWidgets = false;
         for (int i = 0; i < mWidgetsCount; i++) {
             ConstraintWidget widget = mWidgets[i];
-            if (!widget.allowedInBarrier()) {
+            if (!mAllowsGoneWidget && !widget.allowedInBarrier()) {
                 continue;
             }
             if ((mBarrierType == LEFT || mBarrierType == RIGHT)
@@ -240,7 +244,7 @@ public class Barrier extends Helper {
         }
         for (int i = 0; i < mWidgetsCount; i++) {
             ConstraintWidget widget = mWidgets[i];
-            if (!widget.allowedInBarrier()) {
+            if (!mAllowsGoneWidget && !widget.allowedInBarrier()) {
                 continue;
             }
             SolverVariable target = system.createObjectVariable(widget.mListAnchors[mBarrierType]);
