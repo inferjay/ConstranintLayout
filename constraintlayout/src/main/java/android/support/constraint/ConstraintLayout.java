@@ -580,6 +580,22 @@ public class ConstraintLayout extends ViewGroup {
         mChildrenByIds.put(getId(), this);
     }
 
+    /**
+     * @hide
+     * @param title
+     */
+    public void setTitle(String title) {
+        mTitle = title;
+    }
+
+    /**
+     * @hide
+     * @return
+     */
+    public String getTitle() {
+        return mTitle;
+    }
+
     private void init(AttributeSet attrs) {
         mLayoutWidget.setCompanionWidget(this);
         mChildrenByIds.put(getId(), this);
