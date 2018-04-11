@@ -316,6 +316,8 @@ class Chain {
                     SolverVariable beginTarget = beginAnchor.mTarget != null ? beginAnchor.mTarget.mSolverVariable : null;
                     if (previousVisibleWidget != widget) {
                         beginTarget = previousVisibleWidget.mListAnchors[offset + 1].mSolverVariable;
+                    } else if (widget == firstVisibleWidget && previousVisibleWidget == widget) {
+                        beginTarget = first.mListAnchors[offset].mTarget != null ? first.mListAnchors[offset].mTarget.mSolverVariable : null;
                     }
 
                     ConstraintAnchor beginNextAnchor = null;
