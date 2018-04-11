@@ -2627,7 +2627,7 @@ public class ConstraintWidget {
                     if (!useRatio) {
                         // useRatio is true if the side we base ourselves on for the ratio is this one
                         // in that case, we need to have a stronger constraint.
-                        strength = SolverVariable.STRENGTH_EQUALITY;
+                        strength = SolverVariable.STRENGTH_FIXED;
                     }
                     system.addEquality(begin, beginTarget, beginAnchor.getMargin(), strength);
                     system.addEquality(end, endTarget, -endAnchor.getMargin(), strength);
