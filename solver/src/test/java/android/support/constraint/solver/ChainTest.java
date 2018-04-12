@@ -15,10 +15,7 @@
  */
 package android.support.constraint.solver;
 
-import android.support.constraint.solver.widgets.ConstraintAnchor;
-import android.support.constraint.solver.widgets.ConstraintWidget;
-import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
-import android.support.constraint.solver.widgets.Guideline;
+import android.support.constraint.solver.widgets.*;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -26,6 +23,49 @@ import java.util.ArrayList;
 import static org.testng.Assert.assertEquals;
 
 public class ChainTest {
+
+    @Test
+    public void testBasicChainMatch() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        C.setDebugName("C");
+        root.add(A);
+        root.add(B);
+        root.add(C);
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT);
+        B.connect(ConstraintAnchor.Type.RIGHT, C, ConstraintAnchor.Type.LEFT);
+        C.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.RIGHT);
+        C.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        B.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        C.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+
+        A.setHorizontalChainStyle(ConstraintWidget.CHAIN_SPREAD);
+        A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        C.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setBaselineDistance(8);
+        B.setBaselineDistance(8);
+        C.setBaselineDistance(8);
+
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD | Optimizer.OPTIMIZATION_CHAIN);
+        root.layout();
+        System.out.println("A: " + A + " B: " + B + " C: " + C);
+        assertEquals(A.getLeft(), 0);
+        assertEquals(A.getRight(), 200);
+        assertEquals(B.getLeft(), 200);
+        assertEquals(B.getRight(), 400);
+        assertEquals(C.getLeft(), 400);
+        assertEquals(C.getRight(), 600);
+    }
 
     @Test
     public void testSpreadChainGone() {
