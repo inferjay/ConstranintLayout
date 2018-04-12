@@ -1658,40 +1658,40 @@ public class ConstraintSet {
     }
 
     /**
-     * @since 1.1
-     *
      * Sets the height of the view. It can be a dimension, {@link #WRAP_CONTENT} or {@link
      * #MATCH_CONSTRAINT}.
      *
      * @param viewId ID of view to adjust its height
      * @param height the height of the constraint
+     *
+     * @since 1.1
      */
     public void constrainHeight(int viewId, int height) {
         get(viewId).mHeight = height;
     }
 
     /**
-     * @since 1.1
-     *
      * Sets the width of the view. It can be a dimension, {@link #WRAP_CONTENT} or {@link
      * #MATCH_CONSTRAINT}.
      *
      * @param viewId ID of view to adjust its width
      * @param width the width of the view
+     *
+     * @since 1.1
      */
     public void constrainWidth(int viewId, int width) {
         get(viewId).mWidth = width;
     }
 
     /**
-     * @since 1.1
-     *
      * Constrain the view on a circle constraint
      *
      * @param viewId ID of the view we constrain
      * @param id ID of the view we constrain relative to
      * @param radius the radius of the circle in degrees
      * @param angle the angle
+     *
+     * @since 1.1
      */
     public void constrainCircle(int viewId, int id, int radius, float angle) {
         Constraint constraint = get(viewId);
@@ -1701,100 +1701,100 @@ public class ConstraintSet {
     }
 
     /**
-     * @since 1.1
-     *
      * Sets the maximum height of the view. It is a dimension, It is only applicable if height is
      * #MATCH_CONSTRAINT}.
      *
      * @param viewId ID of view to adjust it height
      * @param height the height of the constraint
+     *
+     * @since 1.1
      */
     public void constrainMaxHeight(int viewId, int height) {
         get(viewId).heightMax = height;
     }
 
     /**
-     * @since 1.1
-     *
      * Sets the maximum width of the view. It is a dimension, It is only applicable if width is
      * #MATCH_CONSTRAINT}.
      *
      * @param viewId ID of view to adjust its max height
      * @param width the width of the view
+     *
+     * @since 1.1
      */
     public void constrainMaxWidth(int viewId, int width) {
         get(viewId).widthMax = width;
     }
 
     /**
-     * @since 1.1
-     *
      * Sets the height of the view. It is a dimension, It is only applicable if height is
      * #MATCH_CONSTRAINT}.
      *
      * @param viewId ID of view to adjust its min height
      * @param height the minimum height of the view
+     *
+     * @since 1.1
      */
     public void constrainMinHeight(int viewId, int height) {
         get(viewId).heightMin = height;
     }
 
     /**
-     * @since 1.1
-     *
      * Sets the width of the view.  It is a dimension, It is only applicable if width is
      * #MATCH_CONSTRAINT}.
      *
      * @param viewId ID of view to adjust its min height
      * @param width the minimum width of the view
+     *
+     * @since 1.1
      */
     public void constrainMinWidth(int viewId, int width) {
         get(viewId).widthMin = width;
     }
 
     /**
-     * @since 1.1
-     *
      * Sets the width of the view as a percentage of the parent.
      * @param viewId
      * @param percent
+     *
+     * @since 1.1
      */
     public void constrainPercentWidth(int viewId, float percent) {
         get(viewId).widthPercent = percent;
     }
 
     /**
-     * @since 1.1
-     *
      * Sets the height of the view as a percentage of the parent.
      * @param viewId
      * @param percent
+     *
+     * @since 1.1
      */
     public void constrainPercentHeight(int viewId, float percent) {
         get(viewId).heightPercent = percent;
     }
 
     /**
-     * @since 1.1
-     *
      * Sets how the height is calculated ether MATCH_CONSTRAINT_WRAP or MATCH_CONSTRAINT_SPREAD.
      * Default is spread.
      *
      * @param viewId ID of view to adjust its matchConstraintDefaultHeight
      * @param height MATCH_CONSTRAINT_WRAP or MATCH_CONSTRAINT_SPREAD
+     *
+     * @since 1.1
      */
     public void constrainDefaultHeight(int viewId, int height) {
         get(viewId).heightDefault = height;
     }
 
     /**
-     * @since 1.1
-     *
      * Sets how the width is calculated ether MATCH_CONSTRAINT_WRAP or MATCH_CONSTRAINT_SPREAD.
      * Default is spread.
      *
      * @param viewId ID of view to adjust its matchConstraintDefaultWidth
      * @param width SPREAD or WRAP
+     *
+     * @since 1.1
      */
     public void constrainDefaultWidth(int viewId, int width) {
         get(viewId).widthDefault = width;
@@ -2006,13 +2006,13 @@ public class ConstraintSet {
     }
 
     /**
-     * @since 1.1
-     *
      * Creates a ConstraintLayout Barrier object.
      *
      * @param id
      * @param direction Barrier.{LEFT,RIGHT,TOP,BOTTOM,START,END}
      * @param referenced
+     *
+     * @since 1.1
      */
     public void createBarrier(int id, int direction, int... referenced) {
         Constraint constraint = get(id);
