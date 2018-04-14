@@ -16,7 +16,6 @@
 package android.support.constraint.solver.widgets;
 
 import android.support.constraint.solver.Cache;
-import android.support.constraint.solver.LinearSystem;
 import android.support.constraint.solver.SolverVariable;
 
 import java.util.ArrayList;
@@ -49,14 +48,14 @@ public class ConstraintAnchor {
     /**
      * Resolution node, used by graph resolution
      */
-    private ResolutionNode mResolutionNode = new ResolutionNode(this);
+    private ResolutionAnchor mResolutionAnchor = new ResolutionAnchor(this);
 
     /**
      * Resolution node accessor
      * @return the Resolution node for this ConstraintAnchor
      */
-    public ResolutionNode getResolutionNode() {
-        return mResolutionNode;
+    public ResolutionAnchor getResolutionNode() {
+        return mResolutionAnchor;
     }
 
     /**
@@ -179,7 +178,7 @@ public class ConstraintAnchor {
         mStrength = Strength.STRONG;
         mConnectionCreator = USER_CREATOR;
         mConnectionType = ConnectionType.RELAXED;
-        mResolutionNode.reset();
+        mResolutionAnchor.reset();
     }
 
     /**

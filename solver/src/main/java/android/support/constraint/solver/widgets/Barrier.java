@@ -20,7 +20,6 @@ import android.support.constraint.solver.LinearSystem;
 import android.support.constraint.solver.SolverVariable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * A Barrier takes multiple widgets
@@ -33,7 +32,7 @@ public class Barrier extends Helper {
     public static final int BOTTOM = 3;
 
     private int mBarrierType = LEFT;
-    private ArrayList<ResolutionNode> mNodes = new ArrayList<>(4);
+    private ArrayList<ResolutionAnchor> mNodes = new ArrayList<>(4);
 
     private boolean mAllowsGoneWidget = true;
 
@@ -56,9 +55,10 @@ public class Barrier extends Helper {
 
     /**
      * Graph analysis
+     * @param optimizationLevel
      */
     @Override
-    public void analyze() {
+    public void analyze(int optimizationLevel) {
         if (mParent == null) {
             return;
         }
@@ -66,7 +66,7 @@ public class Barrier extends Helper {
             return;
         }
 
-        ResolutionNode node;
+        ResolutionAnchor node;
         switch (mBarrierType) {
             case LEFT:
                 node = mLeft.getResolutionNode();
@@ -83,7 +83,7 @@ public class Barrier extends Helper {
             default:
                 return;
         }
-        node.setType(ResolutionNode.BARRIER_CONNECTION);
+        node.setType(ResolutionAnchor.BARRIER_CONNECTION);
 
         if (mBarrierType == LEFT || mBarrierType == RIGHT) {
             mTop.getResolutionNode().resolve(null, 0);
@@ -99,7 +99,7 @@ public class Barrier extends Helper {
             if (!mAllowsGoneWidget && !widget.allowedInBarrier()) {
                 continue;
             }
-            ResolutionNode depends = null;
+            ResolutionAnchor depends = null;
             switch (mBarrierType) {
                 case LEFT:
                     depends = widget.mLeft.getResolutionNode();
@@ -126,7 +126,7 @@ public class Barrier extends Helper {
      */
     @Override
     public void resolve() {
-        ResolutionNode node = null;
+        ResolutionAnchor node = null;
         float value = 0;
         switch (mBarrierType) {
             case LEFT: {
@@ -148,10 +148,10 @@ public class Barrier extends Helper {
         }
 
         final int count = mNodes.size();
-        ResolutionNode resolvedTarget = null;
+        ResolutionAnchor resolvedTarget = null;
         for (int i = 0; i < count; i++) {
-            ResolutionNode n = mNodes.get(i);
-            if (n.state != ResolutionNode.RESOLVED) {
+            ResolutionAnchor n = mNodes.get(i);
+            if (n.state != ResolutionAnchor.RESOLVED) {
                 return;
             }
             if (mBarrierType == LEFT || mBarrierType == TOP) {
