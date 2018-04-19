@@ -1872,8 +1872,6 @@ public class ConstraintLayout extends ViewGroup {
     }
 
     /**
-     * @since 1.1
-     *
      * Set the optimization for the layout resolution.
      *
      * The optimization can be one of:
@@ -1890,17 +1888,19 @@ public class ConstraintLayout extends ViewGroup {
      * <li>Optimizer.OPTIMIZATION_CHAIN  </li>
      * </ul>
      * @param level optimization level
+     *
+     * @since 1.1
      */
     public void setOptimizationLevel(int level) {
         mLayoutWidget.setOptimizationLevel(level);
     }
 
     /**
-     * @since 1.1
-     *
      * Return the current optimization level for the layout resolution
      *
      * @return the current level
+     *
+     * @since 1.1
      */
     public int getOptimizationLevel() { return mLayoutWidget.getOptimizationLevel(); }
 

@@ -2651,6 +2651,10 @@ public class ConstraintWidget {
                 system.addGreaterThan(begin, beginTarget, beginAnchor.getMargin(), SolverVariable.STRENGTH_FIXED);
                 system.addLowerThan(end, endTarget, -endAnchor.getMargin(), SolverVariable.STRENGTH_FIXED);
             }
+
+            if (parentWrapContent) {
+                system.addGreaterThan(begin, parentMin, 0, SolverVariable.STRENGTH_FIXED);
+            }
         }
 
         if (parentWrapContent) {
