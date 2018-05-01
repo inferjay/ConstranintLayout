@@ -86,12 +86,12 @@ task makeJavadocs(type: Javadoc, dependsOn: project.configurations.doclava) {
     title = null
     destinationDir = new File(buildDir, docDir)
     source = 'src/main/java'
-    classpath = files("${rootDir}/../../prebuilts/sdk/${latestSdkVersion}/android.jar")
+    classpath = files("${rootDir}/../../prebuilts/sdk/${latestSdkVersion}/public/android.jar")
     options.addStringOption "resourcesdir", "${rootDir}/constraintlayout/resources/"
     options.addStringOption "resourcesoutdir", "reference/android/support/constraint/resources/"
     options.addStringOption "federate Android", "http://developer.android.com"
     options.addStringOption "federationapi Android",
-                "${rootDir}/../../prebuilts/sdk/api/${latestSdkVersion}.txt"
+                "${rootDir}/../../prebuilts/sdk/${latestSdkVersion}/public/api/android.txt"
     options.encoding = "UTF-8"
     options.doclet = "com.google.doclava.Doclava"
     options.docletpath = configurations.doclava.files.asType(List)
