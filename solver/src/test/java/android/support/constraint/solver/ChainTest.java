@@ -130,7 +130,7 @@ public class ChainTest {
         System.out.println("A: " + A + " B: " + B + " C: " + C);
         assertEquals(A.getLeft(), 200);
         assertEquals(B.getLeft(), 300);
-        assertEquals(C.getLeft(), 400);
+        assertEquals(C.getLeft(), 500);
         assertEquals(A.getWidth(), 100);
         assertEquals(B.getWidth(), 100);
         assertEquals(C.getWidth(), 0);

@@ -16,8 +16,11 @@
 package android.support.constraint.solver;
 
 import android.support.constraint.solver.widgets.ConstraintAnchor;
+import android.support.constraint.solver.widgets.ConstraintAnchor.Type;
 import android.support.constraint.solver.widgets.ConstraintWidget;
+import android.support.constraint.solver.widgets.ConstraintWidget.DimensionBehaviour;
 import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
+import android.support.constraint.solver.widgets.Optimizer;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -25,6 +28,82 @@ import java.util.ArrayList;
 import static org.testng.Assert.assertEquals;
 
 public class AdvancedChainTest {
+
+    @Test
+    public void testRatioChainGone() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 800);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        ConstraintWidget ratio = new ConstraintWidget(100, 20);
+
+        root.setDebugSolverName(root.getSystem(), "root");
+        A.setDebugSolverName(root.getSystem(), "A");
+        B.setDebugSolverName(root.getSystem(), "B");
+        C.setDebugSolverName(root.getSystem(), "C");
+        ratio.setDebugSolverName(root.getSystem(), "ratio");
+
+        root.add(A);
+        root.add(B);
+        root.add(C);
+        root.add(ratio);
+
+        A.connect(Type.LEFT, root, Type.LEFT, 0);
+        A.connect(Type.RIGHT, root, Type.RIGHT, 0);
+
+        B.connect(Type.LEFT, root, Type.LEFT, 0);
+        B.connect(Type.RIGHT, root, Type.RIGHT, 0);
+
+        C.connect(Type.LEFT, root, Type.LEFT, 0);
+        C.connect(Type.RIGHT, root, Type.RIGHT, 0);
+
+        ratio.connect(Type.TOP, root, Type.TOP, 0);
+        ratio.connect(Type.LEFT, root, Type.LEFT, 0);
+        ratio.connect(Type.RIGHT, root, Type.RIGHT, 0);
+
+        A.connect(Type.TOP, root, Type.TOP, 0);
+        A.connect(Type.BOTTOM, B, Type.TOP, 0);
+        B.connect(Type.TOP, A, Type.BOTTOM, 0);
+        B.connect(Type.BOTTOM, ratio, Type.BOTTOM, 0);
+        C.connect(Type.TOP, B, Type.TOP, 0);
+        C.connect(Type.BOTTOM, ratio, Type.BOTTOM, 0);
+
+        A.setHorizontalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+        B.setHorizontalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+        C.setHorizontalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+        ratio.setHorizontalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+
+        A.setVerticalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+        B.setVerticalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+        C.setVerticalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+        ratio.setVerticalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+        ratio.setDimensionRatio("4:3");
+
+        B.setVisibility(ConstraintWidget.GONE);
+        C.setVisibility(ConstraintWidget.GONE);
+
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_NONE);
+        root.layout();
+
+        System.out.println("A: " + A);
+        System.out.println("B: " + B);
+        System.out.println("C: " + C);
+        System.out.println("ratio: " + ratio);
+
+        assertEquals(A.getHeight(), 600);
+
+        root.setVerticalDimensionBehaviour(DimensionBehaviour.WRAP_CONTENT);
+
+        root.layout();
+
+        System.out.println("A: " + A);
+        System.out.println("B: " + B);
+        System.out.println("C: " + C);
+        System.out.println("ratio: " + ratio);
+        System.out.println("root: " + root);
+
+        assertEquals(A.getHeight(), 600);
+    }
 
     @Test
     public void testSimpleHorizontalChainPacked() {
