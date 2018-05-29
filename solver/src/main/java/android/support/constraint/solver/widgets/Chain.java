@@ -153,7 +153,7 @@ class Chain {
             int strength = SolverVariable.STRENGTH_LOW;
             int margin = begin.getMargin();
 
-            if (begin.mTarget != null && widget != first && widget.getVisibility() != GONE) {
+            if (begin.mTarget != null && widget != first) {
                 margin += begin.mTarget.getMargin();
             }
 
@@ -296,11 +296,7 @@ class Chain {
                     bias = head.mVerticalBiasPercent;
                 }
                 int beginMargin = begin.getMargin();
-                if (lastVisibleWidget == null) {
-                    // everything is hidden
-                    lastVisibleWidget = last;
-                }
-                int endMargin = lastVisibleWidget.mListAnchors[offset + 1].getMargin();
+                int endMargin = end.getMargin();
                 system.addCentering(begin.mSolverVariable, beginTarget, beginMargin, bias,
                         endTarget, end.mSolverVariable, endMargin, SolverVariable.STRENGTH_EQUALITY);
             }
