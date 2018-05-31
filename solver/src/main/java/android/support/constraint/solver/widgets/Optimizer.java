@@ -159,9 +159,13 @@ public class Optimizer {
 
         // First the horizontal nodes...
 
+        boolean isOptimizableHorizontalMatch = widget.mListDimensionBehaviors[HORIZONTAL] == MATCH_CONSTRAINT
+            && optimizableMatchConstraint(widget, HORIZONTAL);
+
         if (leftNode.type != ResolutionAnchor.CHAIN_CONNECTION
                 && rightNode.type != ResolutionAnchor.CHAIN_CONNECTION) {
-            if (widget.mListDimensionBehaviors[HORIZONTAL] == FIXED) {
+            if (widget.mListDimensionBehaviors[HORIZONTAL] == FIXED
+                || (isOptimizableHorizontalMatch && widget.getVisibility() == ConstraintWidget.GONE)) {
                 if (widget.mLeft.mTarget == null && widget.mRight.mTarget == null) {
                     leftNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
                     rightNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
@@ -200,8 +204,7 @@ public class Optimizer {
                         rightNode.setOpposite(leftNode, widget.getWidth());
                     }
                 }
-            } else if (widget.mListDimensionBehaviors[HORIZONTAL] == MATCH_CONSTRAINT
-                    && optimizableMatchConstraint(widget, HORIZONTAL)) {
+            } else if (isOptimizableHorizontalMatch) {
                 int width = widget.getWidth();
                 // TODO: ratio won't work with optimiseDimensions as it is
                 // ...but ratio won't work period for now as optimizableMatchConstraint will return false
@@ -252,10 +255,14 @@ public class Optimizer {
 
         // ...then the vertical ones
 
-        if (topNode.type != ResolutionAnchor.CHAIN_CONNECTION
+      boolean isOptimizableVerticalMatch = widget.mListDimensionBehaviors[VERTICAL] == MATCH_CONSTRAINT
+          && optimizableMatchConstraint(widget, VERTICAL);
+
+      if (topNode.type != ResolutionAnchor.CHAIN_CONNECTION
                 && bottomNode.type != ResolutionAnchor.CHAIN_CONNECTION
                 /* && mBaseline.getResolutionNode().type == ResolutionAnchor.UNCONNECTED */) {
-            if (widget.mListDimensionBehaviors[VERTICAL] == FIXED) {
+            if (widget.mListDimensionBehaviors[VERTICAL] == FIXED
+                || (isOptimizableVerticalMatch && widget.getVisibility() == ConstraintWidget.GONE)) {
                 if (widget.mTop.mTarget == null && widget.mBottom.mTarget == null) {
                     topNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
                     bottomNode.setType(ResolutionAnchor.DIRECT_CONNECTION);
@@ -307,8 +314,7 @@ public class Optimizer {
                         widget.mBaseline.getResolutionNode().dependsOn(ResolutionAnchor.DIRECT_CONNECTION, topNode, widget.mBaselineDistance);
                     }
                 }
-            } else if (widget.mListDimensionBehaviors[VERTICAL] == MATCH_CONSTRAINT
-                    && optimizableMatchConstraint(widget, VERTICAL)) {
+            } else if (isOptimizableVerticalMatch) {
                 int height = widget.getHeight();
                 // TODO: fix ratio (right it won't work, optimizableMatchConstraint will return false
                 // if (widget.mDimensionRatio != 0) {

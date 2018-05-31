@@ -141,14 +141,14 @@ public class VisibilityTest {
         assertEquals(root.getHeight(), 600);
         assertEquals(A.getWidth(), 0);
         assertEquals(A.getHeight(), 0);
-        assertEquals(A.getLeft(), 0);
-        assertEquals(A.getRight(), 0);
+        assertEquals(A.getLeft(), 400);
+        assertEquals(A.getRight(), 400);
         assertEquals(B.getLeft(), root.getLeft());
         assertEquals(B.getRight(), root.getRight());
         assertEquals(guideline.getTop(), root.getHeight() / 2);
-        assertEquals(A.getTop(), 0);
-        assertEquals(A.getBottom(), 0);
-        assertEquals(B.getTop(), 300);
+        assertEquals(A.getTop(), 150);
+        assertEquals(A.getBottom(), 150);
+        assertEquals(B.getTop(), 150);
         assertEquals(B.getBottom(), root.getBottom());
     }
 }
