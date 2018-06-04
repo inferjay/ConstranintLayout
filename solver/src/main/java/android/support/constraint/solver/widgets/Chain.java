@@ -240,6 +240,7 @@ class Chain {
 
         // Now, let's apply the centering / spreading for matched constraints widgets
         if (numMatchConstraints > 0) {
+            // TODO: we should not try to apply the constraints for weights = 0
             widget = firstMatchConstraintsWidget;
             while (widget != null) {
                 next = widget.mListNextMatchConstraintsWidget[orientation];
