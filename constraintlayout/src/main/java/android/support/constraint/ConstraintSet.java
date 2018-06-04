@@ -403,8 +403,8 @@ public class ConstraintSet {
         public float translationZ = 0;
         public boolean constrainedWidth = false;
         public boolean constrainedHeight = false;
-        public int widthDefault = UNSET;
-        public int heightDefault = UNSET;
+        public int widthDefault = ConstraintWidget.MATCH_CONSTRAINT_SPREAD;
+        public int heightDefault = ConstraintWidget.MATCH_CONSTRAINT_SPREAD;
         public int widthMax = UNSET;
         public int heightMax = UNSET;
         public int widthMin = UNSET;
