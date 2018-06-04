@@ -30,6 +30,59 @@ import static org.testng.Assert.assertEquals;
 public class AdvancedChainTest {
 
     @Test
+    public void testChainLastGone() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 800);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        ConstraintWidget D = new ConstraintWidget(100, 20);
+        root.setDebugSolverName(root.getSystem(), "root");
+        A.setDebugSolverName(root.getSystem(), "A");
+        B.setDebugSolverName(root.getSystem(), "B");
+        C.setDebugSolverName(root.getSystem(), "C");
+        D.setDebugSolverName(root.getSystem(), "D");
+        root.add(A);
+        root.add(B);
+        root.add(C);
+        root.add(D);
+
+        A.connect(Type.LEFT, root, Type.LEFT, 0);
+        A.connect(Type.RIGHT, root, Type.RIGHT, 0);
+
+        B.connect(Type.LEFT, root, Type.LEFT, 0);
+        B.connect(Type.RIGHT, root, Type.RIGHT, 0);
+
+        C.connect(Type.LEFT, root, Type.LEFT, 0);
+        C.connect(Type.RIGHT, root, Type.RIGHT, 0);
+
+        D.connect(Type.LEFT, root, Type.LEFT, 0);
+        D.connect(Type.RIGHT, root, Type.RIGHT, 0);
+
+        A.connect(Type.TOP, root, Type.TOP, 0);
+        A.connect(Type.BOTTOM, B, Type.TOP, 0);
+        B.connect(Type.TOP, A, Type.BOTTOM, 0);
+        B.connect(Type.BOTTOM, C, Type.TOP, 0);
+        C.connect(Type.TOP, B, Type.BOTTOM, 0);
+        C.connect(Type.BOTTOM, D, Type.TOP, 0);
+        D.connect(Type.TOP, C, Type.BOTTOM, 0);
+        D.connect(Type.BOTTOM, root, Type.BOTTOM, 0);
+
+        B.setVisibility(ConstraintWidget.GONE);
+        D.setVisibility(ConstraintWidget.GONE);
+
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_NONE);
+        root.layout();
+
+        System.out.println("A: " + A);
+        System.out.println("B: " + B);
+        System.out.println("C: " + C);
+        System.out.println("D: " + D);
+
+        assertEquals(A.getTop(), 253);
+        assertEquals(C.getTop(), 527);
+    }
+
+    @Test
     public void testRatioChainGone() {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 800);
         ConstraintWidget A = new ConstraintWidget(100, 20);

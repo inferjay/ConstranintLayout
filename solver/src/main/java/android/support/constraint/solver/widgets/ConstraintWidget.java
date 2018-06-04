@@ -2240,12 +2240,25 @@ public class ConstraintWidget {
         if (mDimensionRatio > 0 && mVisibility != GONE) {
             useRatio = true;
             if (mListDimensionBehaviors[DIMENSION_HORIZONTAL] == DimensionBehaviour.MATCH_CONSTRAINT
-                    && mListDimensionBehaviors[DIMENSION_VERTICAL] == DimensionBehaviour.MATCH_CONSTRAINT) {
+                && mMatchConstraintDefaultWidth == MATCH_CONSTRAINT_SPREAD) {
+                mMatchConstraintDefaultWidth = MATCH_CONSTRAINT_RATIO;
+            }
+            if (mListDimensionBehaviors[DIMENSION_VERTICAL] == DimensionBehaviour.MATCH_CONSTRAINT
+                && mMatchConstraintDefaultHeight == MATCH_CONSTRAINT_SPREAD) {
+                mMatchConstraintDefaultHeight = MATCH_CONSTRAINT_RATIO;
+            }
+
+            if (mListDimensionBehaviors[DIMENSION_HORIZONTAL] == DimensionBehaviour.MATCH_CONSTRAINT
+                    && mListDimensionBehaviors[DIMENSION_VERTICAL] == DimensionBehaviour.MATCH_CONSTRAINT
+                    && mMatchConstraintDefaultWidth == MATCH_CONSTRAINT_RATIO
+                    && mMatchConstraintDefaultHeight == MATCH_CONSTRAINT_RATIO) {
                 setupDimensionRatio(horizontalParentWrapContent, verticalParentWrapContent, horizontalDimensionFixed, verticalDimensionFixed);
-            } else if (mListDimensionBehaviors[DIMENSION_HORIZONTAL] == DimensionBehaviour.MATCH_CONSTRAINT) {
+            } else if (mListDimensionBehaviors[DIMENSION_HORIZONTAL] == DimensionBehaviour.MATCH_CONSTRAINT
+                    && mMatchConstraintDefaultWidth == MATCH_CONSTRAINT_RATIO) {
                 mResolvedDimensionRatioSide = HORIZONTAL;
                 width = (int) (mResolvedDimensionRatio * mHeight);
-            } else if (mListDimensionBehaviors[DIMENSION_VERTICAL] == DimensionBehaviour.MATCH_CONSTRAINT) {
+            } else if (mListDimensionBehaviors[DIMENSION_VERTICAL] == DimensionBehaviour.MATCH_CONSTRAINT
+                    && mMatchConstraintDefaultHeight == MATCH_CONSTRAINT_RATIO) {
                 mResolvedDimensionRatioSide = VERTICAL;
                 if (mDimensionRatioSide == UNKNOWN) {
                     // need to reverse the ratio as the parsing is done in horizontal mode
@@ -2342,13 +2355,6 @@ public class ConstraintWidget {
      * @param verticalDimensionFixed    true if this widget vertical dimension is fixed
      */
     public void setupDimensionRatio(boolean hparentWrapContent, boolean vparentWrapContent, boolean horizontalDimensionFixed, boolean verticalDimensionFixed) {
-        if (mMatchConstraintDefaultWidth == MATCH_CONSTRAINT_SPREAD) {
-            mMatchConstraintDefaultWidth = MATCH_CONSTRAINT_RATIO;
-        }
-        if (mMatchConstraintDefaultHeight == MATCH_CONSTRAINT_SPREAD) {
-            mMatchConstraintDefaultHeight = MATCH_CONSTRAINT_RATIO;
-        }
-
         if (mResolvedDimensionRatioSide == UNKNOWN) {
             if (horizontalDimensionFixed && !verticalDimensionFixed) {
                 mResolvedDimensionRatioSide = HORIZONTAL;
@@ -2396,10 +2402,12 @@ public class ConstraintWidget {
             } else if (mMatchConstraintMinWidth == 0 && mMatchConstraintMinHeight > 0) {
                 mResolvedDimensionRatio = 1 / mResolvedDimensionRatio;
                 mResolvedDimensionRatioSide = VERTICAL;
-            } else {
-                mResolvedDimensionRatio = 1 / mResolvedDimensionRatio;
-                mResolvedDimensionRatioSide = VERTICAL;
             }
+        }
+
+        if (mResolvedDimensionRatioSide == UNKNOWN && hparentWrapContent && vparentWrapContent) {
+            mResolvedDimensionRatio = 1 / mResolvedDimensionRatio;
+            mResolvedDimensionRatioSide = VERTICAL;
         }
     }
 
@@ -2624,7 +2632,7 @@ public class ConstraintWidget {
                     applyCentering = true;
                     applyBoundsCheck = true;
                     int strength = SolverVariable.STRENGTH_HIGHEST;
-                    if (!useRatio) {
+                    if (!useRatio && mResolvedDimensionRatioSide != UNKNOWN) {
                         // useRatio is true if the side we base ourselves on for the ratio is this one
                         // in that case, we need to have a stronger constraint.
                         strength = SolverVariable.STRENGTH_FIXED;
