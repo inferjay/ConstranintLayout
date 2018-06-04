@@ -2647,9 +2647,9 @@ public class ConstraintWidget {
                     applyCentering = true;
                     applyBoundsCheck = true;
                     int strength = SolverVariable.STRENGTH_HIGHEST;
-                    if (!useRatio && mResolvedDimensionRatioSide != UNKNOWN) {
+                    if (!useRatio && mResolvedDimensionRatioSide != UNKNOWN && matchMaxDimension <= 0) {
                         // useRatio is true if the side we base ourselves on for the ratio is this one
-                        // in that case, we need to have a stronger constraint.
+                        // if that's not the case, we need to have a stronger constraint.
                         strength = SolverVariable.STRENGTH_FIXED;
                     }
                     system.addEquality(begin, beginTarget, beginAnchor.getMargin(), strength);

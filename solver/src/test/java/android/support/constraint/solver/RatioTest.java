@@ -26,6 +26,33 @@ import static org.testng.Assert.assertEquals;
 public class RatioTest {
 
     @Test
+    public void testRatioMax() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 1000, 1000);
+        ConstraintWidget A = new ConstraintWidget(100, 100);
+        root.setDebugName("root");
+        root.add(A);
+        A.setDebugName("A");
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        A.connect(ConstraintAnchor.Type.BOTTOM, root, ConstraintAnchor.Type.BOTTOM);
+
+        A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setVerticalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_RATIO, 0, 150, 0);
+        A.setDimensionRatio("W,16:9");
+
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_NONE);
+        root.layout();
+
+        System.out.println("a) root: " + root + " A: " + A);
+        assertEquals(A.getWidth(), 267);
+        assertEquals(A.getHeight(), 150);
+        assertEquals(A.getTop(), 425);
+    }
+
+    @Test
     public void testRatioSingleTarget() {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 1000, 1000);
         ConstraintWidget A = new ConstraintWidget(100, 100);
