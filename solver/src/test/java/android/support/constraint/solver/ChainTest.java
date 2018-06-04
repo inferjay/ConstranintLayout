@@ -254,7 +254,7 @@ public class ChainTest {
         System.out.println("i) A: " + A + " B: " + B);
         assertEquals(A.getWidth(), 100);
         assertEquals(B.getWidth(), (int)(16f/9f*20), 1);
-        assertEquals(A.getLeft(), root.getWidth() - B.getRight());
+        assertEquals(A.getLeft(), root.getWidth() - B.getRight(), 1);
         assertEquals(B.getLeft(), A.getLeft() + A.getWidth());
         A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
         A.setHorizontalMatchStyle(ConstraintWidget.MATCH_CONSTRAINT_SPREAD, 0, 0, 1);

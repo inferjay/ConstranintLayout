@@ -25,6 +25,35 @@ import static org.testng.Assert.assertEquals;
 
 public class RatioTest {
 
+    @Test
+    public void testRatioSingleTarget() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 1000, 1000);
+        ConstraintWidget A = new ConstraintWidget(100, 100);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        root.setDebugName("root");
+        root.add(A);
+        root.add(B);
+        A.setDebugName("A");
+        B.setDebugName("B");
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        A.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+
+        B.connect(ConstraintAnchor.Type.TOP, A, ConstraintAnchor.Type.BOTTOM);
+        B.connect(ConstraintAnchor.Type.BOTTOM, A, ConstraintAnchor.Type.BOTTOM);
+        B.setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        B.setDimensionRatio("2:3");
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.LEFT, 50);
+
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_NONE);
+        root.layout();
+
+        System.out.println("a) root: " + root + " A: " + A + " B: " + B);
+        assertEquals(B.getHeight(), 150);
+        assertEquals(B.getTop(), A.getBottom() - B.getHeight() / 2);
+    }
 
     @Test
     public void testSimpleWrapRatio() {
