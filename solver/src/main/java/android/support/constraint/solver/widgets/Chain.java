@@ -159,16 +159,23 @@ class Chain {
 
             if (isChainPacked && widget != first && widget != firstVisibleWidget) {
                 strength = SolverVariable.STRENGTH_FIXED;
+            } else if (isChainSpread && isWrapContent) {
+                // on chain spread, keep the default strength connecting to endpoints to highest
+                // this makes it on par with ratio strength.
+                strength = SolverVariable.STRENGTH_HIGHEST;
             }
 
-            if (widget == firstVisibleWidget) {
-                system.addGreaterThan(begin.mSolverVariable, begin.mTarget.mSolverVariable,
+            if (begin.mTarget != null) {
+                if (widget == firstVisibleWidget) {
+                    system.addGreaterThan(begin.mSolverVariable, begin.mTarget.mSolverVariable,
                         margin, SolverVariable.STRENGTH_EQUALITY);
-            } else {
-                system.addGreaterThan(begin.mSolverVariable, begin.mTarget.mSolverVariable,
+                } else {
+                    system.addGreaterThan(begin.mSolverVariable, begin.mTarget.mSolverVariable,
                         margin, SolverVariable.STRENGTH_FIXED);
+                }
+                system.addEquality(begin.mSolverVariable, begin.mTarget.mSolverVariable, margin,
+                    strength);
             }
-            system.addEquality(begin.mSolverVariable, begin.mTarget.mSolverVariable, margin, strength);
 
             // First, let's maintain a linked list of matched widgets for the chain
             widget.mListNextMatchConstraintsWidget[orientation] = null;
@@ -184,7 +191,8 @@ class Chain {
                 previousMatchConstraintsWidget = widget;
                 if (isWrapContent) {
                     system.addGreaterThan(widget.mListAnchors[offset + 1].mSolverVariable,
-                            widget.mListAnchors[offset].mSolverVariable, 0, SolverVariable.STRENGTH_FIXED);
+                        widget.mListAnchors[offset].mSolverVariable, 0,
+                        SolverVariable.STRENGTH_EQUALITY);
                 }
             }
 
