@@ -22,7 +22,7 @@ task('checkJavaVersion') << {
 }
 final def checkJavaVersionTask = tasks['checkJavaVersion']
 
-ext.version = '1.1.1'
+ext.version = '1.1.2'
 
 /*
  * With the build server you are given two env variables.
