@@ -55,8 +55,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     int mHorizontalChainsSize = 0;
     int mVerticalChainsSize = 0;
 
-    ConstraintWidget[] mVerticalChainsArray = new ConstraintWidget[4];
-    ConstraintWidget[] mHorizontalChainsArray = new ConstraintWidget[4];
+    ChainHead[] mVerticalChainsArray = new ChainHead[4];
+    ChainHead[] mHorizontalChainsArray = new ChainHead[4];
 
     private int mOptimizationLevel = Optimizer.OPTIMIZATION_STANDARD;
 
@@ -664,22 +664,8 @@ public class ConstraintWidgetContainer extends WidgetContainer {
     void addChain(ConstraintWidget constraintWidget, int type) {
         ConstraintWidget widget = constraintWidget;
         if (type == HORIZONTAL) {
-            // find the left most widget that doesn't have a dual connection (i.e., start of chain)
-            while (widget.mLeft.mTarget != null
-                    && widget.mLeft.mTarget.mOwner.mRight.mTarget != null
-                    && widget.mLeft.mTarget.mOwner.mRight.mTarget == widget.mLeft
-                    && widget.mLeft.mTarget.mOwner != widget) {
-                widget = widget.mLeft.mTarget.mOwner;
-            }
             addHorizontalChain(widget);
         } else if (type == VERTICAL) {
-            // find the top most widget that doesn't have a dual connection (i.e., start of chain)
-            while (widget.mTop.mTarget != null
-                    && widget.mTop.mTarget.mOwner.mBottom.mTarget != null
-                    && widget.mTop.mTarget.mOwner.mBottom.mTarget == widget.mTop
-                    && widget.mTop.mTarget.mOwner != widget) {
-                widget = widget.mTop.mTarget.mOwner;
-            }
             addVerticalChain(widget);
         }
     }
@@ -691,15 +677,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      * @param widget widget starting the chain
      */
     private void addHorizontalChain(ConstraintWidget widget) {
-        for (int i = 0; i < mHorizontalChainsSize; i++) {
-            if (mHorizontalChainsArray[i] == widget) {
-                return;
-            }
-        }
         if (mHorizontalChainsSize + 1 >= mHorizontalChainsArray.length) {
             mHorizontalChainsArray = Arrays.copyOf(mHorizontalChainsArray, mHorizontalChainsArray.length * 2);
         }
-        mHorizontalChainsArray[mHorizontalChainsSize] = widget;
+        mHorizontalChainsArray[mHorizontalChainsSize] = new ChainHead(widget, HORIZONTAL, isRtl());
         mHorizontalChainsSize++;
     }
 
@@ -710,15 +691,10 @@ public class ConstraintWidgetContainer extends WidgetContainer {
      * @param widget widget starting the chain
      */
     private void addVerticalChain(ConstraintWidget widget) {
-        for (int i = 0; i < mVerticalChainsSize; i++) {
-            if (mVerticalChainsArray[i] == widget) {
-                return;
-            }
-        }
         if (mVerticalChainsSize + 1 >= mVerticalChainsArray.length) {
             mVerticalChainsArray = Arrays.copyOf(mVerticalChainsArray, mVerticalChainsArray.length * 2);
         }
-        mVerticalChainsArray[mVerticalChainsSize] = widget;
+        mVerticalChainsArray[mVerticalChainsSize] = new ChainHead(widget, VERTICAL, isRtl());
         mVerticalChainsSize++;
     }
 

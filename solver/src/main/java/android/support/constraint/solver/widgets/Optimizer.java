@@ -372,17 +372,21 @@ public class Optimizer {
      * @param system
      * @param orientation
      * @param offset
-     * @param first
+     * @param chainHead
      *
      * @return true if the chain has been optimized, false otherwise
      */
     static boolean applyChainOptimized(ConstraintWidgetContainer container, LinearSystem system,
-                                      int orientation, int offset, ConstraintWidget first) {
+                                      int orientation, int offset, ChainHead chainHead) {
+
+        ConstraintWidget first = chainHead.mFirst;
+        ConstraintWidget last = chainHead.mLast;
+        ConstraintWidget firstVisibleWidget = chainHead.mFirstVisibleWidget;
+        ConstraintWidget lastVisibleWidget = chainHead.mLastVisibleWidget;
+        ConstraintWidget head = chainHead.mHead;
 
         ConstraintWidget widget = first;
         ConstraintWidget next = null;
-        ConstraintWidget firstVisibleWidget = null;
-        ConstraintWidget lastVisibleWidget = null;
 
         boolean done = false;
 
@@ -396,33 +400,6 @@ public class Optimizer {
         boolean isChainSpreadInside = false;
         boolean isChainPacked = false;
 
-        ConstraintWidget head = first;
-        if (orientation == ConstraintWidget.HORIZONTAL && container.isRtl()) {
-            // find the last widget
-            while (!done) {
-                // go to the next widget
-                ConstraintAnchor nextAnchor = widget.mListAnchors[offset + 1].mTarget;
-                if (nextAnchor != null) {
-                    next = nextAnchor.mOwner;
-                    if (next.mListAnchors[offset].mTarget == null
-                            || next.mListAnchors[offset].mTarget.mOwner != widget) {
-                        next = null;
-                    }
-                } else {
-                    next = null;
-                }
-                if (next != null) {
-                    widget = next;
-                } else {
-                    done = true;
-                }
-            }
-            head = widget;
-            widget = first;
-            next = null;
-            done = false;
-        }
-
         if (orientation == ConstraintWidget.HORIZONTAL) {
             isChainSpread = head.mHorizontalChainStyle == ConstraintWidget.CHAIN_SPREAD;
             isChainSpreadInside = head.mHorizontalChainStyle == ConstraintWidget.CHAIN_SPREAD_INSIDE;
@@ -435,7 +412,6 @@ public class Optimizer {
 
         // The first traversal will:
         // - set up some basic ordering constraints
-        // - build a linked list of visible widgets
         // - build a linked list of matched constraints widgets
 
         float totalSize = 0;
@@ -443,18 +419,8 @@ public class Optimizer {
         int numVisibleWidgets = 0;
 
         while (!done) {
-            // apply ordering on the current widget
-
-            // First, let's maintain a linked list of visible widgets for the chain
-            widget.mListNextVisibleWidget[orientation] = null;
+            // Measure visible widgets and add margins.
             if (widget.getVisibility() != ConstraintWidget.GONE) {
-                if (lastVisibleWidget != null) {
-                    lastVisibleWidget.mListNextVisibleWidget[orientation] = widget;
-                }
-                if (firstVisibleWidget == null) {
-                    firstVisibleWidget = widget;
-                }
-                lastVisibleWidget = widget;
                 numVisibleWidgets ++;
                 if (orientation == HORIZONTAL) {
                     totalSize += widget.getWidth();
@@ -514,7 +480,6 @@ public class Optimizer {
                 done = true;
             }
         }
-        ConstraintWidget last = widget;
 
         ResolutionAnchor firstNode = first.mListAnchors[offset].getResolutionNode();
         ResolutionAnchor lastNode = last.mListAnchors[offset + 1].getResolutionNode();
