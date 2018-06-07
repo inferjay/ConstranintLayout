@@ -43,7 +43,7 @@ class Chain {
         // Don't skip things. Either the element is GONE or not.
         int offset = 0;
         int chainsSize = 0;
-        ConstraintWidget[] chainsArray = null;
+        ChainHead[] chainsArray = null;
         if (orientation == ConstraintWidget.HORIZONTAL) {
             offset = 0;
             chainsSize = constraintWidgetContainer.mHorizontalChainsSize;
@@ -54,7 +54,7 @@ class Chain {
             chainsArray = constraintWidgetContainer.mVerticalChainsArray;
         }
         for (int i = 0; i < chainsSize; i++) {
-            ConstraintWidget first = chainsArray[i];
+            ChainHead first = chainsArray[i];
             if (constraintWidgetContainer.optimizeFor(Optimizer.OPTIMIZATION_CHAIN)) {
                 if (!Optimizer.applyChainOptimized(constraintWidgetContainer, system, orientation, offset, first)) {
                     applyChainConstraints(constraintWidgetContainer, system, orientation, offset, first);
@@ -73,14 +73,19 @@ class Chain {
      * @param system the linear system we add the equations to
      * @param orientation HORIZONTAL or VERTICAL
      * @param offset 0 or 2 to accomodate for HORIZONTAL / VERTICAL
-     * @param first first widget of the chain
+     * @param chainHead a chain represented by its main elements
      */
     static void applyChainConstraints(ConstraintWidgetContainer container, LinearSystem system,
-                                      int orientation, int offset, ConstraintWidget first) {
+                                      int orientation, int offset, ChainHead chainHead) {
+        ConstraintWidget first = chainHead.mFirst;
+        ConstraintWidget last = chainHead.mLast;
+        ConstraintWidget firstVisibleWidget = chainHead.mFirstVisibleWidget;
+        ConstraintWidget lastVisibleWidget = chainHead.mLastVisibleWidget;
+        ConstraintWidget head = chainHead.mHead;
+
         ConstraintWidget widget = first;
         ConstraintWidget next = null;
-        ConstraintWidget firstVisibleWidget = null;
-        ConstraintWidget lastVisibleWidget = null;
+
         boolean done = false;
         int numMatchConstraints = 0;
         float totalWeights = 0;
@@ -91,33 +96,6 @@ class Chain {
         boolean isChainSpread = false;
         boolean isChainSpreadInside = false;
         boolean isChainPacked = false;
-
-        ConstraintWidget head = first;
-        if (orientation == ConstraintWidget.HORIZONTAL && container.isRtl()) {
-            // find the last widget
-            while (!done) {
-                // go to the next widget
-                ConstraintAnchor nextAnchor = widget.mListAnchors[offset + 1].mTarget;
-                if (nextAnchor != null) {
-                    next = nextAnchor.mOwner;
-                    if (next.mListAnchors[offset].mTarget == null
-                            || next.mListAnchors[offset].mTarget.mOwner != widget) {
-                        next = null;
-                    }
-                } else {
-                    next = null;
-                }
-                if (next != null) {
-                    widget = next;
-                } else {
-                    done = true;
-                }
-            }
-            head = widget;
-            widget = first;
-            next = null;
-            done = false;
-        }
 
         if (orientation == ConstraintWidget.HORIZONTAL) {
             isChainSpread = head.mHorizontalChainStyle == ConstraintWidget.CHAIN_SPREAD;
@@ -131,24 +109,9 @@ class Chain {
 
         // The first traversal will:
         // - set up some basic ordering constraints
-        // - build a linked list of visible widgets
         // - build a linked list of matched constraints widgets
 
         while (!done) {
-            // apply ordering on the current widget
-
-            // First, let's maintain a linked list of visible widgets for the chain
-            widget.mListNextVisibleWidget[orientation] = null;
-            if (widget.getVisibility() != ConstraintWidget.GONE) {
-                if (lastVisibleWidget != null) {
-                    lastVisibleWidget.mListNextVisibleWidget[orientation] = widget;
-                }
-                if (firstVisibleWidget == null) {
-                    firstVisibleWidget = widget;
-                }
-                lastVisibleWidget = widget;
-            }
-
             ConstraintAnchor begin = widget.mListAnchors[offset];
             int strength = SolverVariable.STRENGTH_HIGHEST;
             if (isWrapContent || isChainPacked) {
@@ -221,7 +184,6 @@ class Chain {
                 done = true;
             }
         }
-        ConstraintWidget last = widget;
 
         // Make sure we have constraints for the last anchors / targets
         if (lastVisibleWidget != null && last.mListAnchors[offset + 1].mTarget != null) {

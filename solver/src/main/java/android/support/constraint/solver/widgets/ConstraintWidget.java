@@ -2194,15 +2194,21 @@ public class ConstraintWidget {
             verticalParentWrapContent = mParent != null ? mParent.mListDimensionBehaviors[DIMENSION_VERTICAL] == WRAP_CONTENT : false;
 
             // Add this widget to an horizontal chain if dual connections are found
+            if((mLeft.mTarget != null &&  mLeft.mTarget.mTarget != mLeft) &&
+                mRight.mTarget != null && mRight.mTarget.mTarget == mRight){
+                ((ConstraintWidgetContainer) mParent).addChain(this, HORIZONTAL);
+            }
             if ((mLeft.mTarget != null && mLeft.mTarget.mTarget == mLeft)
                     || (mRight.mTarget != null && mRight.mTarget.mTarget == mRight)) {
-                ((ConstraintWidgetContainer) mParent).addChain(this, HORIZONTAL);
                 inHorizontalChain = true;
             }
             // Add this widget to an vertical chain if dual connections are found
+            if((mTop.mTarget != null &&  mTop.mTarget.mTarget != mTop) &&
+                mBottom.mTarget != null && mBottom.mTarget.mTarget == mBottom){
+                ((ConstraintWidgetContainer) mParent).addChain(this, VERTICAL);
+            }
             if ((mTop.mTarget != null && mTop.mTarget.mTarget == mTop)
                     || (mBottom.mTarget != null && mBottom.mTarget.mTarget == mBottom)) {
-                ((ConstraintWidgetContainer) mParent).addChain(this, VERTICAL);
                 inVerticalChain = true;
             }
 
