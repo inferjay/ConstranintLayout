@@ -126,4 +126,51 @@ public class ChainHeadTest {
         assertEquals(chainHead.getFirstVisibleWidget(), B);
     }
 
+    @Test
+    public void basicMatchConstraintTest(){
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 600);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+
+        root.setDebugName("root");
+        A.setDebugName("A");
+        B.setDebugName("B");
+        C.setDebugName("C");
+
+        root.add(A);
+        root.add(B);
+        root.add(C);
+
+        A.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
+        A.connect(ConstraintAnchor.Type.RIGHT, B, ConstraintAnchor.Type.LEFT);
+        B.connect(ConstraintAnchor.Type.LEFT, A, ConstraintAnchor.Type.RIGHT);
+        B.connect(ConstraintAnchor.Type.RIGHT, C, ConstraintAnchor.Type.LEFT);
+        C.connect(ConstraintAnchor.Type.LEFT, B, ConstraintAnchor.Type.RIGHT);
+        C.connect(ConstraintAnchor.Type.RIGHT, root, ConstraintAnchor.Type.RIGHT);
+        A.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        B.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        C.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
+        A.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        B.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        C.setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setHorizontalWeight(1f);
+        B.setHorizontalWeight(2f);
+        C.setHorizontalWeight(3f);
+
+        ChainHead chainHead = new ChainHead(A, ConstraintWidget.HORIZONTAL, false);
+
+        assertEquals(chainHead.getFirstMatchConstraintWidget(), A);
+        assertEquals(chainHead.getLastMatchConstraintWidget(), C);
+        assertEquals(chainHead.getTotalWeight(), 6f);
+
+        C.setVisibility(ConstraintWidget.GONE);
+
+        chainHead = new ChainHead(A, ConstraintWidget.HORIZONTAL, false);
+
+        assertEquals(chainHead.getFirstMatchConstraintWidget(), A);
+        assertEquals(chainHead.getLastMatchConstraintWidget(), B);
+        assertEquals(chainHead.getTotalWeight(), 3f);
+    }
+
 }

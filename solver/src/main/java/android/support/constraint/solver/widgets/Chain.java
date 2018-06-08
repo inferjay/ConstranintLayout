@@ -85,12 +85,11 @@ class Chain {
 
         ConstraintWidget widget = first;
         ConstraintWidget next = null;
-
         boolean done = false;
-        int numMatchConstraints = 0;
-        float totalWeights = 0;
-        ConstraintWidget firstMatchConstraintsWidget = null;
-        ConstraintWidget previousMatchConstraintsWidget = null;
+
+        float totalWeights = chainHead.mTotalWeight;
+        ConstraintWidget firstMatchConstraintsWidget = chainHead.mFirstMatchConstraintWidget;
+        ConstraintWidget previousMatchConstraintsWidget = chainHead.mLastMatchConstraintWidget;
 
         boolean isWrapContent = container.mListDimensionBehaviors[orientation] == ConstraintWidget.DimensionBehaviour.WRAP_CONTENT;
         boolean isChainSpread = false;
@@ -143,26 +142,13 @@ class Chain {
                     strength);
             }
 
-            // First, let's maintain a linked list of matched widgets for the chain
-            widget.mListNextMatchConstraintsWidget[orientation] = null;
-            if (widget.getVisibility() != ConstraintWidget.GONE
-                    && widget.mListDimensionBehaviors[orientation] == ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT) {
-                numMatchConstraints++;
-                totalWeights += widget.mWeight[orientation];
-                if (firstMatchConstraintsWidget == null) {
-                    firstMatchConstraintsWidget = widget;
-                } else {
-                    previousMatchConstraintsWidget.mListNextMatchConstraintsWidget[orientation] = widget;
-                }
-                previousMatchConstraintsWidget = widget;
-                if (isWrapContent) {
+            if (isWrapContent) {
+                if(widget.getVisibility() != ConstraintWidget.GONE
+                    && widget.mListDimensionBehaviors[orientation] == ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT){
                     system.addGreaterThan(widget.mListAnchors[offset + 1].mSolverVariable,
                         widget.mListAnchors[offset].mSolverVariable, 0,
                         SolverVariable.STRENGTH_EQUALITY);
                 }
-            }
-
-            if (isWrapContent) {
                 system.addGreaterThan(widget.mListAnchors[offset].mSolverVariable,
                         container.mListAnchors[offset].mSolverVariable,
                         0, SolverVariable.STRENGTH_FIXED);
@@ -201,7 +187,7 @@ class Chain {
         }
 
         // Now, let's apply the centering / spreading for matched constraints widgets
-        if (numMatchConstraints > 0) {
+        if (firstMatchConstraintsWidget != null) {
             // TODO: we should not try to apply the constraints for weights = 0
             widget = firstMatchConstraintsWidget;
             while (widget != null) {

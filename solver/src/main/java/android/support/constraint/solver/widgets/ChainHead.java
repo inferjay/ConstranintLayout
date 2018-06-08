@@ -16,6 +16,8 @@
 
 package android.support.constraint.solver.widgets;
 
+import android.support.constraint.solver.widgets.ConstraintWidget.DimensionBehaviour;
+
 /**
  * Class to represent a chain by its main elements.
  */
@@ -26,12 +28,15 @@ public class ChainHead {
     protected ConstraintWidget mLast;
     protected ConstraintWidget mLastVisibleWidget;
     protected ConstraintWidget mHead;
+    protected ConstraintWidget mFirstMatchConstraintWidget;
+    protected ConstraintWidget mLastMatchConstraintWidget;
+    protected float mTotalWeight = 0f;
     private int mOrientation;
     private boolean mIsRtl = false;
-    // TODO: Apply linked list of matched constraint widgets.
 
     /**
-     * Initialize variables, then determine visible widgets and head.
+     * Initialize variables, then determine visible widgets, the head of chain and
+     * matched constraint widgets.
      *
      * @param first first widget in a chain
      * @param orientation orientation of the chain (either Horizontal or Vertical)
@@ -51,9 +56,32 @@ public class ChainHead {
         ConstraintWidget widget = mFirst;
         ConstraintWidget next = mFirst;
         boolean done = false;
-        widget.mListNextVisibleWidget[mOrientation] = null;
-
         while (!done) {
+            widget.mListNextVisibleWidget[mOrientation] = null;
+            widget.mListNextMatchConstraintsWidget[mOrientation] = null;
+            if(widget.getVisibility() != ConstraintWidget.GONE) {
+                // Visible widgets linked list.
+                if (mFirstVisibleWidget == null) {
+                    mFirstVisibleWidget = widget;
+                }
+                if(mLastVisibleWidget != null){
+                    mLastVisibleWidget.mListNextVisibleWidget[mOrientation] = widget;
+                }
+                mLastVisibleWidget = widget;
+
+                // Match constraint linked list.
+                if(widget.mListDimensionBehaviors[mOrientation] == DimensionBehaviour.MATCH_CONSTRAINT){
+                    mTotalWeight += widget.mWeight[mOrientation];
+                    if(mFirstMatchConstraintWidget == null){
+                        mFirstMatchConstraintWidget = widget;
+                    }
+                    if(mLastMatchConstraintWidget != null){
+                        mLastMatchConstraintWidget.mListNextMatchConstraintsWidget[mOrientation] = widget;
+                    }
+                    mLastMatchConstraintWidget = widget;
+                }
+            }
+
             // go to the next widget
             ConstraintAnchor nextAnchor = widget.mListAnchors[offset + 1].mTarget;
             if (nextAnchor != null) {
@@ -64,15 +92,6 @@ public class ChainHead {
                 }
             } else {
                 next = null;
-            }
-            if(widget.getVisibility() != ConstraintWidget.GONE) {
-                if (mFirstVisibleWidget == null) {
-                    mFirstVisibleWidget = widget;
-                }
-                if(mLastVisibleWidget != null){
-                    mLastVisibleWidget.mListNextVisibleWidget[mOrientation] = widget;
-                }
-                mLastVisibleWidget = widget;
             }
             if (next != null) {
                 widget = next;
@@ -107,5 +126,17 @@ public class ChainHead {
 
     public ConstraintWidget getHead() {
         return mHead;
+    }
+
+    public ConstraintWidget getFirstMatchConstraintWidget() {
+        return mFirstMatchConstraintWidget;
+    }
+
+    public ConstraintWidget getLastMatchConstraintWidget() {
+        return mLastMatchConstraintWidget;
+    }
+
+    public float getTotalWeight() {
+        return mTotalWeight;
     }
 }

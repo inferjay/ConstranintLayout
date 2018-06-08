@@ -387,13 +387,12 @@ public class Optimizer {
 
         ConstraintWidget widget = first;
         ConstraintWidget next = null;
-
         boolean done = false;
 
         int numMatchConstraints = 0;
-        float totalWeights = 0;
-        ConstraintWidget firstMatchConstraintsWidget = null;
-        ConstraintWidget previousMatchConstraintsWidget = null;
+        float totalWeights = chainHead.mTotalWeight;
+        ConstraintWidget firstMatchConstraintsWidget = chainHead.mFirstMatchConstraintWidget;
+        ConstraintWidget previousMatchConstraintsWidget = chainHead.mLastMatchConstraintWidget;
 
         boolean isWrapContent = container.mListDimensionBehaviors[orientation] == DimensionBehaviour.WRAP_CONTENT;
         boolean isChainSpread = false;
@@ -436,8 +435,6 @@ public class Optimizer {
 
             ConstraintAnchor begin = widget.mListAnchors[offset];
 
-            // First, let's maintain a linked list of matched widgets for the chain
-            widget.mListNextMatchConstraintsWidget[orientation] = null;
             if (widget.getVisibility() != ConstraintWidget.GONE
                     && widget.mListDimensionBehaviors[orientation] == MATCH_CONSTRAINT) {
                 numMatchConstraints++;
@@ -455,13 +452,6 @@ public class Optimizer {
                         return false;
                     }
                 }
-                totalWeights += widget.mWeight[orientation];
-                if (firstMatchConstraintsWidget == null) {
-                    firstMatchConstraintsWidget = widget;
-                } else {
-                    previousMatchConstraintsWidget.mListNextMatchConstraintsWidget[orientation] = widget;
-                }
-                previousMatchConstraintsWidget = widget;
             }
 
             // go to the next widget
