@@ -356,6 +356,12 @@ public class ConstraintWidgetContainer extends WidgetContainer {
                             widget.setDebugSolverName(mSystem, widget.getDebugName());
                         }
                     }
+                } else {
+                    createObjectVariables(mSystem);
+                    for (int i = 0; i < count; i++) {
+                        ConstraintWidget widget = mChildren.get(i);
+                        widget.createObjectVariables(mSystem);
+                    }
                 }
                 needsSolving = addChildrenToSolver(mSystem);
                 if (needsSolving) {

@@ -24,6 +24,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Build;
+import android.support.constraint.solver.LinearSystem;
 import android.support.constraint.solver.Metrics;
 import android.support.constraint.solver.widgets.*;
 import android.support.constraint.solver.widgets.Guideline;
@@ -856,6 +857,7 @@ public class ConstraintLayout extends ViewGroup {
                 ((Placeholder) child).updatePreLayout(this);
             }
         }
+
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             ConstraintWidget widget = getViewWidget(child);
@@ -2255,13 +2257,13 @@ public class ConstraintLayout extends ViewGroup {
          * The child's weight that we can use to distribute the available horizontal space
          * in a chain, if the dimension behaviour is set to MATCH_CONSTRAINT
          */
-        public float horizontalWeight = 0;
+        public float horizontalWeight = UNSET;
 
         /**
          * The child's weight that we can use to distribute the available vertical space
          * in a chain, if the dimension behaviour is set to MATCH_CONSTRAINT
          */
-        public float verticalWeight = 0;
+        public float verticalWeight = UNSET;
 
         /**
          * If the child is the start of a horizontal chain, this attribute will drive how
@@ -2818,11 +2820,11 @@ public class ConstraintLayout extends ViewGroup {
                         break;
                     }
                     case Table.LAYOUT_CONSTRAINT_HORIZONTAL_WEIGHT: {
-                        horizontalWeight = a.getFloat(attr, 0);
+                        horizontalWeight = a.getFloat(attr, horizontalWeight);
                         break;
                     }
                     case Table.LAYOUT_CONSTRAINT_VERTICAL_WEIGHT: {
-                        verticalWeight = a.getFloat(attr, 0);
+                        verticalWeight = a.getFloat(attr, verticalWeight);
                         break;
                     }
                     case Table.LAYOUT_CONSTRAINT_HORIZONTAL_CHAINSTYLE: {

@@ -30,6 +30,134 @@ import static org.testng.Assert.assertEquals;
 public class AdvancedChainTest {
 
     @Test
+    public void testComplexChainWeights() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 800);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+
+        root.setDebugSolverName(root.getSystem(), "root");
+        A.setDebugSolverName(root.getSystem(), "A");
+        B.setDebugSolverName(root.getSystem(), "B");
+
+        A.connect(Type.LEFT, root, Type.LEFT);
+        A.connect(Type.RIGHT, root, Type.RIGHT);
+        B.connect(Type.LEFT, root, Type.LEFT);
+        B.connect(Type.RIGHT, root, Type.RIGHT);
+
+        A.connect(Type.TOP, root, Type.TOP, 0);
+        A.connect(Type.BOTTOM, B, Type.TOP, 0);
+
+        B.connect(Type.TOP, A, Type.BOTTOM, 0);
+        B.connect(Type.BOTTOM, root, Type.BOTTOM, 0);
+
+        root.add(A);
+        root.add(B);
+
+        A.setHorizontalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setVerticalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+        B.setHorizontalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+        B.setVerticalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_NONE);
+        root.layout();
+
+        System.out.println("root: " + root);
+        System.out.println("A: " + A);
+        System.out.println("B: " + B);
+
+        assertEquals(A.getWidth(), 800);
+        assertEquals(B.getWidth(), 800);
+        assertEquals(A.getHeight(), 400);
+        assertEquals(B.getHeight(), 400);
+        assertEquals(A.getTop(), 0);
+        assertEquals(B.getTop(), 400);
+
+        A.setDimensionRatio("16:3");
+
+        root.layout();
+
+        System.out.println("root: " + root);
+        System.out.println("A: " + A);
+        System.out.println("B: " + B);
+
+        assertEquals(A.getWidth(), 800);
+        assertEquals(B.getWidth(), 800);
+        assertEquals(A.getHeight(), 150);
+        assertEquals(B.getHeight(), 150);
+        assertEquals(A.getTop(), 167);
+        assertEquals(B.getTop(), 483);
+
+        B.setVerticalWeight(1);
+
+        root.layout();
+
+        System.out.println("root: " + root);
+        System.out.println("A: " + A);
+        System.out.println("B: " + B);
+
+        assertEquals(A.getWidth(), 800);
+        assertEquals(B.getWidth(), 800);
+        assertEquals(A.getHeight(), 150);
+        assertEquals(B.getHeight(), 650);
+        assertEquals(A.getTop(), 0);
+        assertEquals(B.getTop(), 150);
+
+        A.setVerticalWeight(1);
+
+        root.layout();
+
+        System.out.println("root: " + root);
+        System.out.println("A: " + A);
+        System.out.println("B: " + B);
+
+        assertEquals(A.getWidth(), 800);
+        assertEquals(B.getWidth(), 800);
+        assertEquals(A.getHeight(), 150);
+        assertEquals(B.getHeight(), 150);
+        assertEquals(A.getTop(), 167);
+        assertEquals(B.getTop(), 483);
+    }
+
+    @Test
+    public void testTooSmall() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 800);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+
+        root.setDebugSolverName(root.getSystem(), "root");
+        A.setDebugSolverName(root.getSystem(), "A");
+        B.setDebugSolverName(root.getSystem(), "B");
+        C.setDebugSolverName(root.getSystem(), "C");
+
+        root.add(A);
+        root.add(B);
+        root.add(C);
+
+        A.connect(Type.LEFT, root, Type.LEFT);
+        A.connect(Type.TOP, root, Type.TOP);
+        A.connect(Type.BOTTOM, root, Type.BOTTOM);
+
+        B.connect(Type.LEFT, A, Type.RIGHT, 100);
+        C.connect(Type.LEFT, A, Type.RIGHT, 100);
+
+        B.connect(Type.TOP, A, Type.TOP);
+        B.connect(Type.BOTTOM, C, Type.TOP);
+        C.connect(Type.TOP, B, Type.BOTTOM);
+        C.connect(Type.BOTTOM, A, Type.BOTTOM);
+
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_NONE);
+        root.layout();
+
+        System.out.println("A: " + A);
+        System.out.println("B: " + B);
+        System.out.println("C: " + C);
+        assertEquals(A.getTop(), 390);
+        assertEquals(B.getTop(), 380);
+        assertEquals(C.getTop(), 400);
+    }
+
+    @Test
     public void testChainWeights() {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 800);
         ConstraintWidget A = new ConstraintWidget(100, 20);

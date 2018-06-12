@@ -805,6 +805,10 @@ public class LinearSystem {
                 } else {
                     done = true;
                 }
+                if (tries > mNumColumns / 2) {
+                    // failsafe -- tried too many times
+                    done = true;
+                }
             }
         }
 
@@ -830,6 +834,9 @@ public class LinearSystem {
             if (DEBUG && infeasibleSystem) {
                 System.out.println("IMPOSSIBLE SYSTEM, WTF");
                 throw new Exception();
+            }
+            if (infeasibleSystem) {
+                return tries;
             }
         }
 

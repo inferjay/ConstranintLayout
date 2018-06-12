@@ -18,6 +18,12 @@ package android.support.constraint.solver.widgets;
 
 import android.support.constraint.solver.widgets.ConstraintWidget.DimensionBehaviour;
 
+import java.util.ArrayList;
+
+import static android.support.constraint.solver.widgets.ConstraintWidget.MATCH_CONSTRAINT_PERCENT;
+import static android.support.constraint.solver.widgets.ConstraintWidget.MATCH_CONSTRAINT_RATIO;
+import static android.support.constraint.solver.widgets.ConstraintWidget.MATCH_CONSTRAINT_SPREAD;
+
 /**
  * Class to represent a chain by its main elements.
  */
@@ -30,9 +36,16 @@ public class ChainHead {
     protected ConstraintWidget mHead;
     protected ConstraintWidget mFirstMatchConstraintWidget;
     protected ConstraintWidget mLastMatchConstraintWidget;
+    protected ArrayList<ConstraintWidget> mWeightedMatchConstraintsWidgets;
+    protected int mWidgetsCount;
+    protected int mWidgetsMatchCount;
     protected float mTotalWeight = 0f;
     private int mOrientation;
     private boolean mIsRtl = false;
+    protected boolean mHasUndefinedWeights;
+    protected boolean mHasDefinedWeights;
+    protected boolean mHasComplexMatchWeights;
+    private boolean mDefined;
 
     /**
      * Initialize variables, then determine visible widgets, the head of chain and
@@ -46,7 +59,20 @@ public class ChainHead {
         mFirst = first;
         mOrientation = orientation;
         mIsRtl = isRtl;
-        defineChainProperties();
+    }
+
+    /**
+     * Returns true if the widget should be part of the match equality rules in the chain
+     *
+     * @param widget      the widget to test
+     * @param orientation current orientation, HORIZONTAL or VERTICAL
+     * @return
+     */
+    static private boolean isMatchConstraintEqualityCandidate(ConstraintWidget widget, int orientation) {
+        return widget.getVisibility() != ConstraintWidget.GONE
+                && widget.mListDimensionBehaviors[orientation] == ConstraintWidget.DimensionBehaviour.MATCH_CONSTRAINT
+                && (widget.mResolvedMatchConstraintDefault[orientation] == MATCH_CONSTRAINT_SPREAD
+                || widget.mResolvedMatchConstraintDefault[orientation] == MATCH_CONSTRAINT_RATIO);
     }
 
     private void defineChainProperties(){
@@ -57,6 +83,7 @@ public class ChainHead {
         ConstraintWidget next = mFirst;
         boolean done = false;
         while (!done) {
+            mWidgetsCount++;
             widget.mListNextVisibleWidget[mOrientation] = null;
             widget.mListNextMatchConstraintsWidget[mOrientation] = null;
             if(widget.getVisibility() != ConstraintWidget.GONE) {
@@ -70,8 +97,28 @@ public class ChainHead {
                 mLastVisibleWidget = widget;
 
                 // Match constraint linked list.
-                if(widget.mListDimensionBehaviors[mOrientation] == DimensionBehaviour.MATCH_CONSTRAINT){
-                    mTotalWeight += widget.mWeight[mOrientation];
+                if(widget.mListDimensionBehaviors[mOrientation] == DimensionBehaviour.MATCH_CONSTRAINT
+                   && (widget.mResolvedMatchConstraintDefault[mOrientation] == MATCH_CONSTRAINT_SPREAD
+                       || widget.mResolvedMatchConstraintDefault[mOrientation] == MATCH_CONSTRAINT_RATIO
+                        || widget.mResolvedMatchConstraintDefault[mOrientation] == MATCH_CONSTRAINT_PERCENT)) {
+                    mWidgetsMatchCount++;
+                    float weight = widget.mWeight[mOrientation];
+                    if (weight > 0) {
+                        mTotalWeight += widget.mWeight[mOrientation];
+                    }
+
+                    if (isMatchConstraintEqualityCandidate(widget, mOrientation)) {
+                        if (weight < 0) {
+                            mHasUndefinedWeights = true;
+                        } else {
+                            mHasDefinedWeights = true;
+                        }
+                        if (mWeightedMatchConstraintsWidgets == null) {
+                            mWeightedMatchConstraintsWidgets = new ArrayList<>();
+                        }
+                        mWeightedMatchConstraintsWidgets.add(widget);
+                    }
+
                     if(mFirstMatchConstraintWidget == null){
                         mFirstMatchConstraintWidget = widget;
                     }
@@ -106,6 +153,8 @@ public class ChainHead {
         }else{
             mHead = mFirst;
         }
+
+        mHasComplexMatchWeights = mHasDefinedWeights && mHasUndefinedWeights;
     }
 
     public ConstraintWidget getFirst() {
@@ -138,5 +187,12 @@ public class ChainHead {
 
     public float getTotalWeight() {
         return mTotalWeight;
+    }
+
+    public void define() {
+        if (!mDefined) {
+            defineChainProperties();
+        }
+        mDefined = true;
     }
 }

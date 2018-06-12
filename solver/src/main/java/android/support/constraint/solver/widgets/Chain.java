@@ -20,6 +20,8 @@ import android.support.constraint.solver.ArrayRow;
 import android.support.constraint.solver.LinearSystem;
 import android.support.constraint.solver.SolverVariable;
 
+import java.util.ArrayList;
+
 import static android.support.constraint.solver.widgets.ConstraintWidget.*;
 
 /**
@@ -53,8 +55,12 @@ class Chain {
             chainsSize = constraintWidgetContainer.mVerticalChainsSize;
             chainsArray = constraintWidgetContainer.mVerticalChainsArray;
         }
+
         for (int i = 0; i < chainsSize; i++) {
             ChainHead first = chainsArray[i];
+            // we have to make sure we define the ChainHead here, otherwise the values we use may not
+            // be correctly initialized (as we initialize them in the ConstraintWidget.addToSolver())
+            first.define();
             if (constraintWidgetContainer.optimizeFor(Optimizer.OPTIMIZATION_CHAIN)) {
                 if (!Optimizer.applyChainOptimized(constraintWidgetContainer, system, orientation, offset, first)) {
                     applyChainConstraints(constraintWidgetContainer, system, orientation, offset, first);
@@ -187,43 +193,49 @@ class Chain {
         }
 
         // Now, let's apply the centering / spreading for matched constraints widgets
-        if (firstMatchConstraintsWidget != null) {
-            // TODO: we should not try to apply the constraints for weights = 0
-            widget = firstMatchConstraintsWidget;
-            while (widget != null) {
-                next = widget.mListNextMatchConstraintsWidget[orientation];
-                if (next != null) {
-                    float currentWeight = widget.mWeight[orientation];
-                    float nextWeight = next.mWeight[orientation];
-                    SolverVariable begin = widget.mListAnchors[offset].mSolverVariable;
-                    SolverVariable end = widget.mListAnchors[offset + 1].mSolverVariable;
-                    SolverVariable nextBegin = next.mListAnchors[offset].mSolverVariable;
-                    SolverVariable nextEnd = next.mListAnchors[offset + 1].mSolverVariable;
+        ArrayList<ConstraintWidget> listMatchConstraints = chainHead.mWeightedMatchConstraintsWidgets;
+        if (listMatchConstraints != null) {
+            final int count = listMatchConstraints.size();
+            if (count > 1) {
+                ConstraintWidget lastMatch = null;
+                float lastWeight = 0;
 
-                    boolean applyEquality;
-                    int currentDimensionDefault;
-                    int nextDimensionDefault;
-                    if (orientation == ConstraintWidget.HORIZONTAL) {
-                        currentDimensionDefault = widget.mMatchConstraintDefaultWidth;
-                        nextDimensionDefault = next.mMatchConstraintDefaultWidth;
-                    } else {
-                        currentDimensionDefault = widget.mMatchConstraintDefaultHeight;
-                        nextDimensionDefault = next.mMatchConstraintDefaultHeight;
+                if (chainHead.mHasUndefinedWeights && !chainHead.mHasComplexMatchWeights) {
+                    totalWeights = chainHead.mWidgetsMatchCount;
+                }
+
+                for (int i = 0; i < count; i++) {
+                    ConstraintWidget match = listMatchConstraints.get(i);
+                    float currentWeight = match.mWeight[orientation];
+
+                    if (currentWeight < 0) {
+                        if (chainHead.mHasComplexMatchWeights) {
+                            system.addEquality(match.mListAnchors[offset + 1].mSolverVariable,
+                                    match.mListAnchors[offset].mSolverVariable, 0, SolverVariable.STRENGTH_HIGHEST);
+                            continue;
+                        }
+                        currentWeight = 1;
                     }
-                    applyEquality = ((currentDimensionDefault == MATCH_CONSTRAINT_SPREAD)
-                            || (currentDimensionDefault == MATCH_CONSTRAINT_RATIO)) &&
-                            ((nextDimensionDefault == MATCH_CONSTRAINT_SPREAD)
-                                    || (nextDimensionDefault == MATCH_CONSTRAINT_RATIO));
+                    if (currentWeight == 0) {
+                        system.addEquality(match.mListAnchors[offset + 1].mSolverVariable,
+                                match.mListAnchors[offset].mSolverVariable, 0, SolverVariable.STRENGTH_FIXED);
+                        continue;
+                    }
 
-                    if (applyEquality) {
+                    if (lastMatch != null) {
+                        SolverVariable begin = lastMatch.mListAnchors[offset].mSolverVariable;
+                        SolverVariable end = lastMatch.mListAnchors[offset + 1].mSolverVariable;
+                        SolverVariable nextBegin = match.mListAnchors[offset].mSolverVariable;
+                        SolverVariable nextEnd = match.mListAnchors[offset + 1].mSolverVariable;
                         ArrayRow row = system.createRow();
-                        row.createRowEqualMatchDimensions(currentWeight, totalWeights, nextWeight,
+                        row.createRowEqualMatchDimensions(lastWeight, totalWeights, currentWeight,
                                 begin, end, nextBegin, nextEnd);
                         system.addConstraint(row);
                     }
 
+                    lastMatch = match;
+                    lastWeight = currentWeight;
                 }
-                widget = next;
             }
         }
 
@@ -264,6 +276,7 @@ class Chain {
             // for chain spread, we need to add equal dimensions in between *visible* widgets
             widget = firstVisibleWidget;
             ConstraintWidget previousVisibleWidget = firstVisibleWidget;
+            boolean applyFixedEquality = chainHead.mWidgetsMatchCount > 0 && (chainHead.mWidgetsCount == chainHead.mWidgetsMatchCount);
             while (widget != null) {
                 next = widget.mListNextVisibleWidget[orientation];
                 if (next != null || widget == lastVisibleWidget) {
@@ -309,9 +322,13 @@ class Chain {
                         if (widget == lastVisibleWidget) {
                             margin2 = lastVisibleWidget.mListAnchors[offset + 1].getMargin();
                         }
+                        int strength = SolverVariable.STRENGTH_HIGHEST;
+                        if (applyFixedEquality) {
+                            strength = SolverVariable.STRENGTH_FIXED;
+                        }
                         system.addCentering(begin, beginTarget, margin1, 0.5f,
                                 beginNext, beginNextTarget, margin2,
-                                SolverVariable.STRENGTH_HIGHEST);
+                                strength);
                     }
                 }
                 previousVisibleWidget = widget;
@@ -321,6 +338,7 @@ class Chain {
             // for chain spread inside, we need to add equal dimensions in between *visible* widgets
             widget = firstVisibleWidget;
             ConstraintWidget previousVisibleWidget = firstVisibleWidget;
+            boolean applyFixedEquality = chainHead.mWidgetsMatchCount > 0 && (chainHead.mWidgetsCount == chainHead.mWidgetsMatchCount);
             while (widget != null) {
                 next = widget.mListNextVisibleWidget[orientation];
                 if (widget != firstVisibleWidget && widget != lastVisibleWidget && next != null) {
@@ -355,10 +373,14 @@ class Chain {
                     if (previousVisibleWidget != null) {
                         beginMargin += previousVisibleWidget.mListAnchors[offset + 1].getMargin();
                     }
+                    int strength = SolverVariable.STRENGTH_HIGHEST;
+                    if (applyFixedEquality) {
+                        strength = SolverVariable.STRENGTH_FIXED;
+                    }
                     if (begin != null && beginTarget != null && beginNext != null && beginNextTarget != null) {
                         system.addCentering(begin, beginTarget, beginMargin, 0.5f,
                                 beginNext, beginNextTarget, nextMargin,
-                                SolverVariable.STRENGTH_HIGHEST);
+                                strength);
                     }
                 }
                 previousVisibleWidget = widget;
@@ -382,7 +404,7 @@ class Chain {
 
         }
 
-        // final centering, necessary if the chain is smaller than the available space...
+        // final centering, necessary if the chain is larger than the available space...
         if ((isChainSpread || isChainSpreadInside) && firstVisibleWidget != null) {
             ConstraintAnchor begin = firstVisibleWidget.mListAnchors[offset];
             ConstraintAnchor end = lastVisibleWidget.mListAnchors[offset + 1];

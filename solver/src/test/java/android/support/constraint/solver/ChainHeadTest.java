@@ -53,6 +53,7 @@ public class ChainHeadTest {
         C.connect(ConstraintAnchor.Type.TOP, root, ConstraintAnchor.Type.TOP);
 
         ChainHead chainHead = new ChainHead(A, ConstraintWidget.HORIZONTAL, false);
+        chainHead.define();
 
         assertEquals(chainHead.getHead(), A);
         assertEquals(chainHead.getFirst(), A);
@@ -63,6 +64,7 @@ public class ChainHeadTest {
         A.setVisibility(ConstraintWidget.GONE);
 
         chainHead = new ChainHead(A, ConstraintWidget.HORIZONTAL, false);
+        chainHead.define();
 
         assertEquals(chainHead.getHead(), A);
         assertEquals(chainHead.getFirst(), A);
@@ -70,6 +72,7 @@ public class ChainHeadTest {
 
 
         chainHead = new ChainHead(A, ConstraintWidget.HORIZONTAL, true);
+        chainHead.define();
 
         assertEquals(chainHead.getHead(), C);
         assertEquals(chainHead.getFirst(), A);
@@ -103,6 +106,7 @@ public class ChainHeadTest {
         C.connect(ConstraintAnchor.Type.LEFT, root, ConstraintAnchor.Type.LEFT);
 
         ChainHead chainHead = new ChainHead(A, ConstraintWidget.VERTICAL, false);
+        chainHead.define();
 
         assertEquals(chainHead.getHead(), A);
         assertEquals(chainHead.getFirst(), A);
@@ -113,6 +117,7 @@ public class ChainHeadTest {
         A.setVisibility(ConstraintWidget.GONE);
 
         chainHead = new ChainHead(A, ConstraintWidget.VERTICAL, false);
+        chainHead.define();
 
         assertEquals(chainHead.getHead(), A);
         assertEquals(chainHead.getFirst(), A);
@@ -120,6 +125,7 @@ public class ChainHeadTest {
 
 
         chainHead = new ChainHead(A, ConstraintWidget.VERTICAL, true);
+        chainHead.define();
 
         assertEquals(chainHead.getHead(), A);
         assertEquals(chainHead.getFirst(), A);
@@ -159,6 +165,7 @@ public class ChainHeadTest {
         C.setHorizontalWeight(3f);
 
         ChainHead chainHead = new ChainHead(A, ConstraintWidget.HORIZONTAL, false);
+        chainHead.define();
 
         assertEquals(chainHead.getFirstMatchConstraintWidget(), A);
         assertEquals(chainHead.getLastMatchConstraintWidget(), C);
@@ -167,6 +174,7 @@ public class ChainHeadTest {
         C.setVisibility(ConstraintWidget.GONE);
 
         chainHead = new ChainHead(A, ConstraintWidget.HORIZONTAL, false);
+        chainHead.define();
 
         assertEquals(chainHead.getFirstMatchConstraintWidget(), A);
         assertEquals(chainHead.getLastMatchConstraintWidget(), B);

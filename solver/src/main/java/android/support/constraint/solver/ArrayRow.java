@@ -212,33 +212,33 @@ public class ArrayRow implements LinearSystem.Row {
                                         SolverVariable variableEndA,
                                         SolverVariable variableStartB,
                                         SolverVariable variableEndB) {
+        constantValue = 0;
         if (totalWeights == 0 || (currentWeight == nextWeight)) {
             // endA - startA == endB - startB
             // 0 = startA - endA + endB - startB
-            constantValue = 0;
             variables.put(variableStartA, 1);
             variables.put(variableEndA, -1);
             variables.put(variableEndB, 1);
             variables.put(variableStartB, -1);
         } else {
             if (currentWeight == 0) {
-                currentWeight = epsilon;
-            }
-            if (nextWeight == 0) {
-                nextWeight = epsilon;
-            }
+                variables.put(variableStartA, 1);
+                variables.put(variableEndA, -1);
+            } else if (nextWeight == 0) {
+                variables.put(variableStartB, 1);
+                variables.put(variableEndB, -1);
+            } else {
+                float cw = currentWeight / totalWeights;
+                float nw = nextWeight / totalWeights;
+                float w = cw / nw;
 
-            float cw = currentWeight / totalWeights;
-            float nw = nextWeight / totalWeights;
-            float w = cw / nw;
-
-            // endA - startA == w * (endB - startB)
-            // 0 = startA - endA + w * (endB - startB)
-            constantValue = 0;
-            variables.put(variableStartA, 1);
-            variables.put(variableEndA, -1);
-            variables.put(variableEndB, w);
-            variables.put(variableStartB, -w);
+                // endA - startA == w * (endB - startB)
+                // 0 = startA - endA + w * (endB - startB)
+                variables.put(variableStartA, 1);
+                variables.put(variableEndA, -1);
+                variables.put(variableEndB, w);
+                variables.put(variableStartB, -w);
+            }
         }
         return this;
     }

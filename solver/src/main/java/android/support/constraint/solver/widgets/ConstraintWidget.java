@@ -75,6 +75,8 @@ public class ConstraintWidget {
 
     int mMatchConstraintDefaultWidth = MATCH_CONSTRAINT_SPREAD;
     int mMatchConstraintDefaultHeight = MATCH_CONSTRAINT_SPREAD;
+    int[] mResolvedMatchConstraintDefault = new int[2];
+
     int mMatchConstraintMinWidth = 0;
     int mMatchConstraintMaxWidth = 0;
     float mMatchConstraintPercentWidth = 1;
@@ -232,7 +234,7 @@ public class ConstraintWidget {
     boolean mHorizontalChainFixedPosition;
     boolean mVerticalChainFixedPosition;
 
-    float[] mWeight = {0, 0};
+    float[] mWeight = { UNKNOWN, UNKNOWN};
 
     protected ConstraintWidget[] mListNextMatchConstraintsWidget = {null, null};
     protected ConstraintWidget[] mListNextVisibleWidget = {null, null};
@@ -283,8 +285,8 @@ public class ConstraintWidget {
         mVerticalChainStyle = CHAIN_SPREAD;
         mHorizontalChainFixedPosition = false;
         mVerticalChainFixedPosition = false;
-        mWeight[DIMENSION_HORIZONTAL] = 0;
-        mWeight[DIMENSION_VERTICAL] = 0;
+        mWeight[DIMENSION_HORIZONTAL] = UNKNOWN;
+        mWeight[DIMENSION_VERTICAL] = UNKNOWN;
         mHorizontalResolution = UNKNOWN;
         mVerticalResolution = UNKNOWN;
         mMaxDimension[HORIZONTAL] = Integer.MAX_VALUE;
@@ -672,6 +674,21 @@ public class ConstraintWidget {
         if (mBaselineDistance > 0) {
             SolverVariable baseline = system.createObjectVariable(mBaseline);
             baseline.setName(name + ".baseline");
+        }
+    }
+
+    /**
+     * Create all the system variables for this widget
+     * @hide
+     * @param system
+     */
+    public void createObjectVariables(LinearSystem system) {
+        SolverVariable left = system.createObjectVariable(mLeft);
+        SolverVariable top = system.createObjectVariable(mTop);
+        SolverVariable right = system.createObjectVariable(mRight);
+        SolverVariable bottom = system.createObjectVariable(mBottom);
+        if (mBaselineDistance > 0) {
+            SolverVariable baseline = system.createObjectVariable(mBaseline);
         }
     }
 
@@ -2286,6 +2303,9 @@ public class ConstraintWidget {
             }
         }
 
+        mResolvedMatchConstraintDefault[HORIZONTAL] = matchConstraintDefaultWidth;
+        mResolvedMatchConstraintDefault[VERTICAL] = matchConstraintDefaultHeight;
+
         boolean useHorizontalRatio = useRatio && (mResolvedDimensionRatioSide == HORIZONTAL
                 || mResolvedDimensionRatioSide == UNKNOWN);
 
@@ -2701,6 +2721,18 @@ public class ConstraintWidget {
         int top = system.getObjectVariableValue(mTop);
         int right = system.getObjectVariableValue(mRight);
         int bottom = system.getObjectVariableValue(mBottom);
+        int w = right - left;
+        int h = bottom - top;
+        if (w < 0 || h < 0
+                || left == Integer.MIN_VALUE || left == Integer.MAX_VALUE
+                || top == Integer.MIN_VALUE || top == Integer.MAX_VALUE
+                || right == Integer.MIN_VALUE || right == Integer.MAX_VALUE
+                || bottom == Integer.MIN_VALUE || bottom == Integer.MAX_VALUE) {
+            left = 0;
+            top = 0;
+            right = 0;
+            bottom = 0;
+        }
         setFrame(left, top, right, bottom);
     }
 }
