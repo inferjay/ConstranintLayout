@@ -480,6 +480,9 @@ public class ConstraintLayout extends ViewGroup {
     // after implementing priorities/hierarchy of constraints.
     static final boolean ALLOWS_EMBEDDED = false;
 
+    // Disallow cached measured dimension since it has side-effects for widgets expecting a measure.
+    private static final boolean CACHE_MEASURED_DIMENSION = false;
+
     /** @hide */
     public static final String VERSION = "ConstraintLayout-1.1.2";
     private static final String TAG = "ConstraintLayout";
@@ -1500,27 +1503,29 @@ public class ConstraintLayout extends ViewGroup {
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-        boolean validLastMeasure = mLastMeasureWidth != -1 && mLastMeasureHeight != -1;
-        boolean sameSize = widthMode == MeasureSpec.EXACTLY && heightMode == MeasureSpec.EXACTLY
-                && widthSize == mLastMeasureWidth && heightSize == mLastMeasureHeight;
-        boolean sameMode = widthMode == mLastMeasureWidthMode && heightMode == mLastMeasureHeightMode;
-        boolean sameMeasure = sameMode && widthSize == mLastMeasureWidthSize && heightSize == mLastMeasureHeightSize;
+        if (CACHE_MEASURED_DIMENSION) {
+            boolean validLastMeasure = mLastMeasureWidth != -1 && mLastMeasureHeight != -1;
+            boolean sameSize = widthMode == MeasureSpec.EXACTLY && heightMode == MeasureSpec.EXACTLY
+                    && widthSize == mLastMeasureWidth && heightSize == mLastMeasureHeight;
+            boolean sameMode = widthMode == mLastMeasureWidthMode && heightMode == mLastMeasureHeightMode;
+            boolean sameMeasure = sameMode && widthSize == mLastMeasureWidthSize && heightSize == mLastMeasureHeightSize;
 
-        boolean fitSizeWidth = sameMode && widthMode == MeasureSpec.AT_MOST && heightMode == MeasureSpec.EXACTLY
-                && widthSize >= mLastMeasureWidth && heightSize == mLastMeasureHeight;
+            boolean fitSizeWidth = sameMode && widthMode == MeasureSpec.AT_MOST && heightMode == MeasureSpec.EXACTLY
+                    && widthSize >= mLastMeasureWidth && heightSize == mLastMeasureHeight;
 
-        boolean fitSizeHeight = sameMode && widthMode == MeasureSpec.EXACTLY && heightMode == MeasureSpec.AT_MOST
-                && widthSize == mLastMeasureWidth && heightSize >= mLastMeasureHeight;
+            boolean fitSizeHeight = sameMode && widthMode == MeasureSpec.EXACTLY && heightMode == MeasureSpec.AT_MOST
+                    && widthSize == mLastMeasureWidth && heightSize >= mLastMeasureHeight;
 
-        if (false && validLastMeasure && (sameMeasure || sameSize || fitSizeWidth || fitSizeHeight)) {
-            setMeasuredDimension(mLastMeasureWidth, mLastMeasureHeight);
-            return;
+            if (validLastMeasure && (sameMeasure || sameSize || fitSizeWidth || fitSizeHeight)) {
+                setMeasuredDimension(mLastMeasureWidth, mLastMeasureHeight);
+                return;
+            }
+
+            mLastMeasureWidthMode = widthMode;
+            mLastMeasureHeightMode = heightMode;
+            mLastMeasureWidthSize = widthSize;
+            mLastMeasureHeightSize = heightSize;
         }
-
-        mLastMeasureWidthMode = widthMode;
-        mLastMeasureHeightMode = heightMode;
-        mLastMeasureWidthSize = widthSize;
-        mLastMeasureHeightSize = heightSize;
 
         int paddingLeft = getPaddingLeft();
         int paddingTop = getPaddingTop();
