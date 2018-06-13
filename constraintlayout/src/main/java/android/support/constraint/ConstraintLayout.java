@@ -1686,7 +1686,8 @@ public class ConstraintLayout extends ViewGroup {
                 if (child == null) {
                     continue;
                 }
-                if (child.getMeasuredWidth() != widget.getWidth() || child.getMeasuredHeight() != widget.getHeight()) {
+                if ((child.getMeasuredWidth() != widget.getWidth() || child.getMeasuredHeight() != widget.getHeight())
+                        && widget.getVisibility() != ConstraintWidget.GONE) {
                     int widthSpec = MeasureSpec.makeMeasureSpec(widget.getWidth(), MeasureSpec.EXACTLY);
                     int heightSpec = MeasureSpec.makeMeasureSpec(widget.getHeight(), MeasureSpec.EXACTLY);
                     child.measure(widthSpec, heightSpec);

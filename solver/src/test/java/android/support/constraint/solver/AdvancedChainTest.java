@@ -30,6 +30,142 @@ import static org.testng.Assert.assertEquals;
 public class AdvancedChainTest {
 
     @Test
+    public void testChainWeights() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 800);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+
+        root.setDebugSolverName(root.getSystem(), "root");
+        A.setDebugSolverName(root.getSystem(), "A");
+        B.setDebugSolverName(root.getSystem(), "B");
+
+        A.connect(Type.LEFT, root, Type.LEFT, 0);
+        A.connect(Type.RIGHT, B, Type.LEFT, 0);
+
+        B.connect(Type.LEFT, A, Type.RIGHT, 0);
+        B.connect(Type.RIGHT, root, Type.RIGHT, 0);
+
+        root.add(A);
+        root.add(B);
+
+        A.setHorizontalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+        B.setHorizontalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+        A.setHorizontalWeight(1);
+        B.setHorizontalWeight(0);
+
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_NONE);
+        root.layout();
+
+        System.out.println("A: " + A);
+        System.out.println("B: " + B);
+        assertEquals(A.getWidth(), 800, 1);
+        assertEquals(B.getWidth(), 0, 1);
+        assertEquals(A.getLeft(), 0, 1);
+        assertEquals(B.getLeft(), 800, 1);
+    }
+
+    @Test
+    public void testChain3Weights() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 800);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+
+        root.setDebugSolverName(root.getSystem(), "root");
+        A.setDebugSolverName(root.getSystem(), "A");
+        B.setDebugSolverName(root.getSystem(), "B");
+        C.setDebugSolverName(root.getSystem(), "C");
+
+        A.connect(Type.LEFT, root, Type.LEFT, 0);
+        A.connect(Type.RIGHT, B, Type.LEFT, 0);
+
+        B.connect(Type.LEFT, A, Type.RIGHT, 0);
+        B.connect(Type.RIGHT, C, Type.LEFT, 0);
+
+        C.connect(Type.LEFT, B, Type.RIGHT, 0);
+        C.connect(Type.RIGHT, root, Type.RIGHT, 0);
+
+        root.add(A);
+        root.add(B);
+        root.add(C);
+
+        A.setHorizontalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+        B.setHorizontalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+        C.setHorizontalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+
+        A.setHorizontalWeight(1);
+        B.setHorizontalWeight(0);
+        C.setHorizontalWeight(1);
+
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_NONE);
+        root.layout();
+
+        System.out.println("A: " + A);
+        System.out.println("B: " + B);
+        System.out.println("C: " + C);
+
+        assertEquals(A.getWidth(), 400);
+        assertEquals(B.getWidth(), 0);
+        assertEquals(C.getWidth(), 400);
+        assertEquals(A.getLeft(), 0);
+        assertEquals(B.getLeft(), 400);
+        assertEquals(C.getLeft(), 400);
+    }
+
+    @Test
+    public void testChainLastGone() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 800);
+        ConstraintWidget A = new ConstraintWidget(100, 20);
+        ConstraintWidget B = new ConstraintWidget(100, 20);
+        ConstraintWidget C = new ConstraintWidget(100, 20);
+        ConstraintWidget D = new ConstraintWidget(100, 20);
+        root.setDebugSolverName(root.getSystem(), "root");
+        A.setDebugSolverName(root.getSystem(), "A");
+        B.setDebugSolverName(root.getSystem(), "B");
+        C.setDebugSolverName(root.getSystem(), "C");
+        D.setDebugSolverName(root.getSystem(), "D");
+        root.add(A);
+        root.add(B);
+        root.add(C);
+        root.add(D);
+
+        A.connect(Type.LEFT, root, Type.LEFT, 0);
+        A.connect(Type.RIGHT, root, Type.RIGHT, 0);
+
+        B.connect(Type.LEFT, root, Type.LEFT, 0);
+        B.connect(Type.RIGHT, root, Type.RIGHT, 0);
+
+        C.connect(Type.LEFT, root, Type.LEFT, 0);
+        C.connect(Type.RIGHT, root, Type.RIGHT, 0);
+
+        D.connect(Type.LEFT, root, Type.LEFT, 0);
+        D.connect(Type.RIGHT, root, Type.RIGHT, 0);
+
+        A.connect(Type.TOP, root, Type.TOP, 0);
+        A.connect(Type.BOTTOM, B, Type.TOP, 0);
+        B.connect(Type.TOP, A, Type.BOTTOM, 0);
+        B.connect(Type.BOTTOM, C, Type.TOP, 0);
+        C.connect(Type.TOP, B, Type.BOTTOM, 0);
+        C.connect(Type.BOTTOM, D, Type.TOP, 0);
+        D.connect(Type.TOP, C, Type.BOTTOM, 0);
+        D.connect(Type.BOTTOM, root, Type.BOTTOM, 0);
+
+        B.setVisibility(ConstraintWidget.GONE);
+        D.setVisibility(ConstraintWidget.GONE);
+
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_NONE);
+        root.layout();
+
+        System.out.println("A: " + A);
+        System.out.println("B: " + B);
+        System.out.println("C: " + C);
+        System.out.println("D: " + D);
+
+        assertEquals(A.getTop(), 253);
+        assertEquals(C.getTop(), 527);
+    }
+
+    @Test
     public void testRatioChainGone() {
         ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 800, 800);
         ConstraintWidget A = new ConstraintWidget(100, 20);

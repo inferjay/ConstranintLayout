@@ -150,7 +150,10 @@ class Chain {
             }
 
             ConstraintAnchor begin = widget.mListAnchors[offset];
-            int strength = SolverVariable.STRENGTH_LOW;
+            int strength = SolverVariable.STRENGTH_HIGHEST;
+            if (isWrapContent || isChainPacked) {
+                strength = SolverVariable.STRENGTH_LOW;
+            }
             int margin = begin.getMargin();
 
             if (begin.mTarget != null && widget != first) {
@@ -237,6 +240,7 @@ class Chain {
 
         // Now, let's apply the centering / spreading for matched constraints widgets
         if (numMatchConstraints > 0) {
+            // TODO: we should not try to apply the constraints for weights = 0
             widget = firstMatchConstraintsWidget;
             while (widget != null) {
                 next = widget.mListNextMatchConstraintsWidget[orientation];
@@ -333,7 +337,7 @@ class Chain {
                     if (next != null) {
                         beginNextAnchor = next.mListAnchors[offset];
                         beginNext = beginNextAnchor.mSolverVariable;
-                        beginNextTarget = beginNextAnchor.mTarget != null ? beginNextAnchor.mTarget.mSolverVariable : null;
+                        beginNextTarget = widget.mListAnchors[offset + 1].mSolverVariable;
                     } else {
                         beginNextAnchor = last.mListAnchors[offset + 1].mTarget;
                         if (beginNextAnchor != null) {
@@ -430,12 +434,16 @@ class Chain {
 
         }
 
-        // final centering
+        // final centering, necessary if the chain is smaller than the available space...
         if ((isChainSpread || isChainSpreadInside) && firstVisibleWidget != null) {
             ConstraintAnchor begin = firstVisibleWidget.mListAnchors[offset];
             ConstraintAnchor end = lastVisibleWidget.mListAnchors[offset + 1];
             SolverVariable beginTarget = begin.mTarget != null ? begin.mTarget.mSolverVariable : null;
             SolverVariable endTarget = end.mTarget != null ? end.mTarget.mSolverVariable : null;
+            if (last != lastVisibleWidget) {
+                ConstraintAnchor realEnd = last.mListAnchors[offset + 1];
+                endTarget = realEnd.mTarget != null ? realEnd.mTarget.mSolverVariable : null;
+            }
             if (firstVisibleWidget == lastVisibleWidget) {
                 begin = firstVisibleWidget.mListAnchors[offset];
                 end = firstVisibleWidget.mListAnchors[offset + 1];

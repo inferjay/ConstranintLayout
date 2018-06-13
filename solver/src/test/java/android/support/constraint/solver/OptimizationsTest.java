@@ -16,11 +16,51 @@
 package android.support.constraint.solver;
 
 import android.support.constraint.solver.widgets.*;
+import android.support.constraint.solver.widgets.ConstraintAnchor.Type;
+import android.support.constraint.solver.widgets.ConstraintWidget.DimensionBehaviour;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 
 public class OptimizationsTest {
+    @Test
+    public void testGoneMatchConstraint() {
+        ConstraintWidgetContainer root = new ConstraintWidgetContainer(0, 0, 600, 800);
+        ConstraintWidget A = new ConstraintWidget( 0, 10);
+
+        root.setDebugName("root");
+        A.setDebugName("A");
+
+        root.add(A);
+
+        A.connect(Type.TOP, root, Type.TOP, 8);
+        A.connect(Type.LEFT, root, Type.LEFT, 8);
+        A.connect(Type.RIGHT, root, Type.RIGHT, 8);
+        A.connect(Type.BOTTOM, root, Type.BOTTOM, 8);
+        A.setVerticalBiasPercent(0.2f);
+        A.setHorizontalBiasPercent(0.2f);
+        A.setHorizontalDimensionBehaviour(DimensionBehaviour.MATCH_CONSTRAINT);
+
+        Metrics metrics = new Metrics();
+        root.fillMetrics(metrics);
+        root.setOptimizationLevel(Optimizer.OPTIMIZATION_STANDARD);
+        root.layout();
+
+        System.out.println("1) A: " + A);
+        assertEquals(A.getLeft(), 8);
+        assertEquals(A.getTop(), 162);
+        assertEquals(A.getRight(), 592);
+        assertEquals(A.getBottom(), 172);
+
+        A.setVisibility(ConstraintWidget.GONE);
+        root.layout();
+
+        System.out.println("2) A: " + A);
+        assertEquals(A.getLeft(), 120);
+        assertEquals(A.getTop(), 160);
+        assertEquals(A.getRight(), 120);
+        assertEquals(A.getBottom(), 160);
+    }
 
     @Test
     public void test3EltsChain() {

@@ -17,6 +17,7 @@ package android.support.constraint.solver.widgets;
 
 import android.support.constraint.solver.LinearSystem;
 import android.support.constraint.solver.SolverVariable;
+import android.support.constraint.solver.widgets.ConstraintAnchor.Type;
 
 /**
  * Implements a mechanism to resolve nodes via a dependency graph
@@ -154,7 +155,9 @@ public class ResolutionAnchor extends ResolutionNode {
             float distance = 0;
             float percent = 0.5f;
 
-            if (oppositeOffset > 0) {
+            boolean isEndAnchor = myAnchor.mType == Type.RIGHT || myAnchor.mType == Type.BOTTOM;
+
+            if (isEndAnchor) {
                 // we are right or bottom
                 distance = target.resolvedOffset - opposite.target.resolvedOffset;
             } else {
@@ -180,7 +183,7 @@ public class ResolutionAnchor extends ResolutionNode {
             distance -= margin;
             distance -= oppositeMargin;
 
-            if (oppositeOffset > 0) {
+            if (isEndAnchor) {
                 // we are right or bottom
                 opposite.resolvedOffset = opposite.target.resolvedOffset
                         + oppositeMargin + distance * percent;

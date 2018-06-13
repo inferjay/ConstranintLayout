@@ -23,6 +23,7 @@ import android.content.res.XmlResourceParser;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.support.constraint.ConstraintLayout.LayoutParams;
+import android.support.constraint.solver.widgets.ConstraintWidget;
 import android.util.*;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -403,8 +404,8 @@ public class ConstraintSet {
         public float translationZ = 0;
         public boolean constrainedWidth = false;
         public boolean constrainedHeight = false;
-        public int widthDefault = UNSET;
-        public int heightDefault = UNSET;
+        public int widthDefault = ConstraintWidget.MATCH_CONSTRAINT_SPREAD;
+        public int heightDefault = ConstraintWidget.MATCH_CONSTRAINT_SPREAD;
         public int widthMax = UNSET;
         public int heightMax = UNSET;
         public int widthMin = UNSET;

@@ -24,6 +24,7 @@ public class ArrayRow implements LinearSystem.Row {
     SolverVariable variable = null;
     float constantValue = 0;
     boolean used = false;
+    private static final float epsilon = 0.001f;
 
     public final ArrayLinkedVariables variables;
 
@@ -220,9 +221,17 @@ public class ArrayRow implements LinearSystem.Row {
             variables.put(variableEndB, 1);
             variables.put(variableStartB, -1);
         } else {
+            if (currentWeight == 0) {
+                currentWeight = epsilon;
+            }
+            if (nextWeight == 0) {
+                nextWeight = epsilon;
+            }
+
             float cw = currentWeight / totalWeights;
             float nw = nextWeight / totalWeights;
             float w = cw / nw;
+
             // endA - startA == w * (endB - startB)
             // 0 = startA - endA + w * (endB - startB)
             constantValue = 0;
