@@ -33,6 +33,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -260,7 +261,14 @@ public class ConstraintSet {
     private static final int CIRCLE = 61;
     private static final int CIRCLE_RADIUS = 62;
     private static final int CIRCLE_ANGLE = 63;
-    private static final int UNUSED = 64;
+
+    private static final int WIDTH_PERCENT = 69;
+    private static final int HEIGHT_PERCENT = 70;
+    private static final int CHAIN_USE_RTL = 71;
+    private static final int BARRIER_DIRECTION = 72;
+    private static final int CONSTRAINT_REFERENCED_IDS = 73;
+    private static final int BARRIER_ALLOWS_GONE_WIDGETS = 74;
+    private static final int UNUSED = 75;
 
     static {
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintLeft_toLeftOf, LEFT_TO_LEFT);
@@ -333,6 +341,18 @@ public class ConstraintSet {
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintCircleRadius, CIRCLE_RADIUS);
         mapToConstant.append(R.styleable.ConstraintSet_layout_constraintCircleAngle, CIRCLE_ANGLE);
         mapToConstant.append(R.styleable.ConstraintSet_android_id, VIEW_ID);
+
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintWidth_percent, WIDTH_PERCENT);
+        mapToConstant.append(R.styleable.ConstraintSet_layout_constraintHeight_percent, HEIGHT_PERCENT);
+
+        mapToConstant.append(R.styleable.ConstraintSet_chainUseRtl, CHAIN_USE_RTL);
+        mapToConstant.append(R.styleable.ConstraintSet_barrierDirection, BARRIER_DIRECTION);
+        mapToConstant.append(R.styleable.ConstraintSet_constraint_referenced_ids, CONSTRAINT_REFERENCED_IDS);
+        mapToConstant.append(R.styleable.ConstraintSet_barrierAllowsGoneWidgets, BARRIER_ALLOWS_GONE_WIDGETS);
+    }
+
+    public Constraint getParameters(int mId) {
+        return  get(mId);
     }
 
     private static class Constraint {
@@ -412,9 +432,11 @@ public class ConstraintSet {
         public int heightMin = UNSET;
         public float widthPercent = 1;
         public float heightPercent = 1;
+	public boolean mBarrierAllowsGoneWidgets = false;
         public int mBarrierDirection = UNSET;
         public int mHelperType = UNSET;
         public int [] mReferenceIds;
+	public String mReferenceIdString;
 
         public Constraint clone() {
             Constraint clone = new Constraint();
@@ -496,6 +518,7 @@ public class ConstraintSet {
             clone.circleConstraint = circleConstraint;
             clone.circleRadius = circleRadius;
             clone.circleAngle = circleAngle;
+            clone.mBarrierAllowsGoneWidgets = mBarrierAllowsGoneWidgets;
             return clone;
         }
 
@@ -640,6 +663,8 @@ public class ConstraintSet {
             param.guideEnd = guideEnd;
             param.width = mWidth;
             param.height = mHeight;
+
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 param.setMarginStart(startMargin);
                 param.setMarginEnd(endMargin);
@@ -718,6 +743,12 @@ public class ConstraintSet {
                     }
                 }
             }
+            if (view instanceof Barrier) {
+                Barrier barrier = ((Barrier) view);
+                constraint.mBarrierAllowsGoneWidgets = barrier.allowsGoneWidget();
+                constraint.mReferenceIds = barrier.getReferencedIds();
+                constraint.mBarrierDirection = barrier.getType();
+            }
         }
     }
 
@@ -775,18 +806,24 @@ public class ConstraintSet {
             if (mConstraints.containsKey(id)) {
                 used.remove(id);
                 Constraint constraint = mConstraints.get(id);
+                if (view instanceof Barrier) {
+                    constraint.mHelperType = BARRIER_TYPE;
+                }
                 if (constraint.mHelperType != UNSET) {
                     switch (constraint.mHelperType) {
                         case BARRIER_TYPE:
                             Barrier barrier = (Barrier) view;
                             barrier.setId(id);
-                            barrier.setReferencedIds(constraint.mReferenceIds);
                             barrier.setType(constraint.mBarrierDirection);
-                            ConstraintLayout.LayoutParams param = constraintLayout
-                                .generateDefaultLayoutParams();
-                            constraint.applyTo(param);
+                            barrier.setAllowsGoneWidget(constraint.mBarrierAllowsGoneWidgets);
+                            if (constraint.mReferenceIds != null) {
+                                barrier.setReferencedIds(constraint.mReferenceIds);
+                            } else if (constraint.mReferenceIdString != null) {
+                                constraint.mReferenceIds = convertReferenceString(barrier,
+                                        constraint.mReferenceIdString);
+                                barrier.setReferencedIds(constraint.mReferenceIds);
+                            }
                             break;
-
                     }
                 }
                 ConstraintLayout.LayoutParams param = (ConstraintLayout.LayoutParams) view
@@ -825,14 +862,20 @@ public class ConstraintSet {
                     case BARRIER_TYPE:
                         Barrier barrier = new Barrier(constraintLayout.getContext());
                         barrier.setId(id);
-                        barrier.setReferencedIds(constraint.mReferenceIds);
+                        if (constraint.mReferenceIds != null) {
+                            barrier.setReferencedIds(constraint.mReferenceIds);
+                        } else if (constraint.mReferenceIdString != null) {
+                            constraint.mReferenceIds = convertReferenceString(barrier,
+                                    constraint.mReferenceIdString);
+                            barrier.setReferencedIds(constraint.mReferenceIds);
+                        }
                         barrier.setType(constraint.mBarrierDirection);
                         ConstraintLayout.LayoutParams param = constraintLayout
                             .generateDefaultLayoutParams();
+                        barrier.validateParams();
                         constraint.applyTo(param);
                         constraintLayout.addView(barrier, param);
                         break;
-
                 }
             }
             if (constraint.mIsGuideline) {
@@ -2366,6 +2409,25 @@ public class ConstraintSet {
                 case DIMENSION_RATIO:
                     c.dimensionRatio = a.getString(attr);
                     break;
+                case WIDTH_PERCENT:
+                    c.widthPercent = a.getFloat(attr, 1);
+                    break;
+                case HEIGHT_PERCENT:
+                    c.heightPercent = a.getFloat(attr, 1);
+                    break;
+                case CHAIN_USE_RTL:
+                    Log.e(TAG, "CURRENTLY UNSUPPORTED"); // TODO add support or remove
+                 //  TODO add support or remove  c.mChainUseRtl = a.getBoolean(attr,c.mChainUseRtl);
+                    break;
+                case BARRIER_DIRECTION:
+                    c.mBarrierDirection = a.getInt(attr,c.mBarrierDirection);
+                    break;
+                case CONSTRAINT_REFERENCED_IDS:
+                    c.mReferenceIdString = a.getString(attr);
+                     break;
+                case BARRIER_ALLOWS_GONE_WIDGETS:
+                    c.mBarrierAllowsGoneWidgets = a.getBoolean(attr,c.mBarrierAllowsGoneWidgets);
+                    break;
                 case UNUSED:
                     Log.w(TAG,
                         "unused attribute 0x" + Integer.toHexString(attr) + "   " + mapToConstant.get(attr));
@@ -2375,6 +2437,43 @@ public class ConstraintSet {
                         "Unknown attribute 0x" + Integer.toHexString(attr) + "   " + mapToConstant.get(attr));
             }
         }
+    }
+
+    private int[] convertReferenceString(View view, String referenceIdString) {
+        String[] split = referenceIdString.split(",");
+        Context context = view.getContext();
+        int[]tags = new int[split.length];
+        int count = 0;
+        for (int i = 0; i < split.length; i++) {
+            String idString = split[i];
+            idString = idString.trim();
+            int tag = 0;
+            try {
+                Class res = R.id.class;
+                Field field = res.getField(idString);
+                tag = field.getInt(null);
+            }
+            catch (Exception e) {
+                // Do nothing
+            }
+            if (tag == 0) {
+                tag = context.getResources().getIdentifier(idString, "id",
+                        context.getPackageName());
+            }
+
+            if (tag == 0 && view.isInEditMode() && view.getParent() instanceof ConstraintLayout) {
+                ConstraintLayout constraintLayout = (ConstraintLayout) view.getParent();
+                Object value = constraintLayout.getDesignInformation(0, idString);
+                if (value != null && value instanceof Integer) {
+                    tag = (Integer) value;
+                }
+            }
+            tags[count++] = tag;
+        }
+        if (count!=split.length) {
+            tags = Arrays.copyOf(tags,count);
+        }
+        return tags;
     }
 
 }

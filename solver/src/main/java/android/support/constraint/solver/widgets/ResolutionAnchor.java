@@ -304,10 +304,10 @@ public class ResolutionAnchor extends ResolutionNode {
         SolverVariable sv = myAnchor.getSolverVariable();
 
         if (resolvedTarget == null) {
-            system.addEquality(sv, (int) resolvedOffset);
+            system.addEquality(sv, (int) (resolvedOffset + 0.5f));
         } else {
             SolverVariable v = system.createObjectVariable(resolvedTarget.myAnchor);
-            system.addEquality(sv, v, (int) resolvedOffset, SolverVariable.STRENGTH_FIXED);
+            system.addEquality(sv, v, (int) (resolvedOffset + 0.5f), SolverVariable.STRENGTH_FIXED);
         }
     }
 

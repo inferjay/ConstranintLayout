@@ -78,6 +78,18 @@ public class WidgetContainer extends ConstraintWidget {
     }
 
     /**
+     * Add multiple child widgets.
+     *
+     * @param widgets to add
+     */
+    public void add(ConstraintWidget... widgets) {
+        final int count = widgets.length;
+        for (int i = 0; i < count; i++) {
+            add(widgets[i]);
+        }
+    }
+
+    /**
      * Remove a child widget
      *
      * @param widget to remove

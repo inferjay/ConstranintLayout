@@ -41,7 +41,7 @@ public abstract class ConstraintHelper extends View {
     /**
      * @hide
      */
-    protected int mCount = 0;
+    protected int mCount;
 
     /**
      * @hide
@@ -50,7 +50,7 @@ public abstract class ConstraintHelper extends View {
     /**
      * @hide
      */
-    protected android.support.constraint.solver.widgets.Helper mHelperWidget = null;
+    protected android.support.constraint.solver.widgets.Helper mHelperWidget;
     /**
      * @hide
      */
@@ -235,7 +235,7 @@ public abstract class ConstraintHelper extends View {
         mHelperWidget.removeAllIds();
         for (int i = 0; i < mCount; i++) {
             int id = mIds[i];
-            View view = container.findViewById(id);
+            View view = container.getViewById(id);
             if (view != null) {
                 mHelperWidget.add(container.getViewWidget(view));
             }

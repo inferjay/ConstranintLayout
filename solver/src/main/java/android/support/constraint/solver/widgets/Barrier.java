@@ -20,6 +20,7 @@ import android.support.constraint.solver.LinearSystem;
 import android.support.constraint.solver.SolverVariable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * A Barrier takes multiple widgets
@@ -46,6 +47,8 @@ public class Barrier extends Helper {
     }
 
     public void setAllowsGoneWidget(boolean allowsGoneWidget) { mAllowsGoneWidget = allowsGoneWidget; }
+
+    public boolean allowsGoneWidget() { return mAllowsGoneWidget; }
 
     @Override
     public void resetResolutionNodes() {

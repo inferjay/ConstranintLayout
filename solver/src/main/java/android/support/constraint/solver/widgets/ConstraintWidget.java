@@ -89,6 +89,11 @@ public class ConstraintWidget {
     int mResolvedDimensionRatioSide = UNKNOWN;
     float mResolvedDimensionRatio = 1.0f;
 
+    /**
+     * Contains itself and any other widget its connected to.
+     */
+    ConstraintWidgetGroup mBelongingGroup = null;
+
     private int mMaxDimension[] = {Integer.MAX_VALUE, Integer.MAX_VALUE};
     private float mCircleConstraintAngle = 0;
 
@@ -104,8 +109,8 @@ public class ConstraintWidget {
         mMaxDimension[HORIZONTAL] = maxWidth;
     }
 
-    public void setMaxHeight(int maxWidth) {
-        mMaxDimension[VERTICAL] = maxWidth;
+    public void setMaxHeight(int maxHeight) {
+        mMaxDimension[VERTICAL] = maxHeight;
     }
 
     public boolean isSpreadWidth() {
@@ -175,6 +180,8 @@ public class ConstraintWidget {
     // Origin of the widget
     protected int mX = 0;
     protected int mY = 0;
+    int mRelX = 0;
+    int mRelY = 0;
 
     // Current draw position in container's coordinate
     private int mDrawX = 0;
@@ -227,6 +234,9 @@ public class ConstraintWidget {
     boolean mBottomHasCentered;
     boolean mHorizontalWrapVisited;
     boolean mVerticalWrapVisited;
+    boolean mOptimizerMeasurable = false;
+    boolean mOptimizerMeasured = false;
+    boolean mGroupsToSolver = false;
 
     // Chain support
     int mHorizontalChainStyle = CHAIN_SPREAD;
@@ -237,7 +247,7 @@ public class ConstraintWidget {
     float[] mWeight = { UNKNOWN, UNKNOWN};
 
     protected ConstraintWidget[] mListNextMatchConstraintsWidget = {null, null};
-    protected ConstraintWidget[] mListNextVisibleWidget = {null, null};
+    protected ConstraintWidget[] mNextChainWidget = {null, null};
 
     ConstraintWidget mHorizontalNextWidget = null;
     ConstraintWidget mVerticalNextWidget = null;
@@ -307,6 +317,10 @@ public class ConstraintWidget {
         if (mResolutionHeight != null) {
             mResolutionHeight.reset();
         }
+        mBelongingGroup = null;
+        mOptimizerMeasurable = false;
+        mOptimizerMeasured = false;
+        mGroupsToSolver = false;
     }
 
     /*-----------------------------------------------------------------------*/
@@ -829,6 +843,22 @@ public class ConstraintWidget {
     }
 
     /**
+     * Get a dimension of the widget in a particular orientation.
+     *
+     * @param orientation
+     * @return The dimension of the specified orientation.
+     */
+    public int getLength(int orientation) {
+        if (orientation == HORIZONTAL) {
+            return getWidth();
+        } else if (orientation == VERTICAL) {
+            return getHeight();
+        } else {
+            return 0;
+        }
+    }
+
+    /**
      * Return the x position of the widget, relative to the root
      *
      * @return x position
@@ -964,6 +994,23 @@ public class ConstraintWidget {
      */
     public float getVerticalBiasPercent() {
         return mVerticalBiasPercent;
+    }
+
+    /**
+     * Return the percentage bias that is used when two opposite connections exist of the same
+     * strength in a particular orientation.
+     *
+     * @param orientation Orientation {@link #HORIZONTAL}/{@link #VERTICAL}.
+     * @return Respective percentage bias.
+     */
+    public float getBiasPercent(int orientation) {
+        if (orientation == HORIZONTAL) {
+            return mHorizontalBiasPercent;
+        } else if (orientation == VERTICAL) {
+            return mVerticalBiasPercent;
+        } else {
+            return UNKNOWN;
+        }
     }
 
     /**
@@ -1178,6 +1225,20 @@ public class ConstraintWidget {
         mHeight = h;
         if (mHeight < mMinHeight) {
             mHeight = mMinHeight;
+        }
+    }
+
+    /**
+     * Set the dimension of a widget in a particular orientation.
+     *
+     * @param length      Size of the dimension.
+     * @param orientation
+     */
+    public void setLength(int length, int orientation) {
+        if (orientation == HORIZONTAL) {
+            setWidth(length);
+        } else if (orientation == VERTICAL) {
+            setHeight(length);
         }
     }
 
@@ -1430,6 +1491,23 @@ public class ConstraintWidget {
         if (LinearSystem.FULL_DEBUG) {
             System.out.println("update from solver " + mDebugName +  " " + mX + ":" + mY + " - " + mWidth + " x " + mHeight);
         }
+        mOptimizerMeasured = true;
+    }
+
+    /**
+     * Set the position+dimension of the widget based on starting/ending positions on one dimension.
+     *
+     * @param start       Left/Top side position of the widget.
+     * @param end         Right/Bottom side position of the widget.
+     * @param orientation Orientation being set (HORIZONTAL/VERTICAL).
+     */
+    public void setFrame(int start, int end, int orientation) {
+        if (orientation == HORIZONTAL) {
+            setHorizontalDimension(start, end);
+        } else if (orientation == VERTICAL) {
+            setVerticalDimension(start, end);
+        }
+        mOptimizerMeasured = true;
     }
 
     /**
@@ -1457,6 +1535,36 @@ public class ConstraintWidget {
         mHeight = bottom - top;
         if (mHeight < mMinHeight) {
             mHeight = mMinHeight;
+        }
+    }
+
+    /**
+     * Get the left/top position of the widget relative to the outer side of the container (right/bottom).
+     *
+     * @param orientation
+     * @return The relative position of the widget.
+     */
+    int getRelativePositioning(int orientation) {
+        if (orientation == HORIZONTAL) {
+            return mRelX;
+        } else if (orientation == VERTICAL) {
+            return mRelY;
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * Set the left/top position of the widget relative to the outer side of the container (right/bottom).
+     *
+     * @param offset      Offset of the relative position.
+     * @param orientation Orientation of the offset being set.
+     */
+    void setRelativePositioning(int offset, int orientation) {
+        if (orientation == HORIZONTAL) {
+            mRelX = offset;
+        } else if (orientation == VERTICAL) {
+            mRelY = offset;
         }
     }
 
@@ -2071,6 +2179,22 @@ public class ConstraintWidget {
     }
 
     /**
+     * Get the widget's {@link DimensionBehaviour} in an specific orientation.
+     *
+     * @param orientation
+     * @return The {@link DimensionBehaviour} of the widget.
+     */
+    public DimensionBehaviour getDimensionBehaviour(int orientation) {
+        if (orientation == HORIZONTAL) {
+            return getHorizontalDimensionBehaviour();
+        } else if (orientation == VERTICAL) {
+            return getVerticalDimensionBehaviour();
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Set the widget's behaviour for the horizontal dimension
      *
      * @param behaviour the horizontal dimension's behaviour
@@ -2179,6 +2303,21 @@ public class ConstraintWidget {
         return found;
     }
 
+    /**
+     * Determine if the widget is the first element of a chain in a given orientation.
+     *
+     * @param orientation Either {@link #HORIZONTAL} or {@link #VERTICAL}
+     * @return if the widget is the head of a chain
+     */
+    private boolean isChainHead(int orientation) {
+        int offset = orientation * 2;
+        return (mListAnchors[offset].mTarget != null
+            && mListAnchors[offset].mTarget.mTarget != mListAnchors[offset])
+            && (mListAnchors[offset + 1].mTarget != null
+            && mListAnchors[offset + 1].mTarget.mTarget == mListAnchors[offset + 1]);
+    }
+
+
     /*-----------------------------------------------------------------------*/
     // Constraints
     /*-----------------------------------------------------------------------*/
@@ -2210,33 +2349,30 @@ public class ConstraintWidget {
             horizontalParentWrapContent = mParent != null ? mParent.mListDimensionBehaviors[DIMENSION_HORIZONTAL] == WRAP_CONTENT : false;
             verticalParentWrapContent = mParent != null ? mParent.mListDimensionBehaviors[DIMENSION_VERTICAL] == WRAP_CONTENT : false;
 
-            // Add this widget to an horizontal chain if dual connections are found
-            if((mLeft.mTarget != null &&  mLeft.mTarget.mTarget != mLeft) &&
-                mRight.mTarget != null && mRight.mTarget.mTarget == mRight){
+            // Add this widget to a horizontal chain if it is the Head of it.
+            if (isChainHead(HORIZONTAL)) {
                 ((ConstraintWidgetContainer) mParent).addChain(this, HORIZONTAL);
-            }
-            if ((mLeft.mTarget != null && mLeft.mTarget.mTarget == mLeft)
-                    || (mRight.mTarget != null && mRight.mTarget.mTarget == mRight)) {
                 inHorizontalChain = true;
+            } else {
+                inHorizontalChain = isInHorizontalChain();
             }
-            // Add this widget to an vertical chain if dual connections are found
-            if((mTop.mTarget != null &&  mTop.mTarget.mTarget != mTop) &&
-                mBottom.mTarget != null && mBottom.mTarget.mTarget == mBottom){
+
+            // Add this widget to a vertical chain if it is the Head of it.
+            if (isChainHead(VERTICAL)) {
                 ((ConstraintWidgetContainer) mParent).addChain(this, VERTICAL);
-            }
-            if ((mTop.mTarget != null && mTop.mTarget.mTarget == mTop)
-                    || (mBottom.mTarget != null && mBottom.mTarget.mTarget == mBottom)) {
                 inVerticalChain = true;
+            } else {
+                inVerticalChain = isInVerticalChain();
             }
 
             if (horizontalParentWrapContent && mVisibility != GONE
-                    && mLeft.mTarget == null && mRight.mTarget == null) {
+                && mLeft.mTarget == null && mRight.mTarget == null) {
                 SolverVariable parentRight = system.createObjectVariable(mParent.mRight);
                 system.addGreaterThan(parentRight, right, 0, SolverVariable.STRENGTH_LOW);
             }
 
             if (verticalParentWrapContent && mVisibility != GONE
-                    && mTop.mTarget == null && mBottom.mTarget == null && mBaseline == null) {
+                && mTop.mTarget == null && mBottom.mTarget == null && mBaseline == null) {
                 SolverVariable parentBottom = system.createObjectVariable(mParent.mBottom);
                 system.addGreaterThan(parentBottom, bottom, 0, SolverVariable.STRENGTH_LOW);
             }
@@ -2252,8 +2388,10 @@ public class ConstraintWidget {
         }
 
         // Dimensions can be either fixed (a given value) or dependent on the solver if set to MATCH_CONSTRAINT
-        boolean horizontalDimensionFixed = mListDimensionBehaviors[DIMENSION_HORIZONTAL] != DimensionBehaviour.MATCH_CONSTRAINT;
-        boolean verticalDimensionFixed = mListDimensionBehaviors[DIMENSION_VERTICAL] != DimensionBehaviour.MATCH_CONSTRAINT;
+        boolean horizontalDimensionFixed =
+            mListDimensionBehaviors[DIMENSION_HORIZONTAL] != DimensionBehaviour.MATCH_CONSTRAINT;
+        boolean verticalDimensionFixed =
+            mListDimensionBehaviors[DIMENSION_VERTICAL] != DimensionBehaviour.MATCH_CONSTRAINT;
 
         // We evaluate the dimension ratio here as the connections can change.
         // TODO: have a validation pass after connection instead
@@ -2562,19 +2700,11 @@ public class ConstraintWidget {
             }
 
             if (matchMinDimension > 0) {
-                if (parentWrapContent) {
-                    system.addGreaterThan(end, begin, matchMinDimension, SolverVariable.STRENGTH_FIXED);
-                } else {
-                    system.addGreaterThan(end, begin, matchMinDimension, SolverVariable.STRENGTH_FIXED);
-                }
+                system.addGreaterThan(end, begin, matchMinDimension, SolverVariable.STRENGTH_FIXED);
                 dimension = Math.max(dimension, matchMinDimension);
             }
             if (matchMaxDimension > 0) {
-                if (parentWrapContent) {
-                    system.addLowerThan(end, begin, matchMaxDimension, SolverVariable.STRENGTH_LOW);
-                } else {
-                    system.addLowerThan(end, begin, matchMaxDimension, SolverVariable.STRENGTH_FIXED);
-                }
+                system.addLowerThan(end, begin, matchMaxDimension, SolverVariable.STRENGTH_FIXED);
                 dimension = Math.min(dimension, matchMaxDimension);
             }
             if (matchConstraintDefault == MATCH_CONSTRAINT_WRAP) {
@@ -2684,21 +2814,36 @@ public class ConstraintWidget {
 
             } else {
                 applyCentering = true;
-                if (parentWrapContent) {
-                    system.addGreaterThan(begin, beginTarget, beginAnchor.getMargin(), SolverVariable.STRENGTH_EQUALITY);
-                    system.addLowerThan(end, endTarget, -endAnchor.getMargin(), SolverVariable.STRENGTH_EQUALITY);
-                }
             }
 
+            int startStrength = SolverVariable.STRENGTH_EQUALITY;
+            int endStrength = SolverVariable.STRENGTH_EQUALITY;
+            boolean applyStartConstraint = parentWrapContent;
+            boolean applyEndConstraint = parentWrapContent;
             if (applyCentering) {
                 system.addCentering(begin, beginTarget, beginAnchor.getMargin(),
                         bias, endTarget, end, endAnchor.getMargin(), centeringStrength); //SolverVariable.STRENGTH_EQUALITY);
+                boolean isBeginAnchorBarrier = beginAnchor.mTarget.mOwner instanceof Barrier;
+                boolean isEndAnchorBarrier = endAnchor.mTarget.mOwner instanceof Barrier;
+
+                if (isBeginAnchorBarrier && !isEndAnchorBarrier) {
+                    endStrength = SolverVariable.STRENGTH_FIXED;
+                    applyEndConstraint = true;
+                } else if (!isBeginAnchorBarrier && isEndAnchorBarrier) {
+                    startStrength = SolverVariable.STRENGTH_FIXED;
+                    applyStartConstraint = true;
+                }
+            }
+            if (applyBoundsCheck) {
+                startStrength = SolverVariable.STRENGTH_FIXED;
+                endStrength = SolverVariable.STRENGTH_FIXED;
             }
 
-            if (applyBoundsCheck) {
-                // Al >= Tl & Ar <= Tr
-                system.addGreaterThan(begin, beginTarget, beginAnchor.getMargin(), SolverVariable.STRENGTH_FIXED);
-                system.addLowerThan(end, endTarget, -endAnchor.getMargin(), SolverVariable.STRENGTH_FIXED);
+            if ((!variableSize && applyStartConstraint) || applyBoundsCheck) {
+                system.addGreaterThan(begin, beginTarget, beginAnchor.getMargin(), startStrength);
+            }
+            if ((!variableSize && applyEndConstraint) || applyBoundsCheck) {
+                system.addLowerThan(end, endTarget, -endAnchor.getMargin(), endStrength);
             }
 
             if (parentWrapContent) {

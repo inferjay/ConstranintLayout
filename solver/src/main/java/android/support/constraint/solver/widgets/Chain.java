@@ -242,7 +242,7 @@ class Chain {
         if (DEBUG) {
             widget = firstVisibleWidget;
             while (widget != null) {
-                next = widget.mListNextVisibleWidget[orientation];
+                next = widget.mNextChainWidget[orientation];
                 widget.mListAnchors[offset].mSolverVariable.setName("" + widget.getDebugName() + ".left");
                 widget.mListAnchors[offset + 1].mSolverVariable.setName("" + widget.getDebugName() + ".right");
                 widget = next;
@@ -278,7 +278,10 @@ class Chain {
             ConstraintWidget previousVisibleWidget = firstVisibleWidget;
             boolean applyFixedEquality = chainHead.mWidgetsMatchCount > 0 && (chainHead.mWidgetsCount == chainHead.mWidgetsMatchCount);
             while (widget != null) {
-                next = widget.mListNextVisibleWidget[orientation];
+                next = widget.mNextChainWidget[orientation];
+                while (next != null && next.getVisibility() == GONE) {
+                    next = next.mNextChainWidget[orientation];
+                }
                 if (next != null || widget == lastVisibleWidget) {
                     ConstraintAnchor beginAnchor = widget.mListAnchors[offset];
                     SolverVariable begin = beginAnchor.mSolverVariable;
@@ -331,7 +334,9 @@ class Chain {
                                 strength);
                     }
                 }
-                previousVisibleWidget = widget;
+                if (widget.getVisibility() != GONE) {
+                    previousVisibleWidget = widget;
+                }
                 widget = next;
             }
         } else if (isChainSpreadInside && firstVisibleWidget != null) {
@@ -340,7 +345,10 @@ class Chain {
             ConstraintWidget previousVisibleWidget = firstVisibleWidget;
             boolean applyFixedEquality = chainHead.mWidgetsMatchCount > 0 && (chainHead.mWidgetsCount == chainHead.mWidgetsMatchCount);
             while (widget != null) {
-                next = widget.mListNextVisibleWidget[orientation];
+                next = widget.mNextChainWidget[orientation];
+                while (next != null && next.getVisibility() == GONE) {
+                    next = next.mNextChainWidget[orientation];
+                }
                 if (widget != firstVisibleWidget && widget != lastVisibleWidget && next != null) {
                     if (next == lastVisibleWidget) {
                         next = null;
@@ -383,7 +391,9 @@ class Chain {
                                 strength);
                     }
                 }
-                previousVisibleWidget = widget;
+                if (widget.getVisibility() != GONE) {
+                    previousVisibleWidget = widget;
+                }
                 widget = next;
             }
             ConstraintAnchor begin = firstVisibleWidget.mListAnchors[offset];

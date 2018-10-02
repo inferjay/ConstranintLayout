@@ -27,6 +27,12 @@ import android.os.Build;
 import android.support.constraint.solver.LinearSystem;
 import android.support.constraint.solver.Metrics;
 import android.support.constraint.solver.widgets.*;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.support.constraint.solver.widgets.ConstraintAnchor;
+import android.support.constraint.solver.widgets.ConstraintWidget;
+import android.support.constraint.solver.widgets.ConstraintWidgetContainer;
 import android.support.constraint.solver.widgets.Guideline;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -484,7 +490,7 @@ public class ConstraintLayout extends ViewGroup {
     private static final boolean CACHE_MEASURED_DIMENSION = false;
 
     /** @hide */
-    public static final String VERSION = "ConstraintLayout-1.1.2";
+    public static final String VERSION = "ConstraintLayout-1.1.3";
     private static final String TAG = "ConstraintLayout";
 
     private static final boolean USE_CONSTRAINTS_HELPER = true;
@@ -1126,6 +1132,12 @@ public class ConstraintLayout extends ViewGroup {
             return mLayoutWidget;
         } else {
             View view = mChildrenByIds.get(id);
+            if (view == null) {
+                view = findViewById(id);
+                if (view != null && view != this && view.getParent() == this) {
+                    onViewAdded(view);
+                }
+            }
             if (view == this) {
                 return mLayoutWidget;
             }
@@ -1542,9 +1554,12 @@ public class ConstraintLayout extends ViewGroup {
         setSelfDimensionBehaviour(widthMeasureSpec, heightMeasureSpec);
         int startingWidth = mLayoutWidget.getWidth();
         int startingHeight = mLayoutWidget.getHeight();
+
+        boolean runAnalyzer = false;
         if (mDirtyHierarchy) {
             mDirtyHierarchy = false;
             updateHierarchy();
+            runAnalyzer = true;
         }
 
         final boolean optimiseDimensions = (mOptimizationLevel & Optimizer.OPTIMIZATION_DIMENSIONS)
@@ -1562,6 +1577,43 @@ public class ConstraintLayout extends ViewGroup {
         if (ALLOWS_EMBEDDED && mLayoutWidget.getParent() != null) {
             setVisibility(INVISIBLE);
             return;
+        }
+
+        if (getChildCount() > 0 && runAnalyzer) {
+            Analyzer.determineGroups(mLayoutWidget);
+        }
+        if (mLayoutWidget.mGroupsWrapOptimized) {
+            if (mLayoutWidget.mHorizontalWrapOptimized && widthMode == MeasureSpec.AT_MOST) {
+                if (mLayoutWidget.mWrapFixedWidth < widthSize) {
+                    mLayoutWidget.setWidth(mLayoutWidget.mWrapFixedWidth);
+                }
+                mLayoutWidget
+                        .setHorizontalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
+            }
+            if (mLayoutWidget.mVerticalWrapOptimized && heightMode == MeasureSpec.AT_MOST) {
+                if (mLayoutWidget.mWrapFixedHeight < heightSize) {
+                    mLayoutWidget.setHeight(mLayoutWidget.mWrapFixedHeight);
+                }
+                mLayoutWidget
+                        .setVerticalDimensionBehaviour(ConstraintWidget.DimensionBehaviour.FIXED);
+            }
+        }
+        // Reposition widgets dependent of layout dimension when necessary.
+        if ((mOptimizationLevel & Optimizer.OPTIMIZATION_GROUPS) == Optimizer.OPTIMIZATION_GROUPS) {
+            int width = mLayoutWidget.getWidth();
+            int height = mLayoutWidget.getHeight();
+            if (mLastMeasureWidth != width && widthMode == MeasureSpec.EXACTLY) {
+                Analyzer.setPosition(mLayoutWidget.mWidgetGroups, HORIZONTAL, width);
+            }
+            if (mLastMeasureHeight != height && heightMode == MeasureSpec.EXACTLY) {
+                Analyzer.setPosition(mLayoutWidget.mWidgetGroups, VERTICAL, height);
+            }
+            if (mLayoutWidget.mHorizontalWrapOptimized && mLayoutWidget.mWrapFixedWidth > widthSize) {
+                Analyzer.setPosition(mLayoutWidget.mWidgetGroups, HORIZONTAL, widthSize);
+            }
+            if (mLayoutWidget.mVerticalWrapOptimized && mLayoutWidget.mWrapFixedHeight > heightSize) {
+                Analyzer.setPosition(mLayoutWidget.mWidgetGroups, VERTICAL, heightSize);
+            }
         }
 
         // let's solve the linear system.

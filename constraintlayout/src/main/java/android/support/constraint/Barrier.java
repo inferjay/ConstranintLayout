@@ -107,8 +107,8 @@ public class Barrier extends ConstraintHelper {
      */
     public static final int END = START + 1;
 
-    private int mIndicatedType = LEFT;
-    private int mResolvedType = LEFT;
+    private int mIndicatedType;
+    private int mResolvedType;
     private android.support.constraint.solver.widgets.Barrier mBarrier;
 
     public Barrier(Context context) {
@@ -173,8 +173,8 @@ public class Barrier extends ConstraintHelper {
     }
 
     /**
-     * @hide
      * @param attrs
+     * @hide
      */
     @Override
     protected void init(AttributeSet attrs) {
@@ -194,6 +194,14 @@ public class Barrier extends ConstraintHelper {
         }
         mHelperWidget = mBarrier;
         validateParams();
+    }
+
+    public void setAllowsGoneWidget(boolean supportGone) {
+        mBarrier.setAllowsGoneWidget(supportGone);
+    }
+
+    public boolean allowsGoneWidget() {
+        return mBarrier.allowsGoneWidget();
     }
 
 }

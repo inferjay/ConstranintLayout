@@ -48,9 +48,9 @@ public class OptimizationsTest {
 
         System.out.println("1) A: " + A);
         assertEquals(A.getLeft(), 8);
-        assertEquals(A.getTop(), 162);
+        assertEquals(A.getTop(), 163);
         assertEquals(A.getRight(), 592);
-        assertEquals(A.getBottom(), 172);
+        assertEquals(A.getBottom(), 173);
 
         A.setVisibility(ConstraintWidget.GONE);
         root.layout();

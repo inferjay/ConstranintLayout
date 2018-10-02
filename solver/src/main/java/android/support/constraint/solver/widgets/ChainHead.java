@@ -77,6 +77,7 @@ public class ChainHead {
 
     private void defineChainProperties(){
         int offset = mOrientation * 2;
+        ConstraintWidget lastVisited = mFirst;
 
         // TraverseChain
         ConstraintWidget widget = mFirst;
@@ -84,23 +85,20 @@ public class ChainHead {
         boolean done = false;
         while (!done) {
             mWidgetsCount++;
-            widget.mListNextVisibleWidget[mOrientation] = null;
+            widget.mNextChainWidget[mOrientation] = null;
             widget.mListNextMatchConstraintsWidget[mOrientation] = null;
-            if(widget.getVisibility() != ConstraintWidget.GONE) {
+            if (widget.getVisibility() != ConstraintWidget.GONE) {
                 // Visible widgets linked list.
                 if (mFirstVisibleWidget == null) {
                     mFirstVisibleWidget = widget;
                 }
-                if(mLastVisibleWidget != null){
-                    mLastVisibleWidget.mListNextVisibleWidget[mOrientation] = widget;
-                }
                 mLastVisibleWidget = widget;
 
                 // Match constraint linked list.
-                if(widget.mListDimensionBehaviors[mOrientation] == DimensionBehaviour.MATCH_CONSTRAINT
-                   && (widget.mResolvedMatchConstraintDefault[mOrientation] == MATCH_CONSTRAINT_SPREAD
-                       || widget.mResolvedMatchConstraintDefault[mOrientation] == MATCH_CONSTRAINT_RATIO
-                        || widget.mResolvedMatchConstraintDefault[mOrientation] == MATCH_CONSTRAINT_PERCENT)) {
+                if (widget.mListDimensionBehaviors[mOrientation] == DimensionBehaviour.MATCH_CONSTRAINT
+                    && (widget.mResolvedMatchConstraintDefault[mOrientation] == MATCH_CONSTRAINT_SPREAD
+                    || widget.mResolvedMatchConstraintDefault[mOrientation] == MATCH_CONSTRAINT_RATIO
+                    || widget.mResolvedMatchConstraintDefault[mOrientation] == MATCH_CONSTRAINT_PERCENT)) {
                     mWidgetsMatchCount++;
                     float weight = widget.mWeight[mOrientation];
                     if (weight > 0) {
@@ -119,15 +117,19 @@ public class ChainHead {
                         mWeightedMatchConstraintsWidgets.add(widget);
                     }
 
-                    if(mFirstMatchConstraintWidget == null){
+                    if (mFirstMatchConstraintWidget == null) {
                         mFirstMatchConstraintWidget = widget;
                     }
-                    if(mLastMatchConstraintWidget != null){
+                    if (mLastMatchConstraintWidget != null) {
                         mLastMatchConstraintWidget.mListNextMatchConstraintsWidget[mOrientation] = widget;
                     }
                     mLastMatchConstraintWidget = widget;
                 }
             }
+            if (lastVisited != widget) {
+                lastVisited.mNextChainWidget[mOrientation] = widget;
+            }
+            lastVisited = widget;
 
             // go to the next widget
             ConstraintAnchor nextAnchor = widget.mListAnchors[offset + 1].mTarget;
@@ -148,9 +150,9 @@ public class ChainHead {
         }
         mLast = widget;
 
-        if(mOrientation == ConstraintWidget.HORIZONTAL && mIsRtl) {
+        if (mOrientation == ConstraintWidget.HORIZONTAL && mIsRtl) {
             mHead = mLast;
-        }else{
+        } else {
             mHead = mFirst;
         }
 

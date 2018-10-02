@@ -33,9 +33,10 @@ public class Optimizer {
     public static final int OPTIMIZATION_CHAIN = 1 << 2;
     public static final int OPTIMIZATION_DIMENSIONS = 1 << 3;
     public static final int OPTIMIZATION_RATIO = 1 << 4;
+    public static final int OPTIMIZATION_GROUPS = 1 << 5;
     public static final int OPTIMIZATION_STANDARD = OPTIMIZATION_DIRECT
             | OPTIMIZATION_BARRIER
-            /* | OPTIMIZATION_CHAIN */
+            | OPTIMIZATION_CHAIN
             /* | OPTIMIZATION_DIMENSIONS */
             ;
 
@@ -429,6 +430,9 @@ public class Optimizer {
                 if (widget != firstVisibleWidget) {
                     totalSize += widget.mListAnchors[offset].getMargin();
                 }
+                if (widget != lastVisibleWidget) {
+                    totalSize += widget.mListAnchors[offset + 1].getMargin();
+                }
                 totalMargins += widget.mListAnchors[offset].getMargin();
                 totalMargins += widget.mListAnchors[offset + 1].getMargin();
             }
@@ -451,6 +455,9 @@ public class Optimizer {
                     } else if (widget.mMatchConstraintMinHeight != 0 || widget.mMatchConstraintMaxHeight != 0) {
                         return false;
                     }
+                }
+                if (widget.mDimensionRatio != 0.0f) {
+                    return false;
                 }
             }
 
@@ -481,7 +488,7 @@ public class Optimizer {
 
         // let's look at the endpoints
         if (firstNode.target.state != ResolutionAnchor.RESOLVED
-                && lastNode.target.state != ResolutionAnchor.RESOLVED) {
+                || lastNode.target.state != ResolutionAnchor.RESOLVED) {
             // No resolved endpoints, let's exit
             return false;
         }
@@ -516,29 +523,26 @@ public class Optimizer {
             }
             distance += totalSize;
             distance -= totalMargins;
-            widget = firstVisibleWidget;
+            widget = first;
             float position = firstOffset;
-            if (isChainSpread) {
-                distance -= (totalMargins - extraMargin);
-            }
-            if (isChainSpread) {
-                position += widget.mListAnchors[offset + 1].getMargin();
-                next = widget.mListNextVisibleWidget[orientation];
-                if (next != null) {
-                    position += next.mListAnchors[offset].getMargin();
-                }
-            }
             while (widget != null) {
                 if (system.sMetrics != null) {
                     system.sMetrics.nonresolvedWidgets--;
                     system.sMetrics.resolvedWidgets++;
                     system.sMetrics.chainConnectionResolved++;
                 }
-                next = widget.mListNextVisibleWidget[orientation];
-                if (next != null || widget == lastVisibleWidget) {
+                next = widget.mNextChainWidget[orientation];
+                if (next != null || widget == last) {
                     float dimension = distance / numMatchConstraints;
                     if (totalWeights > 0) {
-                        dimension = widget.mWeight[orientation] * distance / totalWeights;
+                        if (widget.mWeight[orientation] == UNKNOWN) {
+                            dimension = 0;
+                        } else {
+                            dimension = widget.mWeight[orientation] * distance / totalWeights;
+                        }
+                    }
+                    if (widget.getVisibility() == GONE) {
+                        dimension = 0;
                     }
                     position += widget.mListAnchors[offset].getMargin();
                     widget.mListAnchors[offset].getResolutionNode().resolve(firstNode.resolvedTarget,
@@ -555,23 +559,26 @@ public class Optimizer {
             return true;
         }
 
-        if (distance < totalSize) {
-            return false;
+        // If there is not enough space, the chain has to behave as a packed chain.
+        if (distance < 0) {
+            isChainSpread = false;
+            isChainSpreadInside = false;
+            isChainPacked = true;
         }
 
         if (isChainPacked) {
             distance -= extraMargin;
             // Now let's iterate on those widgets
-            widget = firstVisibleWidget;
-            distance = firstOffset + (distance * first.getHorizontalBiasPercent()); // start after the gap
+            widget = first;
+            distance = firstOffset + (distance * first.getBiasPercent(orientation)); // start after the gap
             while (widget != null) {
                 if (system.sMetrics != null) {
                     system.sMetrics.nonresolvedWidgets--;
                     system.sMetrics.resolvedWidgets++;
                     system.sMetrics.chainConnectionResolved++;
                 }
-                next = widget.mListNextVisibleWidget[orientation];
-                if (next != null || widget == lastVisibleWidget) {
+                next = widget.mNextChainWidget[orientation];
+                if (next != null || widget == last) {
                     float dimension = 0;
                     if (orientation == HORIZONTAL) {
                         dimension = widget.getWidth();
@@ -596,7 +603,7 @@ public class Optimizer {
             } else if (isChainSpreadInside) {
                 distance -= extraMargin;
             }
-            widget = firstVisibleWidget;
+            widget = first;
             float gap = distance / (float) (numVisibleWidgets + 1);
             if (isChainSpreadInside) {
                 if (numVisibleWidgets > 1) {
@@ -605,7 +612,10 @@ public class Optimizer {
                     gap = distance / 2f; // center
                 }
             }
-            distance = firstOffset + gap; // start after the gap
+            distance = firstOffset;
+            if (first.getVisibility() != GONE) {
+                distance += gap; // start after the gap
+            }
             if (isChainSpreadInside && numVisibleWidgets > 1) {
                 distance = firstOffset + firstVisibleWidget.mListAnchors[offset].getMargin();
             }
@@ -620,13 +630,16 @@ public class Optimizer {
                     system.sMetrics.resolvedWidgets++;
                     system.sMetrics.chainConnectionResolved++;
                 }
-                next = widget.mListNextVisibleWidget[orientation];
-                if (next != null || widget == lastVisibleWidget) {
+                next = widget.mNextChainWidget[orientation];
+                if (next != null || widget == last) {
                     float dimension = 0;
                     if (orientation == HORIZONTAL) {
                         dimension = widget.getWidth();
                     } else {
                         dimension = widget.getHeight();
+                    }
+                    if (widget != firstVisibleWidget) {
+                        distance += widget.mListAnchors[offset].getMargin();
                     }
                     widget.mListAnchors[offset].getResolutionNode().resolve(firstNode.resolvedTarget,
                             distance);
@@ -634,12 +647,40 @@ public class Optimizer {
                             distance + dimension);
                     widget.mListAnchors[offset].getResolutionNode().addResolvedValue(system);
                     widget.mListAnchors[offset + 1].getResolutionNode().addResolvedValue(system);
-                    distance += dimension + gap;
+                    distance += dimension + widget.mListAnchors[offset + 1].getMargin();
+                    if (next != null && next.getVisibility() != GONE) {
+                        distance += gap;
+                    }
                 }
                 widget = next;
             }
         }
 
         return true; // optimized!
+    }
+
+    //TODO: Might want to use ResolutionAnchor::resolve(target, offset).
+    /**
+     * Set a {@link ConstraintWidget} optimized position and dimension in an specific orientation.
+     *
+     * @param widget         Widget to be optimized.
+     * @param orientation    Orientation to set optimization (HORIZONTAL{0}/VERTICAL{1}).
+     * @param resolvedOffset The resolved offset of the widget with respect to the root.
+     */
+    static void setOptimizedWidget(ConstraintWidget widget, int orientation, int resolvedOffset) {
+        final int startOffset = orientation * 2;
+        final int endOffset = startOffset + 1;
+        // Left/top of widget.
+        widget.mListAnchors[startOffset].getResolutionNode().resolvedTarget =
+                widget.getParent().mLeft.getResolutionNode();
+        widget.mListAnchors[startOffset].getResolutionNode().resolvedOffset =
+                resolvedOffset;
+        widget.mListAnchors[startOffset].getResolutionNode().state = ResolutionNode.RESOLVED;
+        // Right/bottom of widget.
+        widget.mListAnchors[endOffset].getResolutionNode().resolvedTarget =
+                widget.mListAnchors[startOffset].getResolutionNode();
+        widget.mListAnchors[endOffset].getResolutionNode().resolvedOffset =
+                widget.getLength(orientation);
+        widget.mListAnchors[endOffset].getResolutionNode().state = ResolutionNode.RESOLVED;
     }
 }
